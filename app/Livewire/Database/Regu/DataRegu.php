@@ -3,6 +3,7 @@
 namespace App\Livewire\Database\Regu;
 
 use App\Models\regu;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DataRegu extends Component
@@ -21,5 +22,10 @@ class DataRegu extends Component
          return view('livewire.database.regu.data-regu', [
             'daftarregu' => $this->daftarregu
         ]);
+    }
+
+    public function edit($id)
+    {
+        $this->dispatch('editRegu', id: $id);
     }
 }
