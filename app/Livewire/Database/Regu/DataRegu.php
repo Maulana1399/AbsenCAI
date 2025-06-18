@@ -18,7 +18,7 @@ class DataRegu extends Component
 
     public function render()    
     {
-         return view('livewire.data-regu', [
+         return view('livewire.database.regu.data-regu', [
             'daftarregu' => $this->daftarregu
         ]);
     }

@@ -12,7 +12,7 @@ class TambahRegu extends Component
     
     public function render()
     {
-        return view('livewire.tambah-regu');
+        return view('livewire.database.regu.tambah-regu');
     }
     
     public function simpan(){

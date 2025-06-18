@@ -8,6 +8,6 @@ class EditRegu extends Component
 {
     public function render()
     {
-        return view('livewire.edit-regu');
+        return view('livewire.database.regu.edit-regu');
     }
 }
