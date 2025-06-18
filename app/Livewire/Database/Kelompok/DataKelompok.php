@@ -21,7 +21,7 @@ class DataKelompok extends Component
 
     public function render()    
     {
-         return view('livewire.data-kelompok', [
+         return view('livewire.database.kelompok.data-kelompok', [
             'daftarkelompok' => $this->daftarkelompok
         ]);
     }

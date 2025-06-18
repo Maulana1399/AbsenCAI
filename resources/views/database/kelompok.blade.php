@@ -5,8 +5,8 @@
     <flux:separator variant="subtle" />
 </div>
 
-<livewire:tambah-kelompok />
-@livewire('data-kelompok')
+<livewire:database.kelompok.tambah-kelompok />
+@livewire('database.kelompok.data-kelompok')
 
 
 </x-layouts.app>

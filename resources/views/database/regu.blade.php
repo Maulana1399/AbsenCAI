@@ -5,6 +5,8 @@
         <flux:separator variant="subtle" />
     </div>
 
-    <livewire:tambah-regu />
-    @livewire('data-regu')
+    <livewire:database.regu.tambah-regu />
+    @livewire('database.regu.data-regu')
+    <livewire:database.regu.edit-regu />
+
 </x-layouts.app>

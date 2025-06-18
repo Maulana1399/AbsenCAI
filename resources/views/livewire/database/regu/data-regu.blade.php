@@ -3,7 +3,7 @@
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400\">
             <tr>
                 <th scope="col" class="px-8 py-4 border-b">ID</th>
-                <th scope="col" class="px-8 py-4 border-b">Kelompok</th>
+                <th scope="col" class="px-8 py-4 border-b">Regu</th>
                 <th scope="col" class="px-8 py-4 border-b">Edit</th>
             </tr>
         </thead>
@@ -13,9 +13,8 @@
                 <td class="px-8 py-2 font-medium text-gray-900 dark:text-white\">{{ $regu->id }}</td>
                 <td class="px-8 py-2 text-gray-800 dark:text-gray-400\">{{ $regu->regu }}</td>
                 <td class="px-8 py-2 space-x-5">
-                    <button class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-400 dark:bg-blue-800 dark:hover:bg-blue-700 dark:focus:ring-blue-800\">
-                        Edit
-                    </button>
+                    {{-- <flux:button color="blue" size="sm" wire:click="edit({{ $regu->id }})">Edit</flux:button> --}}
+                    <flux:button wire:click="edit({{ $regu->id }})">Edit</flux:button>
                     <button class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-400 dark:bg-red-800 dark:hover:bg-red-700 dark:focus:ring-red-800 ml-2\">
                         Delete
                     </button>

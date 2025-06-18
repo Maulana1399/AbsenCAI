@@ -8,6 +8,6 @@ class EditKelompok extends Component
 {
     public function render()
     {
-        return view('livewire.edit-kelompok');
+        return view('livewire.database.kelompok.edit-kelompok');
     }
 }

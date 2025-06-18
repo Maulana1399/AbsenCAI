@@ -12,7 +12,7 @@ class TambahDesa extends Component
 
     public function render()
     {
-        return view('livewire.database.desa.data-desa');
+        return view('livewire.database.desa.tambah-desa');
     }
 
     public function simpan(){
