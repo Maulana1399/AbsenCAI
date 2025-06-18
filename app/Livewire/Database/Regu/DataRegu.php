@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Livewire\Database\Regu;
+
+use App\Models\regu;
+use Livewire\Component;
+
+class DataRegu extends Component
+{
+
+    public $daftarregu;
+
+    public function mount(){
+        $this->daftarregu = regu::all();
+
+        // dd($this->daftarregu);
+    }
+
+    public function render()    
+    {
+         return view('livewire.data-regu', [
+            'daftarregu' => $this->daftarregu
+        ]);
+    }
+}
