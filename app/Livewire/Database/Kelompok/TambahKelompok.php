@@ -40,6 +40,6 @@ class TambahKelompok extends Component
     }
     public function render()
     {
-        return view('livewire.tambah-kelompok');
+        return view('livewire.database.kelompok.tambah-kelompok');
     }
 }
