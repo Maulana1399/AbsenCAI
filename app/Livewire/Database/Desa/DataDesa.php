@@ -20,4 +20,9 @@ class DataDesa extends Component
             'daftardesa' => $this->daftardesa
         ]);
     }
+
+    public function edit($id)
+    {
+        $this->dispatch('editDesa', id: $id);
+    }
 }

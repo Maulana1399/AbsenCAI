@@ -9,11 +9,10 @@
         </thead>
         <tbody>
         @foreach($daftarregu as $regu)
-            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200\ border-b">
+            <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200 border-b">
                 <td class="px-8 py-2 font-medium text-gray-900 dark:text-white\">{{ $regu->id }}</td>
                 <td class="px-8 py-2 text-gray-800 dark:text-gray-400\">{{ $regu->regu }}</td>
                 <td class="px-8 py-2 space-x-5">
-                    {{-- <flux:button color="blue" size="sm" wire:click="edit({{ $regu->id }})">Edit</flux:button> --}}
                     <flux:button wire:click="edit({{ $regu->id }})">Edit</flux:button>
                     <button class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-400 dark:bg-red-800 dark:hover:bg-red-700 dark:focus:ring-red-800 ml-2\">
                         Delete

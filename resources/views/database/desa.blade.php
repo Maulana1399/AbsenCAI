@@ -7,5 +7,6 @@
     
     <livewire:database.desa.tambah-desa />
     @livewire('database.desa.data-desa')
+    <livewire:database.desa.edit-desa />
     
 </x-layouts.app>
