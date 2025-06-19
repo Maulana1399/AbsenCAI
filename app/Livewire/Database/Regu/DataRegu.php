@@ -3,7 +3,9 @@
 namespace App\Livewire\Database\Regu;
 
 use App\Models\regu;
+use Flux\Flux;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class DataRegu extends Component
 {
@@ -26,5 +28,17 @@ class DataRegu extends Component
     public function edit($id)
     {
         $this->dispatch('editRegu', id: $id);
+    }
+
+    public function delete($id)
+    {
+        $this->dispatch('HapusRegu', id: $id);
+
+    }
+    
+    #[On('refreshRegu')]
+    public function refreshRegu()
+    {
+        $this->daftarregu = regu::all();
     }
 }

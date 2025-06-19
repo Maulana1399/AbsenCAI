@@ -8,5 +8,6 @@
     <livewire:database.regu.tambah-regu />
     @livewire('database.regu.data-regu')
     <livewire:database.regu.edit-regu />
+    <livewire:database.regu.hapus-regu />
 
 </x-layouts.app>
