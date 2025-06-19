@@ -7,6 +7,8 @@ use App\Models\kelompok;
 use App\Models\desa;
 use App\Models\regu;
 use App\Models\peserta;
+use Livewire\Attributes\On;
+
 
 class Database extends Component
 {
@@ -40,5 +42,19 @@ class Database extends Component
     public function edit($id)
     {
         $this->dispatch('editPeserta', id: $id);
+    }
+
+    public function delete($id)
+    {
+        $this->dispatch('HapusPeserta', id: $id);
+    }
+
+    #[On('refreshPeserta')]
+    public function refreshPeserta()
+    {
+        $this->daftarPeserta = peserta::with(['desa', 'kelompok', 'regu'])->get();
+        $this->daftarkelompok = kelompok::with('desa')->get();
+        $this->daftarDesa = desa::all();
+        $this->daftarRegu = regu::all();
     }
 }

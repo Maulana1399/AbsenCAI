@@ -8,5 +8,6 @@
 <livewire:database.peserta.tambah-peserta />
 @livewire('database.peserta.database')
 <livewire:database.peserta.edit-peserta />
+<livewire:database.peserta.hapus-peserta />
 
 </x-layouts.app>
