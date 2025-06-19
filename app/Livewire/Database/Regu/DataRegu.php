@@ -3,7 +3,6 @@
 namespace App\Livewire\Database\Regu;
 
 use App\Models\regu;
-use Flux\Flux;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
