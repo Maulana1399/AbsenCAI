@@ -36,4 +36,9 @@ class Database extends Component
             'daftarRegu' => $this->daftarRegu
         ]);
     }
+
+    public function edit($id)
+    {
+        $this->dispatch('editPeserta', id: $id);
+    }
 }
