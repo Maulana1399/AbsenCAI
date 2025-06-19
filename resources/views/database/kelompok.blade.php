@@ -7,6 +7,7 @@
 
 <livewire:database.kelompok.tambah-kelompok />
 @livewire('database.kelompok.data-kelompok')
+<livewire:database.kelompok.edit-kelompok />
 
 
 </x-layouts.app>

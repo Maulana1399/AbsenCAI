@@ -25,4 +25,9 @@ class DataKelompok extends Component
             'daftarkelompok' => $this->daftarkelompok
         ]);
     }
+
+    public function edit($id)
+    {
+        $this->dispatch('editKelompok', id: $id);
+    }
 }

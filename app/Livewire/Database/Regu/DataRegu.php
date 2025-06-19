@@ -3,7 +3,6 @@
 namespace App\Livewire\Database\Regu;
 
 use App\Models\regu;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class DataRegu extends Component

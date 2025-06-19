@@ -4,7 +4,7 @@
         <flux:input wire:model="desa" label="Name Desa" placeholder="Masukkan nama desa" />
 
         <div class="flex">
-            <flux:button type="submit" variant="primary" wire:click='update'>Simpan</flux:button>
+            <flux:button type="submit" variant="primary" wire:click='update'>Update</flux:button>
         </div>
     </div>
 </flux:modal>
