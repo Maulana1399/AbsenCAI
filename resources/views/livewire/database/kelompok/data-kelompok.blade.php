@@ -11,7 +11,7 @@
         <tbody>
         @foreach($daftarkelompok as $kelompok)
             <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200 border-b">
-                <td class="px-8 py-2 font-medium text-gray-900 dark:text-white">{{ $kelompok->id }}</td>
+                <td class="px-8 py-2 font-medium text-gray-900 dark:text-white">{{ $loop->iteration }}</td>
                 <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $kelompok->kelompok_asal }}</td>
                 <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $kelompok->desa->desa_asal ?? '-'  }}</td>
                 <td class="px-8 py-2 space-x-5">

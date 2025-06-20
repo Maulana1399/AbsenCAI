@@ -6,6 +6,7 @@
 </div>
 
 <livewire:database.kelompok.tambah-kelompok />
+<livewire:database.kelompok.import-kelompok />
 @livewire('database.kelompok.data-kelompok')
 <livewire:database.kelompok.edit-kelompok />
 <livewire:database.kelompok.hapus-kelompok />

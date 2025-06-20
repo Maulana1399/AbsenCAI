@@ -6,6 +6,7 @@
     </div>
 
 <livewire:database.peserta.tambah-peserta />
+<livewire:database.peserta.import-peserta />
 @livewire('database.peserta.database')
 <livewire:database.peserta.edit-peserta />
 <livewire:database.peserta.hapus-peserta />
