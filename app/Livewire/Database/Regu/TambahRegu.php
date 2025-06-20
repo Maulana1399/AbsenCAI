@@ -7,7 +7,7 @@ use App\Models\regu;
 
 class TambahRegu extends Component
 {
-
+    
     public $regu = '';  
     
     public function render()
