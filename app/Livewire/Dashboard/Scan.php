@@ -13,6 +13,7 @@ class Scan extends Component
     public $nip;
     public $jam_scan;
     public $message;
+    public $restartScanner = false;
 
     public function scanPeserta($data)
     {
@@ -48,6 +49,16 @@ class Scan extends Component
             'jam_scan' => $this->jam_scan,
         ]);
         $this->message = "Absensi berhasil!";
+    }
+
+    public function restartScan()
+    {
+        $this->nama = null;
+        $this->nip = null;
+        $this->jam_scan = null;
+        $this->message = null;
+        // Jika ingin trigger JS restart scanner, bisa tambahkan:
+        $this->dispatch('restartScanner');
     }
 
     public function render()
