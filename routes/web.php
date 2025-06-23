@@ -29,6 +29,10 @@ Route::view('regu', 'database.regu')
     ->middleware(['auth', 'verified'])
     ->name('regu');
 
+Route::view('absensi', 'dashboard.absensi')
+    ->middleware(['auth', 'verified'])
+    ->name('absensi');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
