@@ -8,11 +8,11 @@ use App\Models\desa;
 use App\Models\regu;
 use App\Models\peserta;
 use Livewire\Attributes\On;
-
+use Illuminate\Support\Facades\DB;
 
 class Database extends Component
 {
-    public $daftarPeserta = [];
+    // public $daftarPeserta = [];
 
     public $daftarkelompok = [];
     public $kelompok_id;
@@ -20,10 +20,10 @@ class Database extends Component
     public $desa_id;
     public $daftarRegu = [];
     public $regu_id;
+    public $search = '';
 
     public function mount()
     {
-        $this->daftarPeserta = peserta::with(['desa', 'kelompok', 'regu'])->get();
         $this->daftarkelompok = kelompok::with('desa')->get();
         $this->daftarDesa = desa::all();
         $this->daftarRegu = regu::all();
@@ -31,8 +31,20 @@ class Database extends Component
 
     public function render()
     {
+        logger('search: ' . $this->search); // Tambahkan ini
+
+        $pesertaQuery = peserta::with(['desa', 'kelompok', 'regu']);
+
+        if ($this->search) {
+            $search = $this->search;
+            $pesertaQuery->where(function($q) use ($search) {
+                $q->where('nama', 'like', '%'.$search.'%')
+                  ->orWhere('nip', 'like', '%'.$search.'%');
+            });
+        }
+        // dd($pesertaQuery->get());
         return view('livewire.database.peserta.database', [
-            'daftarPeserta' => $this->daftarPeserta,
+            'daftarPeserta' => $pesertaQuery->get(),
             'daftarkelompok' => $this->daftarkelompok,
             'daftarDesa' => $this->daftarDesa,
             'daftarRegu' => $this->daftarRegu
@@ -52,9 +64,13 @@ class Database extends Component
     #[On('refreshPeserta')]
     public function refreshPeserta()
     {
-        $this->daftarPeserta = peserta::with(['desa', 'kelompok', 'regu'])->get();
         $this->daftarkelompok = kelompok::with('desa')->get();
         $this->daftarDesa = desa::all();
         $this->daftarRegu = regu::all();
+    }
+
+    public function cari()
+    {
+
     }
 }

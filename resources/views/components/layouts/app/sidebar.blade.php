@@ -18,7 +18,7 @@
 
                 </flux:navlist.group>
 
-                    <flux:navlist.group expandable heading="Database" class="hidden lg:grid">
+                    <flux:navlist.group expandable heading="Database" class="grid">
                         <flux:navlist.item :href="route('database')" :current="request()->routeIs('database')" wire:navigate>{{ __('Database Peserta') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('desa')" :current="request()->routeIs('desa')" wire:navigate>{{ __('Desa') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('kelompok')" :current="request()->routeIs('kelompok')" wire:navigate>{{ __('Kelompok') }}</flux:navlist.item>

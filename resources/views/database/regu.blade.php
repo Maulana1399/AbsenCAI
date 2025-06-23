@@ -5,8 +5,10 @@
         <flux:separator variant="subtle" />
     </div>
 
-    <livewire:database.regu.tambah-regu />
-    <livewire:database.regu.import-regu />
+    <div class="flex items-center justify-between mb-6">
+        <livewire:database.regu.tambah-regu />
+        <livewire:database.regu.import-regu />
+    </div>
     @livewire('database.regu.data-regu')
     <livewire:database.regu.edit-regu />
     <livewire:database.regu.hapus-regu />

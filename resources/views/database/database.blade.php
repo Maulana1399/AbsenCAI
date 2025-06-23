@@ -5,9 +5,11 @@
     <flux:separator variant="subtle" />
     </div>
 
-<livewire:database.peserta.tambah-peserta />
-<livewire:database.peserta.import-peserta />
-@livewire('database.peserta.database')
+<div class="flex items-center justify-between mb-6">
+    <livewire:database.peserta.tambah-peserta />
+    <livewire:database.peserta.import-peserta />
+</div>
+<livewire:database.peserta.database />
 <livewire:database.peserta.edit-peserta />
 <livewire:database.peserta.hapus-peserta />
 

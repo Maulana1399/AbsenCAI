@@ -5,8 +5,10 @@
     <flux:separator variant="subtle" />
 </div>
 
-<livewire:database.kelompok.tambah-kelompok />
-<livewire:database.kelompok.import-kelompok />
+<div class="flex items-center justify-between mb-6">
+    <livewire:database.kelompok.tambah-kelompok />
+    <livewire:database.kelompok.import-kelompok />
+</div>
 @livewire('database.kelompok.data-kelompok')
 <livewire:database.kelompok.edit-kelompok />
 <livewire:database.kelompok.hapus-kelompok />

@@ -5,10 +5,14 @@
     <flux:separator variant="subtle" />
     </div>
     
+<div div class="flex items-center justify-between mb-6">
     <livewire:database.desa.tambah-desa />
     <livewire:database.desa.import-desa />
-    @livewire('database.desa.data-desa')
-    <livewire:database.desa.edit-desa />
-    <livewire:database.desa.hapus-desa />
+</div>
+
+
+@livewire('database.desa.data-desa')
+<livewire:database.desa.edit-desa />
+<livewire:database.desa.hapus-desa />
     
 </x-layouts.app>
