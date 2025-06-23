@@ -17,4 +17,24 @@
                 <div class="text-2xl font-bold">{{ $totalRegu }}</div>
             </div>
         </div>
+        <table class="min-w-full border">
+            <thead>
+                <tr>
+                    <th class="border px-2 py-1">No</th>
+                    <th class="border px-2 py-1">Nama</th>
+                    <th class="border px-2 py-1">Regu</th>
+                    <th class="border px-2 py-1">Kelompok</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($absensis as $i => $absen)
+                    <tr>
+                        <td class="border px-2 py-1">{{ $i+1 }}</td>
+                        <td class="border px-2 py-1">{{ $absen->nama }}</td>
+                        <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
+                        <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
