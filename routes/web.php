@@ -3,7 +3,6 @@
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
-use App\Livewire\DataRegu;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,10 +29,6 @@ Route::view('regu', 'database.regu')
     ->middleware(['auth', 'verified'])
     ->name('regu');
 
-// Route::get('/database.regu', DataRegu::class)->name('regu');
-
-
-    
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
