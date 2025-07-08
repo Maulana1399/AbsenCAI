@@ -3,7 +3,7 @@
         <input type="text" wire:model.defer="search" placeholder="Cari nama atau NIP peserta..." class="border rounded px-3 py-2 w-64" />
         <button wire:click="cari" class="px-3 py-2 bg-blue-500 text-white rounded">Search</button>
     </div>
-    <div>Search: {{ $search }}</div>
+    {{-- <div>Search: {{ $search }}</div> --}}
     <div class="overflow-x-auto">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

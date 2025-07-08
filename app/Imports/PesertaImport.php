@@ -2,10 +2,10 @@
 
 namespace App\Imports;
 
-use App\Models\Peserta;
-use App\Models\Desa;
-use App\Models\Kelompok;
-use App\Models\Regu;
+use App\Models\peserta;
+use App\Models\desa;
+use App\Models\kelompok;
+use App\Models\regu;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 

@@ -1,3 +1,7 @@
+@php
+    \Carbon\Carbon::setLocale('id');
+@endphp
+
 <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white rounded-lg shadow p-4">
@@ -24,6 +28,8 @@
                     <th class="border px-2 py-1">Nama</th>
                     <th class="border px-2 py-1">Regu</th>
                     <th class="border px-2 py-1">Kelompok</th>
+                    <th class="border px-2 py-1">Jam Scan</th>
+                    <th class="border px-2 py-1">Hari</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,6 +39,10 @@
                         <td class="border px-2 py-1">{{ $absen->nama }}</td>
                         <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
                         <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
+                        <td class="border px-2 py-1">{{ $absen->jam_scan }}</td> 
+                        <td class="border px-2 py-1">
+                            {{ \Carbon\Carbon::parse($absen->jam_scan)->translatedFormat('l') }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

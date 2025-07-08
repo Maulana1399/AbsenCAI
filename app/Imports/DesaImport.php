@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-use App\Models\Desa;
+use App\Models\desa;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 

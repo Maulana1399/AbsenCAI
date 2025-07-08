@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\desa;
-use App\Models\Kelompok;
+use App\Models\kelompok;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 

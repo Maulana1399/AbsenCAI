@@ -3,11 +3,11 @@
 namespace App\Livewire\Dashboard;
 
 use Livewire\Component;
-use App\Models\Peserta;
-use App\Models\Desa;
-use App\Models\Kelompok;
-use App\Models\Regu;
-use App\Models\Absensi;
+use App\Models\peserta;
+use App\Models\desa;
+use App\Models\kelompok;
+use App\Models\regu;
+use App\Models\absensi;
 
 class Dashboard extends Component
 {

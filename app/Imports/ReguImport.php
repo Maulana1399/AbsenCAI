@@ -1,7 +1,7 @@
 <?php
 namespace App\Imports;
 
-use App\Models\Regu;
+use App\Models\regu;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
