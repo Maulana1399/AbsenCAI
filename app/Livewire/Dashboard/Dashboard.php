@@ -7,6 +7,7 @@ use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
+use App\Models\Absensi;
 
 class Dashboard extends Component
 {
@@ -14,6 +15,7 @@ class Dashboard extends Component
     public $totalDesa;
     public $totalKelompok;
     public $totalRegu;
+    public $absensis;
 
     public function mount()
     {
@@ -21,10 +23,18 @@ class Dashboard extends Component
         $this->totalDesa = Desa::count();
         $this->totalKelompok = Kelompok::count();
         $this->totalRegu = Regu::count();
+
+        // Ambil 10 data scan pertama beserta relasi peserta, regu, kelompok
+        $this->absensis = Absensi::orderBy('jam_scan', 'asc')
+            ->with(['peserta.regu', 'peserta.kelompok'])
+            ->limit(10)
+            ->get();
     }
 
     public function render()
     {
-        return view('livewire.dashboard.dashboard');
+        return view('livewire.dashboard.dashboard', [
+            'absensis' => $this->absensis,
+        ]);
     }
 }

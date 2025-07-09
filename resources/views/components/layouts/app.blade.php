@@ -10,3 +10,5 @@
     </flux:main>
 </x-layouts.app.sidebar>
 @livewireScripts
+@stack('scripts')
+
