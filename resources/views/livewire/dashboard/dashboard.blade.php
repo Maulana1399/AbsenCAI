@@ -74,10 +74,25 @@
 
     <div class="mt-4">
         <h3 class="text-xl font-bold">Peserta yang Belum Absen:</h3>
-        <ul class="list-disc pl-5">
+        <table class="min-w-full border">
+        <thead>
+            <tr>
+                <th class="border px-2 py-1">No</th>
+                <th class="border px-2 py-1">Nama</th>
+                <th class="border px-2 py-1">Regu</th>
+                <th class="border px-2 py-1">Kelompok</th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach($pesertaBelumAbsen as $peserta)
-                <li>{{ $peserta->nama }} - {{ optional($peserta->regu)->regu ?? '-' }} - {{ optional($peserta->kelompok)->kelompok_asal ?? '-' }}</li>
+                <tr>
+                    <td class="border px-2 py-1">{{ $i+1 }}</td>
+                    <td class="border px-2 py-1">{{ $absen->peserta->nama ?? '-' }}</td>
+                    <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
+                    <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
+                </tr>
             @endforeach
-        </ul>
+        </tbody>
+    </table>
     </div>
 </div>
