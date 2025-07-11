@@ -52,13 +52,12 @@
                 <th class="border px-2 py-1">Kelompok</th>
                 <th class="border px-2 py-1">Jam Scan</th>
                 <th class="border px-2 py-1">Hari</th>
-                <th class="border px-2 py-1">Sesi</th>
             </tr>
         </thead>
         <tbody>
             @foreach($absensis as $i => $absen)
                 <tr>
-                    <td class="border px-2 py-1">{{ $i+1 }}</td>
+                    <td class="border px-2 py-1">{{ $loop->iteration }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->nama ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
@@ -66,7 +65,6 @@
                     <td class="border px-2 py-1">
                         {{ \Carbon\Carbon::parse($absen->jam_scan)->translatedFormat('l') }}
                     </td>
-                    <td class="border px-2 py-1">{{ $absen->sesi }}</td> <!-- Menampilkan sesi -->
                 </tr>
             @endforeach
         </tbody>
@@ -86,7 +84,7 @@
         <tbody>
             @foreach($pesertaBelumAbsen as $peserta)
                 <tr>
-                    <td class="border px-2 py-1">{{ $i+1 }}</td>
+                    <td class="border px-2 py-1">{{ $loop->iteration }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->nama ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
