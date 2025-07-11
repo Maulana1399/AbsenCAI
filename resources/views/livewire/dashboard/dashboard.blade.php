@@ -59,7 +59,7 @@
             @foreach($absensis as $i => $absen)
                 <tr>
                     <td class="border px-2 py-1">{{ $i+1 }}</td>
-                    <td class="border px-2 py-1">{{ $absen->peserta->nama }}</td>
+                    <td class="border px-2 py-1">{{ $absen->peserta->nama ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
                     <td class="border px-2 py-1">{{ $absen->jam_scan }}</td>
@@ -71,4 +71,13 @@
             @endforeach
         </tbody>
     </table>
+
+    <div class="mt-4">
+        <h3 class="text-xl font-bold">Peserta yang Belum Absen:</h3>
+        <ul class="list-disc pl-5">
+            @foreach($pesertaBelumAbsen as $peserta)
+                <li>{{ $peserta->nama }} - {{ optional($peserta->regu)->regu ?? '-' }} - {{ optional($peserta->kelompok)->kelompok_asal ?? '-' }}</li>
+            @endforeach
+        </ul>
+    </div>
 </div>
