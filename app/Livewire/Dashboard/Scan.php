@@ -5,7 +5,7 @@ namespace App\Livewire\Dashboard;
 use Livewire\Component;
 use Carbon\Carbon;
 use App\Models\Absensi;
-use App\Models\Peserta;
+use App\Models\peserta;
 
 class Scan extends Component
 {

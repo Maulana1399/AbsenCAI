@@ -1,0 +1,22 @@
+[0;1;32m●[0m php-fpm.service - The PHP FastCGI Process Manager
+     Loaded: loaded (]8;;file://localhost.localdomain/usr/lib/systemd/system/php-fpm.service/usr/lib/systemd/system/php-fpm.service]8;;; [0;1;32menabled[0m; preset: [0;1;38;5;185mdisabled[0m)
+     Active: [0;1;32mactive (running)[0m since Mon 2025-07-07 19:39:51 WIB; 14h ago
+   Main PID: 9296 (php-fpm)
+     Status: "Processes active: 0, idle: 7, Requests: 25, slow: 0, Traffic: 0.00req/sec"
+      Tasks: 8 (limit: 22980)
+     Memory: 64.1M
+        CPU: 2.126s
+     CGroup: /system.slice/php-fpm.service
+             ├─[0;38;5;245m 9296 "php-fpm: master process (/etc/php-fpm.conf)"[0m
+             ├─[0;38;5;245m 9298 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m 9299 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m 9300 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m 9301 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m 9302 "php-fpm: pool www"[0m
+             ├─[0;38;5;245m11239 "php-fpm: pool www"[0m
+             └─[0;38;5;245m11648 "php-fpm: pool www"[0m
+
+Jul 07 19:39:51 localhost.localdomain systemd[1]: Starting The PHP FastCGI Process Manager...
+Jul 07 19:39:51 localhost.localdomain php-fpm[9296]: [07-Jul-2025 19:39:51] WARNING: [pool www] ACL set, listen.owner = 'nginx' is ignored
+Jul 07 19:39:51 localhost.localdomain php-fpm[9296]: [07-Jul-2025 19:39:51] WARNING: [pool www] ACL set, listen.group = 'nginx' is ignored
+Jul 07 19:39:51 localhost.localdomain systemd[1]: Started The PHP FastCGI Process Manager.
