@@ -1,7 +1,7 @@
 <div>
-<flux:modal.trigger name="tambah-peserta">
-    <flux:button>Tambah Peserta</flux:button>
-</flux:modal.trigger>
+    <flux:modal.trigger name="tambah-peserta">
+    <flux:button class="bg-blue-500 text-white hover:bg-blue-600">Tambah Peserta</flux:button>
+    </flux:modal.trigger>
 
 <flux:modal name="tambah-peserta" class="md:w-96">
     <div class="space-y-6">
