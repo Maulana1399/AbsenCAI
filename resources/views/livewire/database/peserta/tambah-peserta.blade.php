@@ -13,7 +13,7 @@
         <flux:input wire:model="nama" label="Nama Peserta" placeholder="Masukkan nama peserta" />
 
         {{-- Input NIP Peserta --}}
-        <flux:input wire:model="nip" label="NIP Peserta" placeholder="Masukkan NIP peserta" />
+        <flux:input wire:model="nip" label="NIP Peserta" readonly />
 
         {{-- Input Jenis Kelamin --}}
         <div>
@@ -49,8 +49,7 @@
         {{-- Dropdown Regu --}}
         <div>
             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Regu</label>
-            <select wire:model="regu_id" class="w-full px-3 py-2 border rounded">
-                <option value="">-- Pilih Regu --</option>
+            <select wire:model="regu_id" class="w-full px-3 py-2 border rounded" disabled>
                 @foreach($daftarRegu as $regu)
                     <option value="{{ $regu->id }}">{{ $regu->regu }}</option>
                 @endforeach

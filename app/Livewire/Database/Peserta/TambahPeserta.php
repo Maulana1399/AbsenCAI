@@ -26,30 +26,32 @@ class TambahPeserta extends Component
         $this->daftarDesa = desa::all();
         $this->daftarKelompok = kelompok::all();
         $this->daftarRegu = regu::all();
+        $this->generateAutoFields();
+    }
+
+    public function generateAutoFields(): void
+    {
+        $this->nip = ((int) peserta::max('nip')) + 1;
+
+        $this->regu_id = regu::withCount('peserta')
+            ->orderBy('peserta_count')
+            ->orderBy('id')
+            ->value('id');
     }
 
     public function simpan()
     {
+        $this->generateAutoFields();
+
         $this->validate([
             'nama' => 'required|string|max:255',
-            'nip' => 'required|integer|max:300',
+            'nip' => 'required|integer',
             'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
             'desa_id' => 'required|exists:desas,id',
             'kelompok_id' => 'required|exists:kelompoks,id',
             'regu_id' => 'required|exists:regus,id',
         ]);
 
-        // Debug
-        logger([
-            'nama' => $this->nama,
-            'nip' => $this->nip,
-            'jenis_kelamin' => $this->jenis_kelamin,
-            'desa_id' => $this->desa_id,
-            'kelompok_id' => $this->kelompok_id,
-            'regu_id' => $this->regu_id,
-        ]);
-
-        // Simpan data peserta
         peserta::create([
             'nama' => $this->nama,
             'nip' => $this->nip,
