@@ -18,6 +18,12 @@
 
                 </flux:navlist.group>
 
+                <flux:navlist.group expandable heading="Registrasi" class="grid">
+                    <flux:navlist.item :href="route('registrasi.peserta')" :current="request()->routeIs('registrasi.peserta')" wire:navigate>{{ __('Registrasi Peserta') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('registrasi.self')" :current="request()->routeIs('registrasi.self')" wire:navigate>{{ __('Self Register') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('registrasi.ulang')" :current="request()->routeIs('registrasi.ulang')" wire:navigate>{{ __('Registrasi Ulang') }}</flux:navlist.item>
+                </flux:navlist.group>
+
                     <flux:navlist.group expandable heading="Database" class="grid">
                         <flux:navlist.item :href="route('database')" :current="request()->routeIs('database')" wire:navigate>{{ __('Database Peserta') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('desa')" :current="request()->routeIs('desa')" wire:navigate>{{ __('Desa') }}</flux:navlist.item>

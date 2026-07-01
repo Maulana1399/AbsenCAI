@@ -22,6 +22,10 @@ Route::get('registrasi/self', SelfRegister::class)
     ->middleware(['auth', 'verified'])
     ->name('registrasi.self');
 
+Route::view('registrasi/ulang', 'registrasi.ulang')
+    ->middleware(['auth', 'verified'])
+    ->name('registrasi.ulang');
+
 Route::view('database', 'database.database')
     ->middleware(['auth', 'verified'])
     ->name('database');
