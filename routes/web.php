@@ -3,6 +3,7 @@
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Registrasi\SelfRegister;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,6 +17,10 @@ Route::view('dashboard', 'dashboard')
 Route::view('registrasi', 'registrasi.peserta')
     ->middleware(['auth', 'verified'])
     ->name('registrasi.peserta');
+
+Route::get('registrasi/self', SelfRegister::class)
+    ->middleware(['auth', 'verified'])
+    ->name('registrasi.self');
 
 Route::view('database', 'database.database')
     ->middleware(['auth', 'verified'])

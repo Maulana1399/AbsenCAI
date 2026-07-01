@@ -4,7 +4,7 @@ use App\Livewire\Auth\Register;
 use Livewire\Livewire;
 
 test('registration screen can be rendered', function () {
-    $response = $this->get('/register');
+    $response = $this->get('/register-user');
 
     $response->assertStatus(200);
 });

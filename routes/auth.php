@@ -7,11 +7,14 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Registrasi\SelfRegister;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('login', Login::class)->name('login');
-    Route::get('register', Register::class)->name('register');
+    Route::get('register', SelfRegister::class)->name('register');
+    Route::view('register/success', 'registrasi.self-register-success')->name('register.success');
+    Route::get('register-user', Register::class)->name('register.user');
     Route::get('forgot-password', ForgotPassword::class)->name('password.request');
     Route::get('reset-password/{token}', ResetPassword::class)->name('password.reset');
 });
