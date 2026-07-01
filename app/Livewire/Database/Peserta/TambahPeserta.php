@@ -59,6 +59,7 @@ class TambahPeserta extends Component
             'desa_id' => $this->desa_id,
             'kelompok_id' => $this->kelompok_id,
             'regu_id' => $this->regu_id,
+            'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
         ]);
 
         return redirect()->to('/database');

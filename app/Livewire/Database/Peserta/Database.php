@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class Database extends Component
 {
-    // public $daftarPeserta = [];
-
     public $daftarkelompok = [];
     public $kelompok_id;
     public $daftarDesa = [];
@@ -31,8 +29,6 @@ class Database extends Component
 
     public function render()
     {
-        logger('search: ' . $this->search); // Tambahkan ini
-
         $pesertaQuery = peserta::with(['desa', 'kelompok', 'regu']);
 
         if ($this->search) {
@@ -42,9 +38,8 @@ class Database extends Component
                   ->orWhere('nip', 'like', '%'.$search.'%');
             });
         }
-        // dd($pesertaQuery->get());
         return view('livewire.database.peserta.database', [
-            'daftarPeserta' => $pesertaQuery->get(),
+            'daftarPeserta' => $pesertaQuery->orderByDesc('id')->get(),
             'daftarkelompok' => $this->daftarkelompok,
             'daftarDesa' => $this->daftarDesa,
             'daftarRegu' => $this->daftarRegu
@@ -71,6 +66,5 @@ class Database extends Component
 
     public function cari()
     {
-
     }
 }

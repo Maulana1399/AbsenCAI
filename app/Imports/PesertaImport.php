@@ -2,63 +2,29 @@
 
 namespace App\Imports;
 
-use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
+use App\Models\peserta;
 use App\Models\regu;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-
 class PesertaImport implements ToModel, WithHeadingRow
 {
-    
     public function model(array $row)
     {
-        $regu = Regu::where('regu', $row['regu'])->first();
-        $kelompok = Kelompok::where('kelompok_asal', $row['kelompok'])->first();
-        $desa = Desa::where('desa_asal', $row['desa'])->first();
+        $regu = regu::where('regu', $row['regu'] ?? null)->first();
+        $kelompok = kelompok::where('kelompok_asal', $row['kelompok'] ?? null)->first();
+        $desa = desa::where('desa_asal', $row['desa'] ?? null)->first();
 
-        return new Peserta([
-            'nama' => $row['nama'],
-            'nip' => $row['nip'],
-            'jenis_kelamin' => $row['jenis_kelamin'],
+        return new peserta([
+            'nama' => $row['nama'] ?? null,
+            'nip' => $row['nip'] ?? null,
+            'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
             'regu_id' => $regu ? $regu->id : null,
             'kelompok_id' => $kelompok ? $kelompok->id : null,
             'desa_id' => $desa ? $desa->id : null,
-        ]);
-    }
-}
-
-<?php
-
-namespace App\Imports;
-
-
-use App\Models\peserta;
-use App\Models\desa;
-use App\Models\kelompok;
-use App\Models\regu;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-
-
-class PesertaImport implements ToModel, WithHeadingRow
-{
-    
-    public function model(array $row)
-    {
-        $regu = Regu::where('regu', $row['regu'])->first();
-        $kelompok = Kelompok::where('kelompok_asal', $row['kelompok'])->first();
-        $desa = Desa::where('desa_asal', $row['desa'])->first();
-
-        return new Peserta([
-            'nama' => $row['nama'],
-            'nip' => $row['nip'],
-            'jenis_kelamin' => $row['jenis_kelamin'],
-            'regu_id' => $regu ? $regu->id : null,
-            'kelompok_id' => $kelompok ? $kelompok->id : null,
-            'desa_id' => $desa ? $desa->id : null,
+            'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
         ]);
     }
 }

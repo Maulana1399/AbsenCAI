@@ -13,6 +13,10 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::view('registrasi', 'registrasi.peserta')
+    ->middleware(['auth', 'verified'])
+    ->name('registrasi.peserta');
+
 Route::view('database', 'database.database')
     ->middleware(['auth', 'verified'])
     ->name('database');
