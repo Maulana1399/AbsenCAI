@@ -16,10 +16,10 @@ class ImportPeserta extends Component
     public function import()
     {
         $this->validate([
-            'file' => 'required|file|mimes:xlsx,csv'
+            'file' => 'required|file|mimes:xlsx,csv,xls'
         ]);
 
-        Excel::import(new PesertaImport, $this->file->getRealPath());
+        Excel::import(new PesertaImport, $this->file);
         session()->flash('success', 'Import berhasil!');
         $this->reset('file');
         $this->dispatch('refreshPeserta');

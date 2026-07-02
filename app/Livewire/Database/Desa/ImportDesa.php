@@ -20,7 +20,7 @@ class ImportDesa extends Component
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
 
-        Excel::import(new DesaImport, $this->file->getRealPath());
+        Excel::import(new DesaImport, $this->file);
         session()->flash('success', 'Data desa berhasil diimpor.');
         $this->reset('file');
         $this->dispatch('refreshDesaList');

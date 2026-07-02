@@ -19,7 +19,7 @@ class ImportKelompok extends Component
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
 
-        Excel::import(new KelompokImport, $this->file->getRealPath());
+        Excel::import(new KelompokImport, $this->file);
         session()->flash('success', 'Data kelompok berhasil diimpor.');
         $this->reset('file');
         $this->dispatch('refreshKelompokList');
