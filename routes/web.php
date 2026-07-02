@@ -4,6 +4,7 @@ use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Registrasi\SelfRegister;
+use App\Http\Controllers\ImportDataController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -53,6 +54,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('import/desa', [ImportDataController::class, 'desa'])->name('import.desa');
+    Route::post('import/kelompok', [ImportDataController::class, 'kelompok'])->name('import.kelompok');
+    Route::post('import/regu', [ImportDataController::class, 'regu'])->name('import.regu');
+    Route::post('import/peserta', [ImportDataController::class, 'peserta'])->name('import.peserta');
 });
 
 require __DIR__.'/auth.php';
