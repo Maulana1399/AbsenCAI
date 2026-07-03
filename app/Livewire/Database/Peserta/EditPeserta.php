@@ -50,7 +50,6 @@ class EditPeserta extends Component
     {
         $this->validate([
             'nama' => 'required',
-            'nip' => 'required',
             'jenis_kelamin' => 'required',
             'desa_id' => 'required',
             'kelompok_id' => 'required',
@@ -59,7 +58,6 @@ class EditPeserta extends Component
 
         peserta::where('id', $this->peserta_id)->update([
             'nama' => $this->nama,
-            'nip' => $this->nip,
             'jenis_kelamin' => $this->jenis_kelamin,
             'desa_id' => $this->desa_id,
             'kelompok_id' => $this->kelompok_id,

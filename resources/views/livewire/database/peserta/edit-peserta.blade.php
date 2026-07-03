@@ -5,7 +5,7 @@
         <flux:input wire:model="nama" label="Nama Peserta" placeholder="Masukkan nama peserta" />
 
         {{-- Input NIP Peserta --}}
-        <flux:input wire:model="nip" label="NIP Peserta" placeholder="Masukkan NIP peserta" />
+        <flux:input wire:model="nip" label="NIP Peserta" readonly />
 
         {{-- Input Jenis Kelamin --}}
         <div>
@@ -51,7 +51,7 @@
 
 
         <div class="flex">
-            <flux:button type="submit" variant="primary" wire:click='update'>Update</flux:button>
+            <flux:button type="submit" variant="primary" wire:click='update' wire:loading.attr="disabled" wire:target="update">Update</flux:button>
         </div>
     </div>
 </flux:modal>

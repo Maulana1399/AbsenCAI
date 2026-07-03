@@ -25,7 +25,7 @@
         <div class="flex">
             <flux:spacer />
 
-            <flux:button type="submit" variant="primary" wire:click='simpan'>Simpan</flux:button>
+            <flux:button type="submit" variant="primary" wire:click='simpan' wire:loading.attr="disabled" wire:target="simpan">Simpan</flux:button>
         </div>
     </div>
 </flux:modal>

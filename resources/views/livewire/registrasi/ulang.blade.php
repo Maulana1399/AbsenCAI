@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="mt-5">
-                    <flux:button type="button" variant="primary" class="w-full" wire:click="registrasiUlang({{ $peserta->id }})">
+                    <flux:button type="button" variant="primary" class="w-full" wire:click="registrasiUlang({{ $peserta->id }})" wire:loading.attr="disabled" wire:target="registrasiUlang">
                         Registrasi Ulang
                     </flux:button>
                 </div>

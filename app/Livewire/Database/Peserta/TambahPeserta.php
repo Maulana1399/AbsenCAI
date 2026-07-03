@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
-use App\Models\regu;
 
 class TambahPeserta extends Component
 {
@@ -16,8 +15,8 @@ class TambahPeserta extends Component
     public $desa_id;
     public $daftarKelompok = [];
     public $kelompok_id;
-    public $daftarRegu = [];
     public $regu_id;
+    public string $regu_nama = '-';
     public $jenis_kelamin;
     public $daftarJenisKelamin = ['Laki - Laki', 'Perempuan'];
 
@@ -25,18 +24,21 @@ class TambahPeserta extends Component
     {
         $this->daftarDesa = desa::all();
         $this->daftarKelompok = kelompok::all();
-        $this->daftarRegu = regu::all();
         $this->generateAutoFields();
     }
 
     public function generateAutoFields(): void
     {
-        $this->nip = ((int) peserta::max('nip')) + 1;
+        $autoPlacement = peserta::autoPlacement($this->jenis_kelamin ?: null);
 
-        $this->regu_id = regu::withCount('peserta')
-            ->orderBy('peserta_count')
-            ->orderBy('id')
-            ->value('id');
+        $this->nip = $autoPlacement['nip'];
+        $this->regu_id = $autoPlacement['regu_id'];
+        $this->regu_nama = $autoPlacement['regu_nama'];
+    }
+
+    public function updatedJenisKelamin(): void
+    {
+        $this->generateAutoFields();
     }
 
     public function simpan()

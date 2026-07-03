@@ -21,6 +21,50 @@ class peserta extends Model
         ];
     }
 
+    public static function nextAutoNip(): int
+    {
+        return ((int) (self::max('nip') ?? 0)) + 1;
+    }
+
+    public static function autoPlacement(?string $jenisKelamin = null): array
+    {
+        $regu = self::leastFilledRegu($jenisKelamin);
+
+        return [
+            'nip' => (string) self::nextAutoNip(),
+            'regu_id' => $regu?->id,
+            'regu_nama' => $regu?->regu ?? '-',
+        ];
+    }
+
+    public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
+    {
+        $query = regu::withCount('peserta');
+
+        if ($jenisKelamin) {
+            $filtered = (clone $query)->where('jenis_kelamin', $jenisKelamin)->orderBy('peserta_count')->orderBy('id')->first();
+
+            if ($filtered) {
+                return $filtered;
+            }
+        }
+
+        return $query
+            ->orderBy('peserta_count')
+            ->orderBy('id')
+            ->first();
+    }
+
+    public static function leastFilledReguId(?string $jenisKelamin = null): ?int
+    {
+        return self::leastFilledRegu($jenisKelamin)?->id;
+    }
+
+    public static function leastFilledReguName(?string $jenisKelamin = null): string
+    {
+        return self::leastFilledRegu($jenisKelamin)?->regu ?? '-';
+    }
+
     public function getStatusRegistrasiLabelAttribute(): string
     {
         return $this->status_registrasi ?: self::STATUS_BELUM_REGISTRASI;

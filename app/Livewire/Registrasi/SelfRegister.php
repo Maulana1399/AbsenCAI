@@ -16,9 +16,15 @@ class SelfRegister extends Component
 
     public string $nip = '';
 
+    public string $jenis_kelamin = '';
+
     public string $desa_id = '';
 
     public string $kelompok_id = '';
+
+    public ?int $regu_id = null;
+
+    public string $regu_nama = '-';
 
     public $daftarDesa = [];
 
@@ -28,24 +34,43 @@ class SelfRegister extends Component
     {
         $this->daftarDesa = desa::orderBy('desa_asal')->get();
         $this->daftarKelompok = kelompok::with('desa')->orderBy('kelompok_asal')->get();
+        $this->fillAutoPlacement();
+    }
+
+    public function fillAutoPlacement(): void
+    {
+        $autoPlacement = peserta::autoPlacement($this->jenis_kelamin ?: null);
+
+        $this->nip = $autoPlacement['nip'];
+        $this->regu_id = $autoPlacement['regu_id'];
+        $this->regu_nama = $autoPlacement['regu_nama'];
+    }
+
+    public function updatedJenisKelamin(): void
+    {
+        $this->fillAutoPlacement();
     }
 
     public function register(): void
     {
+        $this->fillAutoPlacement();
+
         $validated = $this->validate([
             'nama' => ['required', 'string', 'max:255'],
             'nip' => ['required', 'integer'],
+            'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
             'desa_id' => ['required', Rule::exists('desas', 'id')],
             'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],
+            'regu_id' => ['required', Rule::exists('regus', 'id')],
         ]);
 
         peserta::create([
             'nama' => $validated['nama'],
             'nip' => $validated['nip'],
-            'jenis_kelamin' => null,
+            'jenis_kelamin' => $validated['jenis_kelamin'],
             'desa_id' => $validated['desa_id'],
             'kelompok_id' => $validated['kelompok_id'],
-            'regu_id' => null,
+            'regu_id' => $this->regu_id,
             'status_registrasi' => peserta::STATUS_SELF_REGISTER,
         ]);
 
