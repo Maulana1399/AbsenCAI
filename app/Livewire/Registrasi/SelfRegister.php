@@ -5,7 +5,9 @@ namespace App\Livewire\Registrasi;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\peserta;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -64,7 +66,14 @@ class SelfRegister extends Component
             $this->fillAutoPlacement();
 
             $validated = $this->validate([
-                'nama' => ['required', 'string', 'max:255'],
+                'nama' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('pesertas', 'nama')
+                        ->where('desa_id', $this->desa_id)
+                        ->where('kelompok_id', $this->kelompok_id),
+                ],
                 'nip' => ['required', 'integer', Rule::unique('pesertas', 'nip')],
                 'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
                 'desa_id' => ['required', Rule::exists('desas', 'id')],
@@ -72,15 +81,25 @@ class SelfRegister extends Component
                 'regu_id' => ['required', Rule::exists('regus', 'id')],
             ]);
 
-            peserta::create([
-                'nama' => $validated['nama'],
-                'nip' => $validated['nip'],
-                'jenis_kelamin' => $validated['jenis_kelamin'],
-                'desa_id' => $validated['desa_id'],
-                'kelompok_id' => $validated['kelompok_id'],
-                'regu_id' => $this->regu_id,
-                'status_registrasi' => peserta::STATUS_SELF_REGISTER,
-            ]);
+            try {
+                peserta::create([
+                    'nama' => $validated['nama'],
+                    'nip' => $validated['nip'],
+                    'jenis_kelamin' => $validated['jenis_kelamin'],
+                    'desa_id' => $validated['desa_id'],
+                    'kelompok_id' => $validated['kelompok_id'],
+                    'regu_id' => $this->regu_id,
+                    'status_registrasi' => peserta::STATUS_SELF_REGISTER,
+                ]);
+            } catch (QueryException $exception) {
+                if ($exception->getCode() === '23000') {
+                    throw ValidationException::withMessages([
+                        'nama' => 'Peserta dengan nama, desa, dan kelompok ini sudah terdaftar.',
+                    ]);
+                }
+
+                throw $exception;
+            }
 
             session()->flash('self_register', [
                 'nama' => $validated['nama'],

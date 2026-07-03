@@ -6,6 +6,9 @@ use Livewire\Component;
 use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
+use Illuminate\Database\QueryException;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TambahPeserta extends Component
 {
@@ -54,7 +57,14 @@ class TambahPeserta extends Component
             $this->generateAutoFields();
 
             $this->validate([
-                'nama' => 'required|string|max:255',
+                'nama' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('pesertas', 'nama')
+                        ->where('desa_id', $this->desa_id)
+                        ->where('kelompok_id', $this->kelompok_id),
+                ],
                 'nip' => 'required|integer|unique:pesertas,nip',
                 'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
                 'desa_id' => 'required|exists:desas,id',
@@ -62,15 +72,25 @@ class TambahPeserta extends Component
                 'regu_id' => 'required|exists:regus,id',
             ]);
 
-            peserta::create([
-                'nama' => $this->nama,
-                'nip' => $this->nip,
-                'jenis_kelamin' => $this->jenis_kelamin,
-                'desa_id' => $this->desa_id,
-                'kelompok_id' => $this->kelompok_id,
-                'regu_id' => $this->regu_id,
-                'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-            ]);
+            try {
+                peserta::create([
+                    'nama' => $this->nama,
+                    'nip' => $this->nip,
+                    'jenis_kelamin' => $this->jenis_kelamin,
+                    'desa_id' => $this->desa_id,
+                    'kelompok_id' => $this->kelompok_id,
+                    'regu_id' => $this->regu_id,
+                    'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
+                ]);
+            } catch (QueryException $exception) {
+                if ($exception->getCode() === '23000') {
+                    throw ValidationException::withMessages([
+                        'nama' => 'Peserta dengan nama, desa, dan kelompok ini sudah terdaftar.',
+                    ]);
+                }
+
+                throw $exception;
+            }
 
             return redirect()->to('/database');
         } finally {
