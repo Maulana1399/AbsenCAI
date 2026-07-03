@@ -17,7 +17,7 @@
         </div>
 
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-            <flux:link :href="route('register')" class="w-full sm:w-auto">Daftar lagi</flux:link>
+            <flux:link :href="route('registrasi.self')" class="w-full sm:w-auto">Daftar lagi</flux:link>
             <flux:link :href="route('dashboard')" class="w-full sm:w-auto">Kembali ke beranda</flux:link>
         </div>
     </div>
