@@ -9,6 +9,8 @@ use App\Models\kelompok;
 
 class TambahPeserta extends Component
 {
+    public bool $processing = false;
+
     public $nama = '';
     public $nip = '';
     public $daftarDesa = [];
@@ -43,28 +45,37 @@ class TambahPeserta extends Component
 
     public function simpan()
     {
-        $this->generateAutoFields();
+        if ($this->processing) {
+            return;
+        }
+        $this->processing = true;
 
-        $this->validate([
-            'nama' => 'required|string|max:255',
-            'nip' => 'required|integer',
-            'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
-            'desa_id' => 'required|exists:desas,id',
-            'kelompok_id' => 'required|exists:kelompoks,id',
-            'regu_id' => 'required|exists:regus,id',
-        ]);
+        try {
+            $this->generateAutoFields();
 
-        peserta::create([
-            'nama' => $this->nama,
-            'nip' => $this->nip,
-            'jenis_kelamin' => $this->jenis_kelamin,
-            'desa_id' => $this->desa_id,
-            'kelompok_id' => $this->kelompok_id,
-            'regu_id' => $this->regu_id,
-            'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-        ]);
+            $this->validate([
+                'nama' => 'required|string|max:255',
+                'nip' => 'required|integer',
+                'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
+                'desa_id' => 'required|exists:desas,id',
+                'kelompok_id' => 'required|exists:kelompoks,id',
+                'regu_id' => 'required|exists:regus,id',
+            ]);
 
-        return redirect()->to('/database');
+            peserta::create([
+                'nama' => $this->nama,
+                'nip' => $this->nip,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'regu_id' => $this->regu_id,
+                'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
+            ]);
+
+            return redirect()->to('/database');
+        } finally {
+            $this->processing = false;
+        }
     }
 
     public function render()

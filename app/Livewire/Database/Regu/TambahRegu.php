@@ -8,6 +8,7 @@ use Livewire\Component;
 
 class TambahRegu extends Component
 {
+    public bool $processing = false;
     
     public $regu = '';  
     public $jenis_kelamin = '';  
@@ -18,23 +19,32 @@ class TambahRegu extends Component
     }
     
     public function simpan(){
-        $rules = [
-            'regu' => 'required',
-        ];
-
-        $data = [
-            'regu' => $this->regu,
-        ];
-
-        if (Schema::hasColumn('regus', 'jenis_kelamin')) {
-            $rules['jenis_kelamin'] = 'required|in:Laki - Laki,Perempuan';
-            $data['jenis_kelamin'] = $this->jenis_kelamin;
+        if ($this->processing) {
+            return;
         }
+        $this->processing = true;
 
-        $this->validate($rules);
+        try {
+            $rules = [
+                'regu' => 'required',
+            ];
 
-        regu::create($data);
-        
-        return redirect()->to('/regu');
+            $data = [
+                'regu' => $this->regu,
+            ];
+
+            if (Schema::hasColumn('regus', 'jenis_kelamin')) {
+                $rules['jenis_kelamin'] = 'required|in:Laki - Laki,Perempuan';
+                $data['jenis_kelamin'] = $this->jenis_kelamin;
+            }
+
+            $this->validate($rules);
+
+            regu::create($data);
+            
+            return redirect()->to('/regu');
+        } finally {
+            $this->processing = false;
+        }
     }
 }

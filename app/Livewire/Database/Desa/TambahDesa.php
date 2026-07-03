@@ -7,6 +7,7 @@ use Livewire\Component;
 
 class TambahDesa extends Component
 {
+    public bool $processing = false;
 
     public $Desa = '';
 
@@ -16,14 +17,23 @@ class TambahDesa extends Component
     }
 
     public function simpan(){
-        $this->validate([
-            "Desa" => "required"
-        ]);
+        if ($this->processing) {
+            return;
+        }
+        $this->processing = true;
 
-        desa::create([
-            'desa_asal' => $this->Desa,
-        ]);
-        
-        return redirect()->to('/desa');
+        try {
+            $this->validate([
+                "Desa" => "required"
+            ]);
+
+            desa::create([
+                'desa_asal' => $this->Desa,
+            ]);
+            
+            return redirect()->to('/desa');
+        } finally {
+            $this->processing = false;
+        }
     }
 }

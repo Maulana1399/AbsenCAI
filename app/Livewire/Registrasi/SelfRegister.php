@@ -12,6 +12,8 @@ use Livewire\Component;
 #[Layout('components.layouts.auth.simple')]
 class SelfRegister extends Component
 {
+    public bool $processing = false;
+
     public string $nama = '';
 
     public string $nip = '';
@@ -53,35 +55,44 @@ class SelfRegister extends Component
 
     public function register(): void
     {
-        $this->fillAutoPlacement();
+        if ($this->processing) {
+            return;
+        }
+        $this->processing = true;
 
-        $validated = $this->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'nip' => ['required', 'integer'],
-            'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
-            'desa_id' => ['required', Rule::exists('desas', 'id')],
-            'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],
-            'regu_id' => ['required', Rule::exists('regus', 'id')],
-        ]);
+        try {
+            $this->fillAutoPlacement();
 
-        peserta::create([
-            'nama' => $validated['nama'],
-            'nip' => $validated['nip'],
-            'jenis_kelamin' => $validated['jenis_kelamin'],
-            'desa_id' => $validated['desa_id'],
-            'kelompok_id' => $validated['kelompok_id'],
-            'regu_id' => $this->regu_id,
-            'status_registrasi' => peserta::STATUS_SELF_REGISTER,
-        ]);
+            $validated = $this->validate([
+                'nama' => ['required', 'string', 'max:255'],
+                'nip' => ['required', 'integer'],
+                'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
+                'desa_id' => ['required', Rule::exists('desas', 'id')],
+                'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],
+                'regu_id' => ['required', Rule::exists('regus', 'id')],
+            ]);
 
-        session()->flash('self_register', [
-            'nama' => $validated['nama'],
-            'nip' => $validated['nip'],
-            'desa' => desa::find($validated['desa_id'])?->desa_asal,
-            'kelompok' => kelompok::find($validated['kelompok_id'])?->kelompok_asal,
-        ]);
+            peserta::create([
+                'nama' => $validated['nama'],
+                'nip' => $validated['nip'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'regu_id' => $this->regu_id,
+                'status_registrasi' => peserta::STATUS_SELF_REGISTER,
+            ]);
 
-        $this->redirect(route('register.success', absolute: false), navigate: true);
+            session()->flash('self_register', [
+                'nama' => $validated['nama'],
+                'nip' => $validated['nip'],
+                'desa' => desa::find($validated['desa_id'])?->desa_asal,
+                'kelompok' => kelompok::find($validated['kelompok_id'])?->kelompok_asal,
+            ]);
+
+            $this->redirect(route('register.success', absolute: false), navigate: true);
+        } finally {
+            $this->processing = false;
+        }
     }
 
     public function render()

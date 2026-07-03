@@ -8,6 +8,7 @@ use App\Models\desa;
 
 class TambahKelompok extends Component
 {
+    public bool $processing = false;
 
     public $Kelompok = '';
     public $daftarDesa = [];
@@ -20,23 +21,32 @@ class TambahKelompok extends Component
 
 
     public function simpan(){
-        $this->validate([
-            "Kelompok" => "required",
-            "desa_id" => "required"
-        ]);
-        
-        // Debug
-        logger([
-            'Kelompok' => $this->Kelompok,
-            'desa_id' => $this->desa_id,
-        ]);
-        
-        kelompok::create([
-            'kelompok_asal' => $this->Kelompok,
-            'desa_id' => $this->desa_id,
-        ]);
-        
-        return redirect()->to('/kelompok');
+        if ($this->processing) {
+            return;
+        }
+        $this->processing = true;
+
+        try {
+            $this->validate([
+                "Kelompok" => "required",
+                "desa_id" => "required"
+            ]);
+            
+            // Debug
+            logger([
+                'Kelompok' => $this->Kelompok,
+                'desa_id' => $this->desa_id,
+            ]);
+            
+            kelompok::create([
+                'kelompok_asal' => $this->Kelompok,
+                'desa_id' => $this->desa_id,
+            ]);
+            
+            return redirect()->to('/kelompok');
+        } finally {
+            $this->processing = false;
+        }
     }
     public function render()
     {
