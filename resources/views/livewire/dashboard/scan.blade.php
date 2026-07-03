@@ -188,7 +188,7 @@ Livewire.on('restartScanner', async ()=>{
 </script>
 
 
-<style>
+<!-- <style>
 
 #qr-reader {
     width:400px !important;
@@ -211,6 +211,6 @@ Livewire.on('restartScanner', async ()=>{
     display:none !important;
 }
 
-</style>
+</style> -->
 
 @endpush

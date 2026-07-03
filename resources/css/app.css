@@ -64,3 +64,25 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* QR Absensi Scanner */
+#qr-reader {
+    width:400px !important;
+    max-width:100% !important;
+    overflow:hidden !important;
+    border:none !important;
+}
+
+
+#qr-reader video {
+    width:400px !important;
+    max-width:100% !important;
+    height:300px !important;
+    object-fit:cover !important;
+    border-radius:16px;
+}
+
+
+#qr-reader__dashboard {
+    display:none !important;
+}
