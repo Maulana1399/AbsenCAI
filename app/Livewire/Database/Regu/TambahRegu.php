@@ -26,7 +26,7 @@ class TambahRegu extends Component
 
         try {
             $rules = [
-                'regu' => 'required',
+                'regu' => 'required|unique:regus,regu',
             ];
 
             $data = [

@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Kelompok;
 use App\Models\kelompok;
 use Livewire\Component;
 use App\Models\desa;
+use Illuminate\Validation\Rule;
 
 class TambahKelompok extends Component
 {
@@ -28,7 +29,10 @@ class TambahKelompok extends Component
 
         try {
             $this->validate([
-                "Kelompok" => "required",
+                "Kelompok" => [
+                    "required",
+                    Rule::unique('kelompoks', 'kelompok_asal')->where('desa_id', $this->desa_id),
+                ],
                 "desa_id" => "required"
             ]);
             

@@ -65,7 +65,7 @@ class SelfRegister extends Component
 
             $validated = $this->validate([
                 'nama' => ['required', 'string', 'max:255'],
-                'nip' => ['required', 'integer'],
+                'nip' => ['required', 'integer', Rule::unique('pesertas', 'nip')],
                 'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
                 'desa_id' => ['required', Rule::exists('desas', 'id')],
                 'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],

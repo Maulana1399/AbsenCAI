@@ -55,7 +55,7 @@ class TambahPeserta extends Component
 
             $this->validate([
                 'nama' => 'required|string|max:255',
-                'nip' => 'required|integer',
+                'nip' => 'required|integer|unique:pesertas,nip',
                 'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
                 'desa_id' => 'required|exists:desas,id',
                 'kelompok_id' => 'required|exists:kelompoks,id',

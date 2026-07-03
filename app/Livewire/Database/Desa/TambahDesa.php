@@ -24,7 +24,7 @@ class TambahDesa extends Component
 
         try {
             $this->validate([
-                "Desa" => "required"
+                "Desa" => "required|unique:desas,desa_asal"
             ]);
 
             desa::create([
