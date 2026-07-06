@@ -1,6 +1,6 @@
 <?php
 
-namespace App\nExports;
+namespace App\Exports;
 
 use App\Models\peserta;
 use Maatwebsite\Excel\Concerns\FromCollection;
