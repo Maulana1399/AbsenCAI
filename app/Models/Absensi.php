@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Peserta;
+use App\Models\peserta;
 
 class Absensi extends Model
 {
@@ -11,7 +11,7 @@ class Absensi extends Model
 
     public function peserta()
     {
-        return $this->belongsTo(Peserta::class, 'nip', 'nip');
+        return $this->belongsTo(peserta::class, 'nip', 'nip');
     }
 
     public function sesi()

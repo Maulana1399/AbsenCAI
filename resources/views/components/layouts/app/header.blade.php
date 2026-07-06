@@ -102,6 +102,11 @@
                       {{ __('Dashboard') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
+
+                <flux:navlist.group expandable heading="Absensi">
+                    <flux:navlist.item :href="route('absensi')" :current="request()->routeIs('absensi')" wire:navigate>{{ __('Scan Absensi') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('sesi.absensi')" :current="request()->routeIs('sesi.absensi')" wire:navigate>{{ __('Sesi Absensi') }}</flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />

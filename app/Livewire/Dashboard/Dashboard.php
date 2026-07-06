@@ -20,10 +20,10 @@ class Dashboard extends Component
 
     public function mount()
     {
-        $this->totalPeserta = Peserta::count();
-        $this->totalDesa = Desa::count();
-        $this->totalKelompok = Kelompok::count();
-        $this->totalRegu = Regu::count();
+        $this->totalPeserta = peserta::count();
+        $this->totalDesa = desa::count();
+        $this->totalKelompok = kelompok::count();
+        $this->totalRegu = regu::count();
     }
 
     public function render()
@@ -46,19 +46,19 @@ class Dashboard extends Component
         $absensis = $absensiQuery->orderBy('jam_scan', 'asc')->get();
         $absenNips = $absensis->pluck('nip')->unique();
 
-        $pesertaQuery = Peserta::with(['regu', 'kelompok', 'desa']);
+        $pesertaQuery = peserta::with(['regu', 'kelompok', 'desa']);
         if ($this->regu_id) {
             $pesertaQuery->where('regu_id', $this->regu_id);
         }
 
         $pesertaBelumAbsen = $sesiAktif
             ? $pesertaQuery->whereNotIn('nip', $absenNips)->get()
-            : Peserta::with(['regu', 'kelompok', 'desa'])->when($this->regu_id, function ($query) {
+            : peserta::with(['regu', 'kelompok', 'desa'])->when($this->regu_id, function ($query) {
                 $query->where('regu_id', $this->regu_id);
             })->get();
 
         $sudahAbsenCount = $absensis->count();
-        $totalPesertaFiltered = $this->regu_id ? Peserta::where('regu_id', $this->regu_id)->count() : $this->totalPeserta;
+        $totalPesertaFiltered = $this->regu_id ? peserta::where('regu_id', $this->regu_id)->count() : $this->totalPeserta;
         $belumAbsenCount = $sesiAktif ? $pesertaBelumAbsen->count() : $totalPesertaFiltered;
         $persentaseKehadiran = $totalPesertaFiltered > 0
             ? round(($sudahAbsenCount / $totalPesertaFiltered) * 100, 2)
@@ -71,9 +71,21 @@ class Dashboard extends Component
             'sudahAbsenCount' => $sudahAbsenCount,
             'belumAbsenCount' => $belumAbsenCount,
             'persentaseKehadiran' => $persentaseKehadiran,
-            'daftarRegu' => Regu::all(),
+            'daftarRegu' => regu::all(),
             'selectedReguId' => $this->regu_id,
             'totalPesertaFiltered' => $totalPesertaFiltered,
+            'daftarSesi' => SesiAbsensi::orderBy('tanggal', 'asc')->get(),
         ]);
     }
+
+    public function activateSesi($id)
+{
+    SesiAbsensi::query()->update([
+        'aktif' => false
+    ]);
+
+    SesiAbsensi::where('id', $id)->update([
+        'aktif' => true
+    ]);
+}
 }

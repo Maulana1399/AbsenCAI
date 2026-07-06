@@ -11,6 +11,12 @@
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Sesi Aktif</div>
             <div class="text-2xl font-bold">{{ $sesiAktif?->nama_sesi ?? 'Belum ada sesi aktif' }}</div>
+            <div class="text-sm text-gray-500">{{ $sesiAktif?->tanggal ?? '' }}</div>
+            <flux:modal.trigger name="ganti-sesi">
+    <button class="mt-4 inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+        Ganti Sesi
+    </button>
+</flux:modal.trigger>
         </div>
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Sudah Absen</div>
@@ -39,6 +45,59 @@
             </div>
         </div>
     </div>
+
+    <flux:modal name="ganti-sesi" class="md:w-96">
+    <div class="space-y-4">
+
+        <div>
+            <h2 class="text-lg font-bold">Pilih Sesi Aktif</h2>
+            <p class="text-sm text-gray-500">
+                Aktifkan sesi untuk dashboard dan scan absensi.
+            </p>
+        </div>
+
+        @foreach($daftarSesi as $sesi)
+            <div class="flex items-center justify-between rounded-xl border p-3">
+
+                <div>
+                    <div class="font-semibold">
+                        {{ $sesi->nama_sesi }}
+                    </div>
+
+                    <div class="text-sm text-gray-500">
+                        {{ $sesi->tanggal }}
+                    </div>
+                </div>
+
+
+                @if($sesi->aktif)
+
+                    <span class="rounded bg-green-100 px-3 py-1 text-green-700">
+                        Aktif
+                    </span>
+
+                @else
+
+                    <button
+                        wire:click="activateSesi({{ $sesi->id }})"
+                        class="rounded bg-blue-600 px-3 py-2 text-white">
+                        Aktifkan
+                    </button>
+
+                @endif
+
+            </div>
+        @endforeach
+
+
+        @if($daftarSesi->isEmpty())
+            <div class="text-gray-500">
+                Tidak ada sesi.
+            </div>
+        @endif
+
+    </div>
+</flux:modal>
 
     <div class="overflow-x-auto bg-white rounded shadow mb-6">
         <table class="min-w-full border">
