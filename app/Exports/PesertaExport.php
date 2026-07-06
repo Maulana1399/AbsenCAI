@@ -12,12 +12,19 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
     public $regu_id;
     public $kelompok_id;
     public $desa_id;
+    public $jenis_kelamin;
 
-    public function __construct($regu_id = null, $kelompok_id = null, $desa_id = null)
+    public function __construct(
+        $regu_id = null,
+        $kelompok_id = null,
+        $desa_id = null,
+        $jenis_kelamin = null
+    )
     {
         $this->regu_id = $regu_id;
         $this->kelompok_id = $kelompok_id;
         $this->desa_id = $desa_id;
+        $this->jenis_kelamin = $jenis_kelamin;
     }
 
     public function collection()
@@ -34,6 +41,10 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         if ($this->desa_id) {
             $query->where('desa_id', $this->desa_id);
+        }
+
+        if ($this->jenis_kelamin) {
+            $query->where('jenis_kelamin', $this->jenis_kelamin);
         }
 
         return $query->orderBy('nama')->get()->map(function ($peserta, $index) {

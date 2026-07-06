@@ -15,6 +15,7 @@ class RekapPeserta extends Component
     public $regu_id = '';
     public $kelompok_id = '';
     public $desa_id = '';
+    public $jenis_kelamin = '';
 
     public $daftarRegu = [];
     public $daftarKelompok = [];
@@ -43,6 +44,10 @@ class RekapPeserta extends Component
             $query->where('desa_id', $this->desa_id);
         }
 
+        if ($this->jenis_kelamin) {
+            $query->where('jenis_kelamin', $this->jenis_kelamin);
+        }
+
         $daftar = $query->orderBy('nama')->get();
 
         $total = $daftar->count();
@@ -68,7 +73,8 @@ class RekapPeserta extends Component
         return Excel::download(new PesertaExport(
             $this->regu_id,
             $this->kelompok_id,
-            $this->desa_id
+            $this->desa_id,
+            $this->jenis_kelamin
         ), $fileName);
     }
 }
