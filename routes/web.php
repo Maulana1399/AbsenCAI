@@ -51,6 +51,10 @@ Route::view('rekap-peserta', 'rekap.peserta')
     ->middleware(['auth', 'verified'])
     ->name('rekap.peserta');
 
+Route::view('rekap-absensi', 'rekap.absensi')
+    ->middleware(['auth', 'verified'])
+    ->name('rekap.absensi');
+
 Route::view('absensi', 'dashboard.absensi')
     ->middleware(['auth', 'verified'])
     ->name('absensi');
