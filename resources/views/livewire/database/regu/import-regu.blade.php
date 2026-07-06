@@ -13,6 +13,16 @@
         @error('file') <span class="text-red-500">{{ $message }}</span> @enderror
 
         <flux:button type="submit" variant="filled">Import Regu</flux:button>
+
+        @if ($errors->any())
+            <div class="text-red-500 mt-2">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <a href="{{ asset('templates/template_regu.xlsx') }}" download>
             <flux:button type="button" variant="filled">Download Template</flux:button>
         </a>

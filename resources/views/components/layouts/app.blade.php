@@ -1,6 +1,6 @@
 @livewireStyles
 <script>
-    localStorage.setItem('theme', 'light');
+    localStorage.setItem('flux.appearance', 'light');
     document.documentElement.classList.remove('dark');
 </script>
 
