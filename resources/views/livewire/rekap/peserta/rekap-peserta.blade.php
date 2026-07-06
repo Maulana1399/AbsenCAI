@@ -2,7 +2,7 @@
 
     {{-- FILTER --}}
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             <div>
                 <label class="block text-sm font-medium text-gray-700">Pilih Regu</label>
@@ -13,6 +13,29 @@
                     @endforeach
                 </select>
             </div>
+
+            <div>
+    <label class="block text-sm font-medium text-gray-700">
+        Jenis Kelamin
+    </label>
+
+    <select wire:model.live="jenis_kelamin"
+        class="w-full mt-1 rounded border px-3 py-2">
+
+        <option value="">
+            -- Semua --
+        </option>
+
+        <option value="Laki - Laki">
+            Laki - Laki
+        </option>
+
+        <option value="Perempuan">
+            Perempuan
+        </option>
+
+    </select>
+</div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700">Pilih Kelompok</label>
