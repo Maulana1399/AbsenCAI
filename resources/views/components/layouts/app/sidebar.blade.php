@@ -35,6 +35,10 @@
 
                     </flux:navlist.group>
 
+                    <flux:navlist.group expandable heading="Laporan" class="grid">
+                        <flux:navlist.item :href="route('rekap.peserta')" :current="request()->routeIs('rekap.peserta')" wire:navigate>{{ __('Rekap Peserta') }}</flux:navlist.item>
+                    </flux:navlist.group>
+
             </flux:navlist>
 
             <flux:spacer />
