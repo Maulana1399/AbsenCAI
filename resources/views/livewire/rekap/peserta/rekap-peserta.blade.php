@@ -2,7 +2,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div>
             <label class="block text-sm font-medium text-gray-700">Pilih Regu</label>
-            <select wire:model="regu_id" class="w-full mt-1 rounded border px-3 py-2">
+            <select wire:model.live="regu_id" class="w-full mt-1 rounded border px-3 py-2">
                 <option value="">-- Semua Regu --</option>
                 @foreach($daftarRegu as $r)
                     <option value="{{ $r->id }}">{{ $r->regu }}</option>
@@ -12,7 +12,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700">Pilih Kelompok</label>
-            <select wire:model="kelompok_id" class="w-full mt-1 rounded border px-3 py-2">
+            <select wire:model.live="kelompok_id" class="w-full mt-1 rounded border px-3 py-2">
                 <option value="">-- Semua Kelompok --</option>
                 @foreach($daftarKelompok as $k)
                     <option value="{{ $k->id }}">{{ $k->kelompok_asal }} ({{ $k->desa->desa_asal ?? '-' }})</option>
@@ -22,7 +22,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700">Pilih Desa</label>
-            <select wire:model="desa_id" class="w-full mt-1 rounded border px-3 py-2">
+            <select wire:model.live="desa_id" class="w-full mt-1 rounded border px-3 py-2">
                 <option value="">-- Semua Desa --</option>
                 @foreach($daftarDesa as $d)
                     <option value="{{ $d->id }}">{{ $d->desa_asal }}</option>
