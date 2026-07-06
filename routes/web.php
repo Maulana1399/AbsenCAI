@@ -43,6 +43,10 @@ Route::view('regu', 'database.regu')
     ->middleware(['auth', 'verified'])
     ->name('regu');
 
+Route::view('sesi-absensi', 'database.sesi')
+    ->middleware(['auth', 'verified'])
+    ->name('sesi.absensi');
+
 Route::view('absensi', 'dashboard.absensi')
     ->middleware(['auth', 'verified'])
     ->name('absensi');

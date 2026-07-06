@@ -7,10 +7,15 @@ use App\Models\Peserta;
 
 class Absensi extends Model
 {
-    protected $fillable = ['nip', 'nama', 'jam_scan'];
+    protected $fillable = ['nip', 'nama', 'jam_scan', 'sesi_id'];
 
     public function peserta()
     {
         return $this->belongsTo(Peserta::class, 'nip', 'nip');
+    }
+
+    public function sesi()
+    {
+        return $this->belongsTo(SesiAbsensi::class, 'sesi_id');
     }
 }
