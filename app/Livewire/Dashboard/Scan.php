@@ -6,6 +6,7 @@ use Livewire\Component;
 use Carbon\Carbon;
 use App\Models\Absensi;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 
 class Scan extends Component
 {
@@ -33,13 +34,18 @@ class Scan extends Component
         $this->nama = $peserta->nama;
         $this->jam_scan = Carbon::now()->format('Y-m-d H:i:s');
 
-        // Cek apakah sudah absen dalam 1 jam terakhir
+        $sesiAktif = SesiAbsensi::where('aktif', true)->first();
+        if (!$sesiAktif) {
+            $this->message = "Tidak ada sesi absensi aktif";
+            return;
+        }
+
         $last = Absensi::where('nip', $nip)
-            ->where('jam_scan', '>=', Carbon::now()->subHour())
+            ->where('sesi_id', $sesiAktif->id)
             ->first();
 
         if ($last) {
-            $this->message = "Sudah melakukan scan dalam 1 jam terakhir!";
+            $this->message = "Peserta sudah absen pada sesi ini";
             return;
         }
 
@@ -47,6 +53,7 @@ class Scan extends Component
             'nip' => $peserta->nip,
             'nama' => $peserta->nama,
             'jam_scan' => $this->jam_scan,
+            'sesi_id' => $sesiAktif->id,
         ]);
         $this->message = "Absensi berhasil!";
     }
