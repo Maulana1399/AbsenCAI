@@ -3,30 +3,29 @@
 @endphp
 
 <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <div class="bg-white rounded-lg shadow p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Total Peserta</div>
             <div class="text-2xl font-bold">{{ $totalPesertaFiltered }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Sesi Aktif</div>
             <div class="text-2xl font-bold">{{ $sesiAktif?->nama_sesi ?? 'Belum ada sesi aktif' }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Sudah Absen</div>
             <div class="text-2xl font-bold">{{ $sudahAbsenCount }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Belum Absen</div>
             <div class="text-2xl font-bold">{{ $belumAbsenCount }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <div class="text-gray-500">Persentase Kehadiran</div>
             <div class="text-2xl font-bold">{{ $persentaseKehadiran }}%</div>
         </div>
     </div>
 
-    
     <div class="mb-4">
         <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
