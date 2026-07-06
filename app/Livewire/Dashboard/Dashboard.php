@@ -56,10 +56,13 @@ class Dashboard extends Component
             });
         
             $this->pesertaBelumAbsen = Peserta::with(['regu', 'kelompok'])
-            ->whereNotIn('nip', Absensi::whereDate('jam_scan', Carbon::today())->pluck('nip'))
-            ->get()
-            ->unique('nip'); // Mengambil peserta yang belum absen hari ini
-}
+                ->whereNotIn(
+                    'nip',
+                    Absensi::whereDate('jam_scan', Carbon::today())
+                        ->pluck('nip')
+                )
+                ->get(); // Mengambil peserta yang belum absen hari ini
+            }
 
     public function render()
     {

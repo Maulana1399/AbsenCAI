@@ -85,9 +85,9 @@
             @foreach($pesertaBelumAbsen as $peserta)
                 <tr>
                     <td class="border px-2 py-1">{{ $loop->iteration }}</td>
-                    <td class="border px-2 py-1">{{ $absen->peserta->nama ?? '-' }}</td>
-                    <td class="border px-2 py-1">{{ $absen->peserta->regu->regu ?? '-' }}</td>
-                    <td class="border px-2 py-1">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
+                    <td class="border px-2 py-1">{{ $peserta->nama ?? '-' }}</td>
+                    <td class="border px-2 py-1">{{ $peserta->regu->regu ?? '-' }}</td>
+                    <td class="border px-2 py-1">{{ $peserta->kelompok->kelompok_asal ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>
