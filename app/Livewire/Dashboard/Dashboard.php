@@ -8,7 +8,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Models\Absensi;
-use Carbon\Carbon;
+use App\Models\SesiAbsensi;
 
 class Dashboard extends Component
 {
@@ -16,9 +16,7 @@ class Dashboard extends Component
     public $totalDesa;
     public $totalKelompok;
     public $totalRegu;
-    public $absensis;
-    public $rekapAbsenPerSesi; 
-    public $pesertaBelumAbsen; 
+    public $regu_id = '';
 
     public function mount()
     {
@@ -26,50 +24,56 @@ class Dashboard extends Component
         $this->totalDesa = Desa::count();
         $this->totalKelompok = Kelompok::count();
         $this->totalRegu = Regu::count();
-
-        // Ambil data absensi hanya untuk hari ini
-        $today = Carbon::today(); // Mendapatkan tanggal hari ini
-        $this->absensis = Absensi::whereDate('jam_scan', $today) // Memfilter berdasarkan tanggal hari ini
-            ->orderBy('jam_scan', 'asc')
-            ->with(['peserta.regu', 'peserta.kelompok'])
-            ->limit(10)
-            ->get();
-
-        // Menambahkan sesi berdasarkan jam_scan
-         $this->rekapAbsenPerSesi = Absensi::whereDate('jam_scan', Carbon::today())
-            ->with('peserta')
-            ->get() // Mengambil semua data absensi untuk hari ini
-            ->groupBy(function($absen) {
-                $jamScan = Carbon::parse($absen->jam_scan);
-                if ($jamScan->hour >= 0 && $jamScan->hour < 6) {
-                    return 'Subuh';
-                } elseif ($jamScan->hour >= 6 && $jamScan->hour < 12) {
-                    return 'Pagi';
-                } elseif ($jamScan->hour >= 12 && $jamScan->hour < 18) {
-                    return 'Siang';
-                } else {
-                    return 'Malam';
-                }
-            })
-            ->map(function ($group) {
-                return $group->count(); // Menghitung jumlah absensi per sesi
-            });
-        
-            $this->pesertaBelumAbsen = Peserta::with(['regu', 'kelompok'])
-                ->whereNotIn(
-                    'nip',
-                    Absensi::whereDate('jam_scan', Carbon::today())
-                        ->pluck('nip')
-                )
-                ->get(); // Mengambil peserta yang belum absen hari ini
-            }
+    }
 
     public function render()
     {
+        $sesiAktif = SesiAbsensi::where('aktif', true)->first();
+        $absensiQuery = Absensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa']);
+
+        if ($sesiAktif) {
+            $absensiQuery->where('sesi_id', $sesiAktif->id);
+        } else {
+            $absensiQuery->whereRaw('0 = 1');
+        }
+
+        if ($this->regu_id) {
+            $absensiQuery->whereHas('peserta', function ($query) {
+                $query->where('regu_id', $this->regu_id);
+            });
+        }
+
+        $absensis = $absensiQuery->orderBy('jam_scan', 'asc')->get();
+        $absenNips = $absensis->pluck('nip')->unique();
+
+        $pesertaQuery = Peserta::with(['regu', 'kelompok', 'desa']);
+        if ($this->regu_id) {
+            $pesertaQuery->where('regu_id', $this->regu_id);
+        }
+
+        $pesertaBelumAbsen = $sesiAktif
+            ? $pesertaQuery->whereNotIn('nip', $absenNips)->get()
+            : Peserta::with(['regu', 'kelompok', 'desa'])->when($this->regu_id, function ($query) {
+                $query->where('regu_id', $this->regu_id);
+            })->get();
+
+        $sudahAbsenCount = $absensis->count();
+        $totalPesertaFiltered = $this->regu_id ? Peserta::where('regu_id', $this->regu_id)->count() : $this->totalPeserta;
+        $belumAbsenCount = $sesiAktif ? $pesertaBelumAbsen->count() : $totalPesertaFiltered;
+        $persentaseKehadiran = $totalPesertaFiltered > 0
+            ? round(($sudahAbsenCount / $totalPesertaFiltered) * 100, 2)
+            : 0;
+
         return view('livewire.dashboard.dashboard', [
-            'absensis' => $this->absensis,
-            'rekapAbsenPerSesi' => $this->rekapAbsenPerSesi, // Menampilkan rekap absen per sesi untuk hari ini
-            'pesertaBelumAbsen' => $this->pesertaBelumAbsen,
+            'sesiAktif' => $sesiAktif,
+            'absensis' => $absensis,
+            'pesertaBelumAbsen' => $pesertaBelumAbsen,
+            'sudahAbsenCount' => $sudahAbsenCount,
+            'belumAbsenCount' => $belumAbsenCount,
+            'persentaseKehadiran' => $persentaseKehadiran,
+            'daftarRegu' => Regu::all(),
+            'selectedReguId' => $this->regu_id,
+            'totalPesertaFiltered' => $totalPesertaFiltered,
         ]);
     }
 }
