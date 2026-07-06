@@ -31,12 +31,18 @@
         </div>
     </div>
 
-    <div class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div class="bg-white p-3 rounded shadow">Total: <strong>{{ $total }}</strong></div>
-        <div class="bg-white p-3 rounded shadow">Laki-laki: <strong>{{ $totalLaki }}</strong></div>
-        <div class="bg-white p-3 rounded shadow">Perempuan: <strong>{{ $totalPerempuan }}</strong></div>
-        <div class="bg-white p-3 rounded shadow">Registrasi Ulang: <strong>{{ $sudahRegUlang }}</strong></div>
-        <div class="bg-white p-3 rounded shadow">Belum Registrasi: <strong>{{ $belumRegUlang }}</strong></div>
+    <div class="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 flex-1">
+            <div class="bg-white p-3 rounded shadow">Total: <strong>{{ $total }}</strong></div>
+            <div class="bg-white p-3 rounded shadow">Laki-laki: <strong>{{ $totalLaki }}</strong></div>
+            <div class="bg-white p-3 rounded shadow">Perempuan: <strong>{{ $totalPerempuan }}</strong></div>
+            <div class="bg-white p-3 rounded shadow">Registrasi Ulang: <strong>{{ $sudahRegUlang }}</strong></div>
+            <div class="bg-white p-3 rounded shadow">Belum Registrasi: <strong>{{ $belumRegUlang }}</strong></div>
+        </div>
+
+        <div class="md:shrink-0">
+            <flux:button wire:click="exportExcel" variant="primary">Export Excel</flux:button>
+        </div>
     </div>
 
     <div class="overflow-x-auto bg-white rounded shadow">

@@ -7,6 +7,8 @@ use App\Models\peserta;
 use App\Models\regu;
 use App\Models\kelompok;
 use App\Models\desa;
+use App\Exports\PesertaExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RekapPeserta extends Component
 {
@@ -57,5 +59,16 @@ class RekapPeserta extends Component
             'sudahRegUlang' => $sudahRegUlang,
             'belumRegUlang' => $belumRegUlang,
         ]);
+    }
+
+    public function exportExcel()
+    {
+        $fileName = 'rekap-peserta-'.now()->format('YmdHis').'.xlsx';
+
+        return Excel::download(new PesertaExport(
+            $this->regu_id,
+            $this->kelompok_id,
+            $this->desa_id
+        ), $fileName);
     }
 }
