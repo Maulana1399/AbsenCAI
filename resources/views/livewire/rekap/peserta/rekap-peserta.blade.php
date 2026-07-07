@@ -2,7 +2,7 @@
 
     {{-- FILTER --}}
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
 
             <div>
                 <label class="block text-sm font-medium text-gray-700">Pilih Regu</label>
@@ -36,6 +36,16 @@
 
     </select>
 </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Jenis Peserta</label>
+                <select wire:model.live="jenis_peserta" class="w-full mt-1 rounded border px-3 py-2">
+                    <option value="">-- Semua --</option>
+                    <option value="Wajib">Wajib</option>
+                    <option value="Kiriman">Kiriman</option>
+                    <option value="Person">Person</option>
+                </select>
+            </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700">Pilih Kelompok</label>
@@ -113,6 +123,7 @@
                     <th class="px-4 py-3">Nama</th>
                     <th class="px-4 py-3">NIP</th>
                     <th class="px-4 py-3">Jenis Kelamin</th>
+                    <th class="px-4 py-3">Jenis Peserta</th>
                     <th class="px-4 py-3">Desa</th>
                     <th class="px-4 py-3">Kelompok</th>
                     <th class="px-4 py-3">Regu</th>
@@ -139,6 +150,10 @@
 
                     <td class="px-4 py-3">
                         {{ $p->jenis_kelamin }}
+                    </td>
+
+                    <td class="px-4 py-3">
+                        {{ $p->jenis_peserta }}
                     </td>
 
                     <td class="px-4 py-3">

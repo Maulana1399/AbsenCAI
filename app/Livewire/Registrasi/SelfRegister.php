@@ -22,6 +22,8 @@ class SelfRegister extends Component
 
     public string $jenis_kelamin = '';
 
+    public string $jenis_peserta = peserta::JENIS_WAJIB;
+
     public string $desa_id = '';
 
     public string $kelompok_id = '';
@@ -76,6 +78,7 @@ class SelfRegister extends Component
                 ],
                 'nip' => ['required', 'integer', Rule::unique('pesertas', 'nip')],
                 'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
+                'jenis_peserta' => ['required', Rule::in(peserta::jenisPesertaOptions())],
                 'desa_id' => ['required', Rule::exists('desas', 'id')],
                 'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],
                 'regu_id' => ['required', Rule::exists('regus', 'id')],
@@ -86,6 +89,7 @@ class SelfRegister extends Component
                     'nama' => $validated['nama'],
                     'nip' => $validated['nip'],
                     'jenis_kelamin' => $validated['jenis_kelamin'],
+                    'jenis_peserta' => $validated['jenis_peserta'],
                     'desa_id' => $validated['desa_id'],
                     'kelompok_id' => $validated['kelompok_id'],
                     'regu_id' => $this->regu_id,

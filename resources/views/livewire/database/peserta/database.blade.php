@@ -14,6 +14,7 @@
                 <th scope="col" class="px-8 py-4 border-b">Nama</th>
                 <th scope="col" class="px-8 py-4 border-b">NIP</th>
                 <th scope="col" class="px-8 py-4 border-b">Jenis Kelamin</th>
+                <th scope="col" class="px-8 py-4 border-b">Jenis Peserta</th>
                 <th scope="col" class="px-8 py-4 border-b">Status Registrasi</th>
                 <th scope="col" class="px-8 py-4 border-b">Desa</th>
                 <th scope="col" class="px-8 py-4 border-b">Kelompok</th>
@@ -28,6 +29,7 @@
                     <td class="px-8 py-2 font-medium text-gray-900 dark:text-white">{{ $peserta->nama }}</td>
                     <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $peserta->nip }}</td>
                     <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $peserta->jenis_kelamin }}</td>
+                    <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $peserta->jenis_peserta }}</td>
                     <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $peserta->status_registrasi_label }}</td>
                     <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $peserta->desa->desa_asal ?? '-'   }}</td>
                     <td class="px-8 py-2 text-gray-800 dark:text-gray-400">{{ $peserta->kelompok->kelompok_asal ?? '-'    }}</td>

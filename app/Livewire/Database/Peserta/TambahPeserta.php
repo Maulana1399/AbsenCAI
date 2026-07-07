@@ -24,6 +24,7 @@ class TambahPeserta extends Component
     public string $regu_nama = '-';
     public $jenis_kelamin;
     public $daftarJenisKelamin = ['Laki - Laki', 'Perempuan'];
+    public $jenis_peserta = 'Wajib';
 
     public function mount()
     {
@@ -67,6 +68,7 @@ class TambahPeserta extends Component
                 ],
                 'nip' => 'required|integer|unique:pesertas,nip',
                 'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
+                'jenis_peserta' => 'required|in:Wajib,Kiriman,Person',
                 'desa_id' => 'required|exists:desas,id',
                 'kelompok_id' => 'required|exists:kelompoks,id',
                 'regu_id' => 'required|exists:regus,id',
@@ -77,6 +79,7 @@ class TambahPeserta extends Component
                     'nama' => $this->nama,
                     'nip' => $this->nip,
                     'jenis_kelamin' => $this->jenis_kelamin,
+                    'jenis_peserta' => $this->jenis_peserta,
                     'desa_id' => $this->desa_id,
                     'kelompok_id' => $this->kelompok_id,
                     'regu_id' => $this->regu_id,

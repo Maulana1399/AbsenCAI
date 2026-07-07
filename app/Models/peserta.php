@@ -10,7 +10,23 @@ class peserta extends Model
     public const STATUS_SELF_REGISTER = 'Self Register';
     public const STATUS_REGISTRASI_ULANG = 'Registrasi Ulang';
 
-    protected $fillable = ['nama', 'nip', 'jenis_kelamin', 'kelompok_id', 'desa_id', 'regu_id', 'status_registrasi'];
+
+    public const JENIS_WAJIB = 'Wajib';
+    public const JENIS_KIRIMAN = 'Kiriman';
+    public const JENIS_PERSON = 'Person';
+
+
+    protected $fillable = [
+        'nama',
+        'nip',
+        'jenis_kelamin',
+        'jenis_peserta',
+        'kelompok_id',
+        'desa_id',
+        'regu_id',
+        'status_registrasi',
+    ];
+
 
     public static function statusRegistrasiOptions(): array
     {
@@ -18,6 +34,16 @@ class peserta extends Model
             self::STATUS_BELUM_REGISTRASI,
             self::STATUS_SELF_REGISTER,
             self::STATUS_REGISTRASI_ULANG,
+        ];
+    }
+
+
+    public static function jenisPesertaOptions(): array
+    {
+        return [
+            self::JENIS_WAJIB,
+            self::JENIS_KIRIMAN,
+            self::JENIS_PERSON,
         ];
     }
 
@@ -67,23 +93,26 @@ class peserta extends Model
         ];
     }
 
-    public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
-    {
-        $query = regu::withCount('peserta');
+        public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
+        {
+            return regu::withCount([
+                'peserta' => function ($query) use ($jenisKelamin) {
 
-        if ($jenisKelamin) {
-            $filtered = (clone $query)->where('jenis_kelamin', $jenisKelamin)->orderBy('peserta_count')->orderBy('id')->first();
+                    if ($jenisKelamin) {
 
-            if ($filtered) {
-                return $filtered;
-            }
-        }
+                        $query->where(
+                            'jenis_kelamin',
+                            $jenisKelamin
+                        );
 
-        return $query
+                    }
+
+                }
+            ])
             ->orderBy('peserta_count')
             ->orderBy('id')
             ->first();
-    }
+        }
 
     public static function leastFilledReguId(?string $jenisKelamin = null): ?int
     {

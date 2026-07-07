@@ -17,6 +17,16 @@
             </select>
         </div>
 
+        {{-- Input Jenis Peserta --}}
+        <div>
+            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Peserta</label>
+            <select wire:model="jenis_peserta" class="w-full px-3 py-2 border rounded">
+                <option value="Wajib">Wajib</option>
+                <option value="Kiriman">Kiriman</option>
+                <option value="Person">Person</option>
+            </select>
+        </div>
+
         {{-- Dropdown Desa --}}
         <div>
             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Desa</label>

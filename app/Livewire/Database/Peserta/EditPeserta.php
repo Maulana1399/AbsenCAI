@@ -17,6 +17,7 @@ class EditPeserta extends Component
     public $nama;
     public $nip;
     public $jenis_kelamin;
+    public $jenis_peserta;
     public $desa_id;
     public $kelompok_id;
     public $regu_id;
@@ -41,6 +42,7 @@ class EditPeserta extends Component
         $this->nama = $data->nama;
         $this->nip = $data->nip;
         $this->jenis_kelamin = $data->jenis_kelamin;
+        $this->jenis_peserta = $data->jenis_peserta;
         $this->desa_id = $data->desa_id;
         $this->kelompok_id = $data->kelompok_id;
         $this->regu_id = $data->regu_id;
@@ -51,6 +53,7 @@ class EditPeserta extends Component
         $this->validate([
             'nama' => 'required',
             'jenis_kelamin' => 'required',
+            'jenis_peserta' => 'required|in:Wajib,Kiriman,Person',
             'desa_id' => 'required',
             'kelompok_id' => 'required',
             'regu_id' => 'required'
@@ -59,6 +62,7 @@ class EditPeserta extends Component
         peserta::where('id', $this->peserta_id)->update([
             'nama' => $this->nama,
             'jenis_kelamin' => $this->jenis_kelamin,
+            'jenis_peserta' => $this->jenis_peserta,
             'desa_id' => $this->desa_id,
             'kelompok_id' => $this->kelompok_id,
             'regu_id' => $this->regu_id

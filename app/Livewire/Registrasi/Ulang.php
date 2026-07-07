@@ -17,6 +17,7 @@ class Ulang extends Component
     public $editId;
     public $editNama;
     public $editJenisKelamin;
+    public $editJenisPeserta;
     public $editDesa;
     public $editKelompok;
     public $editRegu;
@@ -40,6 +41,7 @@ class Ulang extends Component
         $this->editId = $p->id;
         $this->editNama = $p->nama;
         $this->editJenisKelamin = $p->jenis_kelamin;
+        $this->editJenisPeserta = $p->jenis_peserta;
         $this->editDesa = $p->desa_id;
         $this->editKelompok = $p->kelompok_id;
         $this->editRegu = $p->regu_id;
@@ -54,6 +56,7 @@ class Ulang extends Component
             ->update([
                 'nama' => $this->editNama,
                 'jenis_kelamin' => $this->editJenisKelamin,
+                'jenis_peserta' => $this->editJenisPeserta,
                 'desa_id' => $this->editDesa,
                 'kelompok_id' => $this->editKelompok,
                 'regu_id' => $this->editRegu,

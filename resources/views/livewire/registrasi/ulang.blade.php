@@ -105,6 +105,29 @@
 
 
             <div>
+                <label>Jenis Peserta</label>
+
+                <select
+                    wire:model="editJenisPeserta"
+                    class="w-full rounded border px-3 py-2">
+
+                    <option value="Wajib">
+                        Wajib
+                    </option>
+
+                    <option value="Kiriman">
+                        Kiriman
+                    </option>
+
+                    <option value="Person">
+                        Person
+                    </option>
+
+                </select>
+            </div>
+
+
+            <div>
                 <label>Desa</label>
 
                 <select 

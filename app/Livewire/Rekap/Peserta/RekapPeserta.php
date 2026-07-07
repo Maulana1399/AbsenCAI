@@ -16,6 +16,7 @@ class RekapPeserta extends Component
     public $kelompok_id = '';
     public $desa_id = '';
     public $jenis_kelamin = '';
+    public $jenis_peserta = '';
 
     public $daftarRegu = [];
     public $daftarKelompok = [];
@@ -48,6 +49,10 @@ class RekapPeserta extends Component
             $query->where('jenis_kelamin', $this->jenis_kelamin);
         }
 
+        if ($this->jenis_peserta) {
+            $query->where('jenis_peserta', $this->jenis_peserta);
+        }
+
         $daftar = $query->orderBy('nama')->get();
 
         $total = $daftar->count();
@@ -74,7 +79,8 @@ class RekapPeserta extends Component
             $this->regu_id,
             $this->kelompok_id,
             $this->desa_id,
-            $this->jenis_kelamin
+            $this->jenis_kelamin,
+            $this->jenis_peserta
         ), $fileName);
     }
 }

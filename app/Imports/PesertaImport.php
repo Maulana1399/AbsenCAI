@@ -17,14 +17,26 @@ class PesertaImport implements ToModel, WithHeadingRow
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
         $autoPlacement = peserta::autoPlacement($jenisKelamin);
 
-        return new peserta([
-            'nama' => $row['nama'] ?? null,
-            'nip' => $autoPlacement['nip'],
-            'jenis_kelamin' => $jenisKelamin,
-            'regu_id' => $autoPlacement['regu_id'],
-            'kelompok_id' => $kelompok ? $kelompok->id : null,
-            'desa_id' => $desa ? $desa->id : null,
-            'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-        ]);
+return new peserta([
+    'nama' => $row['nama'] ?? null,
+
+    'nip' => $autoPlacement['nip'],
+
+    'jenis_kelamin' => $jenisKelamin,
+
+    'jenis_peserta' => $row['jenis_peserta'] ?? peserta::JENIS_WAJIB,
+
+    'regu_id' => $autoPlacement['regu_id'],
+
+    'kelompok_id' => $kelompok
+        ? $kelompok->id
+        : null,
+
+    'desa_id' => $desa
+        ? $desa->id
+        : null,
+
+    'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
+]);
     }
 }
