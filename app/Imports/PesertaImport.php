@@ -12,20 +12,33 @@ class PesertaImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        $kelompok = kelompok::where(
-            'kelompok_asal',
-            $row['kelompok'] ?? null
-        )->first();
-
-        $desa = desa::where(
-            'desa_asal',
-            $row['desa'] ?? null
-        )->first();
-
-
-        // cek peserta sudah ada
+        // skip baris kosong excel
         if (
-            peserta::where('nama', $row['nama'] ?? null)
+            empty($row['nama'])
+        ) {
+            return null;
+        }
+
+
+        $kelompok = kelompok::whereRaw(
+            'LOWER(TRIM(kelompok_asal)) = ?',
+            [
+                strtolower(trim($row['kelompok'] ?? ''))
+            ]
+        )->first();
+
+
+        $desa = desa::whereRaw(
+            'LOWER(TRIM(desa_asal)) = ?',
+            [
+                strtolower(trim($row['desa'] ?? ''))
+            ]
+        )->first();
+
+
+        // cegah import peserta yang sama
+        if (
+            peserta::where('nama', $row['nama'])
                 ->where('desa_id', $desa?->id)
                 ->where('kelompok_id', $kelompok?->id)
                 ->exists()
@@ -37,7 +50,7 @@ class PesertaImport implements ToModel, WithHeadingRow
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
 
 
-        // generate NIP + regu setelah yakin peserta baru
+        // generate NIP + regu
         $autoPlacement = peserta::autoPlacement(
             $jenisKelamin
         );
@@ -45,14 +58,14 @@ class PesertaImport implements ToModel, WithHeadingRow
 
         return new peserta([
 
-            'nama' => $row['nama'] ?? null,
+            'nama' => trim($row['nama']),
 
             'nip' => $autoPlacement['nip'],
 
             'jenis_kelamin' => $jenisKelamin,
 
             'jenis_peserta' => $row['jenis_peserta']
-                ?? peserta::JENIS_WAJIB,
+                ?? peserta::JENIS_KIRIMAN,
 
             'regu_id' => $autoPlacement['regu_id'],
 
