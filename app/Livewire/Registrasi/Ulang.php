@@ -3,11 +3,23 @@
 namespace App\Livewire\Registrasi;
 
 use App\Models\peserta;
+use App\Models\desa;
+use App\Models\kelompok;
+use App\Models\regu;
 use Livewire\Component;
 
 class Ulang extends Component
 {
     public string $search = '';
+
+    public $showEditModal = false;
+
+    public $editId;
+    public $editNama;
+    public $editJenisKelamin;
+    public $editDesa;
+    public $editKelompok;
+    public $editRegu;
 
     public function registrasiUlang(int $id): void
     {
@@ -19,6 +31,41 @@ class Ulang extends Component
 
         session()->flash('success', 'Registrasi ulang berhasil.');
     }
+
+
+    public function editPeserta($id)
+    {
+        $p = peserta::findOrFail($id);
+
+        $this->editId = $p->id;
+        $this->editNama = $p->nama;
+        $this->editJenisKelamin = $p->jenis_kelamin;
+        $this->editDesa = $p->desa_id;
+        $this->editKelompok = $p->kelompok_id;
+        $this->editRegu = $p->regu_id;
+
+        $this->showEditModal = true;
+    }
+
+
+    public function updatePeserta()
+    {
+        peserta::where('id',$this->editId)
+            ->update([
+                'nama' => $this->editNama,
+                'jenis_kelamin' => $this->editJenisKelamin,
+                'desa_id' => $this->editDesa,
+                'kelompok_id' => $this->editKelompok,
+                'regu_id' => $this->editRegu,
+            ]);
+
+            $this->showEditModal = false;
+
+            session()->flash('success','Data peserta berhasil diperbarui');
+
+            $this->dispatch('$refresh');
+    }
+
 
     public function render()
     {
@@ -39,6 +86,9 @@ class Ulang extends Component
 
         return view('livewire.registrasi.ulang', [
             'daftarPeserta' => $peserta,
+            'daftarDesa' => desa::all(),
+            'daftarKelompok' => kelompok::all(),
+            'daftarRegu' => regu::all(),
         ]);
     }
 }
