@@ -64,31 +64,31 @@
         @endforelse
     </div>
 
-    @if($showEditModal)
+@if($showEditModal)
 
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
 
-    <div class="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
+    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
 
-        <h2 class="mb-4 text-xl font-bold">
+        <h2 class="mb-5 text-xl font-bold">
             Edit Peserta
         </h2>
 
 
-        <div class="space-y-3">
+        <div class="space-y-4">
 
             <div>
-                <label>Nama</label>
-                <input 
+                <label class="text-sm">Nama</label>
+                <input
                     wire:model="editNama"
                     class="w-full rounded border px-3 py-2">
             </div>
 
 
             <div>
-                <label>Jenis Kelamin</label>
+                <label class="text-sm">Jenis Kelamin</label>
 
-                <select 
+                <select
                     wire:model="editJenisKelamin"
                     class="w-full rounded border px-3 py-2">
 
@@ -105,41 +105,31 @@
 
 
             <div>
-                <label>Jenis Peserta</label>
+                <label class="text-sm">Jenis Peserta</label>
 
                 <select
                     wire:model="editJenisPeserta"
                     class="w-full rounded border px-3 py-2">
 
-                    <option value="Wajib">
-                        Wajib
-                    </option>
-
-                    <option value="Kiriman">
-                        Kiriman
-                    </option>
-
-                    <option value="Person">
-                        Person
-                    </option>
+                    <option value="Wajib">Wajib</option>
+                    <option value="Kiriman">Kiriman</option>
+                    <option value="Person">Person</option>
 
                 </select>
             </div>
 
 
             <div>
-                <label>Desa</label>
+                <label class="text-sm">Desa</label>
 
-                <select 
+                <select
                     wire:model="editDesa"
                     class="w-full rounded border px-3 py-2">
 
                     @foreach($daftarDesa as $d)
-
-                    <option value="{{ $d->id }}">
-                        {{ $d->desa_asal }}
-                    </option>
-
+                        <option value="{{ $d->id }}">
+                            {{ $d->desa_asal }}
+                        </option>
                     @endforeach
 
                 </select>
@@ -147,18 +137,16 @@
 
 
             <div>
-                <label>Kelompok</label>
+                <label class="text-sm">Kelompok</label>
 
-                <select 
+                <select
                     wire:model="editKelompok"
                     class="w-full rounded border px-3 py-2">
 
                     @foreach($daftarKelompok as $k)
-
-                    <option value="{{ $k->id }}">
-                        {{ $k->kelompok_asal }}
-                    </option>
-
+                        <option value="{{ $k->id }}">
+                            {{ $k->kelompok_asal }}
+                        </option>
                     @endforeach
 
                 </select>
@@ -166,18 +154,16 @@
 
 
             <div>
-                <label>Regu</label>
+                <label class="text-sm">Regu</label>
 
-                <select 
+                <select
                     wire:model="editRegu"
                     class="w-full rounded border px-3 py-2">
 
                     @foreach($daftarRegu as $r)
-
-                    <option value="{{ $r->id }}">
-                        {{ $r->regu }}
-                    </option>
-
+                        <option value="{{ $r->id }}">
+                            {{ $r->regu }}
+                        </option>
                     @endforeach
 
                 </select>
@@ -188,7 +174,7 @@
 
                 <button
                     wire:click="updatePeserta"
-                    class="flex-1 rounded bg-blue-600 px-4 py-2 text-white">
+                    class="flex-1 rounded bg-blue-600 py-2 text-white">
 
                     Simpan
 
@@ -197,14 +183,13 @@
 
                 <button
                     wire:click="$set('showEditModal', false)"
-                    class="flex-1 rounded bg-gray-200 px-4 py-2">
+                    class="flex-1 rounded bg-gray-200 py-2">
 
                     Batal
 
                 </button>
 
             </div>
-
 
         </div>
 

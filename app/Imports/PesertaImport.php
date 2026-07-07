@@ -12,31 +12,44 @@ class PesertaImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        $kelompok = kelompok::where('kelompok_asal', $row['kelompok'] ?? null)->first();
-        $desa = desa::where('desa_asal', $row['desa'] ?? null)->first();
+        $kelompok = kelompok::where(
+            'kelompok_asal',
+            $row['kelompok'] ?? null
+        )->first();
+
+        $desa = desa::where(
+            'desa_asal',
+            $row['desa'] ?? null
+        )->first();
+
+
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
-        $autoPlacement = peserta::autoPlacement($jenisKelamin);
 
-return new peserta([
-    'nama' => $row['nama'] ?? null,
 
-    'nip' => $autoPlacement['nip'],
+        $autoPlacement = peserta::autoPlacement(
+            $jenisKelamin
+        );
 
-    'jenis_kelamin' => $jenisKelamin,
 
-    'jenis_peserta' => $row['jenis_peserta'] ?? peserta::JENIS_WAJIB,
+        return new peserta([
 
-    'regu_id' => $autoPlacement['regu_id'],
+            'nama' => $row['nama'] ?? null,
 
-    'kelompok_id' => $kelompok
-        ? $kelompok->id
-        : null,
+            'nip' => $autoPlacement['nip'],
 
-    'desa_id' => $desa
-        ? $desa->id
-        : null,
+            'jenis_kelamin' => $jenisKelamin,
 
-    'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-]);
+            'jenis_peserta' => $row['jenis_peserta']
+                ?? peserta::JENIS_WAJIB,
+
+            'regu_id' => $autoPlacement['regu_id'],
+
+            'kelompok_id' => $kelompok?->id,
+
+            'desa_id' => $desa?->id,
+
+            'status_registrasi'
+                => peserta::STATUS_BELUM_REGISTRASI,
+        ]);
     }
 }
