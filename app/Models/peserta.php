@@ -21,9 +21,39 @@ class peserta extends Model
         ];
     }
 
-    public static function nextAutoNip(): int
+    public static function nextAutoNip(?string $jenisKelamin = null): int
     {
-        return ((int) (self::max('nip') ?? 0)) + 1;
+        if ($jenisKelamin === 'Laki - Laki') {
+
+            $last = self::where(
+                    'jenis_kelamin',
+                    'Laki - Laki'
+                )
+                ->max('nip');
+
+
+            return $last
+                ? ((int)$last + 1)
+                : 1001;
+        }
+
+
+        if ($jenisKelamin === 'Perempuan') {
+
+            $last = self::where(
+                    'jenis_kelamin',
+                    'Perempuan'
+                )
+                ->max('nip');
+
+
+            return $last
+                ? ((int)$last + 1)
+                : 2001;
+        }
+
+
+        return ((int)(self::max('nip') ?? 0)) + 1;
     }
 
     public static function autoPlacement(?string $jenisKelamin = null): array
@@ -31,7 +61,7 @@ class peserta extends Model
         $regu = self::leastFilledRegu($jenisKelamin);
 
         return [
-            'nip' => (string) self::nextAutoNip(),
+            'nip' => (string) self::nextAutoNip($jenisKelamin),
             'regu_id' => $regu?->id,
             'regu_nama' => $regu?->regu ?? '-',
         ];
