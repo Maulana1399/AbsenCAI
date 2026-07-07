@@ -10,7 +10,6 @@ class peserta extends Model
     public const STATUS_SELF_REGISTER = 'Self Register';
     public const STATUS_REGISTRASI_ULANG = 'Registrasi Ulang';
 
-
     public const JENIS_WAJIB = 'Wajib';
     public const JENIS_KIRIMAN = 'Kiriman';
     public const JENIS_PERSON = 'Person';
@@ -47,34 +46,57 @@ class peserta extends Model
         ];
     }
 
+
+    // ================================
+    // AUTO GENERATE NIP
+    // Laki     : 1001 dst
+    // Perempuan: 2001 dst
+    // ================================
     public static function nextAutoNip(?string $jenisKelamin = null): int
     {
-        if ($jenisKelamin === 'Laki - Laki') {
+        $jk = strtolower(
+            str_replace([' ', '-'], '', $jenisKelamin ?? '')
+        );
+
+
+        if ($jk === 'lakilaki') {
 
             $last = self::where(
-                    'jenis_kelamin',
-                    'Laki - Laki'
+                    'nip',
+                    '>=',
+                    1000
+                )
+                ->where(
+                    'nip',
+                    '<',
+                    2000
                 )
                 ->max('nip');
 
 
             return $last
-                ? ((int)$last + 1)
+                ? ((int) $last + 1)
                 : 1001;
         }
 
 
-        if ($jenisKelamin === 'Perempuan') {
+        if ($jk === 'perempuan') {
 
             $last = self::where(
-                    'jenis_kelamin',
-                    'Perempuan'
+                    'nip',
+                    '>=',
+                    2000
+                )
+                ->where(
+                    'nip',
+                    '<',
+                    3000
                 )
                 ->max('nip');
 
 
             return $last
-                ? ((int)$last + 1)
+                ? ((int) $last + 1)
                 : 2001;
         }
 
@@ -82,9 +104,14 @@ class peserta extends Model
         return ((int)(self::max('nip') ?? 0)) + 1;
     }
 
+
+    // ================================
+    // AUTO REGU + NIP
+    // ================================
     public static function autoPlacement(?string $jenisKelamin = null): array
     {
         $regu = self::leastFilledRegu($jenisKelamin);
+
 
         return [
             'nip' => (string) self::nextAutoNip($jenisKelamin),
@@ -93,53 +120,68 @@ class peserta extends Model
         ];
     }
 
-        public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
-        {
-            return regu::withCount([
-                'peserta' => function ($query) use ($jenisKelamin) {
 
-                    if ($jenisKelamin) {
+    // ================================
+    // CARI REGU PALING SEDIKIT
+    // ================================
+    public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
+    {
+        $jk = strtolower(
+            str_replace([' ', '-'], '', $jenisKelamin ?? '')
+        );
 
-                        $query->where(
-                            'jenis_kelamin',
-                            $jenisKelamin
-                        );
 
-                    }
+        $jenisKelaminFix = match ($jk) {
+            'lakilaki' => 'Laki - Laki',
+            'perempuan' => 'Perempuan',
+            default => $jenisKelamin,
+        };
 
-                }
-            ])
+
+        return regu::where(
+                'jenis_kelamin',
+                $jenisKelaminFix
+            )
+            ->withCount('peserta')
             ->orderBy('peserta_count')
             ->orderBy('id')
             ->first();
-        }
+    }
+
 
     public static function leastFilledReguId(?string $jenisKelamin = null): ?int
     {
         return self::leastFilledRegu($jenisKelamin)?->id;
     }
 
+
     public static function leastFilledReguName(?string $jenisKelamin = null): string
     {
         return self::leastFilledRegu($jenisKelamin)?->regu ?? '-';
     }
 
+
     public function getStatusRegistrasiLabelAttribute(): string
     {
-        return $this->status_registrasi ?: self::STATUS_BELUM_REGISTRASI;
+        return $this->status_registrasi
+            ?: self::STATUS_BELUM_REGISTRASI;
     }
-    
-    public function kelompok() {
+
+
+    public function kelompok()
+    {
         return $this->belongsTo(kelompok::class);
     }
 
-    public function desa() {
+
+    public function desa()
+    {
         return $this->belongsTo(desa::class);
     }
 
-    public function regu() {
+
+    public function regu()
+    {
         return $this->belongsTo(regu::class);
     }
 }
-
-    

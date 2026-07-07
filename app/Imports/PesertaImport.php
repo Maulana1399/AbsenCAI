@@ -23,9 +23,21 @@ class PesertaImport implements ToModel, WithHeadingRow
         )->first();
 
 
+        // cek peserta sudah ada
+        if (
+            peserta::where('nama', $row['nama'] ?? null)
+                ->where('desa_id', $desa?->id)
+                ->where('kelompok_id', $kelompok?->id)
+                ->exists()
+        ) {
+            return null;
+        }
+
+
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
 
 
+        // generate NIP + regu setelah yakin peserta baru
         $autoPlacement = peserta::autoPlacement(
             $jenisKelamin
         );
