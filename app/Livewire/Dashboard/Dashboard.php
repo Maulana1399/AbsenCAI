@@ -78,6 +78,13 @@ class Dashboard extends Component
         ]);
     }
 
+
+    public function updatedReguId()
+{
+    logger('REGU FILTER: '.$this->regu_id);
+}
+
+
     public function activateSesi($id)
 {
     SesiAbsensi::query()->update([

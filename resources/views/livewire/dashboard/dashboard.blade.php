@@ -34,13 +34,25 @@
 
     <div class="mb-4">
         <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Filter Regu</label>
-                <select wire:model="regu_id" class="w-full mt-1 rounded border px-3 py-2">
-                    <option value="">-- Semua Regu --</option>
+            <div class="w-full">
+                <label class="block text-sm font-medium text-gray-700">
+                    Filter Regu
+                </label>
+
+                <select
+                    wire:model.live="regu_id"
+                    class="block w-full mt-1 rounded-lg border border-gray-300 bg-white px-3 py-2"
+                >
+                    <option value="">
+                        -- Semua Regu --
+                    </option>
+
                     @foreach($daftarRegu as $regu)
-                        <option value="{{ $regu->id }}">{{ $regu->regu }}</option>
+                        <option value="{{ $regu->id }}">
+                            {{ $regu->regu }}
+                        </option>
                     @endforeach
+
                 </select>
             </div>
         </div>
