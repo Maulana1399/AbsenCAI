@@ -1,22 +1,30 @@
 # CURRENT STATE
 
-Last Update
+> Current Development Status
 
-2026-07-14
+---
+
+# Project
+
+## Name
+
+KJA Event Manager
+
+Current MVP:
+
+CAI Operational
 
 ---
 
 # Current Version
 
+Version:
+
 v1.0
 
-(Project Name)
+Stage:
 
-AbsenCAI
-
-Target
-
-KJA Event Manager
+MVP Development
 
 ---
 
@@ -24,216 +32,218 @@ KJA Event Manager
 
 Sprint 0
 
-Status
+Status:
 
-Planning
+🟡 In Progress
 
-Documentation
+Focus:
 
-Architecture
-
-No Major Coding
+Documentation & Architecture
 
 ---
 
 # Current Goal
 
-Finish CAI Operational.
-
-Do NOT redesign the system yet.
-
-Focus on documentation and architecture.
+Menyelesaikan seluruh dokumentasi sebelum memulai implementasi Sprint 1.
 
 ---
 
 # Current Priority
 
-1.
+Priority saat ini:
 
-Documentation
+1. Finalisasi Dokumentasi
+2. Rapikan Arsitektur
+3. Refactor UI
+4. Stabilkan Operasional CAI
 
-2.
-
-Dark Mode Refactor
-
-3.
-
-QR Generator
-
-4.
-
-Attendance Code
-
-5.
-
-Attendance Improvement
-
-6.
-
-Export
+Tidak ada penambahan fitur besar sebelum Sprint 1 dimulai.
 
 ---
 
-# Current Stack
+# Project Status
 
-Laravel 12
+## Documentation
 
-Livewire
-
-Flux UI
-
-Tailwind
-
-SQLite
-
-Rocky Linux
-
-Proxmox
-
-Nextcloud
-
-TrueNAS
+🟡 In Progress
 
 ---
 
-# Current Branch
+## Architecture
 
-main
-
----
-
-# Current Database
-
-SQLite
-
-Migration to MariaDB planned after CAI.
+🟡 In Progress
 
 ---
 
-# Current Main Entity
+## Database
 
-Person
-
-(Current implementation still uses Peserta.)
-
-Future refactor:
-
-Person
-
-↓
-
-Participation
-
-↓
-
-Attendance
+🟢 Stable
 
 ---
 
-# Active Modules
+## Core Feature
 
-Stable
+🟢 Stable
 
-- Authentication
-- Registration
-- Import
-- Attendance
-- Dashboard
+* Import
+* Registrasi
+* Registrasi Ulang
+* Scan QR
+* Dashboard
+* Rekap
 
-Development
+---
 
-- QR Generator
-- Attendance Code
-- Export
-- Dashboard
+## UI
 
-Planned
+🟡 Needs Improvement
 
-- Scoring
-- Competition
-- Certificate
-- Multi Event
+Target:
+
+* Dark Mode
+* Responsive Mobile
+* Reusable Components
+
+---
+
+## Security
+
+🟢 Stable
+
+---
+
+## Permission
+
+🟢 Stable
+
+---
+
+# Current Technical Stack
+
+Backend
+
+* Laravel 12
+
+Frontend
+
+* Livewire
+* Flux UI
+* Tailwind CSS
+
+Database
+
+Current
+
+* SQLite
+
+Future
+
+* MariaDB
+
+Infrastructure
+
+* Rocky Linux
+* Proxmox
+* TrueNAS
+* Nextcloud
 
 ---
 
 # Current Risks
 
-- QR still depends on NIP.
-- SQLite concurrency.
-- Dark Mode inconsistency.
-- Reusable UI components not complete.
+## High
+
+* SQLite belum cocok untuk concurrent access dalam skala besar.
+* QR masih menggunakan NIP.
+* Dark Mode belum konsisten.
+* Komponen UI masih belum seragam.
 
 ---
 
-# Known Technical Debt
+## Medium
 
-- Business logic inside Livewire.
-- Repeated UI components.
-- Hardcoded terminology.
-- Documentation incomplete.
-
----
-
-# Do Not Change
-
-Do NOT:
-
-- Rename models.
-- Change database schema.
-- Replace QR logic.
-
-Until Sprint 1 starts.
+* Export masih terbatas.
+* Dashboard belum lengkap.
+* Dokumentasi modul belum seluruhnya tersedia.
 
 ---
 
-# Files Frequently Edited
+## Low
 
-app/
-
-resources/
-
-routes/
-
-docs/
+* API belum dibutuhkan.
+* Mobile App masih tahap perencanaan.
 
 ---
 
-# Current Focus
+# Current Technical Debt
 
-CAI first.
-
-Commercial product later.
+* QR Generator masih menggunakan layanan pihak ketiga.
+* Attendance masih menggunakan NIP sebagai identitas QR.
+* Beberapa halaman belum menggunakan komponen UI yang konsisten.
+* Struktur database masih berorientasi pada CAI.
 
 ---
 
 # Next Sprint
 
-Attendance Code
+Sprint 1
 
-QR Generator
+Target:
 
-PDF QR
-
-Manual Attendance
-
-Dark Mode
-
-Export
+* Attendance Code
+* Internal QR Generator
+* Print QR
+* Export
+* Status Attendance
+* Dashboard Improvement
+* UI Refactor
 
 ---
 
-# Long Term Vision
+# Development Rules
 
-Universal Person Database
+Selama Sprint 0:
 
-↓
+✅ Boleh
 
-Event
+* Perbaikan dokumentasi
+* Perbaikan bug
+* Refactor kecil
+* Perbaikan UI
 
-↓
+❌ Tidak boleh
 
-Competition
+* Breaking Change Database
+* Refactor besar tanpa desain
+* Menambah modul baru
+* Mengubah arsitektur inti
 
-↓
+---
 
-Commercial Event Management Platform
+# Success Criteria
+
+Sprint 0 dianggap selesai apabila:
+
+* Dokumentasi lengkap.
+* Struktur proyek konsisten.
+* Roadmap final.
+* Security final.
+* Permission final.
+* AI dapat memahami proyek hanya dengan membaca dokumentasi.
+
+---
+
+# Notes
+
+CURRENT_STATE.md adalah snapshot kondisi proyek.
+
+Dokumen ini akan diperbarui setiap kali sprint selesai.
+
+Dokumen ini **bukan** tempat mencatat roadmap, changelog, atau keputusan desain.
+
+Gunakan dokumen lain sesuai fungsinya:
+
+* ROADMAP.md → Rencana pengembangan.
+* CHANGELOG.md → Riwayat perubahan.
+* DECISION.md → Keputusan arsitektur.
+* TODO.md → Pekerjaan aktif.

@@ -1,12 +1,12 @@
 # CONTEXT
 
-This file is designed for AI assistants.
-
-Read this before reading any other documentation.
+> Product Context
 
 ---
 
 # Project
+
+## Name
 
 KJA Event Manager
 
@@ -16,50 +16,165 @@ AbsenCAI
 
 ---
 
-# Current Stage
+# Background
 
-Sprint 0
+KJA Event Manager awalnya dikembangkan sebagai aplikasi absensi sederhana untuk kegiatan **CAI (Cinta Al-Qur'an Indonesia)**.
 
-Documentation
+Seiring perkembangan kebutuhan organisasi, aplikasi tidak lagi hanya digunakan untuk absensi, tetapi juga mulai menangani:
 
-Architecture
+* Registrasi
+* Database Peserta
+* Dashboard
+* Rekap
+* QR Code
+* Laporan
 
-Planning
-
----
-
-# Current Goal
-
-Finish CAI Operational first.
-
-DO NOT implement Multi Event yet.
-
-Current priority is stability.
+Pengembangan terus berlanjut hingga muncul kebutuhan yang lebih luas.
 
 ---
 
-# Main Entity
+# Problem Statement
+
+Banyak organisasi menghadapi masalah yang sama setiap kali mengadakan event.
+
+Contohnya:
+
+* Data peserta selalu dibuat ulang.
+* Registrasi dilakukan berulang setiap tahun.
+* Absensi masih manual.
+* Penilaian menggunakan spreadsheet terpisah.
+* Laporan dibuat manual.
+* Dokumen tersebar di berbagai media.
+* Tidak ada histori peserta maupun panitia.
+
+Akibatnya:
+
+* Banyak pekerjaan berulang.
+* Tinggi risiko kesalahan data.
+* Sulit melakukan monitoring.
+* Tidak ada database organisasi yang berkelanjutan.
+
+---
+
+# Solution
+
+KJA Event Manager dibangun sebagai platform Event Management yang terintegrasi.
+
+Semua proses berada dalam satu sistem.
+
+Contohnya:
+
+* Registrasi
+* Attendance
+* Dashboard
+* Competition
+* Certificate
+* Reporting
+* Document Management
+
+---
+
+# Current Focus
+
+Prioritas saat ini adalah menyelesaikan seluruh kebutuhan operasional **CAI**.
+
+CAI digunakan sebagai MVP (Minimum Viable Product) untuk memvalidasi desain sistem sebelum dikembangkan menjadi platform yang lebih besar.
+
+---
+
+# Product Vision
+
+Membangun platform Event Management yang:
+
+* Modular
+* Scalable
+* Maintainable
+* Commercial Ready
+
+Satu platform dapat digunakan untuk berbagai jenis event tanpa perlu membuat aplikasi baru.
+
+---
+
+# Target Users
+
+KJA Event Manager dirancang agar dapat digunakan oleh:
+
+* Organisasi
+* Sekolah
+* Universitas
+* Komunitas
+* Yayasan
+* Event Organizer
+* Kejuaraan
+* Festival
+* Seminar
+* Training
+
+---
+
+# Core Concept
+
+## Person First
+
+Satu orang hanya dibuat satu kali.
+
+Person dapat mengikuti banyak event.
+
+Person juga dapat memiliki berbagai peran.
+
+Contoh:
 
 Person
 
-NOT Participant.
+↓
 
-Every human exists only once.
+Participant
 
-Person can become:
+↓
 
-- Participant
-- Committee
-- Judge
-- Official
-- Volunteer
+Committee
 
-depending on Event Participation.
+↓
+
+Judge
+
+↓
+
+Volunteer
+
+↓
+
+Official
+
+Semua berdasarkan Event Participation.
 
 ---
 
-# Core Flow
+# Event Concept
 
+Setiap Event berdiri sendiri.
+
+Contoh:
+
+```text
+CAI 2026
+
+Festival Dakwah
+
+Kejuaraan Silat
+
+Seminar Nasional
+
+Training Organisasi
+```
+
+Semua menggunakan platform yang sama.
+
+---
+
+# Long Term Direction
+
+```text
 Person
 
 ↓
@@ -72,193 +187,83 @@ Attendance
 
 ↓
 
-Report
-
-Future
-
-↓
-
 Competition
 
 ↓
 
 Certificate
 
----
+↓
 
-# Current Stack
-
-Laravel 12
-
-Livewire
-
-Flux UI
-
-Tailwind
-
-SQLite
-
-Rocky Linux
-
-Proxmox
-
-Nextcloud
-
-TrueNAS
+Commercial Platform
+```
 
 ---
 
-# Current Architecture
+# Business Goal
 
-Mini PC
+Tujuan jangka panjang bukan hanya membuat aplikasi internal.
 
-↓
+KJA Event Manager diharapkan menjadi platform Event Management yang dapat digunakan oleh banyak organisasi.
 
-Proxmox
+Model bisnis yang direncanakan:
 
-↓
-
-Rocky Linux
-
-↓
-
-Laravel
-
-↓
-
-SQLite
-
-↓
-
-Nextcloud
-
-Future
-
-↓
-
-MariaDB
-
-↓
-
-Cloud Storage
+* White Label
+* Add-on Module
+* Commercial License
+* SaaS
 
 ---
 
-# AI Development Rules
+# Development Philosophy
 
-Always read:
+Seluruh pengembangan mengikuti prinsip:
 
-INDEX.md
-
-ROADMAP.md
-
-DATABASE.md
-
-RULES.md
-
-Never:
-
-- Rename database without DATABASE.md
-- Add feature without FEATURE.md
-- Change architecture without DECISION.md
-
-Always:
-
-- Reuse existing component
-- Keep Dark Mode compatible
-- Prefer Service Layer
-- Use Validation
-- Keep responsive design
+* Documentation First
+* No Code Before Design
+* Modular Development
+* Reusable Components
+* Backward Compatibility
+* Security by Default
 
 ---
 
-# Current Sprint
+# Scope
 
-Sprint 0
+## Current Scope
 
-Documentation
-
-Next Sprint
-
-Sprint 1
-
-- QR Generator
-- Attendance Code
-- Manual Attendance
-- Dark Mode
-- Export PDF
-- Export Excel
+* CAI Operational
 
 ---
 
-# Coding Language
+## Future Scope
 
-Code
-
-English
-
-UI
-
-Indonesian
-
-Documentation
-
-English
+* Multi Event
+* Multi Organization
+* Competition
+* Certificate
+* Mobile Application
+* API
+* SaaS
 
 ---
 
-# Long Term Vision
+# Success Criteria
 
-Transform AbsenCAI into a Commercial Event Management Platform.
+KJA Event Manager dianggap berhasil apabila:
 
-Target Users
-
-- Organization
-- School
-- University
-- Competition
-- Community
+* Seluruh operasional event dapat dijalankan dari satu platform.
+* Data organisasi tersimpan secara berkelanjutan.
+* Setiap event tidak perlu membangun sistem baru.
+* Sistem dapat dikembangkan menjadi produk komersial.
+* Arsitektur tetap sederhana, modular, dan mudah dipelihara.
 
 ---
 
-# Future Direction
+# Final Vision
 
-Universal Person Database
+CAI bukan tujuan akhir.
 
-↓
+CAI adalah langkah pertama.
 
-Event
-
-↓
-
-Competition
-
-↓
-
-Scoring
-
-↓
-
-Certificate
-
-↓
-
-Commercial Product
-
----
-
-# Important Notes
-
-CAI is NOT the final product.
-
-CAI is the MVP.
-
-KJA Event Manager is the final vision.
-
-Every design decision should support this vision.
-
-Do not optimize only for CAI.
-
-Design for scalability.
-
-Implement gradually.
+KJA Event Manager adalah platform Event Management yang dirancang untuk tumbuh bersama kebutuhan organisasi, mulai dari kegiatan internal hingga event berskala besar dengan ribuan peserta dan banyak lokasi.

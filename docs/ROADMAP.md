@@ -1,114 +1,419 @@
 # KJA Event Manager Roadmap
 
-## Vision
-
-KJA Event Manager adalah platform Event Management yang berfokus pada pengelolaan database organisasi secara berkelanjutan, sehingga setiap orang hanya didaftarkan satu kali dan dapat mengikuti berbagai event tanpa registrasi ulang.
+> Product Roadmap
 
 ---
 
-# Product Goal
+# Vision
 
-Membangun platform Event Management yang dapat digunakan untuk:
+Membangun platform **Event Management** yang modular, scalable, dan dapat digunakan oleh berbagai organisasi.
 
-- CAI
-- Kejuaraan
-- Festival
-- Seminar
-- Training
-- Event Organisasi
+KJA Event Manager dikembangkan secara bertahap.
 
-Dengan sistem modular sehingga dapat dikembangkan menjadi produk komersial.
+Target pertama adalah menyelesaikan seluruh kebutuhan operasional **CAI**, kemudian dikembangkan menjadi platform Event Management yang mendukung berbagai jenis event dan akhirnya menjadi produk komersial.
+
+---
+
+# Development Principles
+
+Seluruh pengembangan mengikuti prinsip:
+
+* CAI First
+* No Code Before Design
+* Documentation First
+* Modular Development
+* Backward Compatible
+* Scalable Architecture
+
+---
+
+# Product Timeline
+
+```
+AbsenCAI
+     │
+     ▼
+CAI Operational
+     │
+     ▼
+KJA Event Manager
+     │
+     ▼
+Competition Module
+     │
+     ▼
+Commercial Platform
+```
+
+---
+
+# Sprint 0
+
+## Status
+
+✅ Current
+
+## Goal
+
+Merapikan pondasi proyek sebelum pengembangan besar dimulai.
+
+## Target
+
+* Dokumentasi
+* Arsitektur
+* Database Design
+* Security
+* Permission
+* Roadmap
+* Development Standard
+
+## Deliverables
+
+* AGENTS.md
+* INDEX.md
+* CONTEXT.md
+* DATABASE.md
+* DATAFLOW.md
+* FEATURE.md
+* SECURITY.md
+* PERMISSION.md
+* ROADMAP.md
+* CHANGELOG.md
+
+---
+
+# Sprint 1
+
+## Goal
+
+Menyelesaikan seluruh kebutuhan operasional absensi CAI.
+
+## Priority
+
+Highest
+
+## Features
+
+### Attendance
+
+* Attendance Code
+* Internal QR Generator
+* QR Regeneration
+* Manual Attendance
+* Attendance History
+* Attendance Status
+* Izin
+* Alfa
+
+---
+
+### QR
+
+* Generate QR
+* Batch Generate
+* PDF Export
+* Print 4×4 cm
+* Batch Print
+
+---
+
+### Report
+
+* Export Excel
+* Export PDF
+* Rekap Per Regu
+* Rekap Per Desa
+* Rekap Per Kelompok
+* Rekap Belum Hadir
+
+---
+
+### Dashboard
+
+* Dashboard Divisi
+* Dashboard PJ Regu
+* Progress Registrasi
+* Progress Absensi
+* Live Monitoring
+
+---
+
+### UI
+
+* Dark Mode
+* Responsive Mobile
+* Menu Refactor
+* Reusable Components
+
+---
+
+# Sprint 2
+
+## Goal
+
+Melengkapi kebutuhan operasional sekretariat.
+
+## Features
+
+### Permission
+
+* Surat Izin
+* Print Surat
+* Return Tracking
+* Riwayat Izin
+
+---
+
+### Scoring
+
+* Master Point
+* Bonus
+* Penalty
+* Leaderboard
+* Riwayat Penilaian
+
+---
+
+### Audit
+
+* Activity Log
+* Export Log
+* Print Log
+* QR Log
+
+---
+
+### Storage
+
+* Nextcloud Integration
+* TrueNAS Integration
+
+---
+
+# Sprint 3
+
+## Goal
+
+Transformasi menuju KJA Event Manager.
+
+## Features
+
+* Universal Person Database
+* Multi Event
+* Multi Role
+* Multi Venue
+* Multi Category
+* Participation History
+* Dashboard Universal
+
+---
+
+# Sprint 4
+
+## Goal
+
+Competition Module.
+
+## Features
+
+* Jadwal
+* Bracket
+* Penilaian Juri
+* Ranking
+* Juara Otomatis
+* Nomor Peserta
+* Nomor Dada
+* Pengundian
+
+---
+
+# Sprint 5
+
+## Goal
+
+Document & Certificate Module.
+
+## Features
+
+* Sertifikat Otomatis
+* QR Verification
+* Arsip Dokumen
+* Template Sertifikat
+* Piagam
+
+---
+
+# Sprint 6
+
+## Goal
+
+Commercial Preparation.
+
+## Features
+
+* White Label
+* Theme
+* Branding
+* Organization Management
+* License Management
+* Billing Preparation
 
 ---
 
 # Version Roadmap
 
-## v1.0 - AbsenCAI (Current)
+## v1.0
 
-Status: Stable
+AbsenCAI
 
-Fitur:
-- CRUD Master Data
-- Import Peserta
-- Registrasi Ulang
-- Scan QR
-- Dashboard
-- Rekap Absensi
+Status:
+
+Released
 
 ---
 
-## v1.5 - CAI Operational
+## v1.5
+
+CAI Operational
+
+Status:
+
+In Development
 
 Target:
-Menyelesaikan seluruh kebutuhan operasional CAI.
 
-Fitur:
-
-- Status Hadir / Izin / Alfa
-- Input Manual Scan
-- Generate QR Internal
-- Unique Attendance Code
-- Export Excel
-- Export PDF
-- Print QR 4x4
-- Dashboard Divisi
-- Dashboard PJ Regu
-- Dark Mode
-- Responsive Mobile
-- Perizinan
-- Print Surat Izin
-- Riwayat Absensi
+Seluruh operasional CAI dapat dijalankan menggunakan sistem.
 
 ---
 
-## v2.0 - KJA Event Manager
+## v2.0
+
+KJA Event Manager
+
+Status:
+
+Planning
 
 Target:
-Transformasi menjadi platform Multi Event.
 
-Fitur:
-
-- Multi Event
-- Multi Category
-- Multi Venue
-- Multi Role
-- Universal Person Database
-- Participation History
-- Dashboard Universal
+Platform Event Management Multi Event.
 
 ---
 
-## v3.0 - Competition Module
+## v2.5
 
-- Bracket
-- Jadwal
-- Penilaian
-- Leaderboard
-- Juara Otomatis
-- Sertifikat
+Competition Module
 
----
+Status:
 
-## v4.0 - Commercial
-
-- White Label
-- Add-on Module
-- License
-- SaaS
-- API
-- Mobile Apps
+Planning
 
 ---
 
-# Development Rule
+## v3.0
 
-No Code Before Design
+Commercial Edition
 
-Semua fitur wajib melalui:
+Status:
 
-Idea
-→ Discussion
-→ Documentation
-→ Database Design
-→ Todo
-→ Development
+Future
+
+---
+
+# Long Term Features
+
+## Event
+
+* Multi Event
+* Event Template
+* Event Archive
+
+---
+
+## Organization
+
+* Multi Organization
+* Multi Branch
+* Organization Dashboard
+
+---
+
+## Attendance
+
+* Offline Mode
+* QR Rotation
+* Face Verification (Optional)
+* GPS Validation (Optional)
+
+---
+
+## Competition
+
+* Judge Panel
+* Live Score
+* Live Ranking
+* Medal Table
+
+---
+
+## Certificate
+
+* Auto Generate
+* QR Verification
+* Online Verification
+
+---
+
+## Dashboard
+
+* TV Dashboard
+* Public Dashboard
+* Mobile Dashboard
+
+---
+
+## Infrastructure
+
+* API
+* Mobile App
+* Cloud Storage
+* Queue
+* Notification
+* Email
+* WhatsApp Integration
+
+---
+
+# Success Criteria
+
+Sprint dianggap selesai apabila:
+
+* Semua fitur selesai.
+* Tidak ada bug kritikal.
+* Dokumentasi diperbarui.
+* Database diperbarui bila diperlukan.
+* CHANGELOG diperbarui.
+* Testing selesai.
+
+---
+
+# Current Priority
+
+```
+1. Stabilkan CAI
+2. Rapikan Arsitektur
+3. Refactor
+4. Multi Event
+5. Competition
+6. Commercial
+```
+
+---
+
+# Product Vision
+
+CAI bukan tujuan akhir.
+
+CAI adalah MVP.
+
+KJA Event Manager adalah platform Event Management yang dapat digunakan oleh sekolah, organisasi, komunitas, universitas, hingga penyelenggara kejuaraan dan festival dengan arsitektur modular yang siap dikembangkan dalam jangka panjang.

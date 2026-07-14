@@ -1,128 +1,322 @@
 # AGENTS
 
-## Project
+> AI Development Guide for KJA Event Manager
+
+---
+
+# Project
+
+## Name
 
 KJA Event Manager
 
 Former Project:
+
 AbsenCAI
 
 ---
 
-## Purpose
+# Product Vision
 
-KJA Event Manager adalah platform Event Management yang dapat digunakan oleh berbagai organisasi.
+KJA Event Manager adalah platform Event Management berbasis web yang dikembangkan secara modular dan dapat digunakan oleh berbagai organisasi.
 
-Current Focus:
+Current MVP:
 
-- CAI Operational
-- Event Management
-- Big Data Management
+CAI Operational.
 
----
+Long Term Goal:
 
-## Current Sprint
-
-Sprint 0
-
-Documentation & Architecture
+Commercial Event Management Platform.
 
 ---
 
-## Tech Stack
+# Tech Stack
 
-Backend
+## Backend
 
-- Laravel 12
+* Laravel 12
 
-Frontend
+## Frontend
 
-- Livewire
-- Flux UI
-- Tailwind CSS
+* Livewire
+* Flux UI
+* Tailwind CSS
 
-Database
+## Database
 
 Current
 
-SQLite
+* SQLite
 
 Future
 
-MariaDB
+* MariaDB
 
-Storage
+Possible Future
 
-Nextcloud
-TrueNAS
+* PostgreSQL
 
-Deployment
+## Storage
 
-Rocky Linux
-Proxmox
+* Nextcloud
+* TrueNAS
+
+## Deployment
+
+* Rocky Linux
+* Proxmox
+
+Future:
+
+* VPS
+* Dedicated Server
 
 ---
 
-## AI Rules
+# Development Principles
 
-Before coding ALWAYS read:
+AI harus mengikuti prinsip berikut.
+
+* Documentation First
+* No Code Before Design
+* Reuse Existing Components
+* Keep Modular
+* Keep Scalable
+* Keep Maintainable
+
+---
+
+# Documentation Read Order
+
+Sebelum melakukan perubahan kode WAJIB membaca:
 
 1. INDEX.md
-2. ROADMAP.md
-3. FEATURE.md
-4. DATABASE.md
-5. RULES.md
-
-Never:
-
-- Rename database without DATABASE.md
-- Rename model without FILEMAP.md
-- Add feature without FEATURE.md
-- Change architecture without DECISION.md
-
-Always:
-
-- Keep Dark Mode compatible
-- Follow Livewire convention
-- Reuse existing component
-- Prefer Service over duplicated logic
+2. CURRENT_STATE.md
+3. ROADMAP.md
+4. FEATURE.md
+5. DATABASE.md
+6. DATAFLOW.md
+7. DECISION.md
+8. SECURITY.md
+9. PERMISSION.md
+10. TODO.md
 
 ---
 
-## Current Priority
+# Development Workflow
 
-Finish CAI first.
+Semua fitur wajib mengikuti alur berikut.
 
-DO NOT implement Multi Event before CAI is stable.
+Idea
 
----
+↓
 
-## Naming
+Discussion
 
-Code
-
-English
-
-UI
-
-Indonesian
+↓
 
 Documentation
 
+↓
+
+Architecture
+
+↓
+
+Database
+
+↓
+
+Todo
+
+↓
+
+Development
+
+↓
+
+Testing
+
+↓
+
+Release
+
+↓
+
+Changelog
+
+Tidak diperbolehkan langsung membuat fitur tanpa mengikuti workflow tersebut.
+
+---
+
+# Coding Rules
+
+Selalu:
+
+* Menggunakan Livewire Convention
+* Menggunakan Laravel Best Practice
+* Menggunakan Validation
+* Menggunakan Service apabila business logic mulai besar
+* Menggunakan Eloquent
+* Menjaga kode tetap sederhana
+
+Hindari:
+
+* Duplicate Code
+* Business Logic di Blade
+* Raw SQL jika tidak diperlukan
+* Hardcode Role
+* Hardcode Permission
+
+---
+
+# Database Rules
+
+Jangan:
+
+* Rename tabel tanpa DATABASE.md
+* Rename Model tanpa dokumentasi
+* Menghapus kolom tanpa ADR
+* Mengubah struktur utama tanpa Discussion
+
+Selalu:
+
+* Gunakan Migration
+* Gunakan Foreign Key
+* Gunakan Validation
+* Gunakan Soft Delete jika diperlukan
+
+---
+
+# UI Rules
+
+Semua UI wajib:
+
+* Responsive
+* Mobile Friendly
+* Dark Mode Compatible
+* Menggunakan Flux Component apabila tersedia
+* Konsisten dengan desain sistem
+
+---
+
+# Naming Convention
+
+## Code
+
+English
+
+Contoh:
+
+Attendance
+
+Registration
+
+Competition
+
+Certificate
+
+---
+
+## UI
+
+Bahasa Indonesia
+
+Contoh:
+
+Registrasi
+
+Absensi
+
+Penilaian
+
+Dashboard
+
+---
+
+## Documentation
+
 English
 
 ---
+
+# Core Concepts
 
 ## Main Entity
 
 Person
 
-NOT Participant
+Bukan Participant.
 
-Person participates in many events.
+Satu orang hanya dibuat satu kali.
+
+Orang tersebut dapat menjadi:
+
+* Participant
+* Committee
+* Judge
+* Official
+* Volunteer
+
+melalui Participation.
 
 ---
 
-## Long Term Goal
+# Current Architecture Direction
 
-Become Commercial Event Management Platform.
+Current
+
+Person
+
+↓
+
+Attendance
+
+Future
+
+Person
+
+↓
+
+Participation
+
+↓
+
+Attendance
+
+↓
+
+Competition
+
+↓
+
+Certificate
+
+---
+
+# AI Responsibilities
+
+AI harus membantu:
+
+* Mendesain arsitektur
+* Menjaga konsistensi database
+* Mengurangi technical debt
+* Menjaga dokumentasi tetap sinkron
+* Menghindari duplicate logic
+* Mengikuti roadmap proyek
+
+AI bukan hanya membantu coding, tetapi juga menjaga kualitas software.
+
+---
+
+# Long Term Goal
+
+Mengembangkan KJA Event Manager menjadi platform Event Management komersial yang:
+
+* Modular
+* Multi Event
+* Multi Organization
+* Multi Venue
+* Scalable
+* Maintainable
+* Easy to Extend
