@@ -63,7 +63,7 @@ class RegistrationService
         return $peserta;
     }
 
-    private function generateAttendanceCode(): string
+    public function generateAttendanceCode(): string
     {
         do {
             $code = 'KJA-'.Str::upper(Str::random(8));

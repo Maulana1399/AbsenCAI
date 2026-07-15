@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.8
+Sprint Bugfix
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Print engine foundation for participant labels
+Repair legacy participant identities
 
 ---
 

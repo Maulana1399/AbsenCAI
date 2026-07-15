@@ -1,5 +1,14 @@
 # Backlog
 
+## Sprint Bugfix (Identity Repair)
+
+- [ ] Backfill legacy participant_number placeholder values
+- [ ] Backfill legacy attendance_code placeholder values
+- [ ] Keep valid records unchanged
+- [ ] Verify command summary output
+
+---
+
 ## Sprint 2.8 (Print Foundation)
 
 - [ ] Create print engine

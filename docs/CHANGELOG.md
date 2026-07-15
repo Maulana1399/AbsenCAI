@@ -10,11 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* PrintEngine dan Label4x4Template sebagai fondasi label print peserta
+* kja:identity-backfill Artisan command untuk memperbaiki participant_number dan attendance_code legacy
 
 ## Changed
 
-* Print foundation mulai memakai QRService dan participant_number tanpa mengubah flow aplikasi
+* Legacy placeholder participant identity values can now be repaired without overwriting valid records
 
 ## Planned
 
