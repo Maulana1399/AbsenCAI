@@ -20,7 +20,8 @@ Current participant identity columns:
 Identity transition status:
 - `nip` masih dipakai untuk backward compatibility dan scan lama
 - `participant_number` sudah disiapkan untuk identitas manusiawi
-- `attendance_code` sudah disiapkan untuk QR identity
+- `attendance_code` sudah dipakai untuk identity QR baru
+- Lookup attendance mulai mengutamakan `attendance_code` lalu fallback ke `nip`
 
 ---
 

@@ -9,11 +9,11 @@ use Carbon\Carbon;
 
 class AttendanceService
 {
-    public function processScan(string $nip, ?int $sesiId = null): array
+    public function processScan(string $identifier, ?int $sesiId = null): array
     {
-        $nip = trim($nip);
+        $identifier = trim($identifier);
 
-        $peserta = peserta::where('nip', $nip)->first();
+        $peserta = $this->findParticipant($identifier);
 
         if (! $peserta) {
             return [
@@ -31,7 +31,7 @@ class AttendanceService
             ];
         }
 
-        $last = Absensi::where('nip', $nip)
+        $last = Absensi::where('nip', $peserta->nip)
             ->where('sesi_id', $sesi->id)
             ->first();
 
@@ -61,5 +61,16 @@ class AttendanceService
             'jam_scan' => $jamScan,
             'absensi' => $absensi,
         ];
+    }
+
+    private function findParticipant(string $identifier): ?peserta
+    {
+        $byAttendanceCode = peserta::whereRaw('LOWER(attendance_code) = ?', [strtolower($identifier)])->first();
+
+        if ($byAttendanceCode) {
+            return $byAttendanceCode;
+        }
+
+        return peserta::where('nip', $identifier)->first();
     }
 }

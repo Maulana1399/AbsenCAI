@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.4
+Sprint 2.5
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Registration transition to participant identity
+Attendance transition to attendance code lookup
 
 ---
 

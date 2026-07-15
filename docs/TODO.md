@@ -1,5 +1,14 @@
 # Backlog
 
+## Sprint 2.5 (Attendance Identity Transition)
+
+- [ ] Lookup attendance by attendance_code first
+- [ ] Keep legacy NIP fallback
+- [ ] Preserve duplicate attendance prevention
+- [ ] Preserve session validation
+
+---
+
 ## Sprint 2.4 (Registration Identity Transition)
 
 - [ ] Generate participant_number on new registration

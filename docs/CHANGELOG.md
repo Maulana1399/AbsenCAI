@@ -10,12 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* Participant Number dan Attendance Code otomatis dibuat saat registrasi peserta baru
+* AttendanceService sekarang mendukung lookup attendance_code sebelum fallback ke NIP legacy
 
 ## Changed
 
-* RegistrationService sekarang menyimpan participant_number dan attendance_code untuk peserta baru
-* PlacementService tetap mendukung participant number architecture sementara legacy NIP tetap tersedia sebagai wrapper kompatibilitas
+* Attendance scan tetap kompatibel dengan NIP lama sambil mulai menerima attendance_code
 
 ## Planned
 
