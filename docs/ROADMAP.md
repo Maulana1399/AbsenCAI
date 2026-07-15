@@ -205,6 +205,7 @@ Transformasi menuju KJA Event Manager.
 * Multi Category
 * Participation History
 * Dashboard Universal
+* Attendance integration coverage hardening
 
 ---
 
@@ -212,18 +213,15 @@ Transformasi menuju KJA Event Manager.
 
 ## Goal
 
-Competition Module.
+Identity & QR.
 
 ## Features
 
-* Jadwal
-* Bracket
-* Penilaian Juri
-* Ranking
-* Juara Otomatis
-* Nomor Peserta
-* Nomor Dada
-* Pengundian
+* Attendance Code finalization
+* QR identity hardening
+* participant_number compatibility rules
+* legacy NIP fallback maintenance
+* scan identifier normalization
 
 ---
 

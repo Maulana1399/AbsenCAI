@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 3
+Sprint 4
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Attendance
+Identity & QR
 
 ---
 
@@ -61,7 +61,7 @@ S01 status:
 
 Priority saat ini:
 
-1. S02 — Placement & Registration
+1. S04 — Identity & QR
 2. Rapikan Arsitektur
 3. Refactor UI
 4. Stabilkan Operasional CAI
@@ -163,7 +163,7 @@ Infrastructure
 ## High
 
 * SQLite belum cocok untuk concurrent access dalam skala besar.
-* QR masih menggunakan NIP.
+* QR masih menggunakan NIP sebagai legacy fallback.
 * Dark Mode belum konsisten.
 * Komponen UI masih belum seragam.
 
@@ -187,7 +187,7 @@ Infrastructure
 # Current Technical Debt
 
 * QR Generator masih menggunakan layanan pihak ketiga.
-* Attendance masih menggunakan NIP sebagai identitas QR.
+* Attendance masih menggunakan NIP sebagai legacy fallback, sementara attendance_code menjadi identifier utama scan.
 * Beberapa halaman belum menggunakan komponen UI yang konsisten.
 * Struktur database masih berorientasi pada CAI.
 

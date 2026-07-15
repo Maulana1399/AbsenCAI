@@ -85,10 +85,12 @@ Status: COMPLETED.
 
 ## Sprint 2.5 (Attendance Identity Transition)
 
-- [ ] Lookup attendance by attendance_code first
-- [ ] Keep legacy NIP fallback
-- [ ] Preserve duplicate attendance prevention
-- [ ] Preserve session validation
+- [x] Lookup attendance by attendance_code first
+- [x] Keep legacy NIP fallback
+- [x] Preserve duplicate attendance prevention
+- [x] Preserve session validation
+- [x] Add Livewire attendance orchestration coverage
+- [x] Close S03 as complete
 
 ---
 
@@ -142,6 +144,7 @@ Status: VERIFIED.
 - [ ] Add attendance_code column
 - [ ] Keep legacy nip compatibility
 - [ ] Prepare identity transition docs
+- [ ] Defer identity cleanup to S04
 
 ---
 

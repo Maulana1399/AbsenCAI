@@ -66,15 +66,15 @@ TODO.md
 
 ## Current Sprint
 
-S02 — Placement & Registration
+S04 — Identity & QR
 
-S01 Infrastructure complete.
+S03 Attendance complete.
 
 ---
 
 ## Current Priority
 
-Finish CAI.
+Finish CAI with S04 identity and QR hardening.
 
 ---
 
