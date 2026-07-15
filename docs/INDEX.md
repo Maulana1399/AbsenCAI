@@ -66,15 +66,15 @@ TODO.md
 
 ## Current Sprint
 
-S04 — Identity & QR
+S05 — Document & Certificate
 
-S03 Attendance complete.
+S04 Identity & QR complete.
 
 ---
 
 ## Current Priority
 
-Finish CAI with S04 identity and QR hardening.
+Finish CAI with S05 document and certificate planning.
 
 ---
 

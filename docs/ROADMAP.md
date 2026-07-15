@@ -284,15 +284,15 @@ Seluruh operasional CAI dapat dijalankan menggunakan sistem.
 
 Current work:
 
-S03 Attendance
+S04 Identity & QR
 
-S02 progress:
+S04 progress:
 
-* Placement logic centralized in PlacementService.
-* Registration persistence centralized in RegistrationService.
+* participant_number contract preserved.
+* attendance_code is the primary QR payload.
 * Legacy NIP compatibility preserved.
-* Participant number contract preserved.
-* S02 completed.
+* QR integration verified.
+* S04 completed.
 
 ---
 

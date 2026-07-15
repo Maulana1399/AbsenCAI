@@ -91,6 +91,8 @@ Status: COMPLETED.
 - [x] Preserve session validation
 - [x] Add Livewire attendance orchestration coverage
 - [x] Close S03 as complete
+- [x] Close S04 as complete
+- [x] Defer SVG QR as technical debt
 
 ---
 

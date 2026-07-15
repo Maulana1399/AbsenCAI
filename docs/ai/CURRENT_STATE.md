@@ -30,15 +30,15 @@ MVP Development
 
 # Current Sprint
 
-Sprint 4
+Sprint 5
 
 Status:
 
-🟡 In Progress
+🟢 Complete
 
 Focus:
 
-Identity & QR
+Document & Certificate
 
 ---
 
@@ -61,7 +61,7 @@ S01 status:
 
 Priority saat ini:
 
-1. S04 — Identity & QR
+1. S05 — Document & Certificate
 2. Rapikan Arsitektur
 3. Refactor UI
 4. Stabilkan Operasional CAI
