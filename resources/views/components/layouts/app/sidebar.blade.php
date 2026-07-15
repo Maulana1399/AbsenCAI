@@ -43,6 +43,10 @@
                         <flux:navlist.item :href="route('rekap.absensi')" :current="request()->routeIs('rekap.absensi')" wire:navigate>{{ __('Rekap Absensi') }}</flux:navlist.item>
                     </flux:navlist.group>
 
+                    <flux:navlist.group expandable heading="QR & Label" class="grid">
+                        <flux:navlist.item :href="route('qr-label.index')" :current="request()->routeIs('qr-label.index')" wire:navigate>{{ __('QR & Label') }}</flux:navlist.item>
+                    </flux:navlist.group>
+
             </flux:navlist>
 
             <flux:spacer />

@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint Bugfix
+Sprint 2.5.1
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Repair legacy participant identities
+QR & Label UI module
 
 ---
 

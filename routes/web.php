@@ -3,6 +3,7 @@
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Livewire\Registrasi\SelfRegister;
 use App\Http\Controllers\ImportDataController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,10 @@ Route::view('rekap-peserta', 'rekap.peserta')
 Route::view('rekap-absensi', 'rekap.absensi')
     ->middleware(['auth', 'verified'])
     ->name('rekap.absensi');
+
+Route::get('qr-label', QRLabelIndex::class)
+    ->middleware(['auth', 'verified'])
+    ->name('qr-label.index');
 
 Route::view('absensi', 'dashboard.absensi')
     ->middleware(['auth', 'verified'])

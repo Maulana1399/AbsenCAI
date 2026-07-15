@@ -1,5 +1,15 @@
 # Backlog
 
+## Sprint 2.5.1 (QR & Label UI)
+
+- [ ] Create QR & Label menu
+- [ ] Individual QR search and download
+- [ ] Batch QR export UI
+- [ ] Print label UI
+- [ ] Keep existing modules unchanged
+
+---
+
 ## Sprint Bugfix (Identity Repair)
 
 - [ ] Backfill legacy participant_number placeholder values

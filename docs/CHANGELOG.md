@@ -10,11 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* kja:identity-backfill Artisan command untuk memperbaiki participant_number dan attendance_code legacy
+* QR & Label module with individual QR, batch export preview, and label 4x4 UI
 
 ## Changed
 
-* Legacy placeholder participant identity values can now be repaired without overwriting valid records
+* Existing QR and print services are now connected to user-facing screens without new business logic
 
 ## Planned
 

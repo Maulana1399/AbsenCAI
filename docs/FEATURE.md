@@ -177,7 +177,7 @@ Future
 
 ---
 
-## QR
+## QR & Label
 
 Status
 
@@ -189,19 +189,21 @@ P0
 
 Sprint
 
-1
+2.5.1
 
 Features
 
-* Internal Generator
-* Batch Generate
-* Print 4×4
-* PDF
-* Regenerate QR
+* Generate Individual QR
+* Download PNG
+* Download SVG
+* Batch QR Export
+* Print Label 4×4
 
 Future
 
-* QR Rotation
+* ID Card
+* Canva Export
+* PDF Layout
 
 ---
 
