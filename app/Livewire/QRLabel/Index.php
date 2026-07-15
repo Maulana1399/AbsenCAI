@@ -7,6 +7,8 @@ use App\Services\Print\PrintEngine;
 use App\Services\QR\BatchQRExportService;
 use App\Services\QR\QRService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Index extends Component
@@ -27,7 +29,9 @@ class Index extends Component
     public $daftarKelompok = [];
     public $daftarRegu = [];
     public $batchPreview = [];
+    public $batchParticipants = [];
     public $labelPreview = [];
+    public ?int $selectedLabelParticipantId = null;
     public string $labelPreviewHtml = '';
 
     public function mount(): void
@@ -38,10 +42,26 @@ class Index extends Component
         $this->refreshBatchAndLabelPreview();
     }
 
+    public function selectLabelParticipant(int $participantId): void
+    {
+        $participant = peserta::findOrFail($participantId);
+
+        $this->selectedLabelParticipantId = $participant->id;
+        $this->labelPreviewHtml = app(PrintEngine::class)->label4x4($participant);
+    }
+
     public function updatedSearch(): void
     {
         $this->selectedParticipantId = null;
         $this->selectedParticipant = null;
+    }
+
+    public function updated($name): void
+    {
+        if (str_starts_with($name, 'filter')) {
+            $this->refreshBatchAndLabelPreview();
+            $this->syncLabelSelectionToFilteredParticipants();
+        }
     }
 
     public function selectParticipant(int $participantId): void
@@ -49,6 +69,10 @@ class Index extends Component
         $participant = peserta::findOrFail($participantId);
         $this->selectedParticipantId = $participant->id;
         $this->selectedParticipant = $participant;
+
+        if ($this->mode === 'label') {
+            $this->labelPreviewHtml = app(PrintEngine::class)->label4x4($participant);
+        }
     }
 
     public function downloadPng()
@@ -81,6 +105,7 @@ class Index extends Component
         $summary = app(BatchQRExportService::class)->export($participants, 'png', 'qr-exports');
 
         $this->batchPreview = $summary;
+        $this->batchParticipants = $participants->values();
     }
 
     public function refreshBatchAndLabelPreview(): void
@@ -94,19 +119,46 @@ class Index extends Component
             'directory' => 'qr-exports',
             'format' => 'png',
         ];
-        $this->labelPreview = $participants->take(10)->values();
+        $this->batchParticipants = $participants->values();
+        $this->syncLabelPreview($participants);
+    }
 
-        if ($participant = $this->labelPreview->first()) {
-            $this->labelPreviewHtml = app(PrintEngine::class)->label4x4($participant);
-        } else {
+    private function syncLabelPreview(?Collection $participants = null): void
+    {
+        $participants ??= $this->filteredParticipants();
+        $this->labelPreview = $participants->values();
+
+        if ($participants->isEmpty()) {
+            $this->selectedLabelParticipantId = null;
             $this->labelPreviewHtml = '';
+            return;
         }
+
+        $selected = $this->selectedLabelParticipantId
+            ? $participants->firstWhere('id', $this->selectedLabelParticipantId)
+            : null;
+
+        if (! $selected) {
+            $selected = $participants->first();
+        }
+
+        $this->selectedLabelParticipantId = $selected->id;
+        $this->labelPreviewHtml = app(PrintEngine::class)->label4x4($selected);
+    }
+
+    private function syncLabelSelectionToFilteredParticipants(): void
+    {
+        $this->syncLabelPreview($this->filteredParticipants());
     }
 
     public function render()
     {
+        $batchParticipants = $this->batchParticipants ?: $this->filteredParticipants();
+
         return view('livewire.qr-label.index', [
             'results' => $this->participantSearchResults(),
+            'batchParticipants' => $batchParticipants,
+            'batchTotal' => $batchParticipants->count(),
         ]);
     }
 
@@ -156,6 +208,64 @@ class Index extends Component
         }
 
         return $query->orderBy('nama')->get();
+    }
+
+    public function printSelectedLabel()
+    {
+        $participant = $this->requireSelectedParticipant();
+        return response($this->printHtmlForParticipants(collect([$participant])))->header('Content-Type', 'text/html');
+    }
+
+    public function printAllFiltered()
+    {
+        $participants = $this->filteredParticipants();
+
+        if ($participants->isEmpty()) {
+            abort(404);
+        }
+
+        return response($this->printHtmlForParticipants($participants))->header('Content-Type', 'text/html');
+    }
+
+    private function printHtmlForParticipants(Collection $participants): string
+    {
+        $qrService = app(QRService::class);
+
+        $pages = $participants->map(function ($participant) use ($qrService) {
+            $qrBase64 = base64_encode($qrService->generatePng((string) $participant->attendance_code));
+            $participantNumber = htmlspecialchars((string) $participant->participant_number, ENT_QUOTES, 'UTF-8');
+            $participantName = htmlspecialchars((string) $participant->nama, ENT_QUOTES, 'UTF-8');
+
+            return <<<HTML
+<div class="label-page">
+    <div class="label">
+        <div class="participant-number">{$participantNumber}</div>
+        <div class="qr"><img src="data:image/png;base64,{$qrBase64}" alt="QR Code"></div>
+        <div class="participant-name">{$participantName}</div>
+    </div>
+</div>
+HTML;
+        })->implode('');
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { size: 4cm 4cm; margin: 0; }
+        html, body { margin: 0; padding: 0; }
+        .label-page { width: 4cm; height: 4cm; page-break-after: always; break-after: page; }
+        .label { width: 4cm; height: 4cm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; padding: 2mm; box-sizing: border-box; font-family: Arial, sans-serif; }
+        .participant-number { font-size: 10pt; font-weight: bold; }
+        .participant-name { font-size: 8pt; line-height: 1.1; }
+        .qr { width: 1.8cm; height: 1.8cm; }
+        .qr img { width: 100%; height: 100%; object-fit: contain; }
+    </style>
+</head>
+<body>{$pages}</body>
+</html>
+HTML;
     }
 
     private function requireSelectedParticipant(): peserta
