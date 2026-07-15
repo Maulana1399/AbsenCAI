@@ -2,11 +2,9 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
-use Carbon\Carbon;
-use App\Models\Absensi;
-use App\Models\peserta;
+use App\Services\Attendance\AttendanceService;
 use App\Models\SesiAbsensi;
+use Livewire\Component;
 
 class Scan extends Component
 {
@@ -35,16 +33,14 @@ class Scan extends Component
 
     public function scanPeserta($data)
     {
-        $nip = trim($data);
+        $result = app(AttendanceService::class)->processScan(
+            (string) $data,
+            $this->sesi_id ? (int) $this->sesi_id : null
+        );
 
+        $this->message = $result['message'];
 
-        // cek peserta
-        $peserta = peserta::where('nip', $nip)->first();
-
-        if (!$peserta) {
-
-            $this->message = "Data peserta tidak ditemukan!";
-
+        if ($result['status'] === 'not_found' || $result['status'] === 'session_required') {
             $this->nama = null;
             $this->nip = null;
             $this->jam_scan = null;
@@ -52,46 +48,9 @@ class Scan extends Component
             return;
         }
 
-
-        // cek sesi pilihan
-        $sesi = SesiAbsensi::find($this->sesi_id);
-
-        if (!$sesi) {
-
-            $this->message = "Pilih sesi absensi terlebih dahulu";
-
-            return;
-        }
-
-
-        $this->nip = $peserta->nip;
-        $this->nama = $peserta->nama;
-        $this->jam_scan = Carbon::now()->format('Y-m-d H:i:s');
-
-
-        // cek sudah absen sesi ini
-        $last = Absensi::where('nip', $nip)
-            ->where('sesi_id', $sesi->id)
-            ->first();
-
-
-        if ($last) {
-
-            $this->message = "Peserta sudah absen pada sesi ini";
-
-            return;
-        }
-
-
-        Absensi::create([
-            'nip' => $peserta->nip,
-            'nama' => $peserta->nama,
-            'jam_scan' => $this->jam_scan,
-            'sesi_id' => $sesi->id,
-        ]);
-
-
-        $this->message = "Absensi berhasil!";
+        $this->nip = $result['peserta']->nip;
+        $this->nama = $result['peserta']->nama;
+        $this->jam_scan = $result['jam_scan'] ?? null;
     }
 
 
