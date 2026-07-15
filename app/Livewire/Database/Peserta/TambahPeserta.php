@@ -6,9 +6,9 @@ use Livewire\Component;
 use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
-use Illuminate\Database\QueryException;
+use App\Services\Placement\PlacementService;
+use App\Services\Registration\RegistrationService;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class TambahPeserta extends Component
 {
@@ -35,7 +35,7 @@ class TambahPeserta extends Component
 
     public function generateAutoFields(): void
     {
-        $autoPlacement = peserta::autoPlacement($this->jenis_kelamin ?: null);
+        $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null);
 
         $this->nip = $autoPlacement['nip'];
         $this->regu_id = $autoPlacement['regu_id'];
@@ -74,26 +74,16 @@ class TambahPeserta extends Component
                 'regu_id' => 'required|exists:regus,id',
             ]);
 
-            try {
-                peserta::create([
-                    'nama' => $this->nama,
-                    'nip' => $this->nip,
-                    'jenis_kelamin' => $this->jenis_kelamin,
-                    'jenis_peserta' => $this->jenis_peserta,
-                    'desa_id' => $this->desa_id,
-                    'kelompok_id' => $this->kelompok_id,
-                    'regu_id' => $this->regu_id,
-                    'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-                ]);
-            } catch (QueryException $exception) {
-                if ($exception->getCode() === '23000') {
-                    throw ValidationException::withMessages([
-                        'nama' => 'Peserta dengan nama, desa, dan kelompok ini sudah terdaftar.',
-                    ]);
-                }
-
-                throw $exception;
-            }
+            app(RegistrationService::class)->createParticipant([
+                'nama' => $this->nama,
+                'nip' => $this->nip,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'jenis_peserta' => $this->jenis_peserta,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'regu_id' => $this->regu_id,
+                'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
+            ]);
 
             return redirect()->to('/database');
         } finally {

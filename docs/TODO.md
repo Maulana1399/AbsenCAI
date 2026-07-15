@@ -103,10 +103,36 @@ Status: COMPLETED.
 
 ## Sprint 2.3 (Participant Number Foundation)
 
-- [ ] Generate participant_number with KL/KP prefix
-- [ ] Keep legacy nip wrapper for backward compatibility
-- [ ] Prepare participant number transition docs
-- [ ] Verify deterministic running sequence
+- [x] Generate participant_number with KL/KP prefix
+- [x] Keep legacy nip wrapper for backward compatibility
+- [x] Prepare participant number transition docs
+- [x] Verify deterministic running sequence
+
+Status: VERIFIED.
+
+---
+
+## Sprint 2.5 (Registration Foundation)
+
+- [x] Centralize participant create/update persistence in RegistrationService
+- [x] Refactor database participant create/update callers
+- [x] Refactor import participant persistence path
+- [x] Add regression tests for registration service
+
+Status: VERIFIED.
+
+S02 status: COMPLETED.
+
+---
+
+## Sprint 2.4 (Placement Foundation)
+
+- [x] Centralize auto placement logic in PlacementService
+- [x] Centralize least-filled regu selection in PlacementService
+- [x] Update callers to use PlacementService as source of truth
+- [x] Add regression tests for placement service
+
+Status: VERIFIED.
 
 ---
 

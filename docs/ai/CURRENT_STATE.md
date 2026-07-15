@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.5.1
+Sprint 3
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-QR & Label UI module
+Attendance
 
 ---
 

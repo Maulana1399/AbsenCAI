@@ -5,6 +5,8 @@ namespace App\Imports;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\peserta;
+use App\Services\Placement\PlacementService;
+use App\Services\Registration\RegistrationService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -36,45 +38,21 @@ class PesertaImport implements ToModel, WithHeadingRow
         )->first();
 
 
-        // cegah import peserta yang sama
-        if (
-            peserta::where('nama', $row['nama'])
-                ->where('desa_id', $desa?->id)
-                ->where('kelompok_id', $kelompok?->id)
-                ->exists()
-        ) {
-            return null;
-        }
-
-
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
+        $autoPlacement = PlacementService::autoPlacement($jenisKelamin);
 
-
-        // generate NIP + regu
-        $autoPlacement = peserta::autoPlacement(
-            $jenisKelamin
-        );
-
-
-        return new peserta([
-
+        return app(RegistrationService::class)->createParticipant([
             'nama' => trim($row['nama']),
-
             'nip' => $autoPlacement['nip'],
-
+            'participant_number' => PlacementService::generateParticipantNumber($jenisKelamin),
             'jenis_kelamin' => $jenisKelamin,
-
             'jenis_peserta' => $row['jenis_peserta']
                 ?? peserta::JENIS_KIRIMAN,
-
             'regu_id' => $autoPlacement['regu_id'],
-
             'kelompok_id' => $kelompok?->id,
-
             'desa_id' => $desa?->id,
-
-            'status_registrasi'
-                => peserta::STATUS_BELUM_REGISTRASI,
+            'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
+            'attendance_code' => null,
         ]);
     }
 }

@@ -67,3 +67,23 @@ test('create participant stores generated participant number and attendance code
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 });
+
+test('update participant persists changed identity fields', function () {
+    $participant = peserta::create([
+        'nama' => 'Peserta Lama',
+        'nip' => 1001,
+        'jenis_kelamin' => 'Laki - Laki',
+    ]);
+
+    $updated = app(RegistrationService::class)->updateParticipant($participant->id, [
+        'nama' => 'Peserta Baru',
+        'jenis_kelamin' => 'Perempuan',
+        'jenis_peserta' => peserta::JENIS_KIRIMAN,
+        'desa_id' => null,
+        'kelompok_id' => null,
+        'regu_id' => null,
+    ]);
+
+    expect($updated->nama)->toBe('Peserta Baru')
+        ->and($updated->jenis_kelamin)->toBe('Perempuan');
+});

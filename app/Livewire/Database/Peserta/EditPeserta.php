@@ -9,6 +9,7 @@ use Flux\Flux;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
+use App\Services\Registration\RegistrationService;
 
 class EditPeserta extends Component
 {
@@ -59,13 +60,13 @@ class EditPeserta extends Component
             'regu_id' => 'required'
         ]);
 
-        peserta::where('id', $this->peserta_id)->update([
+        app(RegistrationService::class)->updateParticipant($this->peserta_id, [
             'nama' => $this->nama,
             'jenis_kelamin' => $this->jenis_kelamin,
             'jenis_peserta' => $this->jenis_peserta,
             'desa_id' => $this->desa_id,
             'kelompok_id' => $this->kelompok_id,
-            'regu_id' => $this->regu_id
+            'regu_id' => $this->regu_id,
         ]);
 
         return redirect()->to('/database');

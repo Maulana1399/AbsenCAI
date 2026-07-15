@@ -15,7 +15,6 @@ class peserta extends Model
     public const JENIS_KIRIMAN = 'Kiriman';
     public const JENIS_PERSON = 'Person';
 
-
     protected $fillable = [
         'nama',
         'nip',
@@ -29,7 +28,6 @@ class peserta extends Model
         'status_registrasi',
     ];
 
-
     public static function statusRegistrasiOptions(): array
     {
         return [
@@ -38,7 +36,6 @@ class peserta extends Model
             self::STATUS_REGISTRASI_ULANG,
         ];
     }
-
 
     public static function jenisPesertaOptions(): array
     {
@@ -49,12 +46,6 @@ class peserta extends Model
         ];
     }
 
-
-    // ================================
-    // AUTO GENERATE NIP
-    // Laki     : 1001 dst
-    // Perempuan: 2001 dst
-    // ================================
     public static function nextAutoNip(?string $jenisKelamin = null): int
     {
         return PlacementService::legacyNextNip($jenisKelamin);
@@ -65,81 +56,21 @@ class peserta extends Model
         return PlacementService::generateParticipantNumber($jenisKelamin);
     }
 
-
-    // ================================
-    // AUTO REGU + NIP
-    // ================================
-    public static function autoPlacement(?string $jenisKelamin = null): array
-    {
-        $regu = self::leastFilledRegu($jenisKelamin);
-
-
-        return [
-            'nip' => (string) self::nextAutoNip($jenisKelamin),
-            'regu_id' => $regu?->id,
-            'regu_nama' => $regu?->regu ?? '-',
-        ];
-    }
-
-
-    // ================================
-    // CARI REGU PALING SEDIKIT
-    // ================================
-    public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
-    {
-        $jk = strtolower(
-            str_replace([' ', '-'], '', $jenisKelamin ?? '')
-        );
-
-
-        $jenisKelaminFix = match ($jk) {
-            'lakilaki' => 'Laki - Laki',
-            'perempuan' => 'Perempuan',
-            default => $jenisKelamin,
-        };
-
-
-        return regu::where(
-                'jenis_kelamin',
-                $jenisKelaminFix
-            )
-            ->withCount('peserta')
-            ->orderBy('peserta_count')
-            ->orderBy('id')
-            ->first();
-    }
-
-
-    public static function leastFilledReguId(?string $jenisKelamin = null): ?int
-    {
-        return self::leastFilledRegu($jenisKelamin)?->id;
-    }
-
-
-    public static function leastFilledReguName(?string $jenisKelamin = null): string
-    {
-        return self::leastFilledRegu($jenisKelamin)?->regu ?? '-';
-    }
-
-
     public function getStatusRegistrasiLabelAttribute(): string
     {
         return $this->status_registrasi
             ?: self::STATUS_BELUM_REGISTRASI;
     }
 
-
     public function kelompok()
     {
         return $this->belongsTo(kelompok::class);
     }
 
-
     public function desa()
     {
         return $this->belongsTo(desa::class);
     }
-
 
     public function regu()
     {

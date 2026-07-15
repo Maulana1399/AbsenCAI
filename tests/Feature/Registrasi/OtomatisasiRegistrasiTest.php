@@ -7,6 +7,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Services\Placement\PlacementService;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -63,8 +64,8 @@ beforeEach(function () {
 });
 
 test('auto placement picks next nip and least filled regu by gender', function () {
-    $placementMale = peserta::autoPlacement('Laki - Laki');
-    $placementFemale = peserta::autoPlacement('Perempuan');
+    $placementMale = PlacementService::autoPlacement('Laki - Laki');
+    $placementFemale = PlacementService::autoPlacement('Perempuan');
 
     expect($placementMale['nip'])->toBe('1001');
     expect($placementMale['regu_id'])->toBe($this->reguMaleB->id);
@@ -117,7 +118,7 @@ test('import peserta uses automatic nip and least filled regu', function () {
         'desa' => 'Desa A',
     ]);
 
-    expect($model->nip)->toBe('2001');
-    expect($model->regu_id)->toBe($this->reguFemaleB->id);
-    expect($model->status_registrasi)->toBe(peserta::STATUS_BELUM_REGISTRASI);
+    expect($model->nip)->toBe('2001')
+        ->and($model->regu_id)->toBe($this->reguFemaleB->id)
+        ->and($model->status_registrasi)->toBe(peserta::STATUS_BELUM_REGISTRASI);
 });

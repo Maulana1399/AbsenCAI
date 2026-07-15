@@ -3,6 +3,7 @@
 namespace App\Services\Placement;
 
 use App\Models\peserta;
+use App\Models\regu;
 
 class PlacementService
 {
@@ -66,6 +67,38 @@ class PlacementService
         return ((int) (peserta::max('nip') ?? 0)) + 1;
     }
 
+    public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
+    {
+        $jenisKelaminFix = self::normalizeGender($jenisKelamin);
+
+        return regu::where('jenis_kelamin', $jenisKelaminFix)
+            ->withCount('peserta')
+            ->orderBy('peserta_count')
+            ->orderBy('id')
+            ->first();
+    }
+
+    public static function leastFilledReguId(?string $jenisKelamin = null): ?int
+    {
+        return self::leastFilledRegu($jenisKelamin)?->id;
+    }
+
+    public static function leastFilledReguName(?string $jenisKelamin = null): string
+    {
+        return self::leastFilledRegu($jenisKelamin)?->regu ?? '-';
+    }
+
+    public static function autoPlacement(?string $jenisKelamin = null): array
+    {
+        $regu = self::leastFilledRegu($jenisKelamin);
+
+        return [
+            'nip' => (string) self::legacyNextNip($jenisKelamin),
+            'regu_id' => $regu?->id,
+            'regu_nama' => $regu?->regu ?? '-',
+        ];
+    }
+
     private static function genderPrefix(?string $jenisKelamin = null): string
     {
         $jk = strtolower(
@@ -76,6 +109,19 @@ class PlacementService
             'lakilaki' => 'KL',
             'perempuan' => 'KP',
             default => 'KL',
+        };
+    }
+
+    private static function normalizeGender(?string $jenisKelamin = null): ?string
+    {
+        $jk = strtolower(
+            str_replace([' ', '-'], '', $jenisKelamin ?? '')
+        );
+
+        return match ($jk) {
+            'lakilaki' => 'Laki - Laki',
+            'perempuan' => 'Perempuan',
+            default => $jenisKelamin,
         };
     }
 }

@@ -5,6 +5,7 @@ namespace App\Livewire\Registrasi;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\peserta;
+use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -44,7 +45,7 @@ class SelfRegister extends Component
 
     public function fillAutoPlacement(): void
     {
-        $autoPlacement = peserta::autoPlacement($this->jenis_kelamin ?: null);
+        $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null);
 
         $this->nip = $autoPlacement['nip'];
         $this->regu_id = $autoPlacement['regu_id'];
