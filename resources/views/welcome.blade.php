@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CAI 2025 | Sistem Registrasi & Absensi</title>
+    <title>{{ config('kjam.mvp_name') }} | Sistem Registrasi & Absensi</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

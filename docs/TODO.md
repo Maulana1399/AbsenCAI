@@ -1,5 +1,42 @@
 # Backlog
 
+## S01 Step 2 (Foundation Service Tests)
+
+- [x] Audit existing tests for service behavior coverage
+- [x] Add direct service tests for PlacementService
+- [x] Add direct service tests for RegistrationService
+- [x] Add direct service tests for AttendanceService
+- [x] Add direct service test for implemented QRService PNG output
+- [x] Verify new service tests in PHP runtime
+
+Status: VERIFIED.
+
+---
+
+## S01 Step 1 (Config Runtime Audit)
+
+- [x] Audit config/feature.php status and runtime usage
+- [x] Audit config/kjam.php status and safe runtime usage
+- [x] Sync relevant documentation to codebase reality
+- [x] Keep behavior unchanged
+
+Status: VERIFIED.
+
+---
+
+## S01 Infrastructure
+
+- [x] Step 1 verified
+- [x] Step 2 verified
+- [x] Step 3 completed
+- [x] Step 4 verified
+- [x] Foundation service tests in place
+- [x] Identifier contract documented consistently
+
+Status: COMPLETED.
+
+---
+
 ## Sprint 2.5.1 (QR & Label UI)
 
 - [ ] Create QR & Label menu

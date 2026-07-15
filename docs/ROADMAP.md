@@ -284,6 +284,19 @@ Target:
 
 Seluruh operasional CAI dapat dijalankan menggunakan sistem.
 
+Current work:
+
+S01 Infrastructure
+
+S01 progress:
+
+* S01 Infrastructure complete.
+* Step 1 verified.
+* Step 2 verified.
+* Step 3 completed.
+* Step 4 verified.
+* Estimated completion: 100%.
+
 ---
 
 ## v2.0

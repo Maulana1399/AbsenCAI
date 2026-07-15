@@ -6,9 +6,8 @@ return [
     | KJA Application Settings
     |--------------------------------------------------------------------------
     |
-    | Placeholder configuration for project-level settings.
-    | Keep values here simple and backward compatible.
-    | Avoid moving business rules into config unless the rule is truly global.
+    | Application metadata and project-level settings.
+    | Keep values simple and backward compatible.
     |
     */
 

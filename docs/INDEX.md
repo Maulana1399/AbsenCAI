@@ -66,9 +66,9 @@ TODO.md
 
 ## Current Sprint
 
-Sprint 0
+S02 — Placement & Registration
 
-Documentation
+S01 Infrastructure complete.
 
 ---
 

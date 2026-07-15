@@ -6,9 +6,8 @@ return [
     | Feature Flags
     |--------------------------------------------------------------------------
     |
-    | Placeholder configuration for future feature toggles.
-    | Add new flags here when a feature needs to be enabled/disabled
-    | without changing business logic in controllers or Livewire components.
+    | Reserved feature flags.
+    | Keep as placeholder unless a flag is actually used safely at runtime.
     |
     */
 

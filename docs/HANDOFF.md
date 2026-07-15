@@ -69,6 +69,8 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 
 - **NIP Laki-laki** dimulai dari `1001` ke atas (range 1000–1999)
 - **NIP Perempuan** dimulai dari `2001` ke atas (range 2000–2999)
+- **Participant Number** memakai format `KL001` / `KP001` sebagai identitas peserta yang human-readable
+- **Attendance Code** memakai format `KJA-XXXXXXXX` sebagai identitas utama QR attendance
 - **Auto Regu**: sistem mencari regu yang paling sedikit anggotanya (sesuai jenis kelamin), lalu memasukkan peserta ke sana secara otomatis
 
 ---
@@ -83,7 +85,7 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 | File | Fungsi | Kapan Diedit |
 |------|--------|--------------|
 | `Dashboard/Dashboard.php` | Menampilkan statistik: total peserta, desa, kelompok, regu. Juga menampilkan siapa yang sudah/belum absen pada sesi aktif | Jika ingin menambah statistik atau mengubah tampilan dashboard |
-| `Dashboard/Scan.php` | Menangani scan QR Code. Membaca NIP dari QR, cek ke database, catat absensi | Jika aturan scan berubah (mis: boleh absen 2x, atau ada validasi tambahan) |
+| `Dashboard/Scan.php` | Menangani scan QR Code. Membaca Attendance Code dari QR, fallback sementara ke NIP lama, cek ke database, catat absensi | Jika aturan scan berubah (mis: boleh absen 2x, atau ada validasi tambahan) |
 
 **Grup: Registrasi**
 
@@ -387,10 +389,11 @@ Pilih Sesi Absensi yang sedang berlangsung
         ↓
 Kamera aktif, siap scan QR Code
         ↓
-QR Code dipindai → sistem membaca NIP dari QR
+QR Code dipindai → sistem membaca Attendance Code dari QR
         ↓
 Scan.php (Livewire) memproses:
-  1. Cari peserta berdasarkan NIP
+  1. Cari peserta berdasarkan Attendance Code
+     → Jika tidak ditemukan, fallback sementara cari berdasarkan NIP legacy
      → Tidak ditemukan? Tampil pesan error
   2. Cek apakah sesi sudah dipilih
      → Belum? Tampil pesan "Pilih sesi dulu"
@@ -403,7 +406,7 @@ Tampil nama peserta + jam scan
 Klik "Scan Lagi" → kamera kembali aktif
 ```
 
-> **Format QR Code:** QR Code harus berisi NIP peserta (angka saja, mis: `1001`)
+> **Format QR Code baru:** QR Code harus berisi Attendance Code peserta (mis: `KJA-XXXXXXXX`). NIP numeric masih diterima sebagai fallback sementara untuk QR lama.
 
 ---
 

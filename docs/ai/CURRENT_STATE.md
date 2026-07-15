@@ -44,7 +44,16 @@ QR & Label UI module
 
 # Current Goal
 
-Menyelesaikan seluruh dokumentasi sebelum memulai implementasi Sprint 1.
+Menyelesaikan S01 Infrastructure secara bertahap tanpa mengubah behavior aplikasi.
+
+S01 status:
+
+* S01 Infrastructure complete.
+* Step 1 verified.
+* Step 2 verified.
+* Step 3 completed.
+* Step 4 verified.
+* Estimated S01 completion: 100%.
 
 ---
 
@@ -52,7 +61,7 @@ Menyelesaikan seluruh dokumentasi sebelum memulai implementasi Sprint 1.
 
 Priority saat ini:
 
-1. Finalisasi Dokumentasi
+1. S02 — Placement & Registration
 2. Rapikan Arsitektur
 3. Refactor UI
 4. Stabilkan Operasional CAI

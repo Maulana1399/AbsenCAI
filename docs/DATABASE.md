@@ -18,10 +18,12 @@ Current participant identity columns:
 - `attendance_code` (active, nullable)
 
 Identity transition status:
-- `nip` masih dipakai untuk backward compatibility dan scan lama
-- `participant_number` sudah disiapkan untuk identitas manusiawi
-- `attendance_code` sudah dipakai untuk identity QR baru
-- Lookup attendance mulai mengutamakan `attendance_code` lalu fallback ke `nip`
+- `nip` adalah legacy operational identifier untuk backward compatibility
+- `nip` laki-laki menggunakan range `1001+`
+- `nip` perempuan menggunakan range `2001+`
+- `participant_number` adalah identitas peserta yang human-readable dengan format `KL001` / `KP001`
+- `attendance_code` adalah primary QR attendance identifier dengan format `KJA-XXXXXXXX`
+- Lookup attendance mengutamakan `attendance_code` lalu temporary fallback ke `nip`
 
 ---
 
@@ -89,8 +91,12 @@ KJA-0000001
 
 Attendance Code
 
-Random Unique String
+Primary QR attendance identifier, format `KJA-XXXXXXXX`
+
+Participant Number
+
+Human-readable participant identifier, format `KL001` / `KP001`
 
 NIP
 
-Nomor Peserta Event
+Legacy operational identifier. Laki-laki `1001+`, perempuan `2001+`.

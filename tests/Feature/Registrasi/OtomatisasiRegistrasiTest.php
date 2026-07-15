@@ -66,11 +66,11 @@ test('auto placement picks next nip and least filled regu by gender', function (
     $placementMale = peserta::autoPlacement('Laki - Laki');
     $placementFemale = peserta::autoPlacement('Perempuan');
 
-    expect($placementMale['nip'])->toBe('14');
+    expect($placementMale['nip'])->toBe('1001');
     expect($placementMale['regu_id'])->toBe($this->reguMaleB->id);
     expect($placementMale['regu_nama'])->toBe('Grup Merah Laki');
 
-    expect($placementFemale['nip'])->toBe('14');
+    expect($placementFemale['nip'])->toBe('2001');
     expect($placementFemale['regu_id'])->toBe($this->reguFemaleB->id);
     expect($placementFemale['regu_nama'])->toBe('Grup Merah Perempuan');
 });
@@ -86,7 +86,7 @@ test('self register uses automatic nip and least filled regu', function () {
 
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Baru',
-        'nip' => 14,
+        'nip' => 2001,
         'regu_id' => $this->reguFemaleB->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
@@ -103,7 +103,7 @@ test('database peserta form uses automatic nip and least filled regu', function 
 
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Database',
-        'nip' => 14,
+        'nip' => 1001,
         'regu_id' => $this->reguMaleB->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
@@ -117,7 +117,7 @@ test('import peserta uses automatic nip and least filled regu', function () {
         'desa' => 'Desa A',
     ]);
 
-    expect($model->nip)->toBe('14');
+    expect($model->nip)->toBe('2001');
     expect($model->regu_id)->toBe($this->reguFemaleB->id);
     expect($model->status_registrasi)->toBe(peserta::STATUS_BELUM_REGISTRASI);
 });

@@ -8,7 +8,7 @@
 
 KJA Event Manager adalah platform Event Management yang dikembangkan untuk membantu organisasi mengelola seluruh proses kegiatan dalam satu sistem.
 
-Awalnya proyek ini dibuat sebagai **AbsenCAI**, namun berkembang menjadi platform yang mampu mengelola berbagai jenis event.
+Awalnya proyek ini dibuat sebagai **AbsenCAI**, namun berkembang menjadi platform yang mampu mengelola berbagai jenis event. Current MVP tetap **CAI Operational**.
 
 Contoh penggunaan:
 

@@ -76,7 +76,7 @@ test('import peserta uploads csv', function () {
 
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Import',
-        'nip' => 1,
+        'nip' => 2001,
         'regu_id' => $regu->id,
         'kelompok_id' => $kelompok->id,
         'desa_id' => $desa->id,
