@@ -85,6 +85,12 @@ Current direction:
 - QR generation should be reusable for ID Card, export, API, and mobile app
 - QR rendering logic should live in a dedicated service layer
 
+Batch export direction:
+
+- QR assets can be generated in bulk for mass printing workflows
+- File naming should use `participant_number`
+- Export should return summary data, not a UI-specific response
+
 ---
 
 ## File Storage

@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.6
+Sprint 2.7
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Reusable QR generation service foundation
+Batch QR export foundation
 
 ---
 

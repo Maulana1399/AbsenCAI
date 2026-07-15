@@ -10,11 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* QRService untuk generate SVG dan PNG berbasis attendance_code
+* BatchQRExportService untuk menyiapkan QR asset massal berbasis participant_number dan attendance_code
 
 ## Changed
 
-* QR generation foundation siap dipakai ulang untuk ID Card, export, dan API di fase berikutnya
+* QR generation foundation diperluas untuk kebutuhan ekspor massal tanpa mengubah flow aplikasi
 
 ## Planned
 

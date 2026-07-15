@@ -1,5 +1,14 @@
 # Backlog
 
+## Sprint 2.7 (Batch QR Export Foundation)
+
+- [ ] Create batch QR export service
+- [ ] Reuse QRService
+- [ ] Support PNG and SVG output
+- [ ] Return export summary
+
+---
+
 ## Sprint 2.6 (QR Foundation)
 
 - [ ] Create reusable QR service
