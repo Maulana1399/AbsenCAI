@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.7
+Sprint 2.8
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Batch QR export foundation
+Print engine foundation for participant labels
 
 ---
 

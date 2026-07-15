@@ -1,5 +1,14 @@
 # Backlog
 
+## Sprint 2.8 (Print Foundation)
+
+- [ ] Create print engine
+- [ ] Create label 4x4 template
+- [ ] Use QRService in print flow
+- [ ] Prepare printable participant labels
+
+---
+
 ## Sprint 2.7 (Batch QR Export Foundation)
 
 - [ ] Create batch QR export service

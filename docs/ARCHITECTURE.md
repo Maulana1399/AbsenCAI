@@ -91,6 +91,12 @@ Batch export direction:
 - File naming should use `participant_number`
 - Export should return summary data, not a UI-specific response
 
+Print direction:
+
+- Print templates should be isolated from business logic
+- A print engine should compose participant data, QR rendering, and printable output
+- First template is `label-4x4`
+
 ---
 
 ## File Storage

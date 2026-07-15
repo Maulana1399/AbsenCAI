@@ -10,11 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* BatchQRExportService untuk menyiapkan QR asset massal berbasis participant_number dan attendance_code
+* PrintEngine dan Label4x4Template sebagai fondasi label print peserta
 
 ## Changed
 
-* QR generation foundation diperluas untuk kebutuhan ekspor massal tanpa mengubah flow aplikasi
+* Print foundation mulai memakai QRService dan participant_number tanpa mengubah flow aplikasi
 
 ## Planned
 
