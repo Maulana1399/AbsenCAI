@@ -11,6 +11,12 @@ Desa
               ├── Absensi
               └── Registrasi
 
+Current participant identity columns:
+- `id`
+- `nip`
+- `participant_number` (planned / nullable)
+- `attendance_code` (planned / nullable)
+
 ---
 
 ## Target Structure

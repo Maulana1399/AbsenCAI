@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 0
+Sprint 2.2
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Documentation & Architecture
+Database foundation for identity architecture
 
 ---
 

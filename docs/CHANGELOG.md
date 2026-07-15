@@ -10,12 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* PlacementService untuk generation participant number
-* RegistrationService untuk create/update participant persistence
+* Migration foundation untuk participant_number dan attendance_code pada tabel pesertas
 
 ## Changed
 
-* Livewire registrasi sekarang mendelegasikan persistence ke service
+* Database identity preparation untuk arsitektur v2 dimulai tanpa mengubah workflow aplikasi
 
 ## Planned
 

@@ -1,5 +1,14 @@
 # Backlog
 
+## Sprint 2.2 (Identity Foundation)
+
+- [ ] Add participant_number column
+- [ ] Add attendance_code column
+- [ ] Keep legacy nip compatibility
+- [ ] Prepare identity transition docs
+
+---
+
 ## Sprint 1 (CAI Priority)
 
 ### Registration Refactor
