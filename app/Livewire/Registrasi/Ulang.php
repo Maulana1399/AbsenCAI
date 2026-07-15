@@ -6,6 +6,7 @@ use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
+use App\Services\Registration\RegistrationService;
 use Livewire\Component;
 
 class Ulang extends Component
@@ -24,11 +25,10 @@ class Ulang extends Component
 
     public function registrasiUlang(int $id): void
     {
-        $peserta = peserta::findOrFail($id);
-
-        $peserta->update([
-            'status_registrasi' => peserta::STATUS_REGISTRASI_ULANG,
-        ]);
+        app(RegistrationService::class)->updateParticipantStatus(
+            $id,
+            peserta::STATUS_REGISTRASI_ULANG
+        );
 
         session()->flash('success', 'Registrasi ulang berhasil.');
     }
@@ -52,21 +52,20 @@ class Ulang extends Component
 
     public function updatePeserta()
     {
-        peserta::where('id',$this->editId)
-            ->update([
-                'nama' => $this->editNama,
-                'jenis_kelamin' => $this->editJenisKelamin,
-                'jenis_peserta' => $this->editJenisPeserta,
-                'desa_id' => $this->editDesa,
-                'kelompok_id' => $this->editKelompok,
-                'regu_id' => $this->editRegu,
-            ]);
+        app(RegistrationService::class)->updateParticipant($this->editId, [
+            'nama' => $this->editNama,
+            'jenis_kelamin' => $this->editJenisKelamin,
+            'jenis_peserta' => $this->editJenisPeserta,
+            'desa_id' => $this->editDesa,
+            'kelompok_id' => $this->editKelompok,
+            'regu_id' => $this->editRegu,
+        ]);
 
-            $this->showEditModal = false;
+        $this->showEditModal = false;
 
-            session()->flash('success','Data peserta berhasil diperbarui');
+        session()->flash('success','Data peserta berhasil diperbarui');
 
-            $this->dispatch('$refresh');
+        $this->dispatch('$refresh');
     }
 
 

@@ -8,6 +8,15 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added
+
+* PlacementService untuk generation participant number
+* RegistrationService untuk create/update participant persistence
+
+## Changed
+
+* Livewire registrasi sekarang mendelegasikan persistence ke service
+
 ## Planned
 
 Belum ada perubahan.

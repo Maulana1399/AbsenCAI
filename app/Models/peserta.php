@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Placement\PlacementService;
 use Illuminate\Database\Eloquent\Model;
 
 class peserta extends Model
@@ -54,54 +55,7 @@ class peserta extends Model
     // ================================
     public static function nextAutoNip(?string $jenisKelamin = null): int
     {
-        $jk = strtolower(
-            str_replace([' ', '-'], '', $jenisKelamin ?? '')
-        );
-
-
-        if ($jk === 'lakilaki') {
-
-            $last = self::where(
-                    'nip',
-                    '>=',
-                    1000
-                )
-                ->where(
-                    'nip',
-                    '<',
-                    2000
-                )
-                ->max('nip');
-
-
-            return $last
-                ? ((int) $last + 1)
-                : 1001;
-        }
-
-
-        if ($jk === 'perempuan') {
-
-            $last = self::where(
-                    'nip',
-                    '>=',
-                    2000
-                )
-                ->where(
-                    'nip',
-                    '<',
-                    3000
-                )
-                ->max('nip');
-
-
-            return $last
-                ? ((int) $last + 1)
-                : 2001;
-        }
-
-
-        return ((int)(self::max('nip') ?? 0)) + 1;
+        return PlacementService::generateParticipantNumber($jenisKelamin);
     }
 
 

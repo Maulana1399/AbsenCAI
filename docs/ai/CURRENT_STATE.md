@@ -186,17 +186,15 @@ Infrastructure
 
 # Next Sprint
 
-Sprint 1
+Sprint 1.4
 
 Target:
 
-* Attendance Code
-* Internal QR Generator
-* Print QR
-* Export
-* Status Attendance
-* Dashboard Improvement
-* UI Refactor
+* Attendance flow service extraction
+* Rekap logic refactor
+* Dashboard service planning
+* UI consistency cleanup
+* Documentation sync
 
 ---
 

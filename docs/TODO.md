@@ -2,6 +2,15 @@
 
 ## Sprint 1 (CAI Priority)
 
+### Registration Refactor
+
+- [ ] RegistrationService
+- [ ] Participant persistence extraction
+- [ ] Update participant status service
+- [ ] Re-registration service cleanup
+
+---
+
 ### UI
 
 - [ ] Dark Mode
