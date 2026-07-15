@@ -10,11 +10,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* AttendanceService sekarang mendukung lookup attendance_code sebelum fallback ke NIP legacy
+* QRService untuk generate SVG dan PNG berbasis attendance_code
 
 ## Changed
 
-* Attendance scan tetap kompatibel dengan NIP lama sambil mulai menerima attendance_code
+* QR generation foundation siap dipakai ulang untuk ID Card, export, dan API di fase berikutnya
 
 ## Planned
 

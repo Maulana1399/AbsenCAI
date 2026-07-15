@@ -1,5 +1,14 @@
 # Backlog
 
+## Sprint 2.6 (QR Foundation)
+
+- [ ] Create reusable QR service
+- [ ] Support SVG generation
+- [ ] Support PNG generation
+- [ ] Keep service reusable for future modules
+
+---
+
 ## Sprint 2.5 (Attendance Identity Transition)
 
 - [ ] Lookup attendance by attendance_code first

@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.5
+Sprint 2.6
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Attendance transition to attendance code lookup
+Reusable QR generation service foundation
 
 ---
 

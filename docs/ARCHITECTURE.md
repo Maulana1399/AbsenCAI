@@ -77,6 +77,16 @@ Token Based Scan (Future)
 
 ---
 
+## QR Generation
+
+Current direction:
+
+- QR content will use `attendance_code`
+- QR generation should be reusable for ID Card, export, API, and mobile app
+- QR rendering logic should live in a dedicated service layer
+
+---
+
 ## File Storage
 
 Database
