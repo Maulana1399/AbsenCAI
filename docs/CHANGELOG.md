@@ -10,11 +10,12 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ## Added
 
-* Migration foundation untuk participant_number dan attendance_code pada tabel pesertas
+* Participant Number dan Attendance Code otomatis dibuat saat registrasi peserta baru
 
 ## Changed
 
-* Database identity preparation untuk arsitektur v2 dimulai tanpa mengubah workflow aplikasi
+* RegistrationService sekarang menyimpan participant_number dan attendance_code untuk peserta baru
+* PlacementService tetap mendukung participant number architecture sementara legacy NIP tetap tersedia sebagai wrapper kompatibilitas
 
 ## Planned
 

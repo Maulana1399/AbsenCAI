@@ -1,5 +1,23 @@
 # Backlog
 
+## Sprint 2.4 (Registration Identity Transition)
+
+- [ ] Generate participant_number on new registration
+- [ ] Generate attendance_code on new registration
+- [ ] Keep legacy nip flow for backward compatibility
+- [ ] Verify unique participant_number and attendance_code
+
+---
+
+## Sprint 2.3 (Participant Number Foundation)
+
+- [ ] Generate participant_number with KL/KP prefix
+- [ ] Keep legacy nip wrapper for backward compatibility
+- [ ] Prepare participant number transition docs
+- [ ] Verify deterministic running sequence
+
+---
+
 ## Sprint 2.2 (Identity Foundation)
 
 - [ ] Add participant_number column

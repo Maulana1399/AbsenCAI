@@ -19,6 +19,8 @@ class peserta extends Model
     protected $fillable = [
         'nama',
         'nip',
+        'participant_number',
+        'attendance_code',
         'jenis_kelamin',
         'jenis_peserta',
         'kelompok_id',
@@ -54,6 +56,11 @@ class peserta extends Model
     // Perempuan: 2001 dst
     // ================================
     public static function nextAutoNip(?string $jenisKelamin = null): int
+    {
+        return PlacementService::legacyNextNip($jenisKelamin);
+    }
+
+    public static function nextAutoParticipantNumber(?string $jenisKelamin = null): string
     {
         return PlacementService::generateParticipantNumber($jenisKelamin);
     }

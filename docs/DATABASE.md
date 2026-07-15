@@ -14,8 +14,13 @@ Desa
 Current participant identity columns:
 - `id`
 - `nip`
-- `participant_number` (planned / nullable)
-- `attendance_code` (planned / nullable)
+- `participant_number` (active, nullable)
+- `attendance_code` (active, nullable)
+
+Identity transition status:
+- `nip` masih dipakai untuk backward compatibility dan scan lama
+- `participant_number` sudah disiapkan untuk identitas manusiawi
+- `attendance_code` sudah disiapkan untuk QR identity
 
 ---
 

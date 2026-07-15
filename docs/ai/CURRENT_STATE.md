@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2.2
+Sprint 2.4
 
 Status:
 
@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Database foundation for identity architecture
+Registration transition to participant identity
 
 ---
 

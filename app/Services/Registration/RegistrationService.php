@@ -3,7 +3,9 @@
 namespace App\Services\Registration;
 
 use App\Models\peserta;
+use App\Services\Placement\PlacementService;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class RegistrationService
@@ -14,6 +16,8 @@ class RegistrationService
             return peserta::create([
                 'nama' => $data['nama'],
                 'nip' => $data['nip'],
+                'participant_number' => $data['participant_number'] ?? PlacementService::generateParticipantNumber($data['jenis_kelamin'] ?? null),
+                'attendance_code' => $data['attendance_code'] ?? $this->generateAttendanceCode(),
                 'jenis_kelamin' => $data['jenis_kelamin'],
                 'jenis_peserta' => $data['jenis_peserta'],
                 'desa_id' => $data['desa_id'],
@@ -57,5 +61,14 @@ class RegistrationService
         ]);
 
         return $peserta;
+    }
+
+    private function generateAttendanceCode(): string
+    {
+        do {
+            $code = 'KJA-'.Str::upper(Str::random(8));
+        } while (peserta::where('attendance_code', $code)->exists());
+
+        return $code;
     }
 }
