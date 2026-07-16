@@ -77,6 +77,44 @@
         </div>
 
         <div>
+        <h3 class="text-xl font-bold mb-3">Peserta Izin</h3>
+            <div class="overflow-x-auto bg-white rounded shadow mb-6">
+                <table class="min-w-full border">
+                    <thead>
+                        <tr>
+                            <th class="border px-2 py-1">No</th>
+                            <th class="border px-2 py-1">Nama</th>
+                            <th class="border px-2 py-1">NIP</th>
+                            <th class="border px-2 py-1">Regu</th>
+                            <th class="border px-2 py-1">Kelompok</th>
+                            <th class="border px-2 py-1">Desa</th>
+                            <th class="border px-2 py-1">Waktu Dicatat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($pesertaIzin as $izin)
+                            <tr>
+                                <td class="border px-2 py-1">{{ $loop->iteration }}</td>
+                                <td class="border px-2 py-1">{{ $izin->peserta->nama ?? '-' }}</td>
+                                <td class="border px-2 py-1">{{ $izin->peserta->nip ?? '-' }}</td>
+                                <td class="border px-2 py-1">{{ $izin->peserta->regu->regu ?? '-' }}</td>
+                                <td class="border px-2 py-1">{{ $izin->peserta->kelompok->kelompok_asal ?? '-' }}</td>
+                                <td class="border px-2 py-1">{{ $izin->peserta->desa->desa_asal ?? '-' }}</td>
+                                <td class="border px-2 py-1">{{ $izin->created_at ?? '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="border px-2 py-3 text-center text-gray-500">
+                                    Tidak ada peserta izin pada sesi ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
             <h3 class="text-xl font-bold mb-3">Peserta Alfa</h3>
             <div class="overflow-x-auto bg-white rounded shadow">
                 <table class="min-w-full border">
