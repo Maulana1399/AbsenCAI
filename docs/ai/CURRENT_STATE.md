@@ -30,7 +30,7 @@ MVP Development
 
 # Current Sprint
 
-Sprint 6
+Sprint 1 — CAI Operational
 
 Status:
 
@@ -38,22 +38,46 @@ Status:
 
 Focus:
 
-Commercial Preparation
+Menyelesaikan seluruh gap operasional CAI sesuai `docs/ROADMAP.md`.
 
 ---
 
 # Current Goal
 
-Menyelesaikan S01 Infrastructure secara bertahap tanpa mengubah behavior aplikasi.
+Menyelesaikan Sprint 1 sebelum melanjutkan ke Sprint berikutnya.
 
-S01 status:
+Completed foundation work:
 
-* Sprint 1 attendance status summary is implemented for Hadir/Izin/Alfa.
-* Step 1 verified.
-* Step 2 verified.
-* Step 3 completed.
-* Step 4 verified.
-* Estimated S01 completion: 100%.
+* S01 Foundation completed.
+* S02 Registration and Placement foundation completed.
+* S03 Attendance architecture completed.
+* S04 Identity & QR completed.
+* S05 Document & Certificate deferred / skipped for now.
+
+Current Sprint 1 attendance state:
+
+* Attendance Code implemented.
+* Internal QR Generator implemented.
+* QR Regeneration supported through on-demand generation from `attendance_code`.
+* Manual Attendance implemented.
+* Manual Hadir implemented.
+* Manual Izin implemented.
+* Attendance Status Hadir/Izin/Alfa implemented.
+* Hadir remains stored in `Absensi`.
+* Izin is stored separately in `IzinAbsensi`.
+* Alfa is derived and is not persisted as a database row.
+* Hadir ↔ Izin conflicts are prevented.
+* Rekap Hadir/Izin/Alfa implemented.
+* Dashboard Hadir/Izin/Alfa summary implemented.
+* `attendance_code` remains the primary scan and QR identifier.
+* Legacy NIP fallback remains supported.
+
+Verification:
+
+* Full test suite passed.
+* 70 tests passed.
+* 198 assertions.
+* 0 failures.
 
 ---
 
@@ -61,14 +85,14 @@ S01 status:
 
 Priority saat ini:
 
-1. S06 — Commercial Preparation
-2. Rapikan Arsitektur
-3. Refactor UI
-4. Stabilkan Operasional CAI
+1. Attendance History hardening.
+2. Complete remaining Sprint 1 operational gaps.
+3. Dashboard PJ Regu.
+4. Progress Absensi and Live Monitoring hardening.
+5. UI hardening.
+6. Close Sprint 1.
 
-Tidak ada penambahan fitur besar sebelum Sprint 1 dimulai.
-
----
+Development follows `docs/ROADMAP.md` as the primary product roadmap.
 
 # Project Status
 
@@ -186,44 +210,40 @@ Infrastructure
 
 # Current Technical Debt
 
-* QR Generator masih menggunakan layanan pihak ketiga.
+* SVG QR generation remains deferred technical debt; active PNG QR runtime uses the internal QR service.
 * Attendance masih menggunakan NIP sebagai legacy fallback, sementara attendance_code menjadi identifier utama scan.
 * Beberapa halaman belum menggunakan komponen UI yang konsisten.
 * Struktur database masih berorientasi pada CAI.
 
 ---
 
-# Next Sprint
+# Next Work
 
-Sprint 1.4
+Current next task:
 
-Target:
+Attendance History hardening.
 
-* Attendance flow service extraction
-* Rekap logic refactor
-* Dashboard service planning
-* UI consistency cleanup
-* Documentation sync
+After Sprint 1:
+
+Continue development according to `docs/ROADMAP.md`.
+
+Sprint 5 Document & Certificate remains deferred until required.
 
 ---
 
 # Development Rules
 
-Selama Sprint 0:
+# Development Rules
 
-✅ Boleh
+Current development rules:
 
-* Perbaikan dokumentasi
-* Perbaikan bug
-* Refactor kecil
-* Perbaikan UI
-
-❌ Tidak boleh
-
-* Breaking Change Database
-* Refactor besar tanpa desain
-* Menambah modul baru
-* Mengubah arsitektur inti
+* Follow `docs/ROADMAP.md` as the primary roadmap.
+* Audit existing functionality before implementing new functionality.
+* Do not duplicate features that already exist.
+* Keep backward compatibility unless an explicit migration is designed.
+* Business logic should remain centralized in service layers.
+* Update documentation after verified changes.
+* Run the full test suite before closing a feature scope.
 
 ---
 

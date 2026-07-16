@@ -84,6 +84,10 @@ Merapikan pondasi proyek sebelum pengembangan besar dimulai.
 
 # Sprint 1
 
+## Status
+
+🟡 In Progress
+
 ## Goal
 
 Menyelesaikan seluruh kebutuhan operasional absensi CAI.
@@ -96,45 +100,53 @@ Highest
 
 ### Attendance
 
-* Attendance Code
-* Internal QR Generator
-* QR Regeneration
-* Manual Attendance
-* Attendance History
-* Attendance Status
-* Izin
-* Alfa
+* [x] Attendance Code
+* [x] Internal QR Generator
+* [x] QR Regeneration
+* [x] Manual Attendance
+* [ ] Attendance History
+* [x] Attendance Status
+* [x] Izin
+* [x] Alfa
+
+Notes:
+
+* Hadir disimpan melalui `Absensi`.
+* Izin disimpan melalui `IzinAbsensi`.
+* Alfa dihitung secara derived dari peserta yang tidak memiliki status Hadir maupun Izin pada sesi.
+* Manual Attendance mendukung pencatatan Hadir dan Izin.
+* Konflik Hadir ↔ Izin dicegah oleh attendance service layer.
+
 
 ---
 
 ### QR
 
-* Generate QR
-* Batch Generate
-* PDF Export
-* Print 4×4 cm
-* Batch Print
+* [x] Generate QR
+* [x] Batch Generate
+* [x] PDF Export
+* [x] Print 4×4 cm
+* [x] Batch Print
 
 ---
 
 ### Report
 
-* Export Excel
-* Export PDF
-* Rekap Per Regu
-* Rekap Per Desa
-* Rekap Per Kelompok
-* Rekap Belum Hadir
-
+* [x] Export Excel
+* [ ] Export PDF
+* [x] Rekap Per Regu
+* [x] Rekap Per Desa
+* [x] Rekap Per Kelompok
+* [x] Rekap Belum Hadir
 ---
 
 ### Dashboard
 
-* Dashboard Divisi
-* Dashboard PJ Regu
-* Progress Registrasi
-* Progress Absensi
-* Live Monitoring
+* [x] Dashboard Divisi
+* [ ] Dashboard PJ Regu
+* [x] Progress Registrasi
+* [ ] Progress Absensi
+* [ ] Live Monitoring
 
 ---
 
@@ -296,7 +308,20 @@ Seluruh operasional CAI dapat dijalankan menggunakan sistem.
 
 Current work:
 
-S04 Identity & QR
+Sprint 1 — CAI Operational
+
+Current progress:
+
+* S01 Foundation completed.
+* S02 Registration/Placement foundation completed.
+* S03 Attendance architecture completed.
+* S04 Identity & QR completed.
+* Sprint 1 operational gap closure is currently in progress.
+* Manual Attendance is implemented and verified.
+* Attendance status Hadir/Izin/Alfa is implemented and verified.
+* QR operational scope is complete.
+* Full regression suite verified: 70 tests passed, 198 assertions, 0 failures.
+* Current next priority: Attendance History hardening.
 
 Notes:
 

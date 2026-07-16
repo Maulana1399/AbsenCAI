@@ -24,29 +24,76 @@ Status: VERIFIED.
 
 ---
 
-## Sprint 1 (CAI Priority)
+## Sprint 1 (CAI Operational)
+
+Status: IN PROGRESS
+
+### Attendance
 
 - [x] Attendance Code
 - [x] Internal QR Generator
 - [x] QR Regeneration
+- [x] Manual Attendance
+- [x] Manual Hadir
+- [x] Manual Izin
+- [x] Attendance Status
+- [x] Hadir summary
+- [x] Izin summary
+- [x] Alfa derivation
+- [x] Hadir ↔ Izin conflict protection
+- [ ] Attendance History hardening
+
+### QR
+
 - [x] Generate QR
 - [x] Batch Generate
 - [x] PDF Export
 - [x] Print 4x4 cm
 - [x] Batch Print
+- [x] QR regeneration via attendance_code
+
+### Report
+
 - [x] Export Excel
+- [ ] Export PDF
 - [x] Rekap Per Regu
 - [x] Rekap Per Desa
 - [x] Rekap Per Kelompok
 - [x] Rekap Belum Hadir
+- [x] Rekap Hadir / Izin / Alfa
+
+### Dashboard
+
 - [x] Dashboard Divisi
+- [ ] Dashboard PJ Regu
 - [x] Progress Registrasi
-- [x] Attendance Status Summary
+- [ ] Progress Absensi hardening
+- [ ] Live Monitoring hardening
 
-Status: PARTIAL — some dashboard/report items remain.
+### UI
 
-- [ ] Fix low-contrast gray text on bright blue background in QR scope UI
+- [ ] Dark Mode hardening
+- [ ] Responsive Mobile hardening
+- [ ] Menu Refactor
+- [ ] Reusable Components
+- [ ] Fix low-contrast gray text on bright blue background
 
+### Verification
+
+- [x] Manual Attendance verified
+- [x] Izin attendance flow verified
+- [x] Hadir/Izin/Alfa summary verified
+- [x] Full regression suite verified
+
+Last verified test suite:
+
+70 tests passed, 198 assertions, 0 failures.
+
+### Current Next Task
+
+- [ ] Audit Attendance History existing implementation
+- [ ] Determine whether Rekap Absensi already satisfies Attendance History requirements
+- [ ] Harden existing flow instead of creating duplicate functionality
 ---
 
 ## Sprint 2.5.1 (QR & Label UI)
