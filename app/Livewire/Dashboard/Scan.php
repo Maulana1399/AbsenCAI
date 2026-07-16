@@ -7,6 +7,8 @@ use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceService;
 use Livewire\Component;
+use App\Services\Attendance\AttendanceExceptionService;
+use Illuminate\Validation\ValidationException;
 
 class Scan extends Component
 {
@@ -89,6 +91,38 @@ class Scan extends Component
         $this->nip = $result['peserta']->nip;
         $this->nama = $result['peserta']->nama;
         $this->jam_scan = $result['jam_scan'] ?? null;
+    }
+
+    public function manualIzin(): void
+    {
+        $participant = $this->selectedManualParticipantId
+            ? peserta::find($this->selectedManualParticipantId)
+            : null;
+
+        if (! $participant) {
+            $this->message = 'Pilih peserta terlebih dahulu';
+            return;
+        }
+
+        if (! $this->sesi_id) {
+            $this->message = 'Pilih sesi absensi terlebih dahulu';
+            return;
+        }
+
+        try {
+            app(AttendanceExceptionService::class)->recordIzin(
+                $participant->id,
+                (int) $this->sesi_id,
+                'manual'
+            );
+
+            $this->nama = $participant->nama;
+            $this->nip = $participant->nip;
+            $this->jam_scan = null;
+            $this->message = 'Peserta berhasil dicatat sebagai izin';
+        } catch (ValidationException $exception) {
+            $this->message = $exception->validator->errors()->first('peserta');
+        }
     }
 
     public function scanPeserta($data)

@@ -125,14 +125,25 @@
                     @endforelse
                 </div>
 
-                <button
-                    type="button"
-                    wire:click="manualAttend"
-                    @disabled(! $selectedManualParticipantId || ! $sesi_id)
-                    class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
-                >
-                    Catat Hadir Manual
-                </button>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <button
+                        type="button"
+                        wire:click="manualAttend"
+                        @disabled(! $selectedManualParticipantId || ! $sesi_id)
+                        class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
+                    >
+                        Catat Hadir
+                    </button>
+
+                    <button
+                        type="button"
+                        wire:click="manualIzin"
+                        @disabled(! $selectedManualParticipantId || ! $sesi_id)
+                        class="w-full rounded-xl border border-zinc-300 px-4 py-3 font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                    >
+                        Catat Izin
+                    </button>
+                </div>
             </div>
         </div>
     </div>
