@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6 px-4 lg:px-0">
     <div class="w-full">
         <flux:heading size="xl" level="1">{{ __('QR & Label') }}</flux:heading>
         <flux:subheading size="lg" class="mb-8">{{ __('Generate QR individual, batch export, dan preview label 4x4.') }}</flux:subheading>
@@ -75,7 +75,6 @@
 
                         <div class="mt-5 flex flex-wrap gap-2">
                             <button wire:click="downloadPng" type="button" class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">Download PNG</button>
-                            <button wire:click="downloadSvg" type="button" class="inline-flex items-center rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white">Download SVG</button>
                         </div>
                     @else
                         <div class="mt-4 rounded-xl border border-dashed border-zinc-200 p-4 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">Pilih peserta untuk melihat QR.</div>
@@ -130,7 +129,6 @@
 
                 <div class="mt-4 flex flex-wrap gap-2">
                     <button type="button" wire:click="generateBatchExport" class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">Generate Export</button>
-                    <button type="button" wire:click="refreshBatchAndLabelPreview" class="inline-flex items-center rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white">Refresh Preview</button>
                 </div>
 
                 <div class="mt-4 flex flex-wrap gap-2">
@@ -185,7 +183,6 @@
                         <flux:heading size="lg" level="2">{{ __('Print Label 4x4') }}</flux:heading>
                         <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Reuses PrintEngine for filtered participants.') }}</flux:text>
                     </div>
-                    <button type="button" wire:click="refreshBatchAndLabelPreview" class="inline-flex items-center rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white">Refresh Preview</button>
                 </div>
 
                 <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">

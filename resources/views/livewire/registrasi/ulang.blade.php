@@ -68,9 +68,9 @@
 
 <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
 
-    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-xl">
 
-        <h2 class="mb-5 text-xl font-bold">
+        <h2 class="mb-5 text-xl font-bold text-zinc-900 dark:text-white">
             Edit Peserta
         </h2>
 
@@ -78,19 +78,19 @@
         <div class="space-y-4">
 
             <div>
-                <label class="text-sm">Nama</label>
+                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Nama</label>
                 <input
                     wire:model="editNama"
-                    class="w-full rounded border px-3 py-2">
+                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
             </div>
 
 
             <div>
-                <label class="text-sm">Jenis Kelamin</label>
+                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Kelamin</label>
 
                 <select
                     wire:model="editJenisKelamin"
-                    class="w-full rounded border px-3 py-2">
+                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
 
                     <option value="Laki - Laki">
                         Laki - Laki
@@ -105,11 +105,11 @@
 
 
             <div>
-                <label class="text-sm">Jenis Peserta</label>
+                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Peserta</label>
 
                 <select
                     wire:model="editJenisPeserta"
-                    class="w-full rounded border px-3 py-2">
+                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
 
                     <option value="Wajib">Wajib</option>
                     <option value="Kiriman">Kiriman</option>
@@ -120,11 +120,11 @@
 
 
             <div>
-                <label class="text-sm">Desa</label>
+                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Desa</label>
 
                 <select
                     wire:model="editDesa"
-                    class="w-full rounded border px-3 py-2">
+                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
 
                     @foreach($daftarDesa as $d)
                         <option value="{{ $d->id }}">
@@ -137,11 +137,11 @@
 
 
             <div>
-                <label class="text-sm">Kelompok</label>
+                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Kelompok</label>
 
                 <select
                     wire:model="editKelompok"
-                    class="w-full rounded border px-3 py-2">
+                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
 
                     @foreach($daftarKelompok as $k)
                         <option value="{{ $k->id }}">
@@ -154,11 +154,11 @@
 
 
             <div>
-                <label class="text-sm">Regu</label>
+                <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Regu</label>
 
                 <select
                     wire:model="editRegu"
-                    class="w-full rounded border px-3 py-2">
+                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
 
                     @foreach($daftarRegu as $r)
                         <option value="{{ $r->id }}">
@@ -174,19 +174,14 @@
 
                 <button
                     wire:click="updatePeserta"
-                    class="flex-1 rounded bg-blue-600 py-2 text-white">
-
+                    class="flex-1 rounded-xl bg-blue-600 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
                     Simpan
-
                 </button>
-
 
                 <button
                     wire:click="$set('showEditModal', false)"
-                    class="flex-1 rounded bg-gray-200 py-2">
-
+                    class="flex-1 rounded-xl bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white">
                     Batal
-
                 </button>
 
             </div>

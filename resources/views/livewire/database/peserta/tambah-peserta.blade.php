@@ -21,8 +21,8 @@
 
         {{-- Input Jenis Kelamin --}}
         <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Kelamin</label>
-            <select wire:model.live="jenis_kelamin" class="w-full px-3 py-2 border rounded">
+            <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Kelamin</label>
+            <select wire:model.live="jenis_kelamin" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                 <option value="">-- Pilih Jenis Kelamin --</option>
                 <option value="Laki - Laki">Laki - Laki</option>
                 <option value="Perempuan">Perempuan</option>
@@ -31,8 +31,8 @@
 
         {{-- Input Jenis Peserta --}}
         <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Peserta</label>
-            <select wire:model="jenis_peserta" class="w-full px-3 py-2 border rounded">
+            <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Peserta</label>
+            <select wire:model="jenis_peserta" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                 <option value="Wajib">Wajib</option>
                 <option value="Kiriman">Kiriman</option>
                 <option value="Person">Person</option>
@@ -41,8 +41,8 @@
 
         {{-- Dropdown Desa --}}
         <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Desa</label>
-            <select wire:model="desa_id" class="w-full px-3 py-2 border rounded">
+            <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Pilih Desa</label>
+            <select wire:model="desa_id" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                 <option value="">-- Pilih Desa --</option>
                 @foreach($daftarDesa as $desa)
                     <option value="{{ $desa->id }}">{{ $desa->desa_asal }}</option>
@@ -52,8 +52,8 @@
 
         {{-- Dropdown Kelompok --}}
         <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Kelompok</label>
-            <select wire:model="kelompok_id" class="w-full px-3 py-2 border rounded">
+            <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Pilih Kelompok</label>
+            <select wire:model="kelompok_id" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                 <option value="">-- Pilih Kelompok --</option>
                 @foreach($daftarKelompok as $kelompok)
                     <option value="{{ $kelompok->id }}">{{ $kelompok->kelompok_asal }}</option>
