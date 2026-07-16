@@ -91,6 +91,49 @@
             @endif
         </div>
 
+        <div class="w-full rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-950 sm:p-5">
+            <div class="space-y-4">
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-zinc-600 dark:text-zinc-300">Manual Attendance</label>
+                    <input
+                        wire:model.live.debounce.300ms="manualSearch"
+                        type="text"
+                        class="w-full rounded-xl border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                        placeholder="Cari nama atau participant number"
+                    >
+                </div>
+
+                <div class="space-y-2">
+                    @forelse($manualResults as $participant)
+                        <button
+                            type="button"
+                            wire:click="selectManualParticipant({{ $participant->id }})"
+                            class="w-full rounded-xl border border-zinc-200 px-3 py-2 text-left text-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+                        >
+                            <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->nama }}</div>
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $participant->participant_number }} · {{ $participant->nip }}</div>
+                        </button>
+                    @empty
+                        <div class="rounded-xl border border-dashed border-zinc-200 px-3 py-2 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">Cari peserta untuk absen manual.</div>
+                    @endforelse
+                </div>
+
+                <button
+                    type="button"
+                    wire:click="manualAttend"
+                    @disabled(! $selectedManualParticipantId || ! $sesi_id)
+                    class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
+                >
+                    Catat Hadir Manual
+                </button>
+            </div>
+        </div>
+
+        <button wire:click="restartScan"
+            type="button"
+            class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600">
+            Scan Lagi
+*** End Patch
         <button wire:click="restartScan"
             type="button"
             class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600">

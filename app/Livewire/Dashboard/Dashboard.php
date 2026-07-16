@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
+use App\Models\Absensi;
+use App\Models\IzinAbsensi;
 use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
-use App\Models\Absensi;
 use App\Models\SesiAbsensi;
+use Livewire\Component;
 
 class Dashboard extends Component
 {
@@ -29,37 +30,43 @@ class Dashboard extends Component
     public function render()
     {
         $sesiAktif = SesiAbsensi::where('aktif', true)->first();
-        $absensiQuery = Absensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa']);
-
-        if ($sesiAktif) {
-            $absensiQuery->where('sesi_id', $sesiAktif->id);
-        } else {
-            $absensiQuery->whereRaw('0 = 1');
-        }
-
-        if ($this->regu_id) {
-            $absensiQuery->whereHas('peserta', function ($query) {
-                $query->where('regu_id', $this->regu_id);
-            });
-        }
-
-        $absensis = $absensiQuery->orderBy('jam_scan', 'asc')->get();
-        $absenNips = $absensis->pluck('nip')->unique();
-
         $pesertaQuery = peserta::with(['regu', 'kelompok', 'desa']);
+
         if ($this->regu_id) {
             $pesertaQuery->where('regu_id', $this->regu_id);
         }
 
+        $pesertaScope = $pesertaQuery->get();
+        $participantIds = $pesertaScope->pluck('id');
+        $participantNips = $pesertaScope->pluck('nip');
+
+        $absensiQuery = Absensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa']);
+        $izinQuery = IzinAbsensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa']);
+
+        if ($sesiAktif) {
+            $absensiQuery->where('sesi_id', $sesiAktif->id)->whereIn('nip', $participantNips);
+            $izinQuery->where('sesi_id', $sesiAktif->id)->whereIn('peserta_id', $participantIds);
+        } else {
+            $absensiQuery->whereRaw('0 = 1');
+            $izinQuery->whereRaw('0 = 1');
+        }
+
+        $absensis = $absensiQuery->orderBy('jam_scan', 'asc')->get();
+        $izinAbsensis = $izinQuery->orderBy('created_at', 'asc')->get();
+
+        $absenNips = $absensis->pluck('nip')->unique();
+        $izinPesertaIds = $izinAbsensis->pluck('peserta_id')->unique();
+
         $pesertaBelumAbsen = $sesiAktif
-            ? $pesertaQuery->whereNotIn('nip', $absenNips)->get()
-            : peserta::with(['regu', 'kelompok', 'desa'])->when($this->regu_id, function ($query) {
-                $query->where('regu_id', $this->regu_id);
-            })->get();
+            ? $pesertaScope->reject(function ($peserta) use ($absenNips, $izinPesertaIds) {
+                return $absenNips->contains($peserta->nip) || $izinPesertaIds->contains($peserta->id);
+            })->values()
+            : $pesertaScope;
 
         $sudahAbsenCount = $absensis->count();
-        $totalPesertaFiltered = $this->regu_id ? peserta::where('regu_id', $this->regu_id)->count() : $this->totalPeserta;
-        $belumAbsenCount = $sesiAktif ? $pesertaBelumAbsen->count() : $totalPesertaFiltered;
+        $izinCount = $izinAbsensis->count();
+        $belumAbsenCount = $pesertaBelumAbsen->count();
+        $totalPesertaFiltered = $pesertaScope->count();
         $persentaseKehadiran = $totalPesertaFiltered > 0
             ? round(($sudahAbsenCount / $totalPesertaFiltered) * 100, 2)
             : 0;
@@ -67,8 +74,10 @@ class Dashboard extends Component
         return view('livewire.dashboard.dashboard', [
             'sesiAktif' => $sesiAktif,
             'absensis' => $absensis,
+            'izinAbsensis' => $izinAbsensis,
             'pesertaBelumAbsen' => $pesertaBelumAbsen,
             'sudahAbsenCount' => $sudahAbsenCount,
+            'izinCount' => $izinCount,
             'belumAbsenCount' => $belumAbsenCount,
             'persentaseKehadiran' => $persentaseKehadiran,
             'daftarRegu' => regu::all(),

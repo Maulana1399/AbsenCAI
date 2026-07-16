@@ -136,14 +136,6 @@
                 <div class="mt-4 flex flex-wrap gap-2">
                     <button
                         type="button"
-                        wire:click="printSelectedLabel"
-                        @disabled(! $selectedParticipantId)
-                        class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
-                    >
-                        Print Label
-                    </button>
-                    <button
-                        type="button"
                         wire:click="printAllFiltered"
                         @disabled($batchTotal === 0)
                         class="inline-flex items-center rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"

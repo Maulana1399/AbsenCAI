@@ -24,16 +24,28 @@ Status: VERIFIED.
 
 ---
 
-## S01 Infrastructure
+## Sprint 1 (CAI Priority)
 
-- [x] Step 1 verified
-- [x] Step 2 verified
-- [x] Step 3 completed
-- [x] Step 4 verified
-- [x] Foundation service tests in place
-- [x] Identifier contract documented consistently
+- [x] Attendance Code
+- [x] Internal QR Generator
+- [x] QR Regeneration
+- [x] Generate QR
+- [x] Batch Generate
+- [x] PDF Export
+- [x] Print 4x4 cm
+- [x] Batch Print
+- [x] Export Excel
+- [x] Rekap Per Regu
+- [x] Rekap Per Desa
+- [x] Rekap Per Kelompok
+- [x] Rekap Belum Hadir
+- [x] Dashboard Divisi
+- [x] Progress Registrasi
+- [x] Attendance Status Summary
 
-Status: COMPLETED.
+Status: PARTIAL — some dashboard/report items remain.
+
+- [ ] Fix low-contrast gray text on bright blue background in QR scope UI
 
 ---
 

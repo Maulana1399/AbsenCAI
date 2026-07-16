@@ -21,17 +21,21 @@
     </div>
 
     @if($sesi_id)
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                 <div class="text-gray-500">Total Peserta</div>
                 <div class="text-2xl font-bold">{{ $totalPeserta }}</div>
             </div>
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-                <div class="text-gray-500">Sudah Absen</div>
+                <div class="text-gray-500">Hadir</div>
                 <div class="text-2xl font-bold">{{ $sudahAbsenCount }}</div>
             </div>
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-                <div class="text-gray-500">Belum Absen</div>
+                <div class="text-gray-500">Izin</div>
+                <div class="text-2xl font-bold">{{ $izinCount }}</div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                <div class="text-gray-500">Alfa</div>
                 <div class="text-2xl font-bold">{{ $belumAbsenCount }}</div>
             </div>
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
@@ -41,7 +45,7 @@
         </div>
 
         <div>
-            <h3 class="text-xl font-bold mb-3">Peserta Sudah Absen</h3>
+            <h3 class="text-xl font-bold mb-3">Peserta Hadir</h3>
             <div class="overflow-x-auto bg-white rounded shadow mb-6">
                 <table class="min-w-full border">
                     <thead>
@@ -73,7 +77,7 @@
         </div>
 
         <div>
-            <h3 class="text-xl font-bold mb-3">Peserta Belum Absen</h3>
+            <h3 class="text-xl font-bold mb-3">Peserta Alfa</h3>
             <div class="overflow-x-auto bg-white rounded shadow">
                 <table class="min-w-full border">
                     <thead>

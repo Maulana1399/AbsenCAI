@@ -30,15 +30,15 @@ MVP Development
 
 # Current Sprint
 
-Sprint 5
+Sprint 6
 
 Status:
 
-🟢 Complete
+🟡 In Progress
 
 Focus:
 
-Document & Certificate
+Commercial Preparation
 
 ---
 
@@ -48,7 +48,7 @@ Menyelesaikan S01 Infrastructure secara bertahap tanpa mengubah behavior aplikas
 
 S01 status:
 
-* S01 Infrastructure complete.
+* Sprint 1 attendance status summary is implemented for Hadir/Izin/Alfa.
 * Step 1 verified.
 * Step 2 verified.
 * Step 3 completed.
@@ -61,7 +61,7 @@ S01 status:
 
 Priority saat ini:
 
-1. S05 — Document & Certificate
+1. S06 — Commercial Preparation
 2. Rapikan Arsitektur
 3. Refactor UI
 4. Stabilkan Operasional CAI

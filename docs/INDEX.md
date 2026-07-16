@@ -66,15 +66,15 @@ TODO.md
 
 ## Current Sprint
 
-S05 — Document & Certificate
+S06 — Commercial Preparation
 
-S04 Identity & QR complete.
+S05 Document & Certificate deferred.
 
 ---
 
 ## Current Priority
 
-Finish CAI with S05 document and certificate planning.
+Finish CAI with S06 commercial preparation planning.
 
 ---
 

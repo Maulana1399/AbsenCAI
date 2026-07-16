@@ -231,6 +231,18 @@ Identity & QR.
 
 Document & Certificate Module.
 
+## Status
+
+Deferred / Skipped for now
+
+## Reason
+
+Fitur belum dibutuhkan pada tahap pengembangan saat ini.
+
+## Completion
+
+0%
+
 ## Features
 
 * Sertifikat Otomatis
@@ -285,6 +297,11 @@ Seluruh operasional CAI dapat dijalankan menggunakan sistem.
 Current work:
 
 S04 Identity & QR
+
+Notes:
+
+* Sprint 1 attendance status summary is implemented for Hadir/Izin/Alfa.
+* UI backlog remains for contrast and other visual polish.
 
 S04 progress:
 

@@ -3,9 +3,11 @@
 namespace App\Services\Attendance;
 
 use App\Models\Absensi;
+use App\Models\IzinAbsensi;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class AttendanceService
 {
@@ -29,6 +31,12 @@ class AttendanceService
                 'status' => 'session_required',
                 'message' => 'Pilih sesi absensi terlebih dahulu',
             ];
+        }
+
+        if (IzinAbsensi::where('peserta_id', $peserta->id)->where('sesi_id', $sesi->id)->exists()) {
+            throw ValidationException::withMessages([
+                'peserta' => 'Peserta sedang berstatus izin pada sesi ini.',
+            ]);
         }
 
         $last = Absensi::where('nip', $peserta->nip)
