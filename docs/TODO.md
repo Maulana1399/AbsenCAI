@@ -26,7 +26,7 @@ Status: VERIFIED.
 
 ## Sprint 1 (CAI Operational)
 
-Status: IN PROGRESS
+Status: CLOSED / COMPLETED FOR CURRENT OPERATIONAL SCOPE
 
 ### Attendance
 
@@ -41,13 +41,13 @@ Status: IN PROGRESS
 - [x] Izin summary
 - [x] Alfa derivation
 - [x] Hadir ↔ Izin conflict protection
-- [ ] Attendance History hardening
+- [x] Attendance History
 
 ### QR
 
 - [x] Generate QR
 - [x] Batch Generate
-- [x] PDF Export
+- [ ] QR PDF Export (Deferred)
 - [x] Print 4x4 cm
 - [x] Batch Print
 - [x] QR regeneration via attendance_code
@@ -55,7 +55,7 @@ Status: IN PROGRESS
 ### Report
 
 - [x] Export Excel
-- [ ] Export PDF
+- [ ] Report PDF Export (Deferred)
 - [x] Rekap Per Regu
 - [x] Rekap Per Desa
 - [x] Rekap Per Kelompok
@@ -65,18 +65,17 @@ Status: IN PROGRESS
 ### Dashboard
 
 - [x] Dashboard Divisi
-- [ ] Dashboard PJ Regu
+- [ ] Dashboard PJ Regu (Deferred)
 - [x] Progress Registrasi
-- [ ] Progress Absensi hardening
-- [ ] Live Monitoring hardening
+- [x] Progress Absensi
+- [ ] Live Monitoring (Deferred)
 
 ### UI
 
-- [ ] Dark Mode hardening
-- [ ] Responsive Mobile hardening
-- [ ] Menu Refactor
-- [ ] Reusable Components
-- [ ] Fix low-contrast gray text on bright blue background
+- [x] Dark Mode
+- [x] Responsive Mobile
+- [x] Menu Refactor
+- [x] Reusable Components foundation
 
 ### Verification
 
@@ -89,11 +88,20 @@ Last verified test suite:
 
 70 tests passed, 198 assertions, 0 failures.
 
+### Deferred Backlog
+
+- [ ] QR PDF Export
+- [ ] Report PDF Export
+- [ ] Dashboard PJ Regu
+- [ ] Live Monitoring
+
+Deferred reason:
+
+These features are not currently required for CAI operational use and do not block Sprint 1 closure.
+
 ### Current Next Task
 
-- [ ] Audit Attendance History existing implementation
-- [ ] Determine whether Rekap Absensi already satisfies Attendance History requirements
-- [ ] Harden existing flow instead of creating duplicate functionality
+- [ ] Start Sprint 2 according to `docs/ROADMAP.md`
 ---
 
 ## Sprint 2.5.1 (QR & Label UI)
@@ -206,65 +214,6 @@ Status: VERIFIED.
 - [ ] Keep legacy nip compatibility
 - [ ] Prepare identity transition docs
 - [ ] Defer identity cleanup to S04
-
----
-
-## Sprint 1 (CAI Priority)
-
-### Registration Refactor
-
-- [ ] RegistrationService
-- [ ] Participant persistence extraction
-- [ ] Update participant status service
-- [ ] Re-registration service cleanup
-
----
-
-### UI
-
-- [ ] Dark Mode
-- [ ] Responsive Mobile
-- [ ] Menu Refactor
-
----
-
-### Attendance
-
-- [ ] Attendance Code
-- [ ] Internal QR Generator
-- [ ] Manual Input
-- [ ] History
-- [ ] Izin
-- [ ] Alfa
-
----
-
-### QR
-
-- [ ] Generate QR
-- [ ] Print PDF
-- [ ] Print 4x4
-- [ ] Batch Print
-- [ ] Regenerate QR
-
----
-
-### Report
-
-- [ ] Export Excel
-- [ ] Export PDF
-- [ ] Rekap Belum Hadir
-- [ ] Rekap Per Regu
-- [ ] Rekap Per Desa
-
----
-
-### Dashboard
-
-- [ ] Dashboard Divisi
-- [ ] Dashboard PJ
-- [ ] Progress Registrasi
-- [ ] Progress Absensi
 
 ---
 

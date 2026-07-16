@@ -86,7 +86,16 @@ Merapikan pondasi proyek sebelum pengembangan besar dimulai.
 
 ## Status
 
-🟡 In Progress
+✅ Closed / Completed for Current Operational Scope
+
+Sprint 1 ditutup untuk kebutuhan operasional CAI saat ini.
+
+Deferred backlog untuk implementasi masa depan:
+
+* QR PDF Export
+* Report PDF Export
+* Dashboard PJ Regu
+* Live Monitoring
 
 ## Goal
 
@@ -104,7 +113,7 @@ Highest
 * [x] Internal QR Generator
 * [x] QR Regeneration
 * [x] Manual Attendance
-* [ ] Attendance History
+* [x] Attendance History
 * [x] Attendance Status
 * [x] Izin
 * [x] Alfa
@@ -124,7 +133,7 @@ Notes:
 
 * [x] Generate QR
 * [x] Batch Generate
-* [x] PDF Export
+* [ ] PDF Export — Deferred
 * [x] Print 4×4 cm
 * [x] Batch Print
 
@@ -133,7 +142,7 @@ Notes:
 ### Report
 
 * [x] Export Excel
-* [ ] Export PDF
+* [ ] Export PDF — Deferred
 * [x] Rekap Per Regu
 * [x] Rekap Per Desa
 * [x] Rekap Per Kelompok
@@ -143,19 +152,25 @@ Notes:
 ### Dashboard
 
 * [x] Dashboard Divisi
-* [ ] Dashboard PJ Regu
+* [ ] Dashboard PJ Regu — Deferred
 * [x] Progress Registrasi
-* [ ] Progress Absensi
-* [ ] Live Monitoring
+* [x] Progress Absensi
+* [ ] Live Monitoring — Deferred
 
 ---
 
 ### UI
 
-* Dark Mode
-* Responsive Mobile
-* Menu Refactor
-* Reusable Components
+* [x] Dark Mode
+* [x] Responsive Mobile
+* [x] Menu Refactor
+* [x] Reusable Components
+
+Notes:
+
+* Reusable Components dinyatakan selesai pada level foundation karena aplikasi menggunakan Flux UI dan centralized layouts.
+* QR regeneration dilakukan on-demand dari `attendance_code`; tidak membutuhkan file QR persisten terpisah.
+* QR PDF Export dan Report PDF Export adalah scope berbeda. QR PDF Export ditunda; QR PNG generation/export dan print flow tetap operasional.
 
 ---
 
@@ -300,7 +315,7 @@ CAI Operational
 
 Status:
 
-In Development
+Operational Scope Completed
 
 Target:
 
@@ -308,7 +323,7 @@ Seluruh operasional CAI dapat dijalankan menggunakan sistem.
 
 Current work:
 
-Sprint 1 — CAI Operational
+Sprint 2 — Secretariat Operational
 
 Current progress:
 
@@ -316,25 +331,21 @@ Current progress:
 * S02 Registration/Placement foundation completed.
 * S03 Attendance architecture completed.
 * S04 Identity & QR completed.
-* Sprint 1 operational gap closure is currently in progress.
+* Sprint 1 CAI Operational closed for current operational scope.
 * Manual Attendance is implemented and verified.
 * Attendance status Hadir/Izin/Alfa is implemented and verified.
 * QR operational scope is complete.
 * Full regression suite verified: 70 tests passed, 198 assertions, 0 failures.
-* Current next priority: Attendance History hardening.
+* Current next priority: Sprint 2.
 
 Notes:
 
 * Sprint 1 attendance status summary is implemented for Hadir/Izin/Alfa.
-* UI backlog remains for contrast and other visual polish.
-
-S04 progress:
-
 * participant_number contract preserved.
 * attendance_code is the primary QR payload.
 * Legacy NIP compatibility preserved.
 * QR integration verified.
-* S04 completed.
+* Deferred Sprint 1 backlog: QR PDF Export, Report PDF Export, Dashboard PJ Regu, Live Monitoring.
 
 ---
 

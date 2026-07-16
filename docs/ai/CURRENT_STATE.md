@@ -30,21 +30,21 @@ MVP Development
 
 # Current Sprint
 
-Sprint 1 — CAI Operational
+Sprint 2 — Secretariat Operational
 
 Status:
 
-🟡 In Progress
+🟡 Starting
 
 Focus:
 
-Menyelesaikan seluruh gap operasional CAI sesuai `docs/ROADMAP.md`.
+Melanjutkan pekerjaan setelah Sprint 1 CAI Operational ditutup untuk kebutuhan operasional saat ini.
 
 ---
 
 # Current Goal
 
-Menyelesaikan Sprint 1 sebelum melanjutkan ke Sprint berikutnya.
+Melanjutkan pengembangan ke Sprint 2 sesuai `docs/ROADMAP.md`.
 
 Completed foundation work:
 
@@ -72,6 +72,13 @@ Current Sprint 1 attendance state:
 * `attendance_code` remains the primary scan and QR identifier.
 * Legacy NIP fallback remains supported.
 
+Deferred Sprint 1 backlog:
+
+* QR PDF Export.
+* Report PDF Export.
+* Dashboard PJ Regu.
+* Live Monitoring.
+
 Verification:
 
 * Full test suite passed.
@@ -85,12 +92,11 @@ Verification:
 
 Priority saat ini:
 
-1. Attendance History hardening.
-2. Complete remaining Sprint 1 operational gaps.
-3. Dashboard PJ Regu.
-4. Progress Absensi and Live Monitoring hardening.
-5. UI hardening.
-6. Close Sprint 1.
+1. Start Sprint 2.
+2. Permission: Surat Izin, Print Surat, Return Tracking, Riwayat Izin.
+3. Scoring: Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian.
+4. Audit: Activity Log, Export Log, Print Log, QR Log.
+5. Storage planning: Nextcloud Integration and TrueNAS Integration.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
 
@@ -98,13 +104,13 @@ Development follows `docs/ROADMAP.md` as the primary product roadmap.
 
 ## Documentation
 
-🟡 In Progress
+🟢 Stable
 
 ---
 
 ## Architecture
 
-🟡 In Progress
+🟢 Stable for CAI Operational
 
 ---
 
@@ -129,13 +135,14 @@ Development follows `docs/ROADMAP.md` as the primary product roadmap.
 
 ## UI
 
-🟡 Needs Improvement
+🟢 Stable for CAI Operational
 
 Target:
 
-* Dark Mode
-* Responsive Mobile
-* Reusable Components
+* Dark Mode completed.
+* Responsive Mobile completed.
+* Menu Refactor completed.
+* Reusable Components foundation completed through Flux UI and centralized layouts.
 
 ---
 
@@ -188,15 +195,15 @@ Infrastructure
 
 * SQLite belum cocok untuk concurrent access dalam skala besar.
 * QR masih menggunakan NIP sebagai legacy fallback.
-* Dark Mode belum konsisten.
-* Komponen UI masih belum seragam.
 
 ---
 
 ## Medium
 
-* Export masih terbatas.
-* Dashboard belum lengkap.
+* QR PDF Export deferred.
+* Report PDF Export deferred.
+* Dashboard PJ Regu deferred.
+* Live Monitoring deferred.
 * Dokumentasi modul belum seluruhnya tersedia.
 
 ---
@@ -212,7 +219,6 @@ Infrastructure
 
 * SVG QR generation remains deferred technical debt; active PNG QR runtime uses the internal QR service.
 * Attendance masih menggunakan NIP sebagai legacy fallback, sementara attendance_code menjadi identifier utama scan.
-* Beberapa halaman belum menggunakan komponen UI yang konsisten.
 * Struktur database masih berorientasi pada CAI.
 
 ---
@@ -221,11 +227,13 @@ Infrastructure
 
 Current next task:
 
-Attendance History hardening.
+Sprint 2.
 
-After Sprint 1:
+After Sprint 1 closure:
 
 Continue development according to `docs/ROADMAP.md`.
+
+Deferred Sprint 1 items remain in backlog until operationally required.
 
 Sprint 5 Document & Certificate remains deferred until required.
 

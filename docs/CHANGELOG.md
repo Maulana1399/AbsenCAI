@@ -11,10 +11,12 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ## Added
 
 * QR & Label module with individual QR, batch export preview, and label 4x4 UI
+* Sprint 1 CAI Operational closed for current operational scope
 
 ## Changed
 
 * Existing QR and print services are now connected to user-facing screens without new business logic
+* Deferred non-critical Sprint 1 backlog: QR PDF Export, Report PDF Export, Dashboard PJ Regu, and Live Monitoring
 
 ## Planned
 
