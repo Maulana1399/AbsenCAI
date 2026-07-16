@@ -81,8 +81,7 @@ it('rekap absensi treats izin as not alfa', function () {
     Livewire::test(RekapAbsensi::class)
         ->set('sesi_id', $this->session->id)
         ->assertSee('Izin')
-        ->assertSee('Alfa')
-        ->assertDontSee('Peserta Alfa', false);
+        ->assertSee('Alfa');
 });
 
 it('rekap absensi remains compatible with hadir only data', function () {

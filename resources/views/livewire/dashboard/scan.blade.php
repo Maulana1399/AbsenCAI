@@ -66,6 +66,13 @@
             </div>
         </div>
 
+        <button wire:click="restartScan"
+            type="button"
+            class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600">
+            Scan Lagi
+        </button>
+
+
         <div class="w-full rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-950 sm:p-5">
             <div class="space-y-3 text-sm text-zinc-700 dark:text-zinc-300">
                 <div class="flex justify-between gap-4">
@@ -128,17 +135,6 @@
                 </button>
             </div>
         </div>
-
-        <button wire:click="restartScan"
-            type="button"
-            class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600">
-            Scan Lagi
-*** End Patch
-        <button wire:click="restartScan"
-            type="button"
-            class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600">
-            Scan Lagi
-        </button>
     </div>
 </div>
 
