@@ -219,11 +219,48 @@ Status: VERIFIED.
 
 ## Sprint 2
 
-- [ ] Penalty
+Status: IN PROGRESS — Permission group completed
+
+### Permission
+
+- [x] Surat Izin — create, submit, approve, reject, cancel, return
+- [x] Print Surat — A5 landscape template with Kop Surat
+- [x] Return Tracking — selectable return date, attendance cleanup
+- [ ] Riwayat Izin
+
+Notes:
+
+* Permission feature group implemented with service layer, Livewire UI, database migrations, authorization gates, and test coverage.
+* `jenis_izin` (`pulang`/`keluar`) support added.
+* Print uses browser-native print — no PDF library dependency.
+
+Known Limitation:
+
+* EditSesi page treats `SuratIzin.sesi_id` as editable session data — needs architectural review. The `sesi_id` on a Surat Izin should record the session the izin applies to, not allow arbitrary session editing.
+
+### Scoring
+
+- [ ] Master Point
 - [ ] Bonus
+- [ ] Penalty
 - [ ] Leaderboard
-- [ ] Print Surat Izin
-- [ ] Riwayat Pelanggaran
+- [ ] Riwayat Penilaian
+
+### Audit
+
+- [ ] Activity Log
+- [ ] Export Log
+- [ ] Print Log
+- [ ] QR Log
+
+### Storage
+
+- [ ] Nextcloud Integration
+- [ ] TrueNAS Integration
+
+### Verification
+
+- [x] Full regression suite: 124 tests passed, 311 assertions, 0 failures.
 
 ---
 

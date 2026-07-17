@@ -12,11 +12,16 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 * QR & Label module with individual QR, batch export preview, and label 4x4 UI
 * Sprint 1 CAI Operational closed for current operational scope
+* **Surat Izin module** — full create/submit/approve/reject/cancel/return flow with service layer, Livewire UI, database migrations, authorization gates, and test coverage
+* **Print Surat** — A5 landscape template with Kop Surat (KJA/CAI logos) and `jenis_izin` (pulang/keluar), browser-native print
+* **Return Tracking** — selectable return date via modal, attendance cleanup on return, IzinAbsensi end_time update
+* `jenis_izin` column (`pulang`/`keluar`) on `surat_izins` table
 
 ## Changed
 
 * Existing QR and print services are now connected to user-facing screens without new business logic
 * Deferred non-critical Sprint 1 backlog: QR PDF Export, Report PDF Export, Dashboard PJ Regu, and Live Monitoring
+* Test suite expanded: 124 tests, 311 assertions (up from 70 tests, 198 assertions)
 
 ## Planned
 

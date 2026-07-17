@@ -176,6 +176,10 @@ Notes:
 
 # Sprint 2
 
+## Status
+
+🟡 In Progress — Permission feature group completed
+
 ## Goal
 
 Melengkapi kebutuhan operasional sekretariat.
@@ -184,36 +188,46 @@ Melengkapi kebutuhan operasional sekretariat.
 
 ### Permission
 
-* Surat Izin
-* Print Surat
-* Return Tracking
-* Riwayat Izin
+* [x] Surat Izin — create, submit, approve, reject, cancel, return, print
+* [x] Print Surat — A5 landscape template with Kop Surat and logos, browser-native print
+* [x] Return Tracking — mark returned with selectable date, attendance cleanup, IzinAbsensi end_time update
+* [ ] Riwayat Izin — belum diimplementasikan
+
+Notes:
+
+* Surat Izin has full CRUD with service layer (`SuratIzinService`), Livewire UI (`KelolaSuratIzin`, `TambahSuratIzin`), database migrations, authorization gates, and test coverage.
+* Return Tracking is integrated into the Surat Izin flow with a date picker modal.
+* `jenis_izin` (`pulang`/`keluar`) support added as a migration.
+
+Known Limitation:
+
+* `EditSesi` page currently references `sesi_id` from `SuratIzin` as editable session data. This needs to be reviewed: the `sesi_id` on a Surat Izin should record the *session the izin applies to*, not allow arbitrary session editing.
 
 ---
 
 ### Scoring
 
-* Master Point
-* Bonus
-* Penalty
-* Leaderboard
-* Riwayat Penilaian
+* [ ] Master Point
+* [ ] Bonus
+* [ ] Penalty
+* [ ] Leaderboard
+* [ ] Riwayat Penilaian
 
 ---
 
 ### Audit
 
-* Activity Log
-* Export Log
-* Print Log
-* QR Log
+* [ ] Activity Log
+* [ ] Export Log
+* [ ] Print Log
+* [ ] QR Log
 
 ---
 
 ### Storage
 
-* Nextcloud Integration
-* TrueNAS Integration
+* [ ] Nextcloud Integration
+* [ ] TrueNAS Integration
 
 ---
 
@@ -335,8 +349,9 @@ Current progress:
 * Manual Attendance is implemented and verified.
 * Attendance status Hadir/Izin/Alfa is implemented and verified.
 * QR operational scope is complete.
-* Full regression suite verified: 70 tests passed, 198 assertions, 0 failures.
-* Current next priority: Sprint 2.
+* Full regression suite verified: 124 tests passed, 311 assertions, 0 failures.
+* Sprint 2 Permission feature group completed: Surat Izin, Print Surat, Return Tracking.
+* Remaining Sprint 2 scope: Riwayat Izin, Scoring, Audit, Storage.
 
 Notes:
 

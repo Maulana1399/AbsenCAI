@@ -34,11 +34,11 @@ Sprint 2 — Secretariat Operational
 
 Status:
 
-🟡 Starting
+🟡 In Progress
 
 Focus:
 
-Melanjutkan pekerjaan setelah Sprint 1 CAI Operational ditutup untuk kebutuhan operasional saat ini.
+Sprint 2 — Permission feature group (Surat Izin, Print Surat, Return Tracking) completed. Remaining: Riwayat Izin, Scoring, Audit, Storage.
 
 ---
 
@@ -82,8 +82,8 @@ Deferred Sprint 1 backlog:
 Verification:
 
 * Full test suite passed.
-* 70 tests passed.
-* 198 assertions.
+* 124 tests passed.
+* 311 assertions.
 * 0 failures.
 
 ---
@@ -92,8 +92,8 @@ Verification:
 
 Priority saat ini:
 
-1. Start Sprint 2.
-2. Permission: Surat Izin, Print Surat, Return Tracking, Riwayat Izin.
+1. Sprint 2: Permission feature group completed (Surat Izin, Print Surat, Return Tracking).
+2. Remaining Sprint 2: Riwayat Izin, Scoring, Audit, Storage.
 3. Scoring: Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian.
 4. Audit: Activity Log, Export Log, Print Log, QR Log.
 5. Storage planning: Nextcloud Integration and TrueNAS Integration.
@@ -130,6 +130,7 @@ Development follows `docs/ROADMAP.md` as the primary product roadmap.
 * Scan QR
 * Dashboard
 * Rekap
+* Surat Izin
 
 ---
 
@@ -204,7 +205,8 @@ Infrastructure
 * Report PDF Export deferred.
 * Dashboard PJ Regu deferred.
 * Live Monitoring deferred.
-* Dokumentasi modul belum seluruhnya tersedia.
+* EditSesi page references sesi_id from SuratIzin as editable data — needs architectural review.
+* Riwayat Izin belum diimplementasikan.
 
 ---
 
@@ -220,6 +222,7 @@ Infrastructure
 * SVG QR generation remains deferred technical debt; active PNG QR runtime uses the internal QR service.
 * Attendance masih menggunakan NIP sebagai legacy fallback, sementara attendance_code menjadi identifier utama scan.
 * Struktur database masih berorientasi pada CAI.
+* EditSesi page treats SuratIzin.sesi_id as editable session data — this needs architectural review.
 
 ---
 
@@ -227,13 +230,15 @@ Infrastructure
 
 Current next task:
 
-Sprint 2.
+Sprint 2 — Riwayat Izin, Scoring, Audit, Storage.
 
 After Sprint 1 closure:
 
 Continue development according to `docs/ROADMAP.md`.
 
 Deferred Sprint 1 items remain in backlog until operationally required.
+
+Permission feature group completed. Remaining Sprint 2 scope: Riwayat Izin, Scoring (Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian), Audit (Activity Log, Export Log, Print Log, QR Log), Storage (Nextcloud, TrueNAS).
 
 Sprint 5 Document & Certificate remains deferred until required.
 

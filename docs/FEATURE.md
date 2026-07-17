@@ -240,7 +240,7 @@ Future
 
 Status
 
-🔵 Planned
+🟢 Completed for Current Operational Scope
 
 Priority
 
@@ -252,10 +252,20 @@ Sprint
 
 Features
 
-* Surat Izin
-* Print Surat
-* Return Tracking
-* History
+* [x] Surat Izin — create, submit, approve, reject, cancel, return
+* [x] Print Surat — A5 landscape template with Kop Surat
+* [x] Return Tracking — selectable return date, attendance cleanup
+* [ ] Riwayat Izin
+
+Notes:
+
+* Full implementation with service layer, Livewire UI, database migrations, authorization gates, and tests.
+* `jenis_izin` (`pulang`/`keluar`) support added.
+* Print uses browser-native print — no PDF library dependency.
+
+Known Limitation:
+
+* EditSesi page references `SuratIzin.sesi_id` as editable session data — needs architectural review.
 
 ---
 
