@@ -14,6 +14,8 @@
                 <x-app-logo />
             </a>
 
+            <livewire:event.event-switcher />
+
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
@@ -45,6 +47,10 @@
 
                 <flux:navlist.group expandable heading="QR & Label" class="grid">
                     <flux:navlist.item :href="route('qr-label.index')" :current="request()->routeIs('qr-label.index')" wire:navigate>{{ __('QR & Label') }}</flux:navlist.item>
+                </flux:navlist.group>
+
+                <flux:navlist.group expandable heading="Event" class="grid">
+                    <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
                 </flux:navlist.group>
 
                 <flux:navlist.group expandable heading="Sekretariat" class="grid">

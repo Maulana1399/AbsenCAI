@@ -178,7 +178,17 @@ Notes:
 
 ## Status
 
-🟡 In Progress — Permission feature group completed, Activity Log foundation + Export/Print/QR Log completed
+🟢 Operational Stable / Partially Deferred
+
+Permission feature group completed.
+Activity Log foundation + Export/Print/QR Log completed.
+Riwayat Izin, Scoring, Storage **deferred** to 2027.
+
+## Reason for Deferral
+
+Multi Event (Sprint 3) is required for operational use in **August 2026**.
+Next CAI operational use is planned for 2027.
+All CAI-specific Sprint 2 features are deferred until CAI is next needed.
 
 ## Goal
 
@@ -191,7 +201,7 @@ Melengkapi kebutuhan operasional sekretariat.
 * [x] Surat Izin — create, submit, approve, reject, cancel, return, print
 * [x] Print Surat — A5 landscape template with Kop Surat and logos, browser-native print
 * [x] Return Tracking — mark returned with selectable date, attendance cleanup, IzinAbsensi end_time update
-* [ ] Riwayat Izin — belum diimplementasikan
+* [ ] Riwayat Izin — **DEFERRED** to 2027
 
 Notes:
 
@@ -207,11 +217,11 @@ Known Limitation:
 
 ### Scoring
 
-* [ ] Master Point
-* [ ] Bonus
-* [ ] Penalty
-* [ ] Leaderboard
-* [ ] Riwayat Penilaian
+* [ ] Master Point — **DEFERRED** to 2027
+* [ ] Bonus — **DEFERRED** to 2027
+* [ ] Penalty — **DEFERRED** to 2027
+* [ ] Leaderboard — **DEFERRED** to 2027
+* [ ] Riwayat Penilaian — **DEFERRED** to 2027
 
 ---
 
@@ -241,27 +251,102 @@ Notes:
 
 ### Storage
 
-* [ ] Nextcloud Integration
-* [ ] TrueNAS Integration
+* [ ] Nextcloud Integration — **DEFERRED** to 2027
+* [ ] TrueNAS Integration — **DEFERRED** to 2027
 
 ---
 
 # Sprint 3
 
+## Status
+
+🟢 ACTIVE — HIGHEST PRIORITY
+
+Target: August 2026 operational use for Multi Event.
+
 ## Goal
 
-Transformasi menuju KJA Event Manager.
+Transformasi menuju KJA Event Manager — Multi Event Architecture.
 
-## Features
+## Phases
 
-* Universal Person Database
-* Multi Event
-* Multi Role
-* Multi Venue
-* Multi Category
-* Participation History
-* Dashboard Universal
-* Attendance integration coverage hardening
+### S3.0 Architecture & Database Audit
+
+Status: ✅ COMPLETE
+
+See `docs/SPRINT3_MULTI_EVENT_AUDIT.md` for the full audit report.
+
+Deliverables:
+* Current database map (all tables, constraints, relationships)
+* Current identity model audit (NIP, participant_number, attendance_code)
+* Single-event coupling map (10 CRITICAL, 10 HIGH, 5 MEDIUM, 5 LOW findings)
+* Proposed target domain (Person → Participation → Event)
+* Field ownership matrix
+* Multi Event attendance architecture
+* Active event context recommendation
+* Backward compatibility & migration strategy (Stages A-F)
+* Universal Person deduplication strategy
+* Test migration strategy
+* Sprint 3 breakdown (S3.0—S3.10)
+
+### S3.1 Event Foundation
+
+Status: ✅ COMPLETE
+
+Deliverables:
+* Event model + events table migration
+* Legacy CAI Event bootstrap (idempotent seeder)
+* ActiveEventContext service (session-based)
+* Event selection UI in sidebar
+* Event management CRUD (index, create, edit, archive/activate)
+* Event routes (`/events`)
+* Registered ActiveEventContext as singleton
+* 30+ dedicated tests
+* Full backward compatibility — existing app unchanged
+* Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
+
+### S3.2 Universal Person
+
+Status: ✅ COMPLETE
+
+Deliverables:
+* `people` table migration (id, nama, jenis_kelamin (L/P), desa_id FK, nip nullable unique)
+* `Person` model with desa() relationship and jenis_kelamin_label accessor
+* 15+ dedicated tests
+* Clean table — no participation wiring yet (S3.3)
+* No changes to existing peserta or other tables
+
+### S3.3 Participation
+
+Status: 📋 PENDING
+
+### S3.4 Active Event Context (Event-scoped middleware)
+
+Status: 📋 PENDING
+
+### S3.5 Legacy Data Backfill
+
+Status: 📋 PENDING
+
+### S3.6 Attendance Event Scoping
+
+Status: 📋 PENDING
+
+### S3.7 Participant/QR Migration
+
+Status: 📋 PENDING
+
+### S3.8 Dashboard & Report Scoping
+
+Status: 📋 PENDING
+
+### S3.9 Multi Role/Venue/Category
+
+Status: 🔴 DEFERRED (design only — not needed for August 2026)
+
+### S3.10 Regression & Production Readiness
+
+Status: 📋 PENDING
 
 ---
 
@@ -364,14 +449,17 @@ Current progress:
 * Manual Attendance is implemented and verified.
 * Attendance status Hadir/Izin/Alfa is implemented and verified.
 * QR operational scope is complete.
-* Full regression suite verified: 146 tests passed, 344 assertions, 0 failures.
 * Sprint 2 Permission feature group completed: Surat Izin, Print Surat, Return Tracking.
 * Sprint 2 Activity Log Foundation completed: model, service, read-only UI, Surat Izin lifecycle integration, tests.
 * Sprint 2 Print Log completed: Surat Izin print, QR label single/batch/A4 print views integrated with ActivityLogService (action: print_viewed).
 * Sprint 2 Export Log completed: participant data Excel export integrated with ActivityLogService (action: exported).
 * Sprint 2 QR Log completed: single QR PNG download and batch QR export to storage integrated with ActivityLogService (action: downloaded / batch_exported).
 * Latest verified baseline: 186 tests, 432 assertions.
-* Remaining Sprint 2 scope: Riwayat Izin, Scoring, Storage.
+* Sprint 2 remaining scope: Riwayat Izin, Scoring, Storage — **DEFERRED to 2027**.
+* **Sprint 3 ACTIVE — HIGHEST PRIORITY.** Multi Event required for August 2026.
+* S3.0 Architecture & Database Audit: COMPLETE.
+* S3.1 Event Foundation: COMPLETE. Event model, events table, Legacy CAI bootstrap, ActiveEventContext service, event switcher UI, event management CRUD. Existing app backward compatible.
+* S3.2 Universal Person: COMPLETE. People table, Person model. Clean foundational table — no participation wiring.
 
 Notes:
 
@@ -498,12 +586,18 @@ Sprint dianggap selesai apabila:
 # Current Priority
 
 ```
-1. Stabilkan CAI
-2. Rapikan Arsitektur
-3. Refactor
-4. Multi Event
-5. Competition
-6. Commercial
+1. Multi Event (Sprint 3) — HIGHEST PRIORITY, August 2026 target
+2. Event Foundation ✅ Complete (S3.1)
+3. Universal Person ✅ Complete (S3.2)
+4. Participation (S3.3) — NEXT
+5. Active Event Context Scoping (S3.4)
+6. Legacy Data Backfill (S3.5)
+7. Attendance Event Scoping (S3.6)
+8. Participant/QR Migration (S3.7)
+9. Dashboard & Report Scoping (S3.8)
+10. Regression & Production Readiness (S3.10)
+11. Competition (future sprint)
+12. Commercial (future sprint)
 ```
 
 ---

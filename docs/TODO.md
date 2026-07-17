@@ -219,69 +219,128 @@ Status: VERIFIED.
 
 ## Sprint 2
 
-Status: IN PROGRESS — Permission group completed, Activity Log foundation + Print/Export/QR Log completed
+Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 ### Permission
 
 - [x] Surat Izin — create, submit, approve, reject, cancel, return
 - [x] Print Surat — A5 landscape template with Kop Surat
 - [x] Return Tracking — selectable return date, attendance cleanup
-- [ ] Riwayat Izin
-
-Notes:
-
-* Permission feature group implemented with service layer, Livewire UI, database migrations, authorization gates, and test coverage.
-* `jenis_izin` (`pulang`/`keluar`) support added.
-* Print uses browser-native print — no PDF library dependency.
-
-Known Limitation:
-
-* EditSesi page treats `SuratIzin.sesi_id` as editable session data — needs architectural review. The `sesi_id` on a Surat Izin should record the session the izin applies to, not allow arbitrary session editing.
+- [ ] Riwayat Izin — **DEFERRED to 2027**
 
 ### Scoring
 
-- [ ] Master Point
-- [ ] Bonus
-- [ ] Penalty
-- [ ] Leaderboard
-- [ ] Riwayat Penilaian
+- [ ] Master Point — **DEFERRED to 2027**
+- [ ] Bonus — **DEFERRED to 2027**
+- [ ] Penalty — **DEFERRED to 2027**
+- [ ] Leaderboard — **DEFERRED to 2027**
+- [ ] Riwayat Penilaian — **DEFERRED to 2027**
 
 ### Audit
 
 - [x] Activity Log Foundation
-  - `ActivityLog` model with `user()` belongsTo and `subject()` morphTo
-  - `ActivityLogService::log()` — single entry point for all audit logging
-  - Surat Izin lifecycle integration: created, submitted, approved, rejected, returned
-  - Transaction-safe: logs written only after successful business operations
-  - Read-only Activity Log UI (Livewire): newest-first, pagination, search, module/action filters, expandable properties
-  - User fallback: "Sistem" when user_id is null or user deleted
-  - Route: `GET /activity-log` under Sekretariat menu
-  - 22 dedicated tests
 - [x] Print Log
-  - Surat Izin print (single): `print` module, `print_viewed` action, subject SuratIzin
-  - QR label print selected (single): `print` module, `print_viewed` action, subject peserta
-  - QR label print filtered (batch): `print` module, `print_viewed` action, count in properties
-  - QR label print A4 (batch): `print` module, `print_viewed` action, count in properties
-  - Physical print limitation acknowledged: logs print-page access only
-  - 16 dedicated tests in `tests/Feature/PrintLog/`
 - [x] Export Log
-  - Participant data Excel export via `RekapPeserta::exportExcel()`: `export` module, `exported` action
-  - Properties: export_type, format, filename, filters
-  - 10 dedicated tests in `tests/Feature/ExportLog/`
 - [x] QR Log
-  - Single QR download via `QRLabel\Index::downloadPng()`: `qr` module, `downloaded` action, subject peserta
-  - Batch QR export via `QRLabel\Index::generateBatchExport()`: `qr` module, `batch_exported` action
-  - Low-level `QRService` NOT logged to prevent duplicates
-  - 15 dedicated tests in `tests/Feature/QrLog/`
 
 ### Storage
 
-- [ ] Nextcloud Integration
-- [ ] TrueNAS Integration
+- [ ] Nextcloud Integration — **DEFERRED to 2027**
+- [ ] TrueNAS Integration — **DEFERRED to 2027**
 
 ### Verification
 
 - [x] Full regression suite: 186 tests passed, 432 assertions, 0 failures.
+
+---
+
+## Sprint 3
+
+Status: 🟢 ACTIVE — HIGHEST PRIORITY
+
+Target: August 2026 operational use for Multi Event.
+
+Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
+
+### S3.0 Architecture & Database Audit
+
+- [x] Current database map
+- [x] Current identity model audit
+- [x] Single-event coupling map
+- [x] Target domain design
+- [x] Field ownership matrix
+- [x] Multi Event attendance architecture
+- [x] Active event context recommendation
+- [x] Backward compatibility & migration strategy
+- [x] Universal Person deduplication strategy
+- [x] Test migration strategy
+- [x] Sprint 3 breakdown & roadmap proposal
+
+Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
+
+### S3.1 Event Foundation ✅
+
+- [x] Event model + events table migration
+- [x] Legacy CAI Event bootstrap (idempotent)
+- [x] ActiveEventContext service (session-based singleton)
+- [x] Event selection UI (sidebar switcher)
+- [x] Event management CRUD (index, create, edit, archive/activate)
+- [x] Event routes (`/events`)
+- [x] Registered ActiveEventContext in AppServiceProvider
+- [x] Tests: Event creation, validation, bootstrap, context, UI
+- [x] Backward compatibility: existing app unchanged
+- [x] Documentation: ROADMAP, TODO, CHANGELOG, CURRENT_STATE
+
+### S3.2 Universal Person ✅
+
+- [x] Create `people` migration + Person model
+- [x] Person model with desa() relationship and jenis_kelamin_label accessor
+- [x] Tests: person creation, schema, NIP uniqueness, desa FK, jenis_kelamin L/P format
+- [ ] Design deduplication matching strategy (deferred to S3.5 backfill)
+
+### S3.3 Participation
+
+- [ ] Create `participations` migration + Participation model
+- [ ] Participation-level participant_number and attendance_code
+- [ ] Tests: person can participate in multiple events
+
+### S3.4 Active Event Context (Scoping)
+
+- [ ] Middleware for route-based event context
+- [ ] Event-scoped query scopes
+- [ ] Tests: event isolation
+
+### S3.5 Legacy Data Backfill
+
+- [ ] Artisan command to backfill Person + Participation from existing peserta
+- [ ] Verification: legacy data accessible
+
+### S3.6 Attendance Event Scoping
+
+- [ ] Migrate sessions to event-scoped
+- [ ] Migrate attendance to participation-based
+- [ ] Migrate permits to participation-based
+
+### S3.7 Participant/QR Migration
+
+- [ ] QR lookup event-scoped
+- [ ] Participant numbering per-event
+
+### S3.8 Dashboard & Report Scoping
+
+- [ ] Dashboard counts filtered by active event
+- [ ] Reports filtered by active event
+
+### S3.9 Multi Role/Venue/Category
+
+- [ ] Design only — deferred
+
+### S3.10 Regression & Production Readiness
+
+- [ ] Full test suite verification
+- [ ] Manual QA on critical flows
+- [ ] Performance testing
+- [ ] Deployment checklist
 
 ---
 

@@ -2,21 +2,18 @@
 
 namespace App\Providers;
 
+use App\Support\ActiveEventContext;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->singleton(ActiveEventContext::class, function () {
+            return new ActiveEventContext;
+        });
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //

@@ -30,21 +30,24 @@ MVP Development
 
 # Current Sprint
 
-Sprint 2 — Secretariat Operational
+Sprint 3 — Multi Event Architecture
 
 Status:
 
-🟡 In Progress
+🟢 ACTIVE — HIGHEST PRIORITY
+
+Target: August 2026 operational use.
 
 Focus:
 
-Sprint 2 — Permission feature group completed. Activity Log foundation + Print/Export/QR Log completed. Remaining: Riwayat Izin, Scoring, Storage.
+Multi Event Foundation. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE.
+Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 ---
 
 # Current Goal
 
-Melanjutkan pengembangan ke Sprint 2 sesuai `docs/ROADMAP.md`.
+Melanjutkan pengembangan ke Sprint 3 — Multi Event Architecture sesuai `docs/ROADMAP.md`.
 
 Completed foundation work:
 
@@ -53,6 +56,9 @@ Completed foundation work:
 * S03 Attendance architecture completed.
 * S04 Identity & QR completed.
 * S05 Document & Certificate deferred / skipped for now.
+* S3.0 Architecture & Database Audit completed.
+* S3.1 Event Foundation completed.
+* S3.2 Universal Person completed.
 
 Current Sprint 1 attendance state:
 
@@ -85,6 +91,7 @@ Verification:
 * 186 tests passed.
 * 432 assertions.
 * 0 failures.
+* Sprint 3 Event Foundation: 30+ dedicated Event tests added.
 
 Sprint 2 Activity Log integration verified:
 
@@ -102,13 +109,16 @@ Sprint 2 Activity Log integration verified:
 
 Priority saat ini:
 
-1. Sprint 2: Permission feature group completed (Surat Izin, Print Surat, Return Tracking).
-2. Activity Log foundation + Print/Export/QR Log integration completed (186 tests, 432 assertions).
-3. Remaining Sprint 2: Riwayat Izin, Scoring, Storage.
-3. Scoring: Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian.
-4. Storage planning: Nextcloud Integration and TrueNAS Integration.
+1. **Sprint 3: Multi Event Architecture** — HIGHEST PRIORITY, target August 2026.
+2. S3.0 Architecture & Database Audit ✅ COMPLETE.
+3. S3.1 Event Foundation ✅ COMPLETE — Event model, events table, Legacy CAI bootstrap, ActiveEventContext, event switcher UI, event management CRUD.
+4. S3.2 Universal Person ✅ COMPLETE — People table, Person model.
+5. S3.3 Participation — NEXT.
+6. S3.4 Active Event Context Scoping — NEXT after S3.3.
+7. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
+Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
 
 # Project Status
 
@@ -207,6 +217,7 @@ Infrastructure
 
 * SQLite belum cocok untuk concurrent access dalam skala besar.
 * QR masih menggunakan NIP sebagai legacy fallback.
+* Multi Event S3.1 Event Foundation is context-only — no existing queries are yet event-scoped. Modules must be migrated one by one.
 
 ---
 
@@ -236,6 +247,8 @@ Infrastructure
 * Struktur database masih berorientasi pada CAI.
 * EditSesi page treats SuratIzin.sesi_id as editable session data — this needs architectural review.
 * Activity Log's "failed submit" test has a dead assertion after `expectException`.
+* Event Foundation is context infrastructure only — no existing queries are yet event-scoped.
+* Person table is foundational only — no participation wiring, no backfill from peserta yet.
 
 ---
 
@@ -243,17 +256,19 @@ Infrastructure
 
 Current next task:
 
-Sprint 2 — Riwayat Izin, Scoring, Storage.
+**Sprint 3.3 — Participation.** Create `participations` table connecting `people` to `events` with participation-level `participant_number`, `attendance_code`, `jenis_peserta`, and team placement.
 
-After Sprint 1 closure:
+After S3.1 Event Foundation completion:
 
-Continue development according to `docs/ROADMAP.md`.
+Continue development according to `docs/ROADMAP.md` and `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
 
 Deferred Sprint 1 items remain in backlog until operationally required.
+Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **deferred to 2027**.
 
-Permission feature group completed. Activity Log foundation + Print/Export/QR Log integration completed.
+Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
 Latest verified baseline: 186 tests, 432 assertions.
-Remaining Sprint 2 scope: Riwayat Izin, Scoring (Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian), Storage (Nextcloud, TrueNAS).
+Event Foundation: 30+ dedicated tests added.
+Person Foundation: 15+ dedicated tests added.
 
 Sprint 5 Document & Certificate remains deferred until required.
 

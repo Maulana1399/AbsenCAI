@@ -28,10 +28,25 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * Existing QR and print services are now connected to user-facing screens without new business logic
 * Deferred non-critical Sprint 1 backlog: QR PDF Export, Report PDF Export, Dashboard PJ Regu, and Live Monitoring
 * Test suite expanded: 186 tests, 432 assertions (up from 70 tests, 198 assertions)
+* Sprint 2 status changed to Operational Stable / Partially Deferred — Riwayat Izin, Scoring, Storage deferred to 2027
+* Sprint 3 promoted to ACTIVE / HIGHEST PRIORITY
 * `SuratIzinService` now depends on `ActivityLogService` via constructor injection — logs are written after successful business operations only
 * `routes/web.php`: all 4 print route closures now inject `ActivityLogService::log()` after authorization/validation
 * `App\Livewire\QRLabel\Index`: `downloadPng()` and `generateBatchExport()` now inject `ActivityLogService::log()` after successful generation
 * `App\Livewire\Rekap\Peserta\RekapPeserta`: `exportExcel()` now injects `ActivityLogService::log()` before returning download
+* **Event model and `events` table** — foundation for Multi Event architecture
+* **Legacy CAI Event seeder** — idempotent bootstrap creates `cai-operational` event
+* **ActiveEventContext service** — session-based active event management with singleton binding
+* **Event switcher UI** — sidebar dropdown to select active event
+* **Event management CRUD** — index, create, edit, archive/activate via `/events` Livewire page
+* **Sprint 3 ACTIVE** — Multi Event highest priority for August 2026
+* **Sprint 2 remaining features deferred** — Riwayat Izin, Scoring, Storage deferred to 2027
+* `docs/SPRINT3_MULTI_EVENT_AUDIT.md` — full architecture audit and migration plan
+* 30+ dedicated tests for Event Foundation
+* **Person model and `people` table** — Universal Person foundation (S3.2)
+* `Person` model with `desa()` relationship and `jenis_kelamin_label` accessor
+* 15+ dedicated tests for Person Foundation
+* Sprint 3.2 status updated to COMPLETE
 
 ## Planned
 

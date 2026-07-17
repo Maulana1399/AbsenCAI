@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Audit\ActivityLogIndex;
+use App\Livewire\Event\Index as EventIndex;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -227,6 +228,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('import/kelompok', [ImportDataController::class, 'kelompok'])->name('import.kelompok');
     Route::post('import/regu', [ImportDataController::class, 'regu'])->name('import.regu');
     Route::post('import/peserta', [ImportDataController::class, 'peserta'])->name('import.peserta');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('events', EventIndex::class)->name('events.index');
 });
 
 require __DIR__.'/auth.php';

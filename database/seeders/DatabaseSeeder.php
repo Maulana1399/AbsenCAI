@@ -7,6 +7,7 @@ use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Models\User;
+use Database\Seeders\LegacyEventSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(LegacyEventSeeder::class);
+
         User::updateOrCreate([
             'email' => 'test@example.com',
         ], [
