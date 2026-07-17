@@ -332,9 +332,19 @@ Deliverables:
 * No peserta backfill — legacy architecture unchanged
 * No runtime migration — CAI operational still on peserta architecture
 
-### S3.4 Active Event Context (Event-scoped middleware)
+### S3.4 Active Event Context Hardening
 
-Status: 📋 PENDING
+Status: ✅ COMPLETE
+
+Deliverables:
+* Hardened `ActiveEventContext` — centralized session-based singleton
+* `requireCurrent(): Event` — throws `RuntimeException` when no active event available
+* `resolveDefault(): ?Event` — returns first active event, no session mutation
+* Stale session handling — deleted/archived event IDs are automatically cleared
+* Inactive event enforcement — archived events cannot become active context
+* 25+ dedicated tests including context isolation, stale state, inactive policy, Participation isolation, and legacy compatibility
+* Route middleware deferred — no concrete multi-event routes exist yet to apply it to
+* No legacy module scoping — switching active event has zero effect on peserta/attendance/QR/surat-izin/reports
 
 ### S3.5 Legacy Data Backfill
 
@@ -472,6 +482,8 @@ Current progress:
 * S3.0 Architecture & Database Audit: COMPLETE.
 * S3.1 Event Foundation: COMPLETE. Event model, events table, Legacy CAI bootstrap, ActiveEventContext service, event switcher UI, event management CRUD. Existing app backward compatible.
 * S3.2 Universal Person: COMPLETE. People table, Person model. Clean foundational table — no participation wiring.
+* S3.3 Participation Foundation: COMPLETE. Participations table, Participation model, Person↔Event relationships. No legacy backfill.
+* S3.4 Active Event Context Hardening: COMPLETE. requireCurrent(), resolveDefault(), stale/inactive event safety. No legacy module scoping.
 
 Notes:
 
@@ -602,7 +614,7 @@ Sprint dianggap selesai apabila:
 2. Event Foundation ✅ Complete (S3.1)
 3. Universal Person ✅ Complete (S3.2)
 4. Participation Foundation ✅ Complete (S3.3)
-5. Active Event Context Scoping (S3.4)
+5. Active Event Context Hardening ✅ Complete (S3.4)
 6. Legacy Data Backfill (S3.5)
 7. Attendance Event Scoping (S3.6)
 8. Participant/QR Migration (S3.7)

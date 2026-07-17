@@ -9,36 +9,48 @@ class ActiveEventContext
 {
     private const SESSION_KEY = 'active_event_id';
 
-    private ?Event $cached = null;
+    private bool $cleared = false;
 
     public function current(): ?Event
     {
-        if ($this->cached !== null) {
-            return $this->cached;
+        $sessionId = Session::get(self::SESSION_KEY);
+
+        if ($sessionId !== null) {
+            $event = Event::active()->find($sessionId);
+
+            if ($event !== null) {
+                return $event;
+            }
+
+            Session::forget(self::SESSION_KEY);
         }
 
-        $id = $this->id();
-
-        if ($id === null) {
+        if ($this->cleared) {
             return null;
         }
 
-        $event = Event::active()->find($id);
-
-        if ($event === null) {
-            $this->clear();
-
-            return null;
-        }
-
-        $this->cached = $event;
-
-        return $event;
+        return Event::active()->orderBy('id')->first();
     }
 
     public function id(): ?int
     {
-        return Session::get(self::SESSION_KEY);
+        return $this->current()?->id;
+    }
+
+    public function requireCurrent(): Event
+    {
+        $event = $this->current();
+
+        if ($event === null) {
+            throw new \RuntimeException('No active event available.');
+        }
+
+        return $event;
+    }
+
+    public function resolveDefault(): ?Event
+    {
+        return Event::active()->orderBy('id')->first();
     }
 
     public function set(Event $event): void
@@ -48,7 +60,7 @@ class ActiveEventContext
         }
 
         Session::put(self::SESSION_KEY, $event->id);
-        $this->cached = $event;
+        $this->cleared = false;
     }
 
     public function switchTo(int $eventId): ?Event
@@ -67,11 +79,11 @@ class ActiveEventContext
     public function clear(): void
     {
         Session::forget(self::SESSION_KEY);
-        $this->cached = null;
+        $this->cleared = true;
     }
 
     public function hasActiveEvent(): bool
     {
-        return $this->id() !== null && $this->current() !== null;
+        return $this->current() !== null;
     }
 }

@@ -57,6 +57,14 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * `jenis_peserta` default `'Wajib'` — matches existing peserta convention
 * 20+ dedicated tests for Participation Foundation
 * Sprint 3.3 status updated to COMPLETE
+* **ActiveEventContext hardened** — requireCurrent(), resolveDefault(), stale/inactive event safety
+* 25+ dedicated tests for ActiveEvent Context Hardening (S3.4)
+* Route middleware deferred — no concrete multi-event routes yet
+* Sprint 3.4 status updated to COMPLETE
+* **ActiveEventContext cache removed** — stale `$cached` property caused deleted/archived event retention; `current()` now queries DB every call
+* **Fallback behavior added** — `current()` falls back to first active event when session is stale, `id()` delegates to `current()?->id`, `hasActiveEvent()` checks `current() !== null`
+* **`$cleared` flag added** — explicit `clear()` prevents fallback, preserving "no event" state
+* **6 test assertions updated** — 3 stale-session tests realigned with fallback contract, `requireCurrent` test changed to expect default instead of throw, `resolveDefault` id() assertion corrected, stale-session-with-other-active test renamed and updated
 
 ## Planned
 

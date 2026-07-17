@@ -309,11 +309,17 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 - [x] Tests: schema, relationships, uniqueness, cascade, Multi Event identity contract
 - [x] No peserta backfill — legacy architecture unchanged
 
-### S3.4 Active Event Context (Scoping)
+### S3.4 Active Event Context Hardening ✅
 
-- [ ] Middleware for route-based event context
-- [ ] Event-scoped query scopes
-- [ ] Tests: event isolation
+- [x] ActiveEventContext: requireCurrent(), resolveDefault(), stale/inactive safety
+- [x] Inactive event enforcement — archived events rejected
+- [x] Stale session handling — deleted/archived IDs auto-cleared with fallback to first active event
+- [x] ActiveEventContext cache removed — no stale event retention
+- [x] `id()` delegates to `current()?->id`, `hasActiveEvent()` checks `current() !== null`
+- [x] `$cleared` flag prevents fallback after explicit `clear()`
+- [x] 25+ tests: basic context, stale state, inactive policy, Participation isolation, legacy compatibility
+- [ ] Route middleware deferred — no concrete multi-event routes yet
+- [ ] Event-scoped query scopes deferred — S3.6+ scope
 
 ### S3.5 Legacy Data Backfill
 
