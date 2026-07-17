@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class SesiAbsensi extends Model
 {
-    protected $fillable = ['nama_sesi', 'tanggal', 'aktif'];
+    protected $fillable = ['event_id', 'nama_sesi', 'tanggal', 'aktif'];
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
 
     public function absensis()
     {

@@ -4,6 +4,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -24,6 +25,15 @@ function EventFoundation_makeEvent(array $overrides = []): Event
 function EventFoundation_makeUser(): User
 {
     return User::factory()->create();
+}
+
+function EventFoundation_makeSession(array $overrides = []): \App\Models\SesiAbsensi
+{
+    return \App\Models\SesiAbsensi::create(array_merge([
+        'nama_sesi' => 'Sesi Test',
+        'tanggal' => '2026-07-21',
+        'aktif' => true,
+    ], $overrides));
 }
 
 // ---------------------------------------------------------------------------
@@ -268,6 +278,55 @@ test('event can be archived via Livewire', function () {
         ->call('archive', $event->id);
 
     expect($event->fresh()->status)->toBe('archived');
+});
+
+test('sesi_absensis has nullable event_id column', function () {
+    expect(Schema::hasColumn('sesi_absensis', 'event_id'))->toBeTrue();
+});
+
+test('existing session can exist without event_id', function () {
+    $session = EventFoundation_makeSession();
+
+    expect($session->event_id)->toBeNull();
+});
+
+test('session can belong to an event', function () {
+    $event = EventFoundation_makeEvent();
+    $session = EventFoundation_makeSession([
+        'event_id' => $event->id,
+    ]);
+
+    expect($session->event->is($event))->toBeTrue();
+});
+
+test('event has many sessions', function () {
+    $event = EventFoundation_makeEvent();
+    EventFoundation_makeSession(['event_id' => $event->id]);
+    EventFoundation_makeSession(['event_id' => $event->id, 'nama_sesi' => 'Sesi 2']);
+
+    expect($event->sesiAbsensis)->toHaveCount(2);
+});
+
+test('deleting event with referenced session is prevented', function () {
+    $event = EventFoundation_makeEvent();
+    EventFoundation_makeSession(['event_id' => $event->id]);
+
+    expect(fn () => $event->delete())->toThrow(\Illuminate\Database\QueryException::class);
+});
+
+test('deleting unreferenced event remains possible', function () {
+    $event = EventFoundation_makeEvent();
+
+    expect($event->delete())->toBeTrue();
+    expect(\App\Models\Event::find($event->id))->toBeNull();
+});
+
+test('deleting session does not delete its event', function () {
+    $event = EventFoundation_makeEvent();
+    $session = EventFoundation_makeSession(['event_id' => $event->id]);
+
+    expect($session->delete())->toBeTrue();
+    expect(\App\Models\Event::find($event->id))->not->toBeNull();
 });
 
 test('legacy CAI event cannot be archived', function () {
