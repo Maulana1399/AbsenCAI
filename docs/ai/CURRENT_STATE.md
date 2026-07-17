@@ -61,7 +61,7 @@ Completed foundation work:
 * S3.2 Universal Person completed.
 * S3.3 Participation Foundation completed.
 * S3.4 Active Event Context Hardening completed.
-* S3.5 Mapping Infrastructure completed (LegacyPesertaMapping model, migration, relationships, UNIQUE constraints, restrictOnDelete FKs, snapshot columns, 20+ tests). Backfill Artisan command REMAINING.
+* S3.5 Legacy Data Backfill COMPLETE (S3.5A Audit, S3.5B Mapping Infrastructure, S3.5C Backfill Engine). LegacyPesertaMapping model, migration, relationships, UNIQUE constraints, restrictOnDelete FKs, snapshot columns. LegacyPesertaBackfillService with per-peserta analysis, NIP matching, identity signal validation, conflict detection, dry-run projection, transactional execution. BackfillLegacyPeserta Artisan command (default dry-run). 37+ dedicated tests. **Real backfill NOT YET EXECUTED.**
 
 Current Sprint 1 attendance state:
 
@@ -118,8 +118,8 @@ Priority saat ini:
 4. S3.2 Universal Person ✅ COMPLETE — People table, Person model.
 5. S3.3 Participation Foundation ✅ COMPLETE — Participations table, Participation model, Person↔Event relationships. No legacy backfill yet.
 6. S3.4 Active Event Context Hardening ✅ COMPLETE — requireCurrent(), resolveDefault(), stale/inactive safety. Route middleware deferred.
-7. S3.5 Legacy Data Backfill — Mapping Infrastructure ✅ COMPLETE (LegacyPesertaMapping model, migration with UNIQUE+FK+snapshot columns, inverse relationships on all 4 parent models, 20+ tests). Backfill Artisan command REMAINING.
-8. S3.6 Attendance Event Scoping — NEXT after S3.5.
+7. S3.5 Legacy Data Backfill ✅ COMPLETE — S3.5A Audit, S3.5B Mapping Infrastructure (migration, model, relationships, 20+ tests), S3.5C Backfill Engine (LegacyPesertaBackfillService, BackfillLegacyPeserta command, 37+ tests). **Real backfill NOT YET EXECUTED.**
+8. S3.6 Attendance Event Scoping — NEXT.
 9. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
@@ -255,7 +255,7 @@ Infrastructure
 * Event Foundation is context infrastructure only — no existing queries are yet event-scoped.
 * Person table is foundational only — no backfill from peserta yet.
 * Participation is foundation only — no runtime integration with Attendance, QR, Surat Izin, or Reports yet. Legacy peserta architecture remains operational.
-* LegacyPesertaMapping infrastructure complete — migration with UNIQUE(peserta_id), UNIQUE(participation_id), restrictOnDelete FKs, snapshot columns. Backfill Artisan command remaining.
+* LegacyPesertaMapping infrastructure complete — migration with UNIQUE(peserta_id), UNIQUE(participation_id), restrictOnDelete FKs, snapshot columns. LegacyPesertaBackfillService and BackfillLegacyPeserta command implemented. Real backfill NOT YET EXECUTED.
 * ActiveEventContext hardening complete — stale cache removed, fallback to first active event added, clear() prevents fallback. Route middleware and legacy module scoping are not yet implemented. Switching active event has zero effect on operational modules.
 
 ---
@@ -264,7 +264,11 @@ Infrastructure
 
 Current next task:
 
-**Sprint 3.5 — Legacy Data Backfill (Command).** Create Artisan command to backfill Person + Participation + LegacyPesertaMapping from existing peserta records with deduplication matching. Mapping infrastructure (migration, model, relationships, tests) is COMPLETE.
+**Sprint 3.6 — Attendance Event Scoping.** Migrate sessions and attendance to event-scoped with participation-based tracking.
+
+S3.5 Legacy Data Backfill is COMPLETE. Real backfill NOT YET EXECUTED — pending manual `--dry-run` review against the 144 real peserta records.
+
+After S3.6: S3.7 Participant/QR Migration, S3.8 Dashboard & Report Scoping.
 
 After S3.1 Event Foundation completion:
 
@@ -274,12 +278,12 @@ Deferred Sprint 1 items remain in backlog until operationally required.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **deferred to 2027**.
 
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
-Latest verified baseline: 186 tests, 432 assertions (pending re-verification after stale cache fix and fallback contract changes).
+Latest verified baseline: 325 tests, 815 assertions (pending re-verification after S3.5C backfill engine).
 Event Foundation: 30+ dedicated tests added.
 Person Foundation: 15+ dedicated tests added.
 Participation Foundation: 20+ dedicated tests added.
 Active Event Context Hardening: 25+ dedicated tests added (3 stale-session tests and 2 collateral tests updated for new fallback contract).
-LegacyPesertaMapping infrastructure: 20+ dedicated tests added.
+LegacyPesertaMapping infrastructure: 20+ dedicated tests added. LegacyPesertaBackfill: 37+ dedicated tests added.
 
 Sprint 5 Document & Certificate remains deferred until required.
 

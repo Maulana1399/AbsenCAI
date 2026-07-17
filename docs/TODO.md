@@ -323,12 +323,20 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 ### S3.5 Legacy Data Backfill
 
+#### S3.5A Legacy Data Quality Audit ✅
+- [x] Audit legacy peserta data quality (144 peserta, NIP range 1001–2063, gender distribution, duplicate analysis)
+
+#### S3.5B Legacy Mapping Infrastructure ✅
 - [x] `legacy_peserta_mappings` migration — FK constraints with restrictOnDelete, UNIQUE(peserta_id), UNIQUE(participation_id), snapshot columns
 - [x] `LegacyPesertaMapping` model — belongsTo relationships to Peserta, Person, Participation, Event
 - [x] Inverse relationships on Peserta (`hasOne`), Person (`hasOne`), Participation (`hasOne`), Event (`hasMany`)
 - [x] Tests — schema, creation, nullable fields, belongs-to relationships, inverse relationships, UNIQUE constraints, restrictOnDelete (all 4 parents), cascade-free guarantee
-- [ ] Artisan command to backfill Person + Participation from existing peserta
-- [ ] Verification: legacy data accessible
+
+#### S3.5C Backfill Engine ✅
+- [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, NIP matching, identity signal validation, conflict detection, dry-run projection, transactional writes
+- [x] `BackfillLegacyPeserta` Artisan command — `--dry-run` (default), `--execute`, `--event`, mutual exclusion validation, event validation (exists + active)
+- [x] 37+ dedicated tests: command contract, dry-run, execute, NIP matching, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
+- [ ] Real backfill NOT YET EXECUTED — pending manual `--dry-run` review
 
 ### S3.6 Attendance Event Scoping
 

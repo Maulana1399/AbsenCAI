@@ -348,15 +348,30 @@ Deliverables:
 
 ### S3.5 Legacy Data Backfill
 
-Status: 🟢 IN PROGRESS
+Status: ✅ COMPLETE
 
-Mapping infrastructure (migration + model + relationships + tests):
+**S3.5A Legacy Data Quality Audit:** ✅ COMPLETE
+**S3.5B Legacy Mapping Infrastructure:** ✅ COMPLETE
+**S3.5C Backfill Engine:** ✅ COMPLETE
+
+Deliverables:
 - `legacy_peserta_mappings` table with FK constraints (restrictOnDelete)
 - `LegacyPesertaMapping` model with belongsTo relationships to Peserta, Person, Participation, Event
 - Inverse relationships on Peserta, Person, Participation, Event
 - UNIQUE(peserta_id), UNIQUE(participation_id) — identity contracts enforced
 - Snapshot columns for legacy data at backfill time (legacy_nip, legacy_participant_number, legacy_attendance_code)
-- Backfill command (Artisan) — REMAINING
+- `LegacyPesertaBackfillService` — per-peserta analysis, NIP-based Person matching, identity signal validation, Participation conflict detection, dry-run projection, transactional execution
+- `BackfillLegacyPeserta` Artisan command — `php artisan backfill:legacy-peserta` (default dry-run), `--dry-run` (explicit), `--execute` (writes), `--event` (slug)
+- 37+ dedicated tests for backfill engine
+- Real database has only been audited (144 peserta). **No backfill executed yet.**
+
+Safety guarantees:
+- Default is dry-run (zero writes)
+- `--dry-run` + `--execute` rejected together
+- Per-peserta transaction in execute mode
+- NIP is the ONLY automatic Person match key (name never auto-matches)
+- Identity signal conflicts (gender, name, desa) block execution
+- Participant_number and attendance_code conflicts detected before creation
 
 ### S3.6 Attendance Event Scoping
 
@@ -492,6 +507,7 @@ Current progress:
 * S3.2 Universal Person: COMPLETE. People table, Person model. Clean foundational table — no participation wiring.
 * S3.3 Participation Foundation: COMPLETE. Participations table, Participation model, Person↔Event relationships. No legacy backfill.
 * S3.4 Active Event Context Hardening: COMPLETE. requireCurrent(), resolveDefault(), stale/inactive event safety. No legacy module scoping.
+* S3.5 Legacy Data Backfill: COMPLETE (S3.5A Audit, S3.5B Mapping Infrastructure, S3.5C Backfill Engine). LegacyPesertaBackfillService, BackfillLegacyPeserta command (dry-run default). 57+ combined tests. Real backfill NOT YET EXECUTED.
 
 Notes:
 
@@ -623,7 +639,7 @@ Sprint dianggap selesai apabila:
 3. Universal Person ✅ Complete (S3.2)
 4. Participation Foundation ✅ Complete (S3.3)
 5. Active Event Context Hardening ✅ Complete (S3.4)
-6. Legacy Data Backfill (S3.5)
+6. Legacy Data Backfill ✅ Complete (S3.5)
 7. Attendance Event Scoping (S3.6)
 8. Participant/QR Migration (S3.7)
 9. Dashboard & Report Scoping (S3.8)

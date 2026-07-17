@@ -74,6 +74,11 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * Inverse relationships: `Peserta.legacyPesertaMapping()`, `Person.legacyPesertaMapping()`, `Participation.legacyPesertaMapping()`, `Event.legacyPesertaMappings()`
 * 20+ dedicated tests for S3.5 mapping infrastructure
 * S3.5 status updated to IN PROGRESS — mapping infrastructure complete, backfill command remaining
+* **LegacyPesertaBackfillService** — S3.5C backfill engine with per-peserta analysis, NIP-based Person matching, identity signal validation, conflict detection, dry-run projection, and transactional execute mode
+* **BackfillLegacyPeserta Artisan command** — `php artisan backfill:legacy-peserta` with `--dry-run` (default), `--execute` (writes), `--event` (slug target). `--dry-run` + `--execute` mutual exclusion. Event existence and active status validation
+* `BackfillReport` and `BackfillReportItem` value objects for structured service output
+* 37+ dedicated tests for backfill engine: command contract, dry-run guarantees, execute mode, NIP matching rules, conflict detection (name/gender/desa/participant_number/attendance_code), Participation resolution, idempotency, bulk determinism, transaction isolation
+* S3.5 status updated to COMPLETE. **Real backfill NOT YET EXECUTED** — pending manual `--dry-run` review against 144 real peserta records
 
 ## Planned
 
