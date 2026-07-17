@@ -1,22 +1,57 @@
 <?php
 
 use App\Models\Absensi;
+use App\Models\Event;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\SesiAbsensi;
 use App\Models\peserta;
 use App\Services\Attendance\AttendanceExceptionService;
 use App\Services\Attendance\AttendanceService;
+use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 
 it('records izin attendance exception', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Izin',
         'nip' => 5001,
         'attendance_code' => 'KJA-IZIN001',
         'jenis_kelamin' => 'Laki - Laki',
     ]);
+
+    $person = Person::create([
+        'nama' => $participant->nama,
+        'nip' => $participant->nip,
+        'jenis_kelamin' => 'L',
+    ]);
+
+    $participation = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'attendance_code' => $participant->attendance_code,
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
+    ]);
+
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Izin',
         'tanggal' => '2026-07-16',
         'aktif' => true,
@@ -37,13 +72,43 @@ it('records izin attendance exception', function () {
 });
 
 it('rejects duplicate izin for same participant and session', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Izin Duplicate',
         'nip' => 5002,
         'attendance_code' => 'KJA-IZIN002',
         'jenis_kelamin' => 'Laki - Laki',
     ]);
+
+    $person = Person::create([
+        'nama' => $participant->nama,
+        'nip' => $participant->nip,
+        'jenis_kelamin' => 'L',
+    ]);
+
+    $participation = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'attendance_code' => $participant->attendance_code,
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
+    ]);
+
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Izin Duplicate',
         'tanggal' => '2026-07-16',
         'aktif' => true,
@@ -56,13 +121,43 @@ it('rejects duplicate izin for same participant and session', function () {
 });
 
 it('prevents hadir participant from becoming izin', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Hadir Lalu Izin',
         'nip' => 5003,
         'attendance_code' => 'KJA-HADIRIZIN',
         'jenis_kelamin' => 'Laki - Laki',
     ]);
+
+    $person = Person::create([
+        'nama' => $participant->nama,
+        'nip' => $participant->nip,
+        'jenis_kelamin' => 'L',
+    ]);
+
+    $participation = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'attendance_code' => $participant->attendance_code,
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
+    ]);
+
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Hadir Izin',
         'tanggal' => '2026-07-16',
         'aktif' => true,
@@ -80,13 +175,43 @@ it('prevents hadir participant from becoming izin', function () {
 });
 
 it('prevents hadir recording when participant is already izin', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Izin Lalu Hadir',
         'nip' => 5004,
         'attendance_code' => 'KJA-IZINHADIR',
         'jenis_kelamin' => 'Laki - Laki',
     ]);
+
+    $person = Person::create([
+        'nama' => $participant->nama,
+        'nip' => $participant->nip,
+        'jenis_kelamin' => 'L',
+    ]);
+
+    $participation = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'attendance_code' => $participant->attendance_code,
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
+    ]);
+
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Izin Hadir',
         'tanggal' => '2026-07-16',
         'aktif' => true,
