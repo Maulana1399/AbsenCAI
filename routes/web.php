@@ -7,6 +7,7 @@ use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Livewire\Registrasi\SelfRegister;
 use App\Http\Controllers\ImportDataController;
 use App\Models\peserta;
+use App\Models\SuratIzin;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\QRService;
 use Illuminate\Support\Facades\Route;
@@ -149,6 +150,15 @@ Route::get('qr-label/print/a4', function () {
 Route::view('absensi', 'dashboard.absensi')
     ->middleware(['auth', 'verified'])
     ->name('absensi');
+
+Route::view('surat-izin', 'surat-izin.index')
+    ->middleware(['auth', 'verified'])
+    ->name('surat-izin');
+
+Route::get('surat-izin/{surat}/print', function (SuratIzin $surat) {
+    abort_if(! $surat->isApproved(), 403);
+    return view('surat-izin.print', compact('surat'));
+})->middleware(['auth', 'verified'])->name('surat-izin.print');
 
 
 Route::middleware(['auth'])->group(function () {

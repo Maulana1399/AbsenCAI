@@ -3,6 +3,7 @@
 namespace App\Livewire\Database\Sesi;
 
 use App\Models\SesiAbsensi;
+use App\Services\Attendance\SuratIzinService;
 use Livewire\Component;
 
 class TambahSesi extends Component
@@ -35,11 +36,13 @@ class TambahSesi extends Component
                 SesiAbsensi::query()->update(['aktif' => false]);
             }
 
-            SesiAbsensi::create([
+            $sesi = SesiAbsensi::create([
                 'nama_sesi' => $this->nama_sesi,
                 'tanggal' => $this->tanggal,
                 'aktif' => $this->aktif ? 1 : 0,
             ]);
+
+            app(SuratIzinService::class)->syncNewSession($sesi);
 
             $this->dispatch('refreshSesi');
             $this->reset(['nama_sesi', 'tanggal', 'aktif']);

@@ -10,6 +10,7 @@ class SuratIzin extends Model
         'peserta_id',
         'nomor_surat',
         'alasan',
+        'jenis_izin',
         'tanggal_mulai',
         'tanggal_selesai',
         'status',

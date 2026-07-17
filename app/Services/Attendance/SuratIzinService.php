@@ -7,6 +7,7 @@ use App\Models\IzinAbsensi;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,6 +22,7 @@ class SuratIzinService
         return SuratIzin::create([
             'peserta_id'      => $data['peserta_id'],
             'alasan'          => $data['alasan'],
+            'jenis_izin'      => $data['jenis_izin'] ?? 'pulang',
             'tanggal_mulai'   => $data['tanggal_mulai'],
             'tanggal_selesai' => $data['tanggal_selesai'],
             'status'          => 'draft',
@@ -119,7 +121,7 @@ class SuratIzinService
         return $surat->fresh();
     }
 
-    public function markReturned(SuratIzin $surat): SuratIzin
+    public function markReturned(SuratIzin $surat, string $tanggalKembali): SuratIzin
     {
         if (! $surat->isApproved()) {
             throw ValidationException::withMessages([
@@ -133,9 +135,60 @@ class SuratIzinService
             ]);
         }
 
-        $surat->update(['returned_at' => now()]);
+        $tanggalKembaliCarbon = Carbon::parse($tanggalKembali);
+
+        if ($tanggalKembaliCarbon->lt($surat->tanggal_mulai->startOfDay()) || $tanggalKembaliCarbon->gt($surat->tanggal_selesai->endOfDay())) {
+            throw ValidationException::withMessages([
+                'tanggal_kembali' => 'Tanggal kembali harus dalam rentang tanggal surat izin (' .
+                    $surat->tanggal_mulai->format('d/m/Y') . ' — ' .
+                    $surat->tanggal_selesai->format('d/m/Y') . ').',
+            ]);
+        }
+
+        DB::transaction(function () use ($surat, $tanggalKembaliCarbon) {
+            $surat->izinAbsensis()
+                ->whereHas('sesi', fn ($q) => $q->where('tanggal', '>=', $tanggalKembaliCarbon->toDateString()))
+                ->delete();
+
+            $surat->update(['returned_at' => $tanggalKembaliCarbon]);
+        });
 
         return $surat->fresh();
+    }
+
+    public function syncNewSession(SesiAbsensi $sesi): void
+    {
+        $tanggal = Carbon::parse($sesi->tanggal)->toDateString();
+
+        $surats = SuratIzin::with('peserta')
+            ->where('status', 'approved')
+            ->whereNull('returned_at')
+            ->where('tanggal_mulai', '<=', $tanggal)
+            ->where('tanggal_selesai', '>=', $tanggal)
+            ->get();
+
+        foreach ($surats as $surat) {
+            if (Absensi::where('nip', $surat->peserta->nip)
+                ->where('sesi_id', $sesi->id)
+                ->exists()
+            ) {
+                continue;
+            }
+
+            if (IzinAbsensi::where('peserta_id', $surat->peserta_id)
+                ->where('sesi_id', $sesi->id)
+                ->exists()
+            ) {
+                continue;
+            }
+
+            $this->exceptionService->recordIzin(
+                pesertaId:  $surat->peserta_id,
+                sesiId:     $sesi->id,
+                source:     'surat_izin',
+                suratIzinId: $surat->id,
+            );
+        }
     }
 
     private function generateNomorSurat(int $suratId): string
