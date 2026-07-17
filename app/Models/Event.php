@@ -39,6 +39,16 @@ class Event extends Model
         return $this->status === 'archived';
     }
 
+    public function participations()
+    {
+        return $this->hasMany(Participation::class);
+    }
+
+    public function people()
+    {
+        return $this->belongsToMany(Person::class, 'participations');
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Event $event) {

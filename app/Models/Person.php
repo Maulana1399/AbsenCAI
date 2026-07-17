@@ -18,6 +18,16 @@ class Person extends Model
         return $this->belongsTo(desa::class);
     }
 
+    public function participations()
+    {
+        return $this->hasMany(Participation::class);
+    }
+
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'participations');
+    }
+
     public function getJenisKelaminLabelAttribute(): string
     {
         return match ($this->jenis_kelamin) {

@@ -40,7 +40,7 @@ Target: August 2026 operational use.
 
 Focus:
 
-Multi Event Foundation. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE.
+Multi Event Foundation. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE. S3.3 Participation Foundation COMPLETE.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 ---
@@ -59,6 +59,7 @@ Completed foundation work:
 * S3.0 Architecture & Database Audit completed.
 * S3.1 Event Foundation completed.
 * S3.2 Universal Person completed.
+* S3.3 Participation Foundation completed.
 
 Current Sprint 1 attendance state:
 
@@ -113,9 +114,10 @@ Priority saat ini:
 2. S3.0 Architecture & Database Audit ✅ COMPLETE.
 3. S3.1 Event Foundation ✅ COMPLETE — Event model, events table, Legacy CAI bootstrap, ActiveEventContext, event switcher UI, event management CRUD.
 4. S3.2 Universal Person ✅ COMPLETE — People table, Person model.
-5. S3.3 Participation — NEXT.
-6. S3.4 Active Event Context Scoping — NEXT after S3.3.
-7. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
+5. S3.3 Participation Foundation ✅ COMPLETE — Participations table, Participation model, Person↔Event relationships. No legacy backfill yet.
+6. S3.4 Active Event Context Scoping — NEXT.
+7. S3.5 Legacy Data Backfill — NEXT after S3.4.
+8. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
@@ -248,7 +250,8 @@ Infrastructure
 * EditSesi page treats SuratIzin.sesi_id as editable session data — this needs architectural review.
 * Activity Log's "failed submit" test has a dead assertion after `expectException`.
 * Event Foundation is context infrastructure only — no existing queries are yet event-scoped.
-* Person table is foundational only — no participation wiring, no backfill from peserta yet.
+* Person table is foundational only — no backfill from peserta yet.
+* Participation is foundation only — no runtime integration with Attendance, QR, Surat Izin, or Reports yet. Legacy peserta architecture remains operational.
 
 ---
 
@@ -256,7 +259,7 @@ Infrastructure
 
 Current next task:
 
-**Sprint 3.3 — Participation.** Create `participations` table connecting `people` to `events` with participation-level `participant_number`, `attendance_code`, `jenis_peserta`, and team placement.
+**Sprint 3.4 — Active Event Context Scoping.** Harden event context with route middleware, event-scoped query scopes, and tests for event isolation. Next: S3.5 Legacy Data Backfill (create Artisan command to backfill Person + Participation from existing peserta records).
 
 After S3.1 Event Foundation completion:
 
@@ -269,6 +272,7 @@ Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
 Latest verified baseline: 186 tests, 432 assertions.
 Event Foundation: 30+ dedicated tests added.
 Person Foundation: 15+ dedicated tests added.
+Participation Foundation: 20+ dedicated tests added.
 
 Sprint 5 Document & Certificate remains deferred until required.
 

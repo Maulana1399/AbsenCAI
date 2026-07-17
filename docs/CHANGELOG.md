@@ -47,6 +47,16 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * `Person` model with `desa()` relationship and `jenis_kelamin_label` accessor
 * 15+ dedicated tests for Person Foundation
 * Sprint 3.2 status updated to COMPLETE
+* **Participation model and `participations` table** — Participation Foundation (S3.3)
+* `Participation` model with `person()` and `event()` relationships
+* `Person` model: `participations()` hasMany, `events()` belongsToMany
+* `Event` model: `participations()` hasMany, `people()` belongsToMany
+* `UNIQUE(event_id, person_id)` — one participation per person per event
+* `UNIQUE(event_id, participant_number)` — participant number unique within event
+* Globally unique `attendance_code` — unambiguous QR code resolution
+* `jenis_peserta` default `'Wajib'` — matches existing peserta convention
+* 20+ dedicated tests for Participation Foundation
+* Sprint 3.3 status updated to COMPLETE
 
 ## Planned
 

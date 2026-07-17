@@ -313,12 +313,24 @@ Deliverables:
 * `people` table migration (id, nama, jenis_kelamin (L/P), desa_id FK, nip nullable unique)
 * `Person` model with desa() relationship and jenis_kelamin_label accessor
 * 15+ dedicated tests
-* Clean table — no participation wiring yet (S3.3)
+* Clean table — person identity foundation only
 * No changes to existing peserta or other tables
 
-### S3.3 Participation
+### S3.3 Participation Foundation
 
-Status: 📋 PENDING
+Status: ✅ COMPLETE
+
+Deliverables:
+* `participations` table migration (person_id FK, event_id FK, participant_number nullable, attendance_code nullable globally unique, jenis_peserta default 'Wajib')
+* `Participation` model with `person()` and `event()` belongsTo relationships
+* `UNIQUE(event_id, person_id)` — one participation per person per event
+* `UNIQUE(event_id, participant_number)` — per-event participant number
+* Globally unique `attendance_code` — unambiguous QR scanning
+* `Person` model: `participations()` hasMany, `events()` belongsToMany
+* `Event` model: `participations()` hasMany, `people()` belongsToMany
+* 20+ dedicated tests
+* No peserta backfill — legacy architecture unchanged
+* No runtime migration — CAI operational still on peserta architecture
 
 ### S3.4 Active Event Context (Event-scoped middleware)
 
@@ -589,7 +601,7 @@ Sprint dianggap selesai apabila:
 1. Multi Event (Sprint 3) — HIGHEST PRIORITY, August 2026 target
 2. Event Foundation ✅ Complete (S3.1)
 3. Universal Person ✅ Complete (S3.2)
-4. Participation (S3.3) — NEXT
+4. Participation Foundation ✅ Complete (S3.3)
 5. Active Event Context Scoping (S3.4)
 6. Legacy Data Backfill (S3.5)
 7. Attendance Event Scoping (S3.6)

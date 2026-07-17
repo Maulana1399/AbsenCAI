@@ -298,11 +298,16 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 - [x] Tests: person creation, schema, NIP uniqueness, desa FK, jenis_kelamin L/P format
 - [ ] Design deduplication matching strategy (deferred to S3.5 backfill)
 
-### S3.3 Participation
+### S3.3 Participation Foundation ✅
 
-- [ ] Create `participations` migration + Participation model
-- [ ] Participation-level participant_number and attendance_code
-- [ ] Tests: person can participate in multiple events
+- [x] Create `participations` migration + Participation model
+- [x] `UNIQUE(event_id, person_id)` — one participation per person per event
+- [x] `UNIQUE(event_id, participant_number)` — per-event participant number
+- [x] Globally unique `attendance_code`
+- [x] `Person` model: participations() + events() relationships
+- [x] `Event` model: participations() + people() relationships
+- [x] Tests: schema, relationships, uniqueness, cascade, Multi Event identity contract
+- [x] No peserta backfill — legacy architecture unchanged
 
 ### S3.4 Active Event Context (Scoping)
 
