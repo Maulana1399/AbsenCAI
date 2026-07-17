@@ -19,13 +19,19 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * **Activity Log Foundation** — custom audit infrastructure with `ActivityLog` model, `ActivityLogService`, and read-only Livewire UI
 * **Surat Izin Activity Logging** — lifecycle events (created, submitted, approved, rejected, returned) integrated through `SuratIzinService`
 * **Activity Log UI** — `GET /activity-log` route with newest-first list, pagination, search, module/action filters, expandable properties, user fallback "Sistem"
+* **Print Log** — 4 print views logged via `ActivityLogService`: Surat Izin print, single QR label, batch QR filtered, batch QR A4 (module: `print`, action: `print_viewed`)
+* **Export Log** — participant data Excel export logged via `ActivityLogService` through `RekapPeserta::exportExcel()` (module: `export`, action: `exported`)
+* **QR Log** — single QR PNG download and batch QR export to storage logged via `ActivityLogService` through `QRLabel\Index` (module: `qr`, actions: `downloaded`, `batch_exported`)
 
 ## Changed
 
 * Existing QR and print services are now connected to user-facing screens without new business logic
 * Deferred non-critical Sprint 1 backlog: QR PDF Export, Report PDF Export, Dashboard PJ Regu, and Live Monitoring
-* Test suite expanded: 146 tests, 344 assertions (up from 70 tests, 198 assertions)
+* Test suite expanded: 186 tests, 432 assertions (up from 70 tests, 198 assertions)
 * `SuratIzinService` now depends on `ActivityLogService` via constructor injection — logs are written after successful business operations only
+* `routes/web.php`: all 4 print route closures now inject `ActivityLogService::log()` after authorization/validation
+* `App\Livewire\QRLabel\Index`: `downloadPng()` and `generateBatchExport()` now inject `ActivityLogService::log()` after successful generation
+* `App\Livewire\Rekap\Peserta\RekapPeserta`: `exportExcel()` now injects `ActivityLogService::log()` before returning download
 
 ## Planned
 

@@ -8,6 +8,7 @@ use App\Models\regu;
 use App\Models\kelompok;
 use App\Models\desa;
 use App\Exports\PesertaExport;
+use App\Services\Audit\ActivityLogService;
 use Maatwebsite\Excel\Facades\Excel;
 
 class RekapPeserta extends Component
@@ -75,12 +76,33 @@ class RekapPeserta extends Component
     {
         $fileName = 'rekap-peserta-'.now()->format('YmdHis').'.xlsx';
 
-        return Excel::download(new PesertaExport(
+        $filters = [];
+        $this->regu_id && $filters['regu_id'] = $this->regu_id;
+        $this->kelompok_id && $filters['kelompok_id'] = $this->kelompok_id;
+        $this->desa_id && $filters['desa_id'] = $this->desa_id;
+        $this->jenis_kelamin && $filters['jenis_kelamin'] = $this->jenis_kelamin;
+        $this->jenis_peserta && $filters['jenis_peserta'] = $this->jenis_peserta;
+
+        $pesertaExport = new PesertaExport(
             $this->regu_id,
             $this->kelompok_id,
             $this->desa_id,
             $this->jenis_kelamin,
             $this->jenis_peserta
-        ), $fileName);
+        );
+
+        app(ActivityLogService::class)->log(
+            action: 'exported',
+            module: 'export',
+            description: 'Mengekspor data peserta',
+            properties: [
+                'export_type' => 'peserta',
+                'format'      => 'xlsx',
+                'filename'    => $fileName,
+                'filters'     => $filters,
+            ],
+        );
+
+        return Excel::download($pesertaExport, $fileName);
     }
 }

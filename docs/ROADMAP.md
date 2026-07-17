@@ -178,7 +178,7 @@ Notes:
 
 ## Status
 
-🟡 In Progress — Permission feature group completed, Activity Log Foundation completed
+🟡 In Progress — Permission feature group completed, Activity Log foundation + Export/Print/QR Log completed
 
 ## Goal
 
@@ -218,19 +218,24 @@ Known Limitation:
 ### Audit
 
 * [x] Activity Log Foundation — ActivityLog model, ActivityLogService, read-only UI (ActivityLogIndex), Surat Izin lifecycle integration, tests
-* [ ] Export Log — not yet implemented
-* [ ] Print Log — not yet implemented
-* [ ] QR Log — not yet implemented
+* [x] Export Log — participant data Excel export via RekapPeserta::exportExcel()
+* [x] Print Log — Surat Izin print, QR label single/batch/A4 print views (print_viewed action)
+* [x] QR Log — single QR download (downloaded), batch QR export to storage (batch_exported)
 
 Notes:
 
-* Activity Log Foundation is built as a shared audit infrastructure for future modules (Export, Print, QR).
+* Activity Log Foundation is built as a shared audit infrastructure for all audit modules.
 * `ActivityLogService::log()` accepts action, module, description, optional subject (polymorphic), optional properties (JSON), and optional user.
 * Logged Surat Izin events: created, submitted, approved, rejected, returned.
-* Logs are written after successful business operations — failed/rolled-back transactions never produce false logs.
+* Logged Print events: print_viewed (surat_izin, qr_label_single, qr_label_filtered, qr_label_a4).
+* Logged Export events: exported (peserta xlsx).
+* Logged QR events: downloaded (single PNG), batch_exported (batch to storage).
+* Logs are written after successful business operations — failed/rolled-back operations never produce false logs.
 * User fallback: "Sistem" when user_id is null or user deleted (FK uses nullOnDelete).
 * Schema includes ip_address and user_agent only when HTTP request exists (null-safe for CLI/tests).
-* Full test coverage: 22 tests for Activity Log service, Surat Izin integration, and UI.
+* Full test coverage: service unit tests, Surat Izin lifecycle integration, Activity Log UI, Print Log, Export Log, QR Log.
+* Physical print limitation: print_viewed records print-page generation/access, not guaranteed physical printer completion (server cannot detect window.print completion).
+* Latest verified baseline: 186 tests, 432 assertions.
 
 ---
 
@@ -362,7 +367,11 @@ Current progress:
 * Full regression suite verified: 146 tests passed, 344 assertions, 0 failures.
 * Sprint 2 Permission feature group completed: Surat Izin, Print Surat, Return Tracking.
 * Sprint 2 Activity Log Foundation completed: model, service, read-only UI, Surat Izin lifecycle integration, tests.
-* Remaining Sprint 2 scope: Riwayat Izin, Scoring, Export/Print/QR Log, Storage.
+* Sprint 2 Print Log completed: Surat Izin print, QR label single/batch/A4 print views integrated with ActivityLogService (action: print_viewed).
+* Sprint 2 Export Log completed: participant data Excel export integrated with ActivityLogService (action: exported).
+* Sprint 2 QR Log completed: single QR PNG download and batch QR export to storage integrated with ActivityLogService (action: downloaded / batch_exported).
+* Latest verified baseline: 186 tests, 432 assertions.
+* Remaining Sprint 2 scope: Riwayat Izin, Scoring, Storage.
 
 Notes:
 

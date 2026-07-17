@@ -219,7 +219,7 @@ Status: VERIFIED.
 
 ## Sprint 2
 
-Status: IN PROGRESS — Permission group completed, Activity Log Foundation completed
+Status: IN PROGRESS — Permission group completed, Activity Log foundation + Print/Export/QR Log completed
 
 ### Permission
 
@@ -257,9 +257,22 @@ Known Limitation:
   - User fallback: "Sistem" when user_id is null or user deleted
   - Route: `GET /activity-log` under Sekretariat menu
   - 22 dedicated tests
-- [ ] Export Log — not yet integrated
-- [ ] Print Log — not yet integrated
-- [ ] QR Log — not yet integrated
+- [x] Print Log
+  - Surat Izin print (single): `print` module, `print_viewed` action, subject SuratIzin
+  - QR label print selected (single): `print` module, `print_viewed` action, subject peserta
+  - QR label print filtered (batch): `print` module, `print_viewed` action, count in properties
+  - QR label print A4 (batch): `print` module, `print_viewed` action, count in properties
+  - Physical print limitation acknowledged: logs print-page access only
+  - 16 dedicated tests in `tests/Feature/PrintLog/`
+- [x] Export Log
+  - Participant data Excel export via `RekapPeserta::exportExcel()`: `export` module, `exported` action
+  - Properties: export_type, format, filename, filters
+  - 10 dedicated tests in `tests/Feature/ExportLog/`
+- [x] QR Log
+  - Single QR download via `QRLabel\Index::downloadPng()`: `qr` module, `downloaded` action, subject peserta
+  - Batch QR export via `QRLabel\Index::generateBatchExport()`: `qr` module, `batch_exported` action
+  - Low-level `QRService` NOT logged to prevent duplicates
+  - 15 dedicated tests in `tests/Feature/QrLog/`
 
 ### Storage
 
@@ -268,7 +281,20 @@ Known Limitation:
 
 ### Verification
 
-- [x] Full regression suite: 146 tests passed, 344 assertions, 0 failures.
+- [x] Full regression suite: 186 tests passed, 432 assertions, 0 failures.
+
+---
+
+## Sprint 2 Activity Log — Verified Integration Points
+
+| Module | Action(s) | User Boundaries | Tests |
+|---|---|---|---|
+| `surat_izin` | created, submitted, approved, rejected, returned | SuratIzinService | IntegrationTest.php (5 tests) |
+| `print` | print_viewed | 4 route closures | PrintLogTest.php (16 tests) |
+| `export` | exported | RekapPeserta::exportExcel() | ExportLogTest.php (10 tests) |
+| `qr` | downloaded, batch_exported | QRLabel\Index::downloadPng(), generateBatchExport() | QrLogTest.php (15 tests) |
+| UI | search, module/action filter | ActivityLogIndex Livewire | UiTest.php (6 tests) |
+| Service | log, properties, subject, user, null-safety | ActivityLogService | ActivityLogServiceTest.php (7 tests) |
 
 ---
 

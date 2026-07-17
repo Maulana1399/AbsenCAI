@@ -3,6 +3,7 @@
 namespace App\Livewire\QRLabel;
 
 use App\Models\peserta;
+use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\BatchQRExportService;
 use App\Services\QR\QRService;
@@ -79,10 +80,26 @@ class Index extends Component
     {
         $participant = $this->requireSelectedParticipant();
         $content = app(QRService::class)->generatePng((string) $participant->attendance_code);
+        $filename = $participant->participant_number.'.png';
+
+        app(ActivityLogService::class)->log(
+            action: 'downloaded',
+            module: 'qr',
+            description: 'Mengunduh QR peserta '.$participant->nama,
+            subject: $participant,
+            properties: [
+                'qr_type'           => 'single',
+                'peserta_id'        => $participant->id,
+                'participant_number' => $participant->participant_number,
+                'attendance_code'   => $participant->attendance_code,
+                'format'            => 'png',
+                'filename'          => $filename,
+            ],
+        );
 
         return response()->streamDownload(function () use ($content) {
             echo $content;
-        }, $participant->participant_number.'.png', [
+        }, $filename, [
             'Content-Type' => 'image/png',
         ]);
     }
@@ -103,6 +120,20 @@ class Index extends Component
     {
         $participants = $this->filteredParticipants();
         $summary = app(BatchQRExportService::class)->export($participants, 'png', 'qr-exports');
+
+        app(ActivityLogService::class)->log(
+            action: 'batch_exported',
+            module: 'qr',
+            description: 'Membuat batch QR peserta',
+            properties: [
+                'qr_type'      => 'batch',
+                'format'       => $summary['format'],
+                'record_count' => $summary['generated'],
+                'skipped'      => $summary['skipped'],
+                'failed'       => $summary['failed'],
+                'directory'    => $summary['directory'],
+            ],
+        );
 
         $this->batchPreview = $summary;
         $this->batchParticipants = $participants->values();

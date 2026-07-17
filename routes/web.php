@@ -9,6 +9,7 @@ use App\Livewire\Registrasi\SelfRegister;
 use App\Http\Controllers\ImportDataController;
 use App\Models\peserta;
 use App\Models\SuratIzin;
+use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\QRService;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,18 @@ Route::get('qr-label', QRLabelIndex::class)
     ->name('qr-label.index');
 
 Route::get('qr-label/print/selected/{participant}', function (peserta $participant) {
+    app(ActivityLogService::class)->log(
+        action: 'print_viewed',
+        module: 'print',
+        description: 'Membuka tampilan cetak label QR '.$participant->nama,
+        subject: $participant,
+        properties: [
+            'print_type'      => 'qr_label_single',
+            'peserta_id'      => $participant->id,
+            'attendance_code' => $participant->attendance_code,
+        ],
+    );
+
     $html = app(PrintEngine::class)->label4x4($participant);
 
     $html = str_replace(
@@ -101,6 +114,17 @@ Route::get('qr-label/print/filtered', function () {
     $participants = $query->orderBy('nama')->get();
     abort_if($participants->isEmpty(), 404);
 
+    app(ActivityLogService::class)->log(
+        action: 'print_viewed',
+        module: 'print',
+        description: 'Membuka tampilan cetak batch label QR sebanyak '.$participants->count().' peserta',
+        properties: [
+            'print_type' => 'qr_label_filtered',
+            'count'      => $participants->count(),
+            'format'     => '4x4_single',
+        ],
+    );
+
     $qrService = app(QRService::class);
     $pages = $participants->map(function ($participant) use ($qrService) {
         $qrBase64 = base64_encode($qrService->generatePng((string) $participant->attendance_code));
@@ -132,6 +156,17 @@ Route::get('qr-label/print/a4', function () {
     $participants = $query->orderBy('nama')->get();
     abort_if($participants->isEmpty(), 404);
 
+    app(ActivityLogService::class)->log(
+        action: 'print_viewed',
+        module: 'print',
+        description: 'Membuka tampilan cetak label QR A4 sebanyak '.$participants->count().' peserta',
+        properties: [
+            'print_type' => 'qr_label_a4',
+            'count'      => $participants->count(),
+            'format'     => 'a4_grid',
+        ],
+    );
+
     $qrService = app(QRService::class);
     $pages = $participants->chunk(35)->map(function ($chunk) use ($qrService) {
         $labels = $chunk->map(function ($participant) use ($qrService) {
@@ -158,6 +193,20 @@ Route::view('surat-izin', 'surat-izin.index')
 
 Route::get('surat-izin/{surat}/print', function (SuratIzin $surat) {
     abort_if(! $surat->isApproved(), 403);
+
+    app(ActivityLogService::class)->log(
+        action: 'print_viewed',
+        module: 'print',
+        description: 'Membuka tampilan cetak surat izin '.$surat->nomor_surat,
+        subject: $surat,
+        properties: [
+            'print_type'    => 'surat_izin',
+            'peserta_id'    => $surat->peserta_id,
+            'surat_izin_id' => $surat->id,
+            'nomor_surat'   => $surat->nomor_surat,
+        ],
+    );
+
     return view('surat-izin.print', compact('surat'));
 })->middleware(['auth', 'verified'])->name('surat-izin.print');
 

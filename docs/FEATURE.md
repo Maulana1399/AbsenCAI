@@ -300,7 +300,7 @@ Future
 
 Status
 
-🟢 Activity Log Foundation Completed
+🟢 Activity Log Integration Completed
 
 Priority
 
@@ -313,17 +313,20 @@ Sprint
 Features
 
 * [x] Activity Log Foundation — model, service, read-only UI, Surat Izin integration, tests
-* [ ] Export Log — not yet integrated
-* [ ] Print Log — not yet integrated
-* [ ] QR Log — not yet integrated
+* [x] Print Log — Surat Izin print, QR label print views (single/batch/A4) logged via ActivityLogService
+* [x] Export Log — participant data Excel export logged via ActivityLogService
+* [x] QR Log — single QR download and batch QR export logged via ActivityLogService
 
 Notes:
 
 * `ActivityLogService::log()` provides a single entry point for all audit logging with automatic user/IP/user-agent detection.
-* Logged Surat Izin events: created, submitted, approved, rejected, returned.
-* Logs are written after successful business operations only — no false logs on failure.
+* Logged modules: `surat_izin` (created/submitted/approved/rejected/returned), `print` (print_viewed), `export` (exported), `qr` (downloaded/batch_exported).
+* Logs are written after successful business operations only — no false logs on failure/forbidden.
 * User fallback: "Sistem" when user_id is null or user deleted.
 * Schema is extensible: properties JSON column, polymorphic subject, nullable ip_address/user_agent.
+* Physical print limitation: `print_viewed` action records print-page generation/access, not guaranteed physical printer completion.
+* Low-level `QRService::generatePng()` is intentionally NOT logged to prevent duplicate logs from internal rendering.
+* Latest verified test baseline: 186 tests, 432 assertions.
 
 ---
 

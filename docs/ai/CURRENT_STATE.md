@@ -38,7 +38,7 @@ Status:
 
 Focus:
 
-Sprint 2 — Permission feature group completed. Activity Log Foundation completed. Remaining: Riwayat Izin, Scoring, Export/Print/QR Log, Storage.
+Sprint 2 — Permission feature group completed. Activity Log foundation + Print/Export/QR Log completed. Remaining: Riwayat Izin, Scoring, Storage.
 
 ---
 
@@ -82,9 +82,19 @@ Deferred Sprint 1 backlog:
 Verification:
 
 * Full test suite passed.
-* 146 tests passed.
-* 344 assertions.
+* 186 tests passed.
+* 432 assertions.
 * 0 failures.
+
+Sprint 2 Activity Log integration verified:
+
+| Module | Actions | Boundaries |
+|---|---|---|
+| `surat_izin` | created, submitted, approved, rejected, returned | SuratIzinService |
+| `print` | print_viewed | 4 route closures (surat-izin.print, qr-label.print.*) |
+| `export` | exported | RekapPeserta::exportExcel() |
+| `qr` | downloaded, batch_exported | QRLabel\Index::downloadPng(), generateBatchExport() |
+| UI | search, filter, paginate | ActivityLogIndex Livewire |
 
 ---
 
@@ -93,11 +103,10 @@ Verification:
 Priority saat ini:
 
 1. Sprint 2: Permission feature group completed (Surat Izin, Print Surat, Return Tracking).
-2. Activity Log Foundation completed (model, service, read-only UI, Surat Izin integration, tests).
-3. Remaining Sprint 2: Riwayat Izin, Scoring, Export/Print/QR Log, Storage.
+2. Activity Log foundation + Print/Export/QR Log integration completed (186 tests, 432 assertions).
+3. Remaining Sprint 2: Riwayat Izin, Scoring, Storage.
 3. Scoring: Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian.
-4. Audit: Activity Log, Export Log, Print Log, QR Log.
-5. Storage planning: Nextcloud Integration and TrueNAS Integration.
+4. Storage planning: Nextcloud Integration and TrueNAS Integration.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
 
@@ -209,7 +218,7 @@ Infrastructure
 * Live Monitoring deferred.
 * EditSesi page references sesi_id from SuratIzin as editable data — needs architectural review.
 * Riwayat Izin belum diimplementasikan.
-* Export Log, Print Log, QR Log belum diintegrasikan dengan Activity Log.
+* Batch mode "Print All Filtered" via Livewire `printAllFiltered()` is not logged (blade in label mode uses route which is logged; batch mode uses Livewire method directly — minor gap).
 
 ---
 
@@ -234,7 +243,7 @@ Infrastructure
 
 Current next task:
 
-Sprint 2 — Riwayat Izin, Scoring, Export/Print/QR Log, Storage.
+Sprint 2 — Riwayat Izin, Scoring, Storage.
 
 After Sprint 1 closure:
 
@@ -242,8 +251,9 @@ Continue development according to `docs/ROADMAP.md`.
 
 Deferred Sprint 1 items remain in backlog until operationally required.
 
-Permission feature group completed. Activity Log Foundation completed (model, service, read-only UI, Surat Izin integration, tests).
-Remaining Sprint 2 scope: Riwayat Izin, Scoring (Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian), Export Log, Print Log, QR Log, Storage (Nextcloud, TrueNAS).
+Permission feature group completed. Activity Log foundation + Print/Export/QR Log integration completed.
+Latest verified baseline: 186 tests, 432 assertions.
+Remaining Sprint 2 scope: Riwayat Izin, Scoring (Master Point, Bonus, Penalty, Leaderboard, Riwayat Penilaian), Storage (Nextcloud, TrueNAS).
 
 Sprint 5 Document & Certificate remains deferred until required.
 
