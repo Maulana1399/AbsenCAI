@@ -7,6 +7,7 @@ use App\Models\IzinAbsensi;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
+use App\Services\Audit\ActivityLogService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -15,11 +16,12 @@ class SuratIzinService
 {
     public function __construct(
         private readonly AttendanceExceptionService $exceptionService,
+        private readonly ActivityLogService $activityLogService,
     ) {}
 
     public function create(array $data, int $createdBy): SuratIzin
     {
-        return SuratIzin::create([
+        $surat = SuratIzin::create([
             'peserta_id'      => $data['peserta_id'],
             'alasan'          => $data['alasan'],
             'jenis_izin'      => $data['jenis_izin'] ?? 'pulang',
@@ -28,6 +30,23 @@ class SuratIzinService
             'status'          => 'draft',
             'created_by'      => $createdBy,
         ]);
+
+        $this->activityLogService->log(
+            action: 'created',
+            module: 'surat_izin',
+            description: 'Surat izin dibuat untuk ' . ($surat->peserta->nama ?? 'Peserta #' . $surat->peserta_id),
+            subject: $surat,
+            properties: [
+                'nomor_surat'     => $surat->nomor_surat,
+                'peserta_id'      => $surat->peserta_id,
+                'status'          => 'draft',
+                'tanggal_mulai'   => $surat->tanggal_mulai?->toDateString(),
+                'tanggal_selesai' => $surat->tanggal_selesai?->toDateString(),
+                'jenis_izin'      => $surat->jenis_izin,
+            ],
+        );
+
+        return $surat;
     }
 
     public function submit(SuratIzin $surat): SuratIzin
@@ -40,7 +59,24 @@ class SuratIzinService
 
         $surat->update(['status' => 'pending']);
 
-        return $surat->fresh();
+        $fresh = $surat->fresh();
+
+        $this->activityLogService->log(
+            action: 'submitted',
+            module: 'surat_izin',
+            description: 'Surat izin diajukan untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            subject: $fresh,
+            properties: [
+                'nomor_surat'     => $fresh->nomor_surat,
+                'peserta_id'      => $fresh->peserta_id,
+                'status'          => 'pending',
+                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
+                'jenis_izin'      => $fresh->jenis_izin,
+            ],
+        );
+
+        return $fresh;
     }
 
     public function approve(SuratIzin $surat, User $approver): array
@@ -105,6 +141,25 @@ class SuratIzinService
             ];
         });
 
+        $fresh = $result['surat'];
+
+        $this->activityLogService->log(
+            action: 'approved',
+            module: 'surat_izin',
+            description: 'Surat izin disetujui untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            subject: $fresh,
+            properties: [
+                'nomor_surat'     => $fresh->nomor_surat,
+                'peserta_id'      => $fresh->peserta_id,
+                'status'          => 'approved',
+                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
+                'jenis_izin'      => $fresh->jenis_izin,
+                'sesi_count'      => $result['sesi_found'],
+                'izin_created'    => count($result['created']),
+            ],
+        );
+
         return $result;
     }
 
@@ -118,7 +173,24 @@ class SuratIzinService
 
         $surat->update(['status' => 'rejected']);
 
-        return $surat->fresh();
+        $fresh = $surat->fresh();
+
+        $this->activityLogService->log(
+            action: 'rejected',
+            module: 'surat_izin',
+            description: 'Surat izin ditolak untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            subject: $fresh,
+            properties: [
+                'nomor_surat'     => $fresh->nomor_surat,
+                'peserta_id'      => $fresh->peserta_id,
+                'status'          => 'rejected',
+                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
+                'jenis_izin'      => $fresh->jenis_izin,
+            ],
+        );
+
+        return $fresh;
     }
 
     public function markReturned(SuratIzin $surat, string $tanggalKembali): SuratIzin
@@ -153,7 +225,25 @@ class SuratIzinService
             $surat->update(['returned_at' => $tanggalKembaliCarbon]);
         });
 
-        return $surat->fresh();
+        $fresh = $surat->fresh();
+
+        $this->activityLogService->log(
+            action: 'returned',
+            module: 'surat_izin',
+            description: 'Surat izin ditandai kembali untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            subject: $fresh,
+            properties: [
+                'nomor_surat'     => $fresh->nomor_surat,
+                'peserta_id'      => $fresh->peserta_id,
+                'status'          => 'approved',
+                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
+                'tanggal_kembali' => $tanggalKembali,
+                'jenis_izin'      => $fresh->jenis_izin,
+            ],
+        );
+
+        return $fresh;
     }
 
     public function syncNewSession(SesiAbsensi $sesi): void

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Audit\ActivityLogIndex;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -160,6 +161,9 @@ Route::get('surat-izin/{surat}/print', function (SuratIzin $surat) {
     return view('surat-izin.print', compact('surat'));
 })->middleware(['auth', 'verified'])->name('surat-izin.print');
 
+Route::get('activity-log', ActivityLogIndex::class)
+    ->middleware(['auth', 'verified'])
+    ->name('activity-log.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

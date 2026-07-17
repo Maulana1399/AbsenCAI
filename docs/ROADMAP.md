@@ -178,7 +178,7 @@ Notes:
 
 ## Status
 
-🟡 In Progress — Permission feature group completed
+🟡 In Progress — Permission feature group completed, Activity Log Foundation completed
 
 ## Goal
 
@@ -217,10 +217,20 @@ Known Limitation:
 
 ### Audit
 
-* [ ] Activity Log
-* [ ] Export Log
-* [ ] Print Log
-* [ ] QR Log
+* [x] Activity Log Foundation — ActivityLog model, ActivityLogService, read-only UI (ActivityLogIndex), Surat Izin lifecycle integration, tests
+* [ ] Export Log — not yet implemented
+* [ ] Print Log — not yet implemented
+* [ ] QR Log — not yet implemented
+
+Notes:
+
+* Activity Log Foundation is built as a shared audit infrastructure for future modules (Export, Print, QR).
+* `ActivityLogService::log()` accepts action, module, description, optional subject (polymorphic), optional properties (JSON), and optional user.
+* Logged Surat Izin events: created, submitted, approved, rejected, returned.
+* Logs are written after successful business operations — failed/rolled-back transactions never produce false logs.
+* User fallback: "Sistem" when user_id is null or user deleted (FK uses nullOnDelete).
+* Schema includes ip_address and user_agent only when HTTP request exists (null-safe for CLI/tests).
+* Full test coverage: 22 tests for Activity Log service, Surat Izin integration, and UI.
 
 ---
 
@@ -349,9 +359,10 @@ Current progress:
 * Manual Attendance is implemented and verified.
 * Attendance status Hadir/Izin/Alfa is implemented and verified.
 * QR operational scope is complete.
-* Full regression suite verified: 124 tests passed, 311 assertions, 0 failures.
+* Full regression suite verified: 146 tests passed, 344 assertions, 0 failures.
 * Sprint 2 Permission feature group completed: Surat Izin, Print Surat, Return Tracking.
-* Remaining Sprint 2 scope: Riwayat Izin, Scoring, Audit, Storage.
+* Sprint 2 Activity Log Foundation completed: model, service, read-only UI, Surat Izin lifecycle integration, tests.
+* Remaining Sprint 2 scope: Riwayat Izin, Scoring, Export/Print/QR Log, Storage.
 
 Notes:
 

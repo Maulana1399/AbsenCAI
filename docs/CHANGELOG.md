@@ -16,12 +16,16 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * **Print Surat** — A5 landscape template with Kop Surat (KJA/CAI logos) and `jenis_izin` (pulang/keluar), browser-native print
 * **Return Tracking** — selectable return date via modal, attendance cleanup on return, IzinAbsensi end_time update
 * `jenis_izin` column (`pulang`/`keluar`) on `surat_izins` table
+* **Activity Log Foundation** — custom audit infrastructure with `ActivityLog` model, `ActivityLogService`, and read-only Livewire UI
+* **Surat Izin Activity Logging** — lifecycle events (created, submitted, approved, rejected, returned) integrated through `SuratIzinService`
+* **Activity Log UI** — `GET /activity-log` route with newest-first list, pagination, search, module/action filters, expandable properties, user fallback "Sistem"
 
 ## Changed
 
 * Existing QR and print services are now connected to user-facing screens without new business logic
 * Deferred non-critical Sprint 1 backlog: QR PDF Export, Report PDF Export, Dashboard PJ Regu, and Live Monitoring
-* Test suite expanded: 124 tests, 311 assertions (up from 70 tests, 198 assertions)
+* Test suite expanded: 146 tests, 344 assertions (up from 70 tests, 198 assertions)
+* `SuratIzinService` now depends on `ActivityLogService` via constructor injection — logs are written after successful business operations only
 
 ## Planned
 

@@ -296,6 +296,37 @@ Future
 
 ---
 
+## Audit
+
+Status
+
+🟢 Activity Log Foundation Completed
+
+Priority
+
+P1
+
+Sprint
+
+2
+
+Features
+
+* [x] Activity Log Foundation — model, service, read-only UI, Surat Izin integration, tests
+* [ ] Export Log — not yet integrated
+* [ ] Print Log — not yet integrated
+* [ ] QR Log — not yet integrated
+
+Notes:
+
+* `ActivityLogService::log()` provides a single entry point for all audit logging with automatic user/IP/user-agent detection.
+* Logged Surat Izin events: created, submitted, approved, rejected, returned.
+* Logs are written after successful business operations only — no false logs on failure.
+* User fallback: "Sistem" when user_id is null or user deleted.
+* Schema is extensible: properties JSON column, polymorphic subject, nullable ip_address/user_agent.
+
+---
+
 ## Competition
 
 Status

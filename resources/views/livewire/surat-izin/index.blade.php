@@ -95,7 +95,8 @@
                                 <div class="flex flex-wrap gap-1.5">
                                     @if ($surat->isDraft())
                                         <button wire:click="submit({{ $surat->id }})" wire:confirm="{{ __('Submit surat izin ini?') }}"
-                                            class="inline-flex items-center rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white">
+                                            class="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+                                            style="background-color: #2563eb;">
                                             {{ __('Submit') }}
                                         </button>
                                     @endif
@@ -115,7 +116,8 @@
 
                                     @if ($surat->isApproved() && !$surat->isReturned())
                                         <button wire:click="confirmReturn({{ $surat->id }})"
-                                            class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900">
+                                            class="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+                                            style="background-color: #2563eb;">
                                             {{ __('Tandai Kembali') }}
                                         </button>
                                     @endif

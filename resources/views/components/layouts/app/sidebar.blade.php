@@ -49,6 +49,7 @@
 
                 <flux:navlist.group expandable heading="Sekretariat" class="grid">
                     <flux:navlist.item :href="route('surat-izin')" :current="request()->routeIs('surat-izin')" wire:navigate>{{ __('Surat Izin') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('activity-log.index')" :current="request()->routeIs('activity-log.index')" wire:navigate>{{ __('Activity Log') }}</flux:navlist.item>
                 </flux:navlist.group>
 
             </flux:navlist>

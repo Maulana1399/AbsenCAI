@@ -219,7 +219,7 @@ Status: VERIFIED.
 
 ## Sprint 2
 
-Status: IN PROGRESS — Permission group completed
+Status: IN PROGRESS — Permission group completed, Activity Log Foundation completed
 
 ### Permission
 
@@ -248,10 +248,18 @@ Known Limitation:
 
 ### Audit
 
-- [ ] Activity Log
-- [ ] Export Log
-- [ ] Print Log
-- [ ] QR Log
+- [x] Activity Log Foundation
+  - `ActivityLog` model with `user()` belongsTo and `subject()` morphTo
+  - `ActivityLogService::log()` — single entry point for all audit logging
+  - Surat Izin lifecycle integration: created, submitted, approved, rejected, returned
+  - Transaction-safe: logs written only after successful business operations
+  - Read-only Activity Log UI (Livewire): newest-first, pagination, search, module/action filters, expandable properties
+  - User fallback: "Sistem" when user_id is null or user deleted
+  - Route: `GET /activity-log` under Sekretariat menu
+  - 22 dedicated tests
+- [ ] Export Log — not yet integrated
+- [ ] Print Log — not yet integrated
+- [ ] QR Log — not yet integrated
 
 ### Storage
 
@@ -260,7 +268,7 @@ Known Limitation:
 
 ### Verification
 
-- [x] Full regression suite: 124 tests passed, 311 assertions, 0 failures.
+- [x] Full regression suite: 146 tests passed, 344 assertions, 0 failures.
 
 ---
 
