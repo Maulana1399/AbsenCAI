@@ -28,6 +28,11 @@ class Person extends Model
         return $this->belongsToMany(Event::class, 'participations');
     }
 
+    public function legacyPesertaMapping()
+    {
+        return $this->hasOne(LegacyPesertaMapping::class, 'person_id');
+    }
+
     public function getJenisKelaminLabelAttribute(): string
     {
         return match ($this->jenis_kelamin) {

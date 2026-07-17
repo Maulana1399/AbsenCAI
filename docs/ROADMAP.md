@@ -348,7 +348,15 @@ Deliverables:
 
 ### S3.5 Legacy Data Backfill
 
-Status: 📋 PENDING
+Status: 🟢 IN PROGRESS
+
+Mapping infrastructure (migration + model + relationships + tests):
+- `legacy_peserta_mappings` table with FK constraints (restrictOnDelete)
+- `LegacyPesertaMapping` model with belongsTo relationships to Peserta, Person, Participation, Event
+- Inverse relationships on Peserta, Person, Participation, Event
+- UNIQUE(peserta_id), UNIQUE(participation_id) — identity contracts enforced
+- Snapshot columns for legacy data at backfill time (legacy_nip, legacy_participant_number, legacy_attendance_code)
+- Backfill command (Artisan) — REMAINING
 
 ### S3.6 Attendance Event Scoping
 

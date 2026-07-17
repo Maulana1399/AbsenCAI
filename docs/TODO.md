@@ -323,6 +323,10 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 ### S3.5 Legacy Data Backfill
 
+- [x] `legacy_peserta_mappings` migration — FK constraints with restrictOnDelete, UNIQUE(peserta_id), UNIQUE(participation_id), snapshot columns
+- [x] `LegacyPesertaMapping` model — belongsTo relationships to Peserta, Person, Participation, Event
+- [x] Inverse relationships on Peserta (`hasOne`), Person (`hasOne`), Participation (`hasOne`), Event (`hasMany`)
+- [x] Tests — schema, creation, nullable fields, belongs-to relationships, inverse relationships, UNIQUE constraints, restrictOnDelete (all 4 parents), cascade-free guarantee
 - [ ] Artisan command to backfill Person + Participation from existing peserta
 - [ ] Verification: legacy data accessible
 

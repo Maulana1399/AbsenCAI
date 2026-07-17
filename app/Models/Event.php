@@ -49,6 +49,11 @@ class Event extends Model
         return $this->belongsToMany(Person::class, 'participations');
     }
 
+    public function legacyPesertaMappings()
+    {
+        return $this->hasMany(LegacyPesertaMapping::class, 'event_id');
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Event $event) {

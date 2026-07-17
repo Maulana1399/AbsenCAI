@@ -81,4 +81,9 @@ class peserta extends Model
     {
         return $this->hasMany(SuratIzin::class, 'peserta_id');
     }
+
+    public function legacyPesertaMapping()
+    {
+        return $this->hasOne(LegacyPesertaMapping::class, 'peserta_id');
+    }
 }

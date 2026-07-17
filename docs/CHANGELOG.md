@@ -65,6 +65,15 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * **Fallback behavior added** — `current()` falls back to first active event when session is stale, `id()` delegates to `current()?->id`, `hasActiveEvent()` checks `current() !== null`
 * **`$cleared` flag added** — explicit `clear()` prevents fallback, preserving "no event" state
 * **6 test assertions updated** — 3 stale-session tests realigned with fallback contract, `requireCurrent` test changed to expect default instead of throw, `resolveDefault` id() assertion corrected, stale-session-with-other-active test renamed and updated
+* **LegacyPesertaMapping model and `legacy_peserta_mappings` table** — S3.5 mapping infrastructure foundation
+* `LegacyPesertaMapping` model with `peserta()`, `person()`, `participation()`, `event()` belongsTo relationships
+* `UNIQUE(peserta_id)` — one mapping per legacy peserta
+* `UNIQUE(participation_id)` — one mapping per participation
+* Snapshot columns: `legacy_nip`, `legacy_participant_number`, `legacy_attendance_code`, `migrated_at`, `backfill_batch_id`
+* All FKs use `restrictOnDelete` — prevents cascade deletion of mapped entities
+* Inverse relationships: `Peserta.legacyPesertaMapping()`, `Person.legacyPesertaMapping()`, `Participation.legacyPesertaMapping()`, `Event.legacyPesertaMappings()`
+* 20+ dedicated tests for S3.5 mapping infrastructure
+* S3.5 status updated to IN PROGRESS — mapping infrastructure complete, backfill command remaining
 
 ## Planned
 

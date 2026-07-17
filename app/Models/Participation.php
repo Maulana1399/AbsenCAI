@@ -23,4 +23,9 @@ class Participation extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    public function legacyPesertaMapping()
+    {
+        return $this->hasOne(LegacyPesertaMapping::class, 'participation_id');
+    }
 }
