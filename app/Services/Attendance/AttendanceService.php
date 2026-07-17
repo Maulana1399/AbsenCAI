@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\IzinAbsensi;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
+use App\Support\ActiveEventContext;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -24,7 +25,11 @@ class AttendanceService
             ];
         }
 
-        $sesi = $sesiId ? SesiAbsensi::find($sesiId) : SesiAbsensi::where('aktif', true)->first();
+        $sesi = $sesiId
+            ? SesiAbsensi::find($sesiId)
+            : SesiAbsensi::where('event_id', app(ActiveEventContext::class)->requireCurrent()->id)
+                ->where('aktif', true)
+                ->first();
 
         if (! $sesi) {
             return [

@@ -4,6 +4,7 @@ namespace App\Livewire\Database\Sesi;
 
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\SuratIzinService;
+use App\Support\ActiveEventContext;
 use Livewire\Component;
 
 class TambahSesi extends Component
@@ -32,11 +33,14 @@ class TambahSesi extends Component
                 'tanggal' => 'required|date',
             ]);
 
+            $event = app(ActiveEventContext::class)->requireCurrent();
+
             if ($this->aktif) {
-                SesiAbsensi::query()->update(['aktif' => false]);
+                SesiAbsensi::where('event_id', $event->id)->update(['aktif' => false]);
             }
 
             $sesi = SesiAbsensi::create([
+                'event_id' => $event->id,
                 'nama_sesi' => $this->nama_sesi,
                 'tanggal' => $this->tanggal,
                 'aktif' => $this->aktif ? 1 : 0,

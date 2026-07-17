@@ -9,6 +9,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Models\SesiAbsensi;
+use App\Support\ActiveEventContext;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -29,7 +30,10 @@ class Dashboard extends Component
 
     public function render()
     {
-        $sesiAktif = SesiAbsensi::where('aktif', true)->first();
+        $event = app(ActiveEventContext::class)->current();
+        $sesiAktif = $event
+            ? SesiAbsensi::where('event_id', $event->id)->where('aktif', true)->first()
+            : null;
         $pesertaQuery = peserta::with(['regu', 'kelompok', 'desa']);
 
         if ($this->regu_id) {
@@ -96,11 +100,13 @@ class Dashboard extends Component
 
     public function activateSesi($id)
 {
-    SesiAbsensi::query()->update([
+    $event = app(ActiveEventContext::class)->requireCurrent();
+
+    SesiAbsensi::where('event_id', $event->id)->update([
         'aktif' => false
     ]);
 
-    SesiAbsensi::where('id', $id)->update([
+    SesiAbsensi::where('event_id', $event->id)->where('id', $id)->update([
         'aktif' => true
     ]);
 }

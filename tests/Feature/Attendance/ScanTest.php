@@ -2,11 +2,21 @@
 
 use App\Livewire\Dashboard\Scan;
 use App\Models\Absensi;
+use App\Models\Event;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
+use App\Support\ActiveEventContext;
 use Livewire\Livewire;
 
 it('Scan orchestration handles successful attendance scan', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Livewire',
         'nip' => 3001,
@@ -16,6 +26,7 @@ it('Scan orchestration handles successful attendance scan', function () {
     ]);
 
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Livewire',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -38,6 +49,14 @@ it('Scan orchestration handles successful attendance scan', function () {
 });
 
 it('Scan orchestration preserves duplicate attendance prevention', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Duplicate Livewire',
         'nip' => 3002,
@@ -47,6 +66,7 @@ it('Scan orchestration preserves duplicate attendance prevention', function () {
     ]);
 
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Duplicate Livewire',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -71,6 +91,14 @@ it('Scan orchestration preserves duplicate attendance prevention', function () {
 });
 
 it('Scan orchestration handles missing active session', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     peserta::create([
         'nama' => 'Peserta Tanpa Sesi',
         'nip' => 3003,
@@ -90,7 +118,16 @@ it('Scan orchestration handles missing active session', function () {
 });
 
 it('Scan orchestration handles invalid identifier', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Invalid Livewire',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -107,6 +144,14 @@ it('Scan orchestration handles invalid identifier', function () {
 });
 
 it('participant_number is not treated as an attendance scan identifier', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Number Only',
         'nip' => 3004,
@@ -116,6 +161,7 @@ it('participant_number is not treated as an attendance scan identifier', functio
     ]);
 
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Participant Number',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -134,6 +180,14 @@ it('participant_number is not treated as an attendance scan identifier', functio
 });
 
 it('manual attendance flow records success through AttendanceService', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Manual',
         'nip' => 4001,
@@ -143,6 +197,7 @@ it('manual attendance flow records success through AttendanceService', function 
     ]);
 
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Manual',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -167,6 +222,14 @@ it('manual attendance flow records success through AttendanceService', function 
 });
 
 it('manual attendance flow preserves duplicate prevention', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Manual Duplicate',
         'nip' => 4002,
@@ -176,6 +239,7 @@ it('manual attendance flow preserves duplicate prevention', function () {
     ]);
 
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Manual Duplicate',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -202,6 +266,14 @@ it('manual attendance flow preserves duplicate prevention', function () {
 });
 
 it('manual attendance flow handles missing session', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Manual No Session',
         'nip' => 4003,

@@ -1,14 +1,24 @@
 <?php
 
 use App\Models\Absensi;
+use App\Models\Event;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceService;
+use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 test('process scan records successful attendance by attendance code', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Scan',
         'nip' => 1001,
@@ -16,6 +26,7 @@ test('process scan records successful attendance by attendance code', function (
         'jenis_kelamin' => 'Laki - Laki',
     ]);
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Pagi',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -36,6 +47,14 @@ test('process scan records successful attendance by attendance code', function (
 });
 
 test('process scan prevents duplicate attendance in the same session', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Duplicate',
         'nip' => 1002,
@@ -43,6 +62,7 @@ test('process scan prevents duplicate attendance in the same session', function 
         'jenis_kelamin' => 'Laki - Laki',
     ]);
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Duplicate',
         'tanggal' => '2026-07-15',
         'aktif' => true,
@@ -64,6 +84,14 @@ test('process scan prevents duplicate attendance in the same session', function 
 });
 
 test('process scan requires an active session after participant is found', function () {
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     peserta::create([
         'nama' => 'Peserta No Session',
         'nip' => 1003,
@@ -90,6 +118,14 @@ test('process scan returns not found for an invalid identifier', function () {
 
 test('process scan still accepts legacy nip fallback', function () {
     // Protects legacy NIP scan behavior until the S04 identity migration is complete.
+    $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
+        'name' => 'CAI Operational',
+        'slug' => 'cai-operational',
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Legacy Nip',
         'nip' => 1999,
@@ -97,6 +133,7 @@ test('process scan still accepts legacy nip fallback', function () {
         'jenis_kelamin' => 'Laki - Laki',
     ]);
     $session = SesiAbsensi::create([
+        'event_id' => $event->id,
         'nama_sesi' => 'Sesi Legacy',
         'tanggal' => '2026-07-15',
         'aktif' => true,

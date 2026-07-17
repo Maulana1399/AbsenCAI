@@ -329,6 +329,37 @@ test('deleting session does not delete its event', function () {
     expect(\App\Models\Event::find($event->id))->not->toBeNull();
 });
 
+test('active session resolution remains event-scoped', function () {
+    $eventA = EventFoundation_makeEvent(['name' => 'Event A', 'slug' => 'event-a']);
+    $eventB = EventFoundation_makeEvent(['name' => 'Event B', 'slug' => 'event-b']);
+
+    $sessionA = EventFoundation_makeSession(['event_id' => $eventA->id, 'nama_sesi' => 'A', 'aktif' => true]);
+    $sessionB = EventFoundation_makeSession(['event_id' => $eventB->id, 'nama_sesi' => 'B', 'aktif' => true]);
+
+    app(ActiveEventContext::class)->set($eventA);
+
+    expect(\App\Models\SesiAbsensi::where('event_id', $eventA->id)->where('aktif', true)->first()->is($sessionA))->toBeTrue()
+        ->and(\App\Models\SesiAbsensi::where('event_id', $eventB->id)->where('aktif', true)->first()->is($sessionB))->toBeTrue();
+});
+
+test('activating a session for one event does not deactivate another event', function () {
+    $eventA = EventFoundation_makeEvent(['name' => 'Event A', 'slug' => 'event-a']);
+    $eventB = EventFoundation_makeEvent(['name' => 'Event B', 'slug' => 'event-b']);
+
+    $sessionA1 = EventFoundation_makeSession(['event_id' => $eventA->id, 'nama_sesi' => 'A1', 'aktif' => true]);
+    $sessionA2 = EventFoundation_makeSession(['event_id' => $eventA->id, 'nama_sesi' => 'A2', 'aktif' => false]);
+    $sessionB = EventFoundation_makeSession(['event_id' => $eventB->id, 'nama_sesi' => 'B1', 'aktif' => true]);
+
+    app(ActiveEventContext::class)->set($eventA);
+
+    Livewire::test(\App\Livewire\Dashboard\Dashboard::class)
+        ->call('activateSesi', $sessionA2->id);
+
+    expect($sessionA1->fresh()->aktif)->toBeFalse()
+        ->and($sessionA2->fresh()->aktif)->toBeTrue()
+        ->and($sessionB->fresh()->aktif)->toBeTrue();
+});
+
 test('legacy CAI event cannot be archived', function () {
     $this->seed(\Database\Seeders\LegacyEventSeeder::class);
     $legacy = Event::where('slug', 'cai-operational')->first();

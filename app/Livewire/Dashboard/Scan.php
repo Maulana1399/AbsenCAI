@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceService;
+use App\Support\ActiveEventContext;
 use Livewire\Component;
 use App\Services\Attendance\AttendanceExceptionService;
 use Illuminate\Validation\ValidationException;
@@ -31,7 +32,10 @@ class Scan extends Component
     {
         $this->daftarSesi = SesiAbsensi::orderBy('tanggal', 'asc')->get();
 
-        $sesiAktif = SesiAbsensi::where('aktif', true)->first();
+        $event = app(ActiveEventContext::class)->current();
+        $sesiAktif = $event
+            ? SesiAbsensi::where('event_id', $event->id)->where('aktif', true)->first()
+            : null;
 
         if ($sesiAktif) {
             $this->sesi_id = $sesiAktif->id;

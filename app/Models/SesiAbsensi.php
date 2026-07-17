@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class SesiAbsensi extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'aktif' => 'boolean',
+        ];
+    }
+
     protected $fillable = ['event_id', 'nama_sesi', 'tanggal', 'aktif'];
 
     public function event()

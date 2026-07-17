@@ -3,6 +3,7 @@
 namespace App\Livewire\Database\Sesi;
 
 use App\Models\SesiAbsensi;
+use App\Support\ActiveEventContext;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Flux\Flux;
@@ -33,11 +34,13 @@ class EditSesi extends Component
             'tanggal' => 'required|date',
         ]);
 
+        $event = app(ActiveEventContext::class)->requireCurrent();
+
         if ($this->aktif) {
-            SesiAbsensi::query()->update(['aktif' => false]);
+            SesiAbsensi::where('event_id', $event->id)->update(['aktif' => false]);
         }
 
-        SesiAbsensi::where('id', $this->sesi_id)->update([
+        SesiAbsensi::where('event_id', $event->id)->where('id', $this->sesi_id)->update([
             'nama_sesi' => $this->nama_sesi,
             'tanggal' => $this->tanggal,
             'aktif' => $this->aktif ? 1 : 0,
