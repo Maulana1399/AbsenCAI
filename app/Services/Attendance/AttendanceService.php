@@ -4,6 +4,7 @@ namespace App\Services\Attendance;
 
 use App\Models\Absensi;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyPesertaMapping;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
@@ -16,6 +17,7 @@ class AttendanceService
     {
         $identifier = trim($identifier);
 
+        $activeEvent = app(ActiveEventContext::class)->requireCurrent();
         $peserta = $this->findParticipant($identifier);
 
         if (! $peserta) {
@@ -25,9 +27,16 @@ class AttendanceService
             ];
         }
 
+        if (! $this->isParticipantAllowedForEvent($peserta, $activeEvent->id)) {
+            return [
+                'status' => 'not_found',
+                'message' => 'Data peserta tidak ditemukan!',
+            ];
+        }
+
         $sesi = $sesiId
-            ? SesiAbsensi::find($sesiId)
-            : SesiAbsensi::where('event_id', app(ActiveEventContext::class)->requireCurrent()->id)
+            ? SesiAbsensi::where('event_id', $activeEvent->id)->find($sesiId)
+            : SesiAbsensi::where('event_id', $activeEvent->id)
                 ->where('aktif', true)
                 ->first();
 
@@ -85,5 +94,34 @@ class AttendanceService
         }
 
         return peserta::where('nip', $identifier)->first();
+    }
+
+    private function isParticipantAllowedForEvent(peserta $peserta, int $eventId): bool
+    {
+        $mapping = LegacyPesertaMapping::with('participation')
+            ->where('peserta_id', $peserta->id)
+            ->first();
+
+        if ($mapping === null || $mapping->participation === null) {
+            return false;
+        }
+
+        if ((int) $mapping->peserta_id !== (int) $peserta->id) {
+            return false;
+        }
+
+        if ((int) $mapping->event_id !== $eventId) {
+            return false;
+        }
+
+        if ((int) $mapping->participation->event_id !== $eventId) {
+            return false;
+        }
+
+        if ((int) $mapping->participation->person_id !== (int) $mapping->person_id) {
+            return false;
+        }
+
+        return true;
     }
 }
