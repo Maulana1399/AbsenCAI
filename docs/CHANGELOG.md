@@ -79,6 +79,9 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 * `BackfillReport` and `BackfillReportItem` value objects for structured service output
 * 37+ dedicated tests for backfill engine: command contract, dry-run guarantees, execute mode, NIP matching rules, conflict detection (name/gender/desa/participant_number/attendance_code), Participation resolution, idempotency, bulk determinism, transaction isolation
 * S3.5 status updated to COMPLETE. **Real backfill NOT YET EXECUTED** — pending manual `--dry-run` review against 144 real peserta records
+* **S3.5C backfill engine fixes** — dry-run reporting contract (Total Legacy Peserta, Database Writes), BROKEN_MAPPING test (valid FK with logical inconsistency), transaction isolation test (real conflict fixture), actual write counters (peopleCreated/participationsCreated/mappingsCreated). Test suite: 368 passed, 964 assertions
+* **S3.5E Production Backfill EXECUTED 2026-07-17** — 144 Person, 144 Participation, 144 LegacyPesertaMapping created. 0 conflicts, 0 errors. Full idempotency verified. Pre-backfill backup: `database/database.pre-s3.5e-backfill-20260717-172802.sqlite`
+* **S3.5 status updated** — ALL sub-phases COMPLETE (A=Audit, B=Mapping, C=Engine, D=Copy verification, E=Production). **Runtime architecture unchanged** — `pesertas` table remains active source. People/participations populated but not yet runtime-migrated
 
 ## Planned
 

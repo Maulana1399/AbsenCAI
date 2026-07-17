@@ -348,11 +348,13 @@ Deliverables:
 
 ### S3.5 Legacy Data Backfill
 
-Status: ✅ COMPLETE
+Status: ✅ COMPLETE — PRODUCTION BACKFILL EXECUTED
 
 **S3.5A Legacy Data Quality Audit:** ✅ COMPLETE
 **S3.5B Legacy Mapping Infrastructure:** ✅ COMPLETE
-**S3.5C Backfill Engine:** ✅ COMPLETE
+**S3.5C Safe Backfill Engine:** ✅ COMPLETE
+**S3.5D Copy Database Execute Verification:** ✅ COMPLETE
+**S3.5E Production Backfill:** ✅ COMPLETE
 
 Deliverables:
 - `legacy_peserta_mappings` table with FK constraints (restrictOnDelete)
@@ -362,8 +364,24 @@ Deliverables:
 - Snapshot columns for legacy data at backfill time (legacy_nip, legacy_participant_number, legacy_attendance_code)
 - `LegacyPesertaBackfillService` — per-peserta analysis, NIP-based Person matching, identity signal validation, Participation conflict detection, dry-run projection, transactional execution
 - `BackfillLegacyPeserta` Artisan command — `php artisan backfill:legacy-peserta` (default dry-run), `--dry-run` (explicit), `--execute` (writes), `--event` (slug)
-- 37+ dedicated tests for backfill engine
-- Real database has only been audited (144 peserta). **No backfill executed yet.**
+- 57+ combined dedicated tests for mapping infrastructure and backfill engine
+
+Production execute results (2026-07-17):
+- People Created: 144
+- Participations Created: 144
+- Mappings Created: 144
+- Database Writes: 432
+- Conflicts: 0 | Review Required: 0 | Broken Mapping: 0 | Drift Detected: 0 | Errors: 0
+- Idempotency verified — second dry-run shows Already Mapped: 144
+
+Current migration state:
+```
+pesertas (legacy runtime)
+        |
+        | LegacyPesertaMapping
+        v
+Person -> Participation -> Event
+```
 
 Safety guarantees:
 - Default is dry-run (zero writes)
@@ -372,6 +390,14 @@ Safety guarantees:
 - NIP is the ONLY automatic Person match key (name never auto-matches)
 - Identity signal conflicts (gender, name, desa) block execution
 - Participant_number and attendance_code conflicts detected before creation
+
+**Important — Runtime architecture unchanged:**
+- `pesertas` table is still the active runtime source for existing modules (attendance, QR, surat izin, reports, registration/import)
+- People/participations are populated with real production data but are NOT yet the runtime source
+- `legacy_peserta_mappings` is the compatibility bridge between legacy and normalized domains
+- Legacy NIP compatibility is preserved
+- `pesertas` is NOT deprecated or removed
+- Runtime event-scoping (S3.6+) will incrementally adopt the normalized domain
 
 ### S3.6 Attendance Event Scoping
 
@@ -507,7 +533,7 @@ Current progress:
 * S3.2 Universal Person: COMPLETE. People table, Person model. Clean foundational table — no participation wiring.
 * S3.3 Participation Foundation: COMPLETE. Participations table, Participation model, Person↔Event relationships. No legacy backfill.
 * S3.4 Active Event Context Hardening: COMPLETE. requireCurrent(), resolveDefault(), stale/inactive event safety. No legacy module scoping.
-* S3.5 Legacy Data Backfill: COMPLETE (S3.5A Audit, S3.5B Mapping Infrastructure, S3.5C Backfill Engine). LegacyPesertaBackfillService, BackfillLegacyPeserta command (dry-run default). 57+ combined tests. Real backfill NOT YET EXECUTED.
+* S3.5 Legacy Data Backfill: COMPLETE — Production backfill executed 2026-07-17. 144 Person, 144 Participation, 144 Mapping created. 0 conflicts. Idempotency verified. Runtime architecture unchanged — peserta table remains active source.
 
 Notes:
 
@@ -639,7 +665,7 @@ Sprint dianggap selesai apabila:
 3. Universal Person ✅ Complete (S3.2)
 4. Participation Foundation ✅ Complete (S3.3)
 5. Active Event Context Hardening ✅ Complete (S3.4)
-6. Legacy Data Backfill ✅ Complete (S3.5)
+6. Legacy Data Backfill ✅ Complete — PRODUCTION BACKFILL EXECUTED (S3.5)
 7. Attendance Event Scoping (S3.6)
 8. Participant/QR Migration (S3.7)
 9. Dashboard & Report Scoping (S3.8)

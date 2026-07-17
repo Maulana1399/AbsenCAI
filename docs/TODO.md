@@ -332,11 +332,24 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 - [x] Inverse relationships on Peserta (`hasOne`), Person (`hasOne`), Participation (`hasOne`), Event (`hasMany`)
 - [x] Tests — schema, creation, nullable fields, belongs-to relationships, inverse relationships, UNIQUE constraints, restrictOnDelete (all 4 parents), cascade-free guarantee
 
-#### S3.5C Backfill Engine ✅
+#### S3.5C Safe Backfill Engine ✅
 - [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, NIP matching, identity signal validation, conflict detection, dry-run projection, transactional writes
 - [x] `BackfillLegacyPeserta` Artisan command — `--dry-run` (default), `--execute`, `--event`, mutual exclusion validation, event validation (exists + active)
 - [x] 37+ dedicated tests: command contract, dry-run, execute, NIP matching, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
-- [ ] Real backfill NOT YET EXECUTED — pending manual `--dry-run` review
+
+#### S3.5D Copy Database Execute Verification ✅
+- [x] Isolated test on `database.s3.5d-test.sqlite` copy
+- [x] First execute: 144 people, participations, mappings created. 0 conflicts. 432 writes
+- [x] Second dry-run: Already Mapped: 144. 0 writes
+- [x] Second execute: Already Mapped: 144. 0 writes. Idempotency verified
+
+#### S3.5E Production Backfill ✅
+- [x] Pre-backfill SQLite backup created: `database/database.pre-s3.5e-backfill-20260717-172802.sqlite`
+- [x] Production dry-run: 144 peserta, 0 conflicts, 0 writes
+- [x] Production execute: 144 People, 144 Participations, 144 Mappings created. 432 writes. 0 errors
+- [x] Post-execute audit: people=144, participations=144, events=1, peserta unchanged
+- [x] Final idempotency dry-run: Already Mapped: 144. 0 writes. 0 projection
+- [x] **Runtime architecture unchanged** — peserta table remains active source
 
 ### S3.6 Attendance Event Scoping
 
