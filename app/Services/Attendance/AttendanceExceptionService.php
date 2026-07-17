@@ -10,8 +10,12 @@ use Illuminate\Validation\ValidationException;
 
 class AttendanceExceptionService
 {
-    public function recordIzin(int $pesertaId, int $sesiId, string $source = 'manual'): IzinAbsensi
-    {
+    public function recordIzin(
+        int $pesertaId,
+        int $sesiId,
+        string $source = 'manual',
+        ?int $suratIzinId = null,
+    ): IzinAbsensi {
         $peserta = peserta::findOrFail($pesertaId);
         $sesi = SesiAbsensi::findOrFail($sesiId);
 
@@ -29,10 +33,11 @@ class AttendanceExceptionService
 
         try {
             return IzinAbsensi::create([
-                'peserta_id' => $peserta->id,
-                'sesi_id' => $sesi->id,
-                'status' => 'izin',
-                'source' => $source,
+                'peserta_id'   => $peserta->id,
+                'sesi_id'      => $sesi->id,
+                'status'       => 'izin',
+                'source'       => $source,
+                'surat_izin_id' => $suratIzinId,
             ]);
         } catch (QueryException $exception) {
             if ($exception->getCode() === '23000') {

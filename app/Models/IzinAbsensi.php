@@ -13,6 +13,7 @@ class IzinAbsensi extends Model
         'sesi_id',
         'status',
         'source',
+        'surat_izin_id',
     ];
 
     public function peserta()
@@ -23,5 +24,10 @@ class IzinAbsensi extends Model
     public function sesi()
     {
         return $this->belongsTo(SesiAbsensi::class, 'sesi_id');
+    }
+
+    public function suratIzin()
+    {
+        return $this->belongsTo(SuratIzin::class, 'surat_izin_id');
     }
 }

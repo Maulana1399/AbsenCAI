@@ -76,4 +76,9 @@ class peserta extends Model
     {
         return $this->belongsTo(regu::class);
     }
+
+    public function suratIzins()
+    {
+        return $this->hasMany(SuratIzin::class, 'peserta_id');
+    }
 }
