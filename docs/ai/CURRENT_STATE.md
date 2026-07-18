@@ -45,6 +45,7 @@ Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 S3.9 Multi Role/Venue/Category is **ACTIVE / IN PROGRESS**.
 S3.9A Domain Foundation is **COMPLETE / VERIFIED**.
 S3.9B Category Foundation is **COMPLETE / VERIFIED**.
+S3.9C Venue + Rundown Foundation is **COMPLETE / VERIFIED**.
 S3.10 Regression & Production Readiness remains **PENDING** as future work.
 
 ---

@@ -422,10 +422,23 @@ Status: ACTIVE / IN PROGRESS
 - [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
 - [x] Full regression suite verified: 425 passed, 1086 assertions, 7.24s
 
+#### S3.9C Venue + Rundown Foundation ✅ VERIFIED
+- [x] Create `venues` table + `Venue` model
+- [x] Create `rundowns` table + `Rundown` model
+- [x] Create `rundown_items` table + `RundownItem` model
+- [x] Add `ActivityScheduleService` for safe venue/rundown creation
+- [x] Enforce event isolation for Venue / Rundown / RundownItem
+- [x] Enforce time validation (`ends_at > starts_at`)
+- [x] Support parallel activities at the same time when venue/rundown data is valid
+- [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
+- [x] Full regression suite verified: 432 passed, 1103 assertions, 7.46s
+
 #### Remaining S3.9 checkpoints
-- [ ] S3.9C Venue + Rundown Foundation
 - [ ] S3.9D Event Role / Committee Foundation
 - [ ] S3.9E Reporting / Export Integration
+
+#### Future checkpoint (not implemented)
+- [ ] Recurring Event Self-Registration & Identity Correction
 
 ### S3.10 Regression & Production Readiness
 

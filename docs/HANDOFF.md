@@ -43,6 +43,13 @@ Event
   -> CategoryDefinition
 
 Event
+  -> Venue
+  -> Rundown
+      -> RundownItem
+          -> Activity
+          -> Venue (nullable)
+
+Event
   -> Participation
       -> ActivityRegistration
           -> Activity

@@ -476,7 +476,23 @@ Deliverables:
 
 #### S3.9C Venue + Rundown Foundation
 
-Status: PENDING
+Status: ✅ COMPLETE / VERIFIED
+
+Deliverables:
+- `venues` table + `Venue` model
+- `rundowns` table + `Rundown` model
+- `rundown_items` table + `RundownItem` model
+- `ActivityScheduleService` for safe venue/rundown creation
+- Event-scoped invariants enforced:
+  - `venue.event_id == event.id`
+  - `rundown.event_id == event.id`
+  - `rundown_item.event_id == rundown.event_id == activity.event_id`
+  - optional venue on rundown item must belong to same event
+- Parallel activities at same time are supported when data structure is valid
+- Time validation prevents `ends_at <= starts_at`
+- Conflict detection / scheduling engine remains future enhancement
+- Legacy `pesertas` + `LegacyPesertaMapping` remain compatibility bridge and are not affected
+- Verified with full regression suite: 432 passed, 1103 assertions, 7.46s
 
 #### S3.9D Event Role / Committee Foundation
 
@@ -485,6 +501,26 @@ Status: PENDING
 #### S3.9E Reporting / Export Integration
 
 Status: PENDING
+
+#### Future Checkpoint: Recurring Event Self-Registration & Identity Correction
+
+Status: FUTURE / NOT IMPLEMENTED
+
+Scope:
+- QR publik membuka self-registration untuk event/pengajian yang dituju
+- peserta mencari Person yang sudah ada
+- tampilkan data pembeda seperti nama, kelompok, desa, tanggal lahir
+- peserta mengonfirmasi identitas
+- sistem membuat Participation untuk event bulan tersebut
+- jika data Person dianggap salah, peserta dapat mengajukan koreksi
+- koreksi tidak langsung mengubah Person
+- koreksi berstatus pending sampai divalidasi panitia
+- panitia dapat approve/reject correction
+- event besar tetap menggunakan operator/panitia untuk registration
+
+Out of scope:
+- jangan implementasikan sekarang
+- jangan dicampur dengan S3.9D
 
 ### S3.10 Regression & Production Readiness
 
