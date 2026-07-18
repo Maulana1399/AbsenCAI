@@ -283,10 +283,14 @@ Status: COMPLETE
 ### S3.8 Dashboard & Report Scoping
 
 - [ ] Migrate dashboard queries to event scope
-- [ ] Migrate report queries to event scope
+- [x] Migrate report queries to event scope (RekapPeserta + PesertaExport checkpoint)
 - [ ] Preserve legacy compatibility where required
+- [ ] Migrate dashboard counters and statistics to event scope
+- [ ] Verify RekapAbsensi event-safe normalization and cross-event leakage
 
-Status: NEXT
+Status: IN PROGRESS
+
+Completed verification: 397 passed, 1019 assertions
 
 Target: August 2026 operational use for Multi Event.
 

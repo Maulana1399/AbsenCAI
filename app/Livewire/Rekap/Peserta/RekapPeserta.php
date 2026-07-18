@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Rekap\Peserta;
 
-use Livewire\Component;
-use App\Models\peserta;
-use App\Models\regu;
-use App\Models\kelompok;
-use App\Models\desa;
 use App\Exports\PesertaExport;
+use App\Models\desa;
+use App\Models\kelompok;
+use App\Models\Participation;
+use App\Models\regu;
 use App\Services\Audit\ActivityLogService;
+use App\Support\ActiveEventContext;
+use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 
 class RekapPeserta extends Component
@@ -32,33 +33,58 @@ class RekapPeserta extends Component
 
     public function render()
     {
-        $query = peserta::with(['regu','kelompok','desa']);
+        $event = app(ActiveEventContext::class)->current();
+        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event']);
+
+        if ($event !== null) {
+            $query->where('event_id', $event->id);
+        }
 
         if ($this->regu_id) {
-            $query->where('regu_id', $this->regu_id);
+            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('regu_id', $this->regu_id));
         }
 
         if ($this->kelompok_id) {
-            $query->where('kelompok_id', $this->kelompok_id);
+            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('kelompok_id', $this->kelompok_id));
         }
 
         if ($this->desa_id) {
-            $query->where('desa_id', $this->desa_id);
+            $query->whereHas('person', fn ($builder) => $builder->where('desa_id', $this->desa_id));
         }
 
         if ($this->jenis_kelamin) {
-            $query->where('jenis_kelamin', $this->jenis_kelamin);
+            $gender = $this->jenis_kelamin === 'Laki - Laki' ? 'L' : 'P';
+            $query->whereHas('person', fn ($builder) => $builder->where('jenis_kelamin', $gender));
         }
 
         if ($this->jenis_peserta) {
             $query->where('jenis_peserta', $this->jenis_peserta);
         }
 
-        $daftar = $query->orderBy('nama')->get();
+        $daftar = $query->orderBy('id')->get()->map(function (Participation $participation) {
+            $person = $participation->person;
+            $peserta = $person?->legacyPesertaMapping?->peserta;
+
+            return (object) [
+                'id' => $participation->id,
+                'person' => $person,
+                'nama' => $person?->nama,
+                'nip' => $person?->nip,
+                'jenis_kelamin' => $person?->jenis_kelamin,
+                'jenis_peserta' => $participation->jenis_peserta,
+                'participant_number' => $participation->participant_number,
+                'attendance_code' => $participation->attendance_code,
+                'desa' => $person?->desa,
+                'kelompok' => $peserta?->kelompok,
+                'regu' => $peserta?->regu,
+                'status_registrasi' => $peserta?->status_registrasi,
+                'status_registrasi_label' => $peserta?->status_registrasi_label ?? 'Belum Registrasi',
+            ];
+        })->values();
 
         $total = $daftar->count();
-        $totalLaki = $daftar->where('jenis_kelamin','Laki - Laki')->count();
-        $totalPerempuan = $daftar->where('jenis_kelamin','Perempuan')->count();
+        $totalLaki = $daftar->where('jenis_kelamin','L')->count();
+        $totalPerempuan = $daftar->where('jenis_kelamin','P')->count();
         $sudahRegUlang = $daftar->where('status_registrasi','Registrasi Ulang')->count();
         $belumRegUlang = $daftar->where('status_registrasi','Belum Registrasi')->count();
 
@@ -84,6 +110,7 @@ class RekapPeserta extends Component
         $this->jenis_peserta && $filters['jenis_peserta'] = $this->jenis_peserta;
 
         $pesertaExport = new PesertaExport(
+            app(ActiveEventContext::class)->current()?->id,
             $this->regu_id,
             $this->kelompok_id,
             $this->desa_id,

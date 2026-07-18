@@ -260,6 +260,7 @@ Infrastructure
 * ActiveEventContext hardening complete — stale cache removed, fallback to first active event added, clear() prevents fallback. Route middleware and legacy module scoping are not yet implemented. Switching active event has zero effect on operational modules.
 * S3.6 complete: attendance sessions are event-scoped, participant resolution is event-safe, and cross-event persistence is blocked.
 * S3.7D verified: RegistrationService now writes normalized participant identifiers through Participation, with LegacyPesertaMapping preserving compatibility.
+* S3.8 checkpoint 1 verified: RekapPeserta and PesertaExport now use active-event-scoped Participation as normalized report/export source.
 
 ---
 
@@ -267,11 +268,13 @@ Infrastructure
 
 Current next task:
 
-**Sprint 3.7 — Participant/QR Migration.** Migrate QR scan/label flows to participation runtime while preserving legacy NIP/attendance_code compatibility.
+**Sprint 3.8 — Dashboard & Report Scoping.** Migrate dashboard counters and attendance/report views to event-scoped data while preserving required legacy compatibility.
 
 S3.5 Legacy Data Backfill is COMPLETE — production backfill executed 2026-07-17. 144 people, participations, mappings created. 0 conflicts. Idempotency verified. Runtime architecture unchanged — peserta remains active source.
 
-After S3.7: S3.8 Dashboard & Report Scoping.
+S3.8 checkpoint 1 complete: RekapPeserta + PesertaExport now scope to the active event via Participation.
+
+After S3.8 report/export checkpoint: Dashboard event-scoping.
 
 After S3.1 Event Foundation completion:
 
@@ -281,7 +284,7 @@ Deferred Sprint 1 items remain in backlog until operationally required.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **deferred to 2027**.
 
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
-Latest verified baseline: 368 tests, 964 assertions.
+Latest verified baseline: 397 tests, 1019 assertions.
 Event Foundation: 30+ dedicated tests added.
 Person Foundation: 15+ dedicated tests added.
 Participation Foundation: 20+ dedicated tests added.

@@ -419,7 +419,10 @@ Klik "Scan Lagi" → kamera kembali aktif
 ```
 Admin buka /rekap-peserta
         ↓
-RekapPeserta.php (Livewire) memuat semua peserta
+RekapPeserta.php (Livewire) membaca Participation aktif-event
+        ↓
+Person dipakai untuk identity fields
+LegacyPesertaMapping → peserta dipakai untuk regu, kelompok, dan status registrasi legacy
         ↓
 Admin bisa filter berdasarkan:
   - Regu
@@ -434,8 +437,7 @@ Tampil tabel + ringkasan statistik:
         ↓
 Klik "Export Excel"
         ↓
-PesertaExport.php membuat file .xlsx
-  dengan filter yang sama seperti yang ditampilkan
+PesertaExport.php membuat file .xlsx dari Participation aktif-event
         ↓
 File Excel terdownload otomatis
 ```

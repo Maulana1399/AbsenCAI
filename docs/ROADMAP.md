@@ -418,7 +418,19 @@ Deliverables:
 
 ### S3.8 Dashboard & Report Scoping
 
-Status: 📋 NEXT
+Status: 🟡 IN PROGRESS
+
+Checkpoint 1 complete:
+- RekapPeserta + PesertaExport scoped to active-event Participation runtime
+- Person supplies identity fields
+- LegacyPesertaMapping preserves legacy kelompok/regu/status compatibility
+- Full suite verified: 397 passed, 1019 assertions
+
+Remaining checkpoints:
+- Dashboard event-scoped counters and reporting
+- RekapAbsensi event-safe normalization and cross-event leakage verification
+
+Next implementation checkpoint: Dashboard event-scoping
 
 ### S3.9 Multi Role/Venue/Category
 

@@ -2,13 +2,15 @@
 
 namespace App\Exports;
 
-use App\Models\peserta;
+use App\Models\Participation;
+use App\Support\ActiveEventContext;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
+    public $event_id;
     public $regu_id;
     public $kelompok_id;
     public $desa_id;
@@ -16,6 +18,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
     public $jenis_peserta;
 
     public function __construct(
+        $event_id = null,
         $regu_id = null,
         $kelompok_id = null,
         $desa_id = null,
@@ -23,6 +26,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
         $jenis_peserta = null
     )
     {
+        $this->event_id = $event_id;
         $this->regu_id = $regu_id;
         $this->kelompok_id = $kelompok_id;
         $this->desa_id = $desa_id;
@@ -32,39 +36,46 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
 
     public function collection()
     {
-        $query = peserta::with(['desa', 'kelompok', 'regu']);
+        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event']);
+
+        if ($this->event_id !== null) {
+            $query->where('event_id', $this->event_id);
+        }
 
         if ($this->regu_id) {
-            $query->where('regu_id', $this->regu_id);
+            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('regu_id', $this->regu_id));
         }
 
         if ($this->kelompok_id) {
-            $query->where('kelompok_id', $this->kelompok_id);
+            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('kelompok_id', $this->kelompok_id));
         }
 
         if ($this->desa_id) {
-            $query->where('desa_id', $this->desa_id);
+            $query->whereHas('person', fn ($builder) => $builder->where('desa_id', $this->desa_id));
         }
 
         if ($this->jenis_kelamin) {
-            $query->where('jenis_kelamin', $this->jenis_kelamin);
+            $query->whereHas('person', fn ($builder) => $builder->where('jenis_kelamin', $this->normalizeGender($this->jenis_kelamin)));
         }
 
         if ($this->jenis_peserta) {
             $query->where('jenis_peserta', $this->jenis_peserta);
         }
 
-        return $query->orderBy('nama')->get()->map(function ($peserta, $index) {
+        return $query->orderBy('id')->get()->map(function (Participation $participation, $index) {
+            $person = $participation->person;
+            $peserta = $person?->legacyPesertaMapping?->peserta;
+
             return [
                 'No' => $index + 1,
-                'Nama' => $peserta->nama,
-                'NIP' => $peserta->nip,
-                'Jenis Kelamin' => $peserta->jenis_kelamin,
-                'Jenis Peserta' => $peserta->jenis_peserta,
-                'Desa' => $peserta->desa->desa_asal ?? '-',
-                'Kelompok' => $peserta->kelompok->kelompok_asal ?? '-',
-                'Regu' => $peserta->regu->regu ?? '-',
-                'Status Registrasi' => $peserta->status_registrasi_label,
+                'Nama' => $person?->nama,
+                'NIP' => $person?->nip,
+                'Jenis Kelamin' => $this->displayGender($person?->jenis_kelamin),
+                'Jenis Peserta' => $participation->jenis_peserta,
+                'Desa' => $person?->desa?->desa_asal ?? '-',
+                'Kelompok' => $peserta?->kelompok?->kelompok_asal ?? '-',
+                'Regu' => $peserta?->regu?->regu ?? '-',
+                'Status Registrasi' => $peserta?->status_registrasi_label ?? '-',
             ];
         });
     }
@@ -82,5 +93,23 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Regu',
             'Status Registrasi',
         ];
+    }
+
+    private function normalizeGender(?string $gender): ?string
+    {
+        return match ($gender) {
+            'L' => 'Laki - Laki',
+            'P' => 'Perempuan',
+            default => $gender,
+        };
+    }
+
+    private function displayGender(?string $gender): ?string
+    {
+        return match ($gender) {
+            'L' => 'Laki - Laki',
+            'P' => 'Perempuan',
+            default => $gender,
+        };
     }
 }

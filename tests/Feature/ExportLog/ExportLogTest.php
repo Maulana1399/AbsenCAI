@@ -1,14 +1,25 @@
 <?php
 
-use App\Models\ActivityLog;
-use App\Models\User;
-use App\Models\peserta;
 use App\Livewire\Rekap\Peserta\RekapPeserta;
+use App\Models\ActivityLog;
+use App\Models\Event;
+use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
+use App\Models\User;
+use App\Models\desa;
+use App\Models\kelompok;
+use App\Models\peserta;
+use App\Models\regu;
+use App\Support\ActiveEventContext;
 use Livewire\Livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
+    $this->eventA = Event::create(['name' => 'Event A', 'slug' => 'event-a-'.str()->random(6), 'status' => 'active']);
+    $this->eventB = Event::create(['name' => 'Event B', 'slug' => 'event-b-'.str()->random(6), 'status' => 'active']);
+    app(ActiveEventContext::class)->set($this->eventA);
 });
 
 // ---------------------------------------------------------------------------
@@ -24,17 +35,43 @@ test('rekap peserta page is accessible by authenticated user', function () {
     $this->get('/rekap-peserta')->assertStatus(200);
 });
 
+test('rekap peserta shows only active event participations', function () {
+    exportLog_makeMappedParticipation($this->eventA, 'Event A Person', '9101', 'Laki - Laki', 'KL910', 'KJA-A1');
+    exportLog_makeMappedParticipation($this->eventB, 'Event B Person', '9201', 'Laki - Laki', 'KL920', 'KJA-B1');
+
+    Livewire::test(RekapPeserta::class)
+        ->assertSee('Event A Person')
+        ->assertDontSee('Event B Person');
+});
+
+test('switching active event changes rekap peserta dataset', function () {
+    exportLog_makeMappedParticipation($this->eventA, 'Event A Switch', '9301', 'Laki - Laki', 'KL930', 'KJA-AS1');
+    exportLog_makeMappedParticipation($this->eventB, 'Event B Switch', '9401', 'Laki - Laki', 'KL940', 'KJA-BS1');
+
+    Livewire::test(RekapPeserta::class)->assertSee('Event A Switch')->assertDontSee('Event B Switch');
+
+    app(ActiveEventContext::class)->set($this->eventB);
+
+    Livewire::test(RekapPeserta::class)->assertSee('Event B Switch')->assertDontSee('Event A Switch');
+});
+
 // ---------------------------------------------------------------------------
 // Export — activity log
 // ---------------------------------------------------------------------------
 
+function exportLog_makeMappedParticipation(Event $event, string $name, string $nip, string $gender, string $participantNumber, string $attendanceCode, string $status = 'Belum Registrasi'): void
+{
+    $desa = desa::first() ?? desa::create(['desa_asal' => 'Desa Export']);
+    $kelompok = kelompok::first() ?? kelompok::create(['kelompok_asal' => 'Kelompok Export', 'desa_id' => $desa->id]);
+    $regu = regu::first() ?? regu::create(['regu' => 'Regu Export', 'jenis_kelamin' => $gender]);
+    $peserta = peserta::create(['nama' => $name, 'nip' => (int) $nip, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'Laki - Laki' : 'Perempuan', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => $status]);
+    $person = Person::create(['nama' => $name, 'nip' => (int) $nip, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'L' : 'P', 'desa_id' => $desa->id]);
+    $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_peserta' => peserta::JENIS_WAJIB]);
+    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+}
+
 test('export peserta creates activity log entry', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 1',
-        'nip'             => 9001,
-        'attendance_code' => 'KJA-EXP-1',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 1', '9001', 'Laki - Laki', 'KL901', 'KJA-EXP-1');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel');
@@ -47,12 +84,7 @@ test('export peserta creates activity log entry', function () {
 });
 
 test('export peserta stores correct module and action', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 2',
-        'nip'             => 9002,
-        'attendance_code' => 'KJA-EXP-2',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 2', '9002', 'Laki - Laki', 'KL902', 'KJA-EXP-2');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel');
@@ -67,12 +99,7 @@ test('export peserta stores correct module and action', function () {
 });
 
 test('export peserta stores correct description', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 3',
-        'nip'             => 9003,
-        'attendance_code' => 'KJA-EXP-3',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 3', '9003', 'Laki - Laki', 'KL903', 'KJA-EXP-3');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel');
@@ -86,12 +113,7 @@ test('export peserta stores correct description', function () {
 });
 
 test('export peserta stores correct properties', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 4',
-        'nip'             => 9004,
-        'attendance_code' => 'KJA-EXP-4',
-        'jenis_kelamin'   => 'Perempuan',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 4', '9004', 'Perempuan', 'KP904', 'KJA-EXP-4');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel');
@@ -108,12 +130,8 @@ test('export peserta stores correct properties', function () {
 });
 
 test('export peserta stores filters in properties when applied', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 5',
-        'nip'             => 9005,
-        'attendance_code' => 'KJA-EXP-5',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 5', '9005', 'Laki - Laki', 'KL905', 'KJA-EXP-5');
+    exportLog_makeMappedParticipation($this->eventB, 'Peserta Export 5 B', '9905', 'Laki - Laki', 'KL915', 'KJA-EXP-5-B');
 
     Livewire::test(RekapPeserta::class)
         ->set('jenis_kelamin', 'Laki - Laki')
@@ -129,12 +147,7 @@ test('export peserta stores filters in properties when applied', function () {
 });
 
 test('export peserta creates exactly one activity log entry per call', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 6',
-        'nip'             => 9006,
-        'attendance_code' => 'KJA-EXP-6',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 6', '9006', 'Laki - Laki', 'KL906', 'KJA-EXP-6');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel');
@@ -147,12 +160,7 @@ test('export peserta creates exactly one activity log entry per call', function 
 });
 
 test('export peserta records authenticated user', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 7',
-        'nip'             => 9007,
-        'attendance_code' => 'KJA-EXP-7',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 7', '9007', 'Laki - Laki', 'KL907', 'KJA-EXP-7');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel');
@@ -166,12 +174,7 @@ test('export peserta records authenticated user', function () {
 });
 
 test('export peserta returns download response', function () {
-    peserta::create([
-        'nama'            => 'Peserta Export 8',
-        'nip'             => 9008,
-        'attendance_code' => 'KJA-EXP-8',
-        'jenis_kelamin'   => 'Laki - Laki',
-    ]);
+    exportLog_makeMappedParticipation($this->eventA, 'Peserta Export 8', '9008', 'Laki - Laki', 'KL908', 'KJA-EXP-8');
 
     Livewire::test(RekapPeserta::class)
         ->call('exportExcel')
