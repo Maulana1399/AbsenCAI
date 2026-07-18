@@ -44,6 +44,21 @@ class Event extends Model
         return $this->hasMany(Participation::class);
     }
 
+    public function activityGroups()
+    {
+        return $this->hasMany(ActivityGroup::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function activityRegistrations()
+    {
+        return $this->hasMany(ActivityRegistration::class);
+    }
+
     public function sesiAbsensis()
     {
         return $this->hasMany(SesiAbsensi::class);

@@ -33,6 +33,17 @@ Event
 ```
 
 ```
+Event
+  -> ActivityGroup
+      -> Activity
+
+Event
+  -> Participation
+      -> ActivityRegistration
+          -> Activity
+```
+
+```
 Attendance
   -> Event
   -> SesiAbsensi
@@ -43,10 +54,13 @@ Kontrak runtime saat ini:
 - `Event` = event boundary
 - `Person` = canonical identity
 - `Participation` = event-scoped participation dan runtime identifiers
+- `ActivityGroup` = event-scoped program/group domain
+- `Activity` = event-scoped activity domain
+- `ActivityRegistration` = domain model pendaftaran activity lintas participation
 - `LegacyPesertaMapping` tetap menjadi compatibility bridge antara legacy `peserta` dan runtime normalized domain
 - Tabel `peserta` belum dihapus dan masih diperlukan untuk backward compatibility
 
-Sprint 3 telah ditutup secara resmi pada level dokumentasi dan runtime verification.
+Sprint 3 tetap berjalan; S3.9A Domain Foundation sudah verified dan checkpoint berikutnya adalah S3.9B.
 
 > **Apa itu Livewire?**
 > Livewire adalah plugin Laravel yang membuat halaman web bisa berubah secara langsung tanpa reload. Mirip seperti Google Sheets yang langsung update tanpa perlu refresh halaman.

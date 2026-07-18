@@ -395,13 +395,27 @@ Target: August 2026 operational use for Multi Event.
 
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
-Next roadmap checkpoint: S3.9 Multi Role/Venue/Category (deferred design only)
+Next roadmap checkpoint: S3.9B Category Foundation
 
 ### S3.9 Multi Role/Venue/Category
 
-- [ ] Design only — deferred
+Status: ACTIVE / IN PROGRESS
 
-Status: DEFERRED DESIGN ONLY
+#### S3.9A Domain Foundation ✅ VERIFIED
+- [x] Create `activity_groups` table + `ActivityGroup` model
+- [x] Create `activities` table + `Activity` model
+- [x] Create `activity_registrations` table + `ActivityRegistration` model
+- [x] Add `ActivityRegistrationService` for safe domain creation
+- [x] Enforce event isolation for ActivityGroup / Activity / ActivityRegistration
+- [x] Enforce duplicate registration protection for Participation + Activity
+- [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
+- [x] Full regression suite verified: 411 passed, 1057 assertions
+
+#### Remaining S3.9 checkpoints
+- [ ] S3.9B Category Foundation
+- [ ] S3.9C Venue + Rundown Foundation
+- [ ] S3.9D Event Role / Committee Foundation
+- [ ] S3.9E Reporting / Export Integration
 
 ### S3.10 Regression & Production Readiness
 

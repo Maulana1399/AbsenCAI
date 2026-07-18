@@ -433,14 +433,48 @@ Deliverables:
 
 ### S3.9 Multi Role/Venue/Category
 
-Status: 🔴 DEFERRED (design only — not needed for August 2026)
+Status: 🟢 ACTIVE — IN PROGRESS
+
+#### S3.9A Domain Foundation
+
+Status: ✅ COMPLETE / VERIFIED
+
+Deliverables:
+- `activity_groups` table + `ActivityGroup` model
+- `activities` table + `Activity` model
+- `activity_registrations` table + `ActivityRegistration` model
+- `ActivityRegistrationService` domain service for safe creation
+- Event-scoped invariants enforced:
+  - `activity_registration.event_id == participation.event_id == activity.event_id`
+  - `activity.event_id == activity_group.event_id`
+- One Participation can join many Activities within the same Event
+- Duplicate registration for the same Participation + Activity is rejected
+- Cross-event activity registration is blocked
+- Legacy `pesertas` + `LegacyPesertaMapping` remain compatibility bridge and are not source of truth for new activity domain
+- Verified with full regression suite: 411 passed, 1057 assertions
+
+#### S3.9B Category Foundation
+
+Status: PENDING
+
+#### S3.9C Venue + Rundown Foundation
+
+Status: PENDING
+
+#### S3.9D Event Role / Committee Foundation
+
+Status: PENDING
+
+#### S3.9E Reporting / Export Integration
+
+Status: PENDING
 
 ### S3.10 Regression & Production Readiness
 
 Status: 📋 PENDING / future work
 
 Next checkpoint:
-- S3.9 Multi Role/Venue/Category (deferred design only)
+- S3.9B Category Foundation
 
 ---
 

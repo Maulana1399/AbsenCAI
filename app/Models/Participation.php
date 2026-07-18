@@ -28,4 +28,9 @@ class Participation extends Model
     {
         return $this->hasOne(LegacyPesertaMapping::class, 'participation_id');
     }
+
+    public function activityRegistrations()
+    {
+        return $this->hasMany(ActivityRegistration::class);
+    }
 }
