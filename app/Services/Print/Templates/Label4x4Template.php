@@ -2,7 +2,7 @@
 
 namespace App\Services\Print\Templates;
 
-use App\Models\peserta;
+use App\Models\Participation;
 use App\Services\QR\QRService;
 
 class Label4x4Template
@@ -12,14 +12,16 @@ class Label4x4Template
     ) {
     }
 
-    public function render(peserta $participant): string
+    public function render(Participation $participant): string
     {
+        $source = $participant instanceof Participation ? $participant->person : $participant;
+
         $qrBase64 = base64_encode(
             $this->qrService->generatePng((string) $participant->attendance_code)
         );
 
         $participantNumber = htmlspecialchars((string) $participant->participant_number, ENT_QUOTES, 'UTF-8');
-        $participantName = htmlspecialchars((string) $participant->nama, ENT_QUOTES, 'UTF-8');
+        $participantName = htmlspecialchars((string) ($source->nama ?? ''), ENT_QUOTES, 'UTF-8');
 
         return <<<HTML
 <!DOCTYPE html>

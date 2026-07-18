@@ -2,7 +2,7 @@
 
 namespace App\Services\Print;
 
-use App\Models\peserta;
+use App\Models\Participation;
 use App\Services\Print\Templates\Label4x4Template;
 
 class PrintEngine
@@ -12,7 +12,7 @@ class PrintEngine
     ) {
     }
 
-    public function label4x4(peserta $participant): string
+    public function label4x4(Participation $participant): string
     {
         return $this->label4x4Template->render($participant);
     }

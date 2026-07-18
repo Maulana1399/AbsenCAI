@@ -1,6 +1,10 @@
 <?php
 
 use App\Models\ActivityLog;
+use App\Models\Event;
+use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\SuratIzin;
 use App\Models\User;
 use App\Models\peserta;
@@ -15,6 +19,29 @@ beforeEach(function () {
         'nip'             => 8001,
         'attendance_code' => 'KJA-PRINT-TEST',
         'jenis_kelamin'   => 'Laki - Laki',
+    ]);
+    $event = Event::create([
+        'name' => 'Print QR Event',
+        'slug' => 'print-qr-event-'.str()->random(6),
+        'status' => 'active',
+    ]);
+    $person = Person::create([
+        'nama' => $this->peserta->nama,
+        'nip' => $this->peserta->nip,
+        'jenis_kelamin' => 'L',
+    ]);
+    $participation = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'participant_number' => 'KL001',
+        'attendance_code' => $this->peserta->attendance_code,
+        'jenis_peserta' => 'Wajib',
+    ]);
+    LegacyPesertaMapping::create([
+        'peserta_id' => $this->peserta->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
     ]);
 });
 
@@ -151,7 +178,7 @@ test('qr label single print creates print_viewed activity log entry', function (
     $this->assertDatabaseHas('activity_logs', [
         'action'       => 'print_viewed',
         'module'       => 'print',
-        'subject_type' => peserta::class,
+        'subject_type' => App\Models\Person::class,
         'subject_id'   => $this->peserta->id,
         'user_id'      => $this->user->id,
     ]);

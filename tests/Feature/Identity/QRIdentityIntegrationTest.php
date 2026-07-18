@@ -1,21 +1,36 @@
 <?php
 
 use App\Livewire\QRLabel\Index as QRLabelIndex;
+use App\Models\Event;
+use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\User;
 use App\Models\peserta;
 use App\Services\QR\QRService;
+
 use Livewire\Livewire;
 
 it('QR label print route encodes attendance code and keeps participant number as label only', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $participant = peserta::create([
+    $event = Event::create([
+        'name' => 'QR Print Event',
+        'slug' => 'qr-print-event-'.str()->random(6),
+        'status' => 'active',
+    ]);
+    $person = Person::create([
         'nama' => 'Peserta QR Print',
         'nip' => 4001,
+        'jenis_kelamin' => 'L',
+    ]);
+    $participant = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
         'participant_number' => 'KL001',
         'attendance_code' => 'KJA-QRPRINT1',
-        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
     ]);
 
     $fake = new class extends QRService {
@@ -31,7 +46,21 @@ it('QR label print route encodes attendance code and keeps participant number as
 
     app()->instance(QRService::class, $fake);
 
-    $response = $this->get('/qr-label/print/selected/'.$participant->id);
+    $legacy = peserta::create([
+        'nama' => 'Peserta QR Print',
+        'nip' => 4001,
+        'participant_number' => 'KL001',
+        'attendance_code' => 'KJA-QRPRINT1',
+        'jenis_kelamin' => 'Laki - Laki',
+    ]);
+    LegacyPesertaMapping::create([
+        'peserta_id' => $legacy->id,
+        'person_id' => $person->id,
+        'participation_id' => $participant->id,
+        'event_id' => $event->id,
+    ]);
+
+    $response = $this->get('/qr-label/print/selected/'.$legacy->id);
 
     $response->assertOk();
     $response->assertSee('KL001', false);
@@ -44,12 +73,22 @@ it('QR label print route encodes attendance code and keeps participant number as
 });
 
 it('QR label Livewire download uses attendance code payload', function () {
-    $participant = peserta::create([
+    $event = Event::create([
+        'name' => 'QR Livewire Event',
+        'slug' => 'qr-livewire-event-'.str()->random(6),
+        'status' => 'active',
+    ]);
+    $person = Person::create([
         'nama' => 'Peserta QR Livewire',
         'nip' => 4002,
+        'jenis_kelamin' => 'P',
+    ]);
+    $participant = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
         'participant_number' => 'KP001',
         'attendance_code' => 'KJA-QRLIVE1',
-        'jenis_kelamin' => 'Perempuan',
+        'jenis_peserta' => 'Wajib',
     ]);
 
     $fake = new class extends QRService {
@@ -67,7 +106,7 @@ it('QR label Livewire download uses attendance code payload', function () {
 
     $response = Livewire::test(QRLabelIndex::class)
         ->set('selectedParticipantId', $participant->id)
-        ->set('selectedParticipant', $participant)
+        ->set('selectedParticipant', $participant->person)
         ->call('downloadPng');
 
     $response->assertOk();

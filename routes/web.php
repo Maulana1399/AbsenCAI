@@ -8,6 +8,7 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Livewire\Registrasi\SelfRegister;
 use App\Http\Controllers\ImportDataController;
+use App\Models\LegacyPesertaMapping;
 use App\Models\peserta;
 use App\Models\SuratIzin;
 use App\Services\Audit\ActivityLogService;
@@ -68,19 +69,26 @@ Route::get('qr-label', QRLabelIndex::class)
     ->name('qr-label.index');
 
 Route::get('qr-label/print/selected/{participant}', function (peserta $participant) {
+    $mapping = $participant->legacyPesertaMapping()->with(['participation.person'])->first();
+
+    abort_if($mapping === null || $mapping->participation === null, 404);
+
+    $participation = $mapping->participation;
+
     app(ActivityLogService::class)->log(
         action: 'print_viewed',
         module: 'print',
-        description: 'Membuka tampilan cetak label QR '.$participant->nama,
-        subject: $participant,
+        description: 'Membuka tampilan cetak label QR '.$participation->person->nama,
+        subject: $participation->person,
         properties: [
             'print_type'      => 'qr_label_single',
             'peserta_id'      => $participant->id,
-            'attendance_code' => $participant->attendance_code,
+            'participant_id'  => $participation->id,
+            'attendance_code' => $participation->attendance_code,
         ],
     );
 
-    $html = app(PrintEngine::class)->label4x4($participant);
+    $html = app(PrintEngine::class)->label4x4($participation);
 
     $html = str_replace(
         '</body>',

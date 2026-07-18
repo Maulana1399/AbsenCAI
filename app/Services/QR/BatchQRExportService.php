@@ -2,7 +2,8 @@
 
 namespace App\Services\QR;
 
-use App\Models\peserta;
+use App\Models\Event;
+use App\Models\Participation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +24,7 @@ class BatchQRExportService
         Storage::makeDirectory($directory);
 
         foreach ($participants as $participant) {
-            if (! $participant instanceof peserta) {
+            if (! $participant instanceof Participation) {
                 $failed++;
                 continue;
             }
@@ -42,7 +43,7 @@ class BatchQRExportService
 
                 $paths[] = $path;
                 $generated++;
-            } catch (\Throwable $throwable) {
+            } catch (\Throwable) {
                 $failed++;
             }
         }

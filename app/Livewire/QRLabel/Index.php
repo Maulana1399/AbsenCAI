@@ -2,11 +2,15 @@
 
 namespace App\Livewire\QRLabel;
 
+use App\Models\Event;
+use App\Models\Participation;
 use App\Models\peserta;
 use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\BatchQRExportService;
+use App\Services\QR\QRIdentityResolver;
 use App\Services\QR\QRService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -45,7 +49,7 @@ class Index extends Component
 
     public function selectLabelParticipant(int $participantId): void
     {
-        $participant = peserta::findOrFail($participantId);
+        $participant = $this->resolveLabelParticipant($participantId);
 
         $this->selectedLabelParticipantId = $participant->id;
         $this->labelPreviewHtml = app(PrintEngine::class)->label4x4($participant);
@@ -55,6 +59,24 @@ class Index extends Component
     {
         $this->selectedParticipantId = null;
         $this->selectedParticipant = null;
+    }
+
+    public function updatedSelectedLabelParticipantId($participantId): void
+    {
+        if (! $participantId) {
+            $this->labelPreviewHtml = '';
+            return;
+        }
+
+        $participant = Participation::with(['person', 'event', 'legacyPesertaMapping'])
+            ->find($participantId);
+
+        if (! $participant) {
+            $this->labelPreviewHtml = '';
+            return;
+        }
+
+        $this->labelPreviewHtml = app(PrintEngine::class)->label4x4($participant);
     }
 
     public function updated($name): void
@@ -67,7 +89,7 @@ class Index extends Component
 
     public function selectParticipant(int $participantId): void
     {
-        $participant = peserta::findOrFail($participantId);
+        $participant = $this->resolveLabelParticipant($participantId);
         $this->selectedParticipantId = $participant->id;
         $this->selectedParticipant = $participant;
 
@@ -81,15 +103,16 @@ class Index extends Component
         $participant = $this->requireSelectedParticipant();
         $content = app(QRService::class)->generatePng((string) $participant->attendance_code);
         $filename = $participant->participant_number.'.png';
+        $subject = $participant->person;
 
         app(ActivityLogService::class)->log(
             action: 'downloaded',
             module: 'qr',
-            description: 'Mengunduh QR peserta '.$participant->nama,
-            subject: $participant,
+            description: 'Mengunduh QR peserta '.$subject->nama,
+            subject: $subject,
             properties: [
                 'qr_type'           => 'single',
-                'peserta_id'        => $participant->id,
+                'participant_id'    => $participant->id,
                 'participant_number' => $participant->participant_number,
                 'attendance_code'   => $participant->attendance_code,
                 'format'            => 'png',
@@ -104,21 +127,9 @@ class Index extends Component
         ]);
     }
 
-    // public function downloadSvg()
-    // {
-    //     $participant = $this->requireSelectedParticipant();
-    //     $content = app(QRService::class)->generateSvg((string) $participant->attendance_code);
-
-    //     return response()->streamDownload(function () use ($content) {
-    //         echo $content;
-    //     }, $participant->participant_number.'.svg', [
-    //         'Content-Type' => 'image/svg+xml',
-    //     ]);
-    // }
-
     public function generateBatchExport(): void
     {
-        $participants = $this->filteredParticipants();
+        $participants = $this->filteredParticipations();
         $summary = app(BatchQRExportService::class)->export($participants, 'png', 'qr-exports');
 
         app(ActivityLogService::class)->log(
@@ -141,7 +152,7 @@ class Index extends Component
 
     public function refreshBatchAndLabelPreview(): void
     {
-        $participants = $this->filteredParticipants();
+        $participants = $this->filteredParticipations();
         $this->batchPreview = [
             'generated' => 0,
             'skipped' => 0,
@@ -154,9 +165,17 @@ class Index extends Component
         $this->syncLabelPreview($participants);
     }
 
+    private function resolveLabelParticipant(int $participantId): Participation
+    {
+        $participation = Participation::with(['person', 'event', 'legacyPesertaMapping'])
+            ->findOrFail($participantId);
+
+        return $participation;
+    }
+
     private function syncLabelPreview(?Collection $participants = null): void
     {
-        $participants ??= $this->filteredParticipants();
+        $participants ??= $this->filteredParticipations();
         $this->labelPreview = $participants->values();
 
         if ($participants->isEmpty()) {
@@ -179,12 +198,12 @@ class Index extends Component
 
     private function syncLabelSelectionToFilteredParticipants(): void
     {
-        $this->syncLabelPreview($this->filteredParticipants());
+        $this->syncLabelPreview($this->filteredParticipations());
     }
 
     public function render()
     {
-        $batchParticipants = $this->batchParticipants ?: $this->filteredParticipants();
+        $batchParticipants = $this->batchParticipants ?: $this->filteredParticipations();
 
         return view('livewire.qr-label.index', [
             'results' => $this->participantSearchResults(),
@@ -195,50 +214,51 @@ class Index extends Component
 
     private function participantSearchResults(): Collection
     {
-        $query = peserta::with(['desa', 'kelompok', 'regu']);
+        return $this->filteredParticipations()->map(fn (Participation $participation) => $participation->person)->filter()->values();
+    }
 
-        $keyword = trim($this->search);
-        if ($keyword !== '') {
-            $query->where(function ($builder) use ($keyword) {
-                $builder->where('nama', 'like', '%'.$keyword.'%')
-                    ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                    ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
+    private function filteredParticipations(): Collection
+    {
+        $event = app(ActiveEventContext::class)->current();
+
+        $query = Participation::with(['person.desa', 'event']);
+
+        if ($event !== null) {
+            $query->where('event_id', $event->id);
+        }
+
+        if ($this->filterDesa !== '') {
+            $query->whereHas('person', fn ($builder) => $builder->where('desa_id', $this->filterDesa));
+        }
+
+        if ($this->filterKelompok !== '' || $this->filterRegu !== '') {
+            $query->whereHas('legacyPesertaMapping.peserta', function ($legacyQuery) {
+                if ($this->filterKelompok !== '') {
+                    $legacyQuery->where('kelompok_id', $this->filterKelompok);
+                }
+
+                if ($this->filterRegu !== '') {
+                    $legacyQuery->where('regu_id', $this->filterRegu);
+                }
             });
         }
 
-        return $query->orderBy('nama')->limit(10)->get();
-    }
-
-    private function filteredParticipants(): Collection
-    {
-        $query = peserta::with(['desa', 'kelompok', 'regu'])->whereNotNull('attendance_code');
-
-        if ($this->filterDesa !== '') {
-            $query->where('desa_id', $this->filterDesa);
-        }
-
-        if ($this->filterKelompok !== '') {
-            $query->where('kelompok_id', $this->filterKelompok);
-        }
-
-        if ($this->filterRegu !== '') {
-            $query->where('regu_id', $this->filterRegu);
-        }
-
         if ($this->filterGender !== '') {
-            $query->where('jenis_kelamin', $this->filterGender);
+            $query->whereHas('person', fn ($builder) => $builder->where('jenis_kelamin', $this->filterGender));
         }
 
         $keyword = trim($this->filterKeyword);
         if ($keyword !== '') {
             $query->where(function ($builder) use ($keyword) {
-                $builder->where('nama', 'like', '%'.$keyword.'%')
-                    ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                    ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
+                $builder->whereHas('person', function ($personQuery) use ($keyword) {
+                    $personQuery->where('nama', 'like', '%'.$keyword.'%');
+                })
+                ->orWhere('participant_number', 'like', '%'.$keyword.'%')
+                ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
             });
         }
 
-        return $query->orderBy('nama')->get();
+        return $query->orderBy('id')->get();
     }
 
     public function printSelectedLabel()
@@ -249,7 +269,7 @@ class Index extends Component
 
     public function printAllFiltered()
     {
-        $participants = $this->filteredParticipants();
+        $participants = $this->filteredParticipations()->map(fn (Participation $participation) => $participation->person)->filter();
 
         if ($participants->isEmpty()) {
             abort(404);
@@ -299,12 +319,12 @@ HTML;
 HTML;
     }
 
-    private function requireSelectedParticipant(): peserta
+    private function requireSelectedParticipant(): Participation
     {
-        if (! $this->selectedParticipantId) {
+        if (! $this->selectedLabelParticipantId) {
             abort(404);
         }
 
-        return peserta::findOrFail($this->selectedParticipantId);
+        return Participation::with('person')->findOrFail($this->selectedLabelParticipantId);
     }
 }

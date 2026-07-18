@@ -22,7 +22,7 @@ class QRIdentityResolver
             ->first();
 
         if ($participation !== null) {
-            return $this->matchEvent($participation, $event) ? $participation : null;
+            return $this->matchesEvent($participation, $event) ? $participation : null;
         }
 
         $mapping = LegacyPesertaMapping::with(['participation.person', 'participation.event', 'person'])
@@ -41,7 +41,7 @@ class QRIdentityResolver
             return null;
         }
 
-        if ($mapping->person_id !== null && $mapping->participation->person_id !== null && (int) $mapping->person_id !== (int) $mapping->participation->person_id) {
+        if ($mapping->person_id !== null && (int) $mapping->person_id !== (int) $mapping->participation->person_id) {
             return null;
         }
 
@@ -53,12 +53,8 @@ class QRIdentityResolver
         return $this->resolve($identifier, $event)?->person;
     }
 
-    private function matchEvent(Participation $participation, ?Event $event): bool
+    private function matchesEvent(Participation $participation, ?Event $event): bool
     {
-        if ($event === null) {
-            return true;
-        }
-
-        return (int) $participation->event_id === (int) $event->id;
+        return $event === null || (int) $participation->event_id === (int) $event->id;
     }
 }
