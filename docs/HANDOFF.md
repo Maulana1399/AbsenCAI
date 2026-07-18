@@ -24,6 +24,23 @@ Tidak perlu menguasai coding untuk membaca dokumen ini. Setiap bagian teknis aka
 > **Apa itu Laravel?**
 > Laravel adalah kerangka kerja (framework) PHP. Bayangkan seperti "template besar" yang sudah menyediakan fondasi aplikasi — kita tinggal mengisi bagian yang spesifik untuk kebutuhan kita.
 
+## Normalized Runtime Boundary Saat Ini
+
+```
+Event
+  -> Participation
+  -> Person
+```
+
+```
+Attendance
+  -> Event
+  -> SesiAbsensi
+  -> Absensi
+```
+
+`LegacyPesertaMapping` tetap menjadi compatibility bridge antara legacy `peserta` dan runtime normalized domain. Tabel `peserta` belum dihapus dan masih diperlukan untuk backward compatibility.
+
 > **Apa itu Livewire?**
 > Livewire adalah plugin Laravel yang membuat halaman web bisa berubah secara langsung tanpa reload. Mirip seperti Google Sheets yang langsung update tanpa perlu refresh halaman.
 
@@ -112,8 +129,8 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 
 | File | Fungsi | Kapan Diedit |
 |------|--------|--------------|
-| `Rekap/Peserta/RekapPeserta.php` | Laporan peserta dengan filter (regu, kelompok, desa, jenis kelamin, jenis peserta). Bisa export ke Excel | Jika ada kolom baru di laporan |
-| `Rekap/Absensi/RekapAbsensi.php` | Laporan absensi per sesi — siapa yang sudah/belum hadir, persentase kehadiran | Jika ada kolom baru di laporan absensi |
+| `Rekap/Peserta/RekapPeserta.php` | Laporan peserta event-scoped berbasis Participation/Person dengan compatibility fields dari LegacyPesertaMapping/peserta | Jika ada kolom baru di laporan |
+| `Rekap/Absensi/RekapAbsensi.php` | Laporan absensi event-safe per sesi — sesi dan participant identity dibatasi active event | Jika ada kolom baru di laporan absensi |
 
 **Grup: Auth (Login)**
 

@@ -282,19 +282,21 @@ Status: COMPLETE
 
 ### S3.8 Dashboard & Report Scoping
 
-- [ ] Migrate dashboard queries to event scope
-- [x] Migrate report queries to event scope (RekapPeserta + PesertaExport checkpoint)
-- [ ] Preserve legacy compatibility where required
-- [ ] Migrate dashboard counters and statistics to event scope
-- [ ] Verify RekapAbsensi event-safe normalization and cross-event leakage
+- [x] Migrate dashboard queries to event scope
+- [x] Migrate report queries to event scope (RekapPeserta + PesertaExport)
+- [x] Preserve legacy compatibility where required
+- [x] Migrate dashboard counters and statistics to event scope
+- [x] Verify RekapAbsensi event-safe normalization and cross-event leakage
 
-Status: IN PROGRESS
+Status: COMPLETE / VERIFIED
 
-Completed verification: 397 passed, 1019 assertions
+Completed verification: 401 passed, 1035 assertions, 7.11s
 
 Target: August 2026 operational use for Multi Event.
 
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
+
+Next roadmap checkpoint: S3.9 Multi Role/Venue/Category (deferred design only)
 
 ### S3.0 Architecture & Database Audit
 

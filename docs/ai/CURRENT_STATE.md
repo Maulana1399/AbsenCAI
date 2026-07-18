@@ -260,7 +260,13 @@ Infrastructure
 * ActiveEventContext hardening complete — stale cache removed, fallback to first active event added, clear() prevents fallback. Route middleware and legacy module scoping are not yet implemented. Switching active event has zero effect on operational modules.
 * S3.6 complete: attendance sessions are event-scoped, participant resolution is event-safe, and cross-event persistence is blocked.
 * S3.7D verified: RegistrationService now writes normalized participant identifiers through Participation, with LegacyPesertaMapping preserving compatibility.
-* S3.8 checkpoint 1 verified: RekapPeserta and PesertaExport now use active-event-scoped Participation as normalized report/export source.
+* S3.8 COMPLETE and VERIFIED — Dashboard and report scoping now follow active-event boundaries across RekapPeserta, PesertaExport, Dashboard, and RekapAbsensi.
+* RekapPeserta uses Participation as the event-scoped runtime source, Person as the identity source, and LegacyPesertaMapping/peserta only for compatibility fields that remain required.
+* PesertaExport is event-scoped and exports from Participation/Person without mixing participants across events.
+* Dashboard totalPeserta uses active-event Participation; totalDesa, totalKelompok, and totalRegu remain global master-data metrics; attendance summary stays within event/session boundaries.
+* RekapAbsensi is event-safe: ActiveEventContext defines the boundary, selectable sessions are limited by event_id, Participation is the normalized participant source, and legacy peserta/NIP fallback remains compatibility-only and event-safe.
+* Same Person participating in multiple events remains isolated by Participation/event boundary.
+* Full suite verified: 401 tests passed, 1035 assertions, duration 7.11s.
 
 ---
 
@@ -268,13 +274,13 @@ Infrastructure
 
 Current next task:
 
-**Sprint 3.8 — Dashboard & Report Scoping.** Migrate dashboard counters and attendance/report views to event-scoped data while preserving required legacy compatibility.
+**Sprint 3.8 — Dashboard & Report Scoping.** COMPLETE and VERIFIED. Dashboard counters and attendance/report views are now event-scoped with required legacy compatibility preserved.
 
 S3.5 Legacy Data Backfill is COMPLETE — production backfill executed 2026-07-17. 144 people, participations, mappings created. 0 conflicts. Idempotency verified. Runtime architecture unchanged — peserta remains active source.
 
-S3.8 checkpoint 1 complete: RekapPeserta + PesertaExport now scope to the active event via Participation.
+S3.8 complete: RekapPeserta + PesertaExport scope to the active event via Participation, and Dashboard + RekapAbsensi are now event-safe as well.
 
-After S3.8 report/export checkpoint: Dashboard event-scoping.
+After S3.8: move to S3.9 only if a future design checkpoint is explicitly reactivated; otherwise maintain S3.8 as closed and verified.
 
 After S3.1 Event Foundation completion:
 

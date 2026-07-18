@@ -418,19 +418,21 @@ Deliverables:
 
 ### S3.8 Dashboard & Report Scoping
 
-Status: 🟡 IN PROGRESS
+Status: ✅ COMPLETE / VERIFIED
 
-Checkpoint 1 complete:
-- RekapPeserta + PesertaExport scoped to active-event Participation runtime
-- Person supplies identity fields
-- LegacyPesertaMapping preserves legacy kelompok/regu/status compatibility
-- Full suite verified: 397 passed, 1019 assertions
+Deliverables:
+- RekapPeserta uses Participation as the active-event runtime source
+- Person provides identity fields
+- LegacyPesertaMapping/peserta remain compatibility-only for required legacy fields
+- PesertaExport is event-scoped and uses Participation/Person without cross-event mixing
+- Dashboard totalPeserta is event-scoped; totalDesa, totalKelompok, and totalRegu remain global master-data metrics
+- Attendance summary remains bounded by active event and session scope
+- RekapAbsensi is event-safe with ActiveEventContext boundary and event-scoped sessions
+- Same Person in multiple events stays isolated by Participation boundary
+- Full suite verified: 401 passed, 1035 assertions, 7.11s
 
-Remaining checkpoints:
-- Dashboard event-scoped counters and reporting
-- RekapAbsensi event-safe normalization and cross-event leakage verification
-
-Next implementation checkpoint: Dashboard event-scoping
+Next checkpoint:
+- S3.9 Multi Role/Venue/Category (deferred design only)
 
 ### S3.9 Multi Role/Venue/Category
 
