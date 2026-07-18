@@ -94,6 +94,20 @@ Semua rencana pengembangan dicatat pada:
 
 ---
 
+## [Unreleased]
+
+### Added
+
+* **S3.6 Attendance Event Scoping** — event-scoped attendance sessions, event-safe participant resolution via LegacyPesertaMapping -> Participation -> Event, and cross-event attendance persistence prevention
+* **S3.6 regression coverage** — tests for event-scoped explicit sessions, duplicate isolation, historical legacy attendance compatibility, and cross-event rejection
+
+### Changed
+
+* Attendance now derives event ownership through `sesi_absensis.event_id` while preserving legacy `absensis` storage (`nip`, `nama`, `jam_scan`, `sesi_id`)
+* Current priority advanced to Sprint 3.7 Participant/QR Migration
+
+---
+
 # [v1.0.0] - 2026-07-14
 
 ## Project

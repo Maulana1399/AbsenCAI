@@ -401,11 +401,11 @@ Safety guarantees:
 
 ### S3.6 Attendance Event Scoping
 
-Status: 📋 PENDING
+Status: ✅ COMPLETE
 
 ### S3.7 Participant/QR Migration
 
-Status: 📋 PENDING
+Status: 📋 NEXT
 
 ### S3.8 Dashboard & Report Scoping
 
@@ -666,7 +666,7 @@ Sprint dianggap selesai apabila:
 4. Participation Foundation ✅ Complete (S3.3)
 5. Active Event Context Hardening ✅ Complete (S3.4)
 6. Legacy Data Backfill ✅ Complete — PRODUCTION BACKFILL EXECUTED (S3.5)
-7. Attendance Event Scoping (S3.6)
+7. Attendance Event Scoping ✅ Complete (S3.6)
 8. Participant/QR Migration (S3.7)
 9. Dashboard & Report Scoping (S3.8)
 10. Regression & Production Readiness (S3.10)

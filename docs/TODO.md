@@ -258,6 +258,25 @@ Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 Status: 🟢 ACTIVE — HIGHEST PRIORITY
 
+### S3.6 Attendance Event Scoping
+
+- [x] Session event ownership added to `sesi_absensis`
+- [x] Active session resolution scoped to active event
+- [x] Participant resolution made event-safe via mapping bridge
+- [x] Cross-event attendance persistence blocked
+- [x] Legacy CAI attendance compatibility preserved
+- [x] Full regression suite verified
+
+Status: COMPLETE
+
+### S3.7 Participant/QR Migration
+
+- [ ] Migrate QR scan/label flows to participation runtime
+- [ ] Add event-scoped QR lookup paths
+- [ ] Preserve legacy NIP/attendance_code compatibility during transition
+
+Status: NEXT
+
 Target: August 2026 operational use for Multi Event.
 
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`

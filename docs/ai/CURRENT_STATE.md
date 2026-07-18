@@ -119,8 +119,9 @@ Priority saat ini:
 5. S3.3 Participation Foundation ✅ COMPLETE — Participations table, Participation model, Person↔Event relationships. No legacy backfill yet.
 6. S3.4 Active Event Context Hardening ✅ COMPLETE — requireCurrent(), resolveDefault(), stale/inactive safety. Route middleware deferred.
 7. S3.5 Legacy Data Backfill ✅ COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created; 0 conflicts). Runtime architecture unchanged — peserta remains active source.
-8. S3.6 Attendance Event Scoping — NEXT.
-9. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
+8. S3.6 Attendance Event Scoping ✅ COMPLETE.
+9. S3.7 Participant/QR Migration — NEXT.
+10. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
@@ -257,6 +258,7 @@ Infrastructure
 * Participation is populated with 144 production records — NOT yet runtime integration with Attendance, QR, Surat Izin, or Reports. Legacy peserta architecture remains operational.
 * LegacyPesertaMapping populated with 144 production records — compatibility bridge between legacy peserta and normalized Person→Participation→Event domain. Production backfill executed 2026-07-17.
 * ActiveEventContext hardening complete — stale cache removed, fallback to first active event added, clear() prevents fallback. Route middleware and legacy module scoping are not yet implemented. Switching active event has zero effect on operational modules.
+* S3.6 complete: attendance sessions are event-scoped, participant resolution is event-safe, and cross-event persistence is blocked.
 
 ---
 
@@ -264,11 +266,11 @@ Infrastructure
 
 Current next task:
 
-**Sprint 3.6 — Attendance Event Scoping.** Migrate sessions and attendance to event-scoped with participation-based tracking.
+**Sprint 3.7 — Participant/QR Migration.** Migrate QR scan/label flows to participation runtime while preserving legacy NIP/attendance_code compatibility.
 
 S3.5 Legacy Data Backfill is COMPLETE — production backfill executed 2026-07-17. 144 people, participations, mappings created. 0 conflicts. Idempotency verified. Runtime architecture unchanged — peserta remains active source.
 
-After S3.6: S3.7 Participant/QR Migration, S3.8 Dashboard & Report Scoping.
+After S3.7: S3.8 Dashboard & Report Scoping.
 
 After S3.1 Event Foundation completion:
 
