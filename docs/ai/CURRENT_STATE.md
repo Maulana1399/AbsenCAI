@@ -34,20 +34,22 @@ Sprint 3 — Multi Event Architecture
 
 Status:
 
-🟢 ACTIVE — HIGHEST PRIORITY
+✅ COMPLETE / VERIFIED
 
 Target: August 2026 operational use.
 
 Focus:
 
-Multi Event Foundation. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE. S3.3 Participation Foundation COMPLETE. S3.4 Active Event Context Hardening COMPLETE. S3.5 Legacy Data Backfill COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created. 0 conflicts. Idempotency verified). **Runtime architecture unchanged** — peserta table remains active source.
+Multi Event Foundation completed and verified. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE. S3.3 Participation Foundation COMPLETE. S3.4 Active Event Context Hardening COMPLETE. S3.5 Legacy Data Backfill COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created. 0 conflicts. Idempotency verified). S3.6 Attendance Event Scoping COMPLETE. S3.7 Participant/QR Migration COMPLETE. S3.8 Dashboard & Report Scoping COMPLETE / VERIFIED. **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
+S3.9 Multi Role/Venue/Category remains **DEFERRED (design only)**.
+S3.10 Regression & Production Readiness remains **PENDING** as future work.
 
 ---
 
 # Current Goal
 
-Melanjutkan pengembangan ke Sprint 3 — Multi Event Architecture sesuai `docs/ROADMAP.md`.
+Sprint 3 Multi Event Architecture telah ditutup secara resmi. Fokus berikutnya mengikuti roadmap pada fase S3.9 yang masih design-only.
 
 Completed foundation work:
 
@@ -112,7 +114,7 @@ Sprint 2 Activity Log integration verified:
 
 Priority saat ini:
 
-1. **Sprint 3: Multi Event Architecture** — HIGHEST PRIORITY, target August 2026.
+1. **Sprint 3: Multi Event Architecture** — ✅ COMPLETE / VERIFIED.
 2. S3.0 Architecture & Database Audit ✅ COMPLETE.
 3. S3.1 Event Foundation ✅ COMPLETE — Event model, events table, Legacy CAI bootstrap, ActiveEventContext, event switcher UI, event management CRUD.
 4. S3.2 Universal Person ✅ COMPLETE — People table, Person model.
@@ -120,8 +122,11 @@ Priority saat ini:
 6. S3.4 Active Event Context Hardening ✅ COMPLETE — requireCurrent(), resolveDefault(), stale/inactive safety. Route middleware deferred.
 7. S3.5 Legacy Data Backfill ✅ COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created; 0 conflicts). Runtime architecture unchanged — peserta remains active source.
 8. S3.6 Attendance Event Scoping ✅ COMPLETE.
-9. S3.7 Participant/QR Migration — NEXT.
-10. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
+9. S3.7 Participant/QR Migration ✅ COMPLETE.
+10. S3.8 Dashboard & Report Scoping ✅ COMPLETE / VERIFIED.
+11. S3.9 Multi Role/Venue/Category — DEFERRED DESIGN ONLY.
+12. S3.10 Regression & Production Readiness — PENDING / future work.
+13. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 Development follows `docs/ROADMAP.md` as the primary product roadmap.
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
@@ -261,11 +266,14 @@ Infrastructure
 * S3.6 complete: attendance sessions are event-scoped, participant resolution is event-safe, and cross-event persistence is blocked.
 * S3.7D verified: RegistrationService now writes normalized participant identifiers through Participation, with LegacyPesertaMapping preserving compatibility.
 * S3.8 COMPLETE and VERIFIED — Dashboard and report scoping now follow active-event boundaries across RekapPeserta, PesertaExport, Dashboard, and RekapAbsensi.
-* RekapPeserta uses Participation as the event-scoped runtime source, Person as the identity source, and LegacyPesertaMapping/peserta only for compatibility fields that remain required.
-* PesertaExport is event-scoped and exports from Participation/Person without mixing participants across events.
-* Dashboard totalPeserta uses active-event Participation; totalDesa, totalKelompok, and totalRegu remain global master-data metrics; attendance summary stays within event/session boundaries.
-* RekapAbsensi is event-safe: ActiveEventContext defines the boundary, selectable sessions are limited by event_id, Participation is the normalized participant source, and legacy peserta/NIP fallback remains compatibility-only and event-safe.
-* Same Person participating in multiple events remains isolated by Participation/event boundary.
+* Architecture contract:
+  * Event = event boundary
+  * Person = canonical identity
+  * Participation = event-scoped participation and runtime identifiers
+  * Event -> Participation -> Person
+  * Attendance = Event -> SesiAbsensi -> Absensi
+  * LegacyPesertaMapping + peserta = intentional backward-compatibility bridge
+* Remaining legacy dependencies are intentional compatibility, not Sprint 3 blockers, and may be reduced in later roadmap phases if required.
 * Full suite verified: 401 tests passed, 1035 assertions, duration 7.11s.
 
 ---

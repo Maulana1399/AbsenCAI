@@ -39,7 +39,14 @@ Attendance
   -> Absensi
 ```
 
-`LegacyPesertaMapping` tetap menjadi compatibility bridge antara legacy `peserta` dan runtime normalized domain. Tabel `peserta` belum dihapus dan masih diperlukan untuk backward compatibility.
+Kontrak runtime saat ini:
+- `Event` = event boundary
+- `Person` = canonical identity
+- `Participation` = event-scoped participation dan runtime identifiers
+- `LegacyPesertaMapping` tetap menjadi compatibility bridge antara legacy `peserta` dan runtime normalized domain
+- Tabel `peserta` belum dihapus dan masih diperlukan untuk backward compatibility
+
+Sprint 3 telah ditutup secara resmi pada level dokumentasi dan runtime verification.
 
 > **Apa itu Livewire?**
 > Livewire adalah plugin Laravel yang membuat halaman web bisa berubah secara langsung tanpa reload. Mirip seperti Google Sheets yang langsung update tanpa perlu refresh halaman.
@@ -131,6 +138,7 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 |------|--------|--------------|
 | `Rekap/Peserta/RekapPeserta.php` | Laporan peserta event-scoped berbasis Participation/Person dengan compatibility fields dari LegacyPesertaMapping/peserta | Jika ada kolom baru di laporan |
 | `Rekap/Absensi/RekapAbsensi.php` | Laporan absensi event-safe per sesi — sesi dan participant identity dibatasi active event | Jika ada kolom baru di laporan absensi |
+| `Dashboard/Dashboard.php` | Statistik dashboard event-scoped untuk totalPeserta + attendance summary; master data tetap global | Jika ada perubahan scope statistik |
 
 **Grup: Auth (Login)**
 

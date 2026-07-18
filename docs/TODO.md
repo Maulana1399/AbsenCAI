@@ -256,7 +256,106 @@ Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 ## Sprint 3
 
-Status: 🟢 ACTIVE — HIGHEST PRIORITY
+Status: ✅ COMPLETE / VERIFIED
+
+### S3.0 Architecture & Database Audit
+
+- [x] Current database map
+- [x] Current identity model audit
+- [x] Single-event coupling map
+- [x] Target domain design
+- [x] Field ownership matrix
+- [x] Multi Event attendance architecture
+- [x] Active event context recommendation
+- [x] Backward compatibility & migration strategy
+- [x] Universal Person deduplication strategy
+- [x] Test migration strategy
+- [x] Sprint 3 breakdown & roadmap proposal
+
+Status: COMPLETE
+
+### S3.1 Event Foundation
+
+- [x] Event model + events table migration
+- [x] Legacy CAI Event bootstrap (idempotent)
+- [x] ActiveEventContext service (session-based singleton)
+- [x] Event selection UI (sidebar switcher)
+- [x] Event management CRUD (index, create, edit, archive/activate)
+- [x] Event routes (`/events`)
+- [x] Registered ActiveEventContext in AppServiceProvider
+- [x] Tests: Event creation, validation, bootstrap, context, UI
+- [x] Backward compatibility: existing app unchanged
+- [x] Documentation: ROADMAP, TODO, CHANGELOG, CURRENT_STATE
+
+Status: COMPLETE / VERIFIED
+
+### S3.2 Universal Person
+
+- [x] Create `people` migration + Person model
+- [x] Person model with desa() relationship and jenis_kelamin_label accessor
+- [x] Tests: person creation, schema, NIP uniqueness, desa FK, jenis_kelamin L/P format
+- [x] Design deduplication matching strategy
+
+Status: COMPLETE / VERIFIED
+
+### S3.3 Participation Foundation
+
+- [x] Create `participations` migration + Participation model
+- [x] `UNIQUE(event_id, person_id)` — one participation per person per event
+- [x] `UNIQUE(event_id, participant_number)` — per-event participant number
+- [x] Globally unique `attendance_code`
+- [x] `Person` model: participations() + events() relationships
+- [x] `Event` model: participations() + people() relationships
+- [x] Tests: schema, relationships, uniqueness, cascade, Multi Event identity contract
+- [x] No peserta backfill — legacy architecture unchanged
+
+Status: COMPLETE / VERIFIED
+
+### S3.4 Active Event Context Hardening
+
+- [x] ActiveEventContext: requireCurrent(), resolveDefault(), stale/inactive safety
+- [x] Inactive event enforcement — archived events rejected
+- [x] Stale session handling — deleted/archived IDs auto-cleared with fallback to first active event
+- [x] ActiveEventContext cache removed — no stale event retention
+- [x] `id()` delegates to `current()?->id`, `hasActiveEvent()` checks `current() !== null`
+- [x] `$cleared` flag prevents fallback after explicit `clear()`
+- [x] 25+ tests: basic context, stale state, inactive policy, Participation isolation, legacy compatibility
+- [x] Route middleware deferred — no concrete multi-event routes yet
+- [x] Event-scoped query scopes deferred — S3.6+ scope
+
+Status: COMPLETE / VERIFIED
+
+### S3.5 Legacy Data Backfill
+
+#### S3.5A Legacy Data Quality Audit ✅
+- [x] Audit legacy peserta data quality (144 peserta, NIP range 1001–2063, gender distribution, duplicate analysis)
+
+#### S3.5B Legacy Mapping Infrastructure ✅
+- [x] `legacy_peserta_mappings` migration — FK constraints with restrictOnDelete, UNIQUE(peserta_id), UNIQUE(participation_id), snapshot columns
+- [x] `LegacyPesertaMapping` model — belongsTo relationships to Peserta, Person, Participation, Event
+- [x] Inverse relationships on Peserta (`hasOne`), Person (`hasOne`), Participation (`hasOne`), Event (`hasMany`)
+- [x] Tests — schema, creation, nullable fields, belongs-to relationships, inverse relationships, UNIQUE constraints, restrictOnDelete (all 4 parents), cascade-free guarantee
+
+#### S3.5C Safe Backfill Engine ✅
+- [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, NIP matching, identity signal validation, conflict detection, dry-run projection, transactional writes
+- [x] `BackfillLegacyPeserta` Artisan command — `--dry-run` (default), `--execute`, `--event`, mutual exclusion validation, event validation (exists + active)
+- [x] 37+ dedicated tests: command contract, dry-run, execute, NIP matching, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
+
+#### S3.5D Copy Database Execute Verification ✅
+- [x] Isolated test on `database.s3.5d-test.sqlite` copy
+- [x] First execute: 144 people, participations, mappings created. 0 conflicts. 432 writes
+- [x] Second dry-run: Already Mapped: 144. 0 writes
+- [x] Second execute: Already Mapped: 144. 0 writes. Idempotency verified
+
+#### S3.5E Production Backfill ✅
+- [x] Pre-backfill SQLite backup created: `database/database.pre-s3.5e-backfill-20260717-172802.sqlite`
+- [x] Production dry-run: 144 peserta, 0 conflicts, 0 writes
+- [x] Production execute: 144 People, 144 Participations, 144 Mappings created. 432 writes. 0 errors
+- [x] Post-execute audit: people=144, participations=144, events=1, peserta unchanged
+- [x] Final idempotency dry-run: Already Mapped: 144. 0 writes. 0 projection
+- [x] **Runtime architecture unchanged** — peserta table remains active source
+
+Status: COMPLETE / VERIFIED
 
 ### S3.6 Attendance Event Scoping
 
@@ -267,7 +366,7 @@ Status: 🟢 ACTIVE — HIGHEST PRIORITY
 - [x] Legacy CAI attendance compatibility preserved
 - [x] Full regression suite verified
 
-Status: COMPLETE
+Status: COMPLETE / VERIFIED
 
 ### S3.7 Participant/QR Migration
 
@@ -278,7 +377,7 @@ Status: COMPLETE
 - [x] participant_number generation is event-scoped
 - [x] Full suite verified (395 passed, 1013 assertions)
 
-Status: COMPLETE
+Status: COMPLETE / VERIFIED
 
 ### S3.8 Dashboard & Report Scoping
 
@@ -297,6 +396,21 @@ Target: August 2026 operational use for Multi Event.
 Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 Next roadmap checkpoint: S3.9 Multi Role/Venue/Category (deferred design only)
+
+### S3.9 Multi Role/Venue/Category
+
+- [ ] Design only — deferred
+
+Status: DEFERRED DESIGN ONLY
+
+### S3.10 Regression & Production Readiness
+
+- [ ] Full test suite verification
+- [ ] Manual QA on critical flows
+- [ ] Performance testing
+- [ ] Deployment checklist
+
+Status: PENDING / future work
 
 ### S3.0 Architecture & Database Audit
 

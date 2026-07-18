@@ -431,16 +431,16 @@ Deliverables:
 - Same Person in multiple events stays isolated by Participation boundary
 - Full suite verified: 401 passed, 1035 assertions, 7.11s
 
-Next checkpoint:
-- S3.9 Multi Role/Venue/Category (deferred design only)
-
 ### S3.9 Multi Role/Venue/Category
 
 Status: 🔴 DEFERRED (design only — not needed for August 2026)
 
 ### S3.10 Regression & Production Readiness
 
-Status: 📋 PENDING
+Status: 📋 PENDING / future work
+
+Next checkpoint:
+- S3.9 Multi Role/Venue/Category (deferred design only)
 
 ---
 
