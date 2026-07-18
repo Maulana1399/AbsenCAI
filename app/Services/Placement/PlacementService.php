@@ -2,18 +2,24 @@
 
 namespace App\Services\Placement;
 
+use App\Models\Participation;
 use App\Models\peserta;
 use App\Models\regu;
 
 class PlacementService
 {
-    public static function generateParticipantNumber(?string $jenisKelamin = null): string
+    public static function generateParticipantNumber(int $eventId, ?string $jenisKelamin = null): string
     {
         $prefix = self::genderPrefix($jenisKelamin);
-        $last = peserta::query()
+        $last = Participation::query()
+            ->where('event_id', $eventId)
             ->whereNotNull('participant_number')
             ->where('participant_number', 'like', $prefix.'%')
-            ->max('participant_number');
+            ->max('participant_number')
+            ?? peserta::query()
+                ->whereNotNull('participant_number')
+                ->where('participant_number', 'like', $prefix.'%')
+                ->max('participant_number');
 
         $nextNumber = $last
             ? ((int) substr($last, 2) + 1)
@@ -29,16 +35,8 @@ class PlacementService
         );
 
         if ($jk === 'lakilaki') {
-            $last = peserta::where(
-                    'nip',
-                    '>=',
-                    1000
-                )
-                ->where(
-                    'nip',
-                    '<',
-                    2000
-                )
+            $last = peserta::where('nip', '>=', 1000)
+                ->where('nip', '<', 2000)
                 ->max('nip');
 
             return $last
@@ -47,16 +45,8 @@ class PlacementService
         }
 
         if ($jk === 'perempuan') {
-            $last = peserta::where(
-                    'nip',
-                    '>=',
-                    2000
-                )
-                ->where(
-                    'nip',
-                    '<',
-                    3000
-                )
+            $last = peserta::where('nip', '>=', 2000)
+                ->where('nip', '<', 3000)
                 ->max('nip');
 
             return $last

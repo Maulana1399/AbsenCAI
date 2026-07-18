@@ -271,9 +271,20 @@ Status: COMPLETE
 
 ### S3.7 Participant/QR Migration
 
-- [ ] Migrate QR scan/label flows to participation runtime
-- [ ] Add event-scoped QR lookup paths
-- [ ] Preserve legacy NIP/attendance_code compatibility during transition
+- [x] Migrate QR scan/label flows to participation runtime
+- [x] Add event-scoped QR lookup paths
+- [x] Preserve legacy NIP/attendance_code compatibility during transition
+- [x] RegistrationService normalized write-path to Participation
+- [x] participant_number generation is event-scoped
+- [x] Full suite verified (395 passed, 1013 assertions)
+
+Status: COMPLETE
+
+### S3.8 Dashboard & Report Scoping
+
+- [ ] Migrate dashboard queries to event scope
+- [ ] Migrate report queries to event scope
+- [ ] Preserve legacy compatibility where required
 
 Status: NEXT
 

@@ -255,10 +255,11 @@ Infrastructure
 * Activity Log's "failed submit" test has a dead assertion after `expectException`.
 * Event Foundation is context infrastructure only — no existing queries are yet event-scoped.
 * Person table is populated with 144 production records — NOT yet runtime source.
-* Participation is populated with 144 production records — NOT yet runtime integration with Attendance, QR, Surat Izin, or Reports. Legacy peserta architecture remains operational.
+* Participation is populated with 144 production records — runtime integration in QR/registration write-path is in progress; legacy peserta architecture remains operational.
 * LegacyPesertaMapping populated with 144 production records — compatibility bridge between legacy peserta and normalized Person→Participation→Event domain. Production backfill executed 2026-07-17.
 * ActiveEventContext hardening complete — stale cache removed, fallback to first active event added, clear() prevents fallback. Route middleware and legacy module scoping are not yet implemented. Switching active event has zero effect on operational modules.
 * S3.6 complete: attendance sessions are event-scoped, participant resolution is event-safe, and cross-event persistence is blocked.
+* S3.7D verified: RegistrationService now writes normalized participant identifiers through Participation, with LegacyPesertaMapping preserving compatibility.
 
 ---
 

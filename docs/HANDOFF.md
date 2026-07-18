@@ -348,8 +348,11 @@ Validasi:
   - Gabungan nama + desa + kelompok harus unik
         ↓
 Jika lolos validasi:
-  peserta::create(...) → simpan ke database
-  status_registrasi = 'Self Register'
+   RegistrationService menyimpan identity normalized ke Participation (event-scoped)
+   LegacyPesertaMapping menjaga kompatibilitas dengan peserta dan Person
+   peserta tetap disimpan untuk kompatibilitas legacy
+   status_registrasi = 'Self Register'
+
         ↓
 Redirect ke /register/success
 Tampil halaman sukses berisi: nama, NIP, desa, kelompok
@@ -407,6 +410,7 @@ Klik "Scan Lagi" → kamera kembali aktif
 ```
 
 > **Format QR Code baru:** QR Code harus berisi Attendance Code peserta (mis: `KJA-XXXXXXXX`). NIP numeric masih diterima sebagai fallback sementara untuk QR lama.
+> QR label/runtime aktif membaca Participation, sedangkan compatibility legacy tetap melalui mapping yang valid.
 
 ---
 

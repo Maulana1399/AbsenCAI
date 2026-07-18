@@ -1,13 +1,16 @@
 <?php
 
 use App\Models\desa;
+use App\Models\Event;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Models\User;
+use App\Support\ActiveEventContext;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
     $this->actingAs(User::factory()->create());
+    app(ActiveEventContext::class)->set(Event::create(['name' => 'Default Event', 'slug' => 'default-event', 'status' => 'active']));
 });
 
 test('import desa uploads csv', function () {

@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Event;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Services\Placement\PlacementService;
@@ -7,9 +10,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
-test('generate participant number uses gender prefix and padded sequence', function () {
-    expect(PlacementService::generateParticipantNumber('Laki - Laki'))->toBe('KL001')
-        ->and(PlacementService::generateParticipantNumber('Perempuan'))->toBe('KP001');
+test('generate participant number uses participation records first and falls back to legacy peserta', function () {
+    $event = Event::create(['name' => 'Placement Event', 'slug' => 'placement-event', 'status' => 'active']);
+    $person = Person::create(['nama' => 'Placement Person', 'nip' => 5001, 'jenis_kelamin' => 'L']);
+    Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-PLAC001', 'jenis_peserta' => 'Wajib']);
+    peserta::create(['nama' => 'Legacy Fallback', 'nip' => 1001, 'participant_number' => 'KL009', 'jenis_kelamin' => 'Laki - Laki']);
+
+    expect(PlacementService::generateParticipantNumber($event->id, 'Laki - Laki'))->toBe('KL002')
+        ->and(PlacementService::generateParticipantNumber($event->id, 'Perempuan'))->toBe('KP001');
 });
 
 test('generate participant number continues the next sequence for the same gender prefix', function () {
@@ -27,8 +35,15 @@ test('generate participant number continues the next sequence for the same gende
         'jenis_kelamin' => 'Perempuan',
     ]);
 
-    expect(PlacementService::generateParticipantNumber('Laki - Laki'))->toBe('KL002')
-        ->and(PlacementService::generateParticipantNumber('Perempuan'))->toBe('KP010');
+    $eventA = Event::create(['name' => 'Placement Event A', 'slug' => 'placement-event-a', 'status' => 'active']);
+    $eventB = Event::create(['name' => 'Placement Event B', 'slug' => 'placement-event-b', 'status' => 'active']);
+    $personA = Person::create(['nama' => 'Placement A', 'nip' => 5002, 'jenis_kelamin' => 'L']);
+    $personB = Person::create(['nama' => 'Placement B', 'nip' => 6002, 'jenis_kelamin' => 'L']);
+    Participation::create(['person_id' => $personA->id, 'event_id' => $eventA->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-PLAC-A1', 'jenis_peserta' => 'Wajib']);
+    Participation::create(['person_id' => $personB->id, 'event_id' => $eventB->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-PLAC-B1', 'jenis_peserta' => 'Wajib']);
+
+    expect(PlacementService::generateParticipantNumber($eventA->id, 'Laki - Laki'))->toBe('KL002')
+        ->and(PlacementService::generateParticipantNumber($eventB->id, 'Laki - Laki'))->toBe('KL002');
 });
 
 test('least filled regu picks the regu with the fewest participants for the selected gender', function () {

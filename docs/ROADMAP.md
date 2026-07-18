@@ -405,11 +405,20 @@ Status: ✅ COMPLETE
 
 ### S3.7 Participant/QR Migration
 
-Status: 📋 NEXT
+Status: ✅ COMPLETE
+
+Deliverables:
+- RegistrationService write-path now normalizes participant identifiers through Participation
+- participant_number generation is event-scoped
+- attendance_code remains globally unique
+- LegacyPesertaMapping preserves compatibility between legacy peserta, Person, and Participation
+- QR runtime remains Participation-based
+- Legacy NIP/regu behavior remains supported
+- Full suite verified: 395 tests passed, 1013 assertions
 
 ### S3.8 Dashboard & Report Scoping
 
-Status: 📋 PENDING
+Status: 📋 NEXT
 
 ### S3.9 Multi Role/Venue/Category
 

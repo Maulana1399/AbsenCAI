@@ -4,13 +4,16 @@ use App\Livewire\Database\Peserta\TambahPeserta;
 use App\Imports\PesertaImport;
 use App\Livewire\Registrasi\SelfRegister;
 use App\Models\desa;
+use App\Models\Event;
 use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Support\ActiveEventContext;
 use App\Services\Placement\PlacementService;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    app(ActiveEventContext::class)->set(Event::create(['name' => 'Default Event', 'slug' => 'default-event', 'status' => 'active']));
     $this->desa = desa::create(['desa_asal' => 'Desa A']);
     $this->kelompok = kelompok::create([
         'kelompok_asal' => 'Kelompok A',
@@ -118,7 +121,7 @@ test('import peserta uses automatic nip and least filled regu', function () {
         'desa' => 'Desa A',
     ]);
 
-    expect($model->nip)->toBe('2001')
+    expect($model->nip)->toBe(2001)
         ->and($model->participant_number)->toBe('KP001')
         ->and($model->attendance_code)->toStartWith('KJA-')
         ->and($model->regu_id)->toBe($this->reguFemaleB->id)

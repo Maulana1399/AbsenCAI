@@ -1,10 +1,15 @@
 <?php
 
 use App\Models\desa;
+use App\Models\Event;
 use App\Models\kelompok;
+use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Services\Registration\RegistrationService;
+use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 
@@ -33,8 +38,11 @@ test('generate attendance code skips existing codes', function () {
     expect(app(RegistrationService::class)->generateAttendanceCode())->toBe('KJA-BBBBBBBB');
 });
 
-test('create participant stores generated participant number and attendance code', function () {
+test('create participant stores normalized participation identifiers', function () {
     Str::createRandomStringsUsing(fn () => 'reg12345');
+
+    $event = Event::create(['name' => 'Registration Event', 'slug' => 'registration-event', 'status' => 'active']);
+    app(ActiveEventContext::class)->set($event);
 
     $desa = desa::create(['desa_asal' => 'Desa Registration']);
     $kelompok = kelompok::create([
@@ -57,23 +65,29 @@ test('create participant stores generated participant number and attendance code
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
-    expect($participant->participant_number)->toBe('KP001')
-        ->and($participant->attendance_code)->toBe('KJA-REG12345');
+    $mapping = LegacyPesertaMapping::with('participation.person')->where('peserta_id', $participant->id)->first();
 
-    $this->assertDatabaseHas('pesertas', [
-        'id' => $participant->id,
-        'participant_number' => 'KP001',
-        'attendance_code' => 'KJA-REG12345',
-        'status_registrasi' => peserta::STATUS_SELF_REGISTER,
-    ]);
+    expect($participant->participant_number)->toBe('KP001')
+        ->and($participant->attendance_code)->toBe('KJA-REG12345')
+        ->and($mapping?->participation?->participant_number)->toBe('KP001')
+        ->and($mapping?->participation?->attendance_code)->toBe('KJA-REG12345')
+        ->and($mapping?->person?->nama)->toBe('Peserta Registration');
 });
 
-test('update participant persists changed identity fields', function () {
+test('update participant persists changed identity fields to mapped participation', function () {
+    $event = Event::create(['name' => 'Registration Event Update', 'slug' => 'registration-event-update', 'status' => 'active']);
+    app(ActiveEventContext::class)->set($event);
+
     $participant = peserta::create([
         'nama' => 'Peserta Lama',
         'nip' => 1001,
+        'participant_number' => 'KL001',
+        'attendance_code' => 'KJA-OLD0001',
         'jenis_kelamin' => 'Laki - Laki',
     ]);
+    $person = Person::create(['nama' => 'Peserta Lama', 'nip' => 1001, 'jenis_kelamin' => 'L']);
+    $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-OLD0001', 'jenis_peserta' => peserta::JENIS_WAJIB]);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
 
     $updated = app(RegistrationService::class)->updateParticipant($participant->id, [
         'nama' => 'Peserta Baru',
@@ -85,5 +99,6 @@ test('update participant persists changed identity fields', function () {
     ]);
 
     expect($updated->nama)->toBe('Peserta Baru')
-        ->and($updated->jenis_kelamin)->toBe('Perempuan');
+        ->and($updated->jenis_kelamin)->toBe('Perempuan')
+        ->and($participation->fresh()->jenis_peserta)->toBe(peserta::JENIS_KIRIMAN);
 });
