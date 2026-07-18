@@ -42,11 +42,12 @@ Focus:
 
 Multi Event Foundation completed and verified. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE. S3.3 Participation Foundation COMPLETE. S3.4 Active Event Context Hardening COMPLETE. S3.5 Legacy Data Backfill COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created. 0 conflicts. Idempotency verified). S3.6 Attendance Event Scoping COMPLETE. S3.7 Participant/QR Migration COMPLETE. S3.8 Dashboard & Report Scoping COMPLETE / VERIFIED. **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
-S3.9 Multi Role/Venue/Category is **ACTIVE / IN PROGRESS**.
+S3.9 Multi Role/Venue/Category is **COMPLETE / VERIFIED**.
 S3.9A Domain Foundation is **COMPLETE / VERIFIED**.
 S3.9B Category Foundation is **COMPLETE / VERIFIED**.
 S3.9C Venue + Rundown Foundation is **COMPLETE / VERIFIED**.
 S3.9D Event Role / Committee Foundation is **COMPLETE / VERIFIED**.
+S3.9E Reporting / Export Integration is **COMPLETE / VERIFIED**.
 S3.10 Regression & Production Readiness remains **PENDING** as future work.
 
 ---

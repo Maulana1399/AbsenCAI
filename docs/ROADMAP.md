@@ -433,7 +433,7 @@ Deliverables:
 
 ### S3.9 Multi Role/Venue/Category
 
-Status: 🟢 ACTIVE — IN PROGRESS
+Status: ✅ COMPLETE / VERIFIED
 
 #### S3.9A Domain Foundation
 
@@ -520,7 +520,16 @@ Deliverables:
 
 #### S3.9E Reporting / Export Integration
 
-Status: PENDING
+Status: ✅ COMPLETE / VERIFIED
+
+Deliverables:
+- `ActivityRegistrationExport` foundation for event-safe activity registration export
+- event-scoped activity registration reporting query foundation
+- committee and rundown reporting query foundations
+- Existing `PesertaExport` and `RekapPeserta` remain compatible and event-scoped
+- Event isolation preserved for participant, activity, category, committee, rundown, and venue reporting paths
+- Export logging follows existing audit convention
+- Verified with full regression suite: 459 passed, 1140 assertions, 7.69s
 
 #### Future Checkpoint: Recurring Event Self-Registration & Identity Correction
 

@@ -84,7 +84,7 @@ Kontrak runtime saat ini:
 - `LegacyPesertaMapping` tetap menjadi compatibility bridge antara legacy `peserta` dan runtime normalized domain
 - Tabel `peserta` belum dihapus dan masih diperlukan untuk backward compatibility
 
-Sprint 3 tetap berjalan; S3.9A–S3.9D sudah verified dan checkpoint berikutnya adalah S3.9E.
+Sprint 3 telah ditutup; S3.9A–S3.9E sudah verified dan checkpoint berikutnya adalah S3.10.
 
 > **Apa itu Livewire?**
 > Livewire adalah plugin Laravel yang membuat halaman web bisa berubah secara langsung tanpa reload. Mirip seperti Google Sheets yang langsung update tanpa perlu refresh halaman.

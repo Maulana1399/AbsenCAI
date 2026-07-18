@@ -445,8 +445,20 @@ Status: ACTIVE / IN PROGRESS
 - [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
 - [x] Full regression suite verified: 452 passed, 1129 assertions, 7.62s
 
-#### Remaining S3.9 checkpoints
-- [ ] S3.9E Reporting / Export Integration
+#### S3.9E Reporting / Export Integration ✅ VERIFIED
+- [x] Add event-safe activity registration reporting/export foundation
+- [x] Keep PesertaExport and RekapPeserta compatible and event-scoped
+- [x] Add committee/reporting query foundation
+- [x] Add rundown/reporting query foundation
+- [x] Preserve export logging convention
+- [x] Full regression suite verified: 459 passed, 1140 assertions, 7.69s
+
+#### S3.9 Closure
+- [x] S3.9A Domain Foundation
+- [x] S3.9B Category Foundation
+- [x] S3.9C Venue + Rundown Foundation
+- [x] S3.9D Event Role / Committee Foundation
+- [x] S3.9E Reporting / Export Integration
 
 #### Future checkpoint (not implemented)
 - [ ] Recurring Event Self-Registration & Identity Correction
