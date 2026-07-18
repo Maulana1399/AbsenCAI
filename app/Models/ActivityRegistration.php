@@ -38,4 +38,9 @@ class ActivityRegistration extends Model
     {
         return $this->belongsTo(Activity::class);
     }
+
+    public function categoryDefinition()
+    {
+        return $this->belongsTo(CategoryDefinition::class, 'category_definition_id');
+    }
 }
