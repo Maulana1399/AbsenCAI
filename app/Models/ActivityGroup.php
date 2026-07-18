@@ -22,4 +22,9 @@ class ActivityGroup extends Model
     {
         return $this->hasMany(Activity::class);
     }
+
+    public function committeeAssignments()
+    {
+        return $this->hasMany(EventCommitteeAssignment::class);
+    }
 }

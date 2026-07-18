@@ -50,6 +50,15 @@ Event
           -> Venue (nullable)
 
 Event
+  -> EventRole
+      -> EventCommitteeAssignment
+          -> Person
+          -> Participation (nullable)
+          -> ActivityGroup (nullable)
+          -> Activity (nullable)
+          -> Venue (nullable)
+
+Event
   -> Participation
       -> ActivityRegistration
           -> Activity
@@ -70,10 +79,12 @@ Kontrak runtime saat ini:
 - `ActivityGroup` = event-scoped program/group domain
 - `Activity` = event-scoped activity domain
 - `ActivityRegistration` = domain model pendaftaran activity lintas participation
+- `EventRole` = definisi role operasional panitia per event, bukan authorization role
+- `EventCommitteeAssignment` = penugasan panitia event-scoped berbasis Person, participation opsional
 - `LegacyPesertaMapping` tetap menjadi compatibility bridge antara legacy `peserta` dan runtime normalized domain
 - Tabel `peserta` belum dihapus dan masih diperlukan untuk backward compatibility
 
-Sprint 3 tetap berjalan; S3.9A Domain Foundation sudah verified dan checkpoint berikutnya adalah S3.9B.
+Sprint 3 tetap berjalan; S3.9A–S3.9D sudah verified dan checkpoint berikutnya adalah S3.9E.
 
 > **Apa itu Livewire?**
 > Livewire adalah plugin Laravel yang membuat halaman web bisa berubah secara langsung tanpa reload. Mirip seperti Google Sheets yang langsung update tanpa perlu refresh halaman.

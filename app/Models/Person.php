@@ -33,6 +33,11 @@ class Person extends Model
         return $this->hasOne(LegacyPesertaMapping::class, 'person_id');
     }
 
+    public function committeeAssignments()
+    {
+        return $this->hasMany(EventCommitteeAssignment::class);
+    }
+
     public function getJenisKelaminLabelAttribute(): string
     {
         return match ($this->jenis_kelamin) {

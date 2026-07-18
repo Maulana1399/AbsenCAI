@@ -433,8 +433,19 @@ Status: ACTIVE / IN PROGRESS
 - [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
 - [x] Full regression suite verified: 432 passed, 1103 assertions, 7.46s
 
+#### S3.9D Event Role / Committee Foundation ✅ VERIFIED
+- [x] Create `event_roles` table + `EventRole` model
+- [x] Create `event_committee_assignments` table + `EventCommitteeAssignment` model
+- [x] Add `EventCommitteeService` for safe committee assignment
+- [x] Enforce event isolation for EventRole / EventCommitteeAssignment
+- [x] Support optional ActivityGroup / Activity / Venue assignment targets
+- [x] Enforce Person as canonical committee identity
+- [x] Keep participation as optional contextual bridge only
+- [x] Preserve authorization separation (`EventRole` != app roles)
+- [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
+- [x] Full regression suite verified: 452 passed, 1129 assertions, 7.62s
+
 #### Remaining S3.9 checkpoints
-- [ ] S3.9D Event Role / Committee Foundation
 - [ ] S3.9E Reporting / Export Integration
 
 #### Future checkpoint (not implemented)

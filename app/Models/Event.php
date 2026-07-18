@@ -74,6 +74,16 @@ class Event extends Model
         return $this->hasMany(LegacyPesertaMapping::class, 'event_id');
     }
 
+    public function eventRoles()
+    {
+        return $this->hasMany(EventRole::class);
+    }
+
+    public function committeeAssignments()
+    {
+        return $this->hasMany(EventCommitteeAssignment::class);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Event $event) {

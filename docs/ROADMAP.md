@@ -496,7 +496,27 @@ Deliverables:
 
 #### S3.9D Event Role / Committee Foundation
 
-Status: PENDING
+Status: ✅ COMPLETE / VERIFIED
+
+Deliverables:
+- `event_roles` table + `EventRole` model
+- `event_committee_assignments` table + `EventCommitteeAssignment` model
+- `EventCommitteeService` domain service for safe committee assignment
+- Event-scoped invariants enforced:
+  - `event_committee_assignment.event_id == event_role.event_id`
+  - if participation is used: `assignment.event_id == participation.event_id`
+  - if participation is used: `assignment.person_id == participation.person_id`
+  - if activity_group is used: `assignment.event_id == activity_group.event_id`
+  - if activity is used: `assignment.event_id == activity.event_id`
+  - if venue is used: `assignment.event_id == venue.event_id`
+- Person is the canonical identity for committee assignments
+- participation_id is nullable and contextual only
+- Optional targets supported: ActivityGroup, Activity, Venue
+- Duplicate identical assignment is rejected
+- Person may hold multiple roles in one event and across multiple events
+- EventRole does not grant application authorization
+- Legacy `pesertas` + `LegacyPesertaMapping` remain compatibility bridge and are not source of truth for committee domain
+- Verified with full regression suite: 452 passed, 1129 assertions, 7.62s
 
 #### S3.9E Reporting / Export Integration
 

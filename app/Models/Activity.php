@@ -37,4 +37,9 @@ class Activity extends Model
     {
         return $this->hasMany(ActivityRegistration::class);
     }
+
+    public function committeeAssignments()
+    {
+        return $this->hasMany(EventCommitteeAssignment::class);
+    }
 }
