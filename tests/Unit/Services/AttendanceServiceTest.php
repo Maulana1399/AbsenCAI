@@ -134,10 +134,99 @@ test('process scan rejects broken legacy mapping', function () {
     expect(Absensi::count())->toBe(0);
 });
 
-test('rejected scans create zero absensi', function () {
-    $event = attendanceTest_makeEvent(); app(ActiveEventContext::class)->set($event);
-    peserta::create(['nama' => 'Peserta Rejected', 'nip' => 2004, 'attendance_code' => 'KJA-REJECT1', 'jenis_kelamin' => 'Laki - Laki']);
-    SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Rejected', 'tanggal' => '2026-07-15', 'aktif' => true]);
-    expect(app(AttendanceService::class)->processScan('2004')['status'])->toBe('not_found');
-    expect(Absensi::count())->toBe(0);
+test('process scan allows explicit session from active event only', function () {
+    $eventA = attendanceTest_makeEvent();
+    $eventB = Event::create([
+        'name' => 'Other Event Explicit',
+        'slug' => 'other-event-explicit-' . str()->random(6),
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($eventA);
+    attendanceTest_makeMappedLegacyPeserta([
+        'nama' => 'Peserta Explicit Session',
+        'nip' => 2100,
+        'attendance_code' => 'KJA-EXPL1',
+    ], $eventA);
+
+    $sessionB = SesiAbsensi::create([
+        'event_id' => $eventB->id,
+        'nama_sesi' => 'Sesi Event B',
+        'tanggal' => '2026-07-15',
+        'aktif' => true,
+    ]);
+
+    $before = Absensi::count();
+    $result = app(AttendanceService::class)->processScan('2100', $sessionB->id);
+
+    expect($result['status'])->toBe('session_required');
+    expect(Absensi::count())->toBe($before);
+});
+
+test('failed cross-event explicit session creates zero absensi', function () {
+    $eventA = attendanceTest_makeEvent();
+    $eventB = Event::create([
+        'name' => 'Other Event Explicit Two',
+        'slug' => 'other-event-explicit-two-' . str()->random(6),
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($eventA);
+    attendanceTest_makeMappedLegacyPeserta([
+        'nama' => 'Peserta Explicit Rejected',
+        'nip' => 2101,
+        'attendance_code' => 'KJA-EXPL2',
+    ], $eventA);
+
+    $sessionB = SesiAbsensi::create([
+        'event_id' => $eventB->id,
+        'nama_sesi' => 'Sesi Event B 2',
+        'tanggal' => '2026-07-15',
+        'aktif' => true,
+    ]);
+
+    $before = Absensi::count();
+
+    expect(app(AttendanceService::class)->processScan('2101', $sessionB->id)['status'])->toBe('session_required');
+    expect(Absensi::count())->toBe($before);
+});
+
+test('cross-event duplicate detection stays isolated by session', function () {
+    $eventA = attendanceTest_makeEvent();
+    $eventB = Event::create([
+        'name' => 'Other Event Same Nip',
+        'slug' => 'other-event-same-nip-' . str()->random(6),
+        'status' => 'active',
+    ]);
+
+    app(ActiveEventContext::class)->set($eventA);
+    [$participantA] = attendanceTest_makeMappedLegacyPeserta([
+        'nama' => 'Peserta Same Nip A',
+        'nip' => 2200,
+        'attendance_code' => 'KJA-SAMENIP-A',
+    ], $eventA);
+    $sessionA = SesiAbsensi::create(['event_id' => $eventA->id, 'nama_sesi' => 'Sesi A', 'tanggal' => '2026-07-15', 'aktif' => true]);
+    expect(app(AttendanceService::class)->processScan('2200', $sessionA->id)['status'])->toBe('success');
+
+    app(ActiveEventContext::class)->set($eventB);
+    $sessionB = SesiAbsensi::create(['event_id' => $eventB->id, 'nama_sesi' => 'Sesi B', 'tanggal' => '2026-07-16', 'aktif' => true]);
+    $before = Absensi::count();
+    $resultB = app(AttendanceService::class)->processScan('2200', $sessionB->id);
+
+    expect($resultB['status'])->toBe('not_found');
+    expect(Absensi::count())->toBe($before);
+});
+
+test('historical legacy absensi using nip and sesi_id remains queryable', function () {
+    $event = attendanceTest_makeEvent();
+    app(ActiveEventContext::class)->set($event);
+    [$participant] = attendanceTest_makeMappedLegacyPeserta([
+        'nama' => 'Peserta Histori',
+        'nip' => 2300,
+        'attendance_code' => 'KJA-HIST1',
+    ], $event);
+    $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Histori', 'tanggal' => '2026-07-15', 'aktif' => true]);
+    $absensi = Absensi::create(['nip' => $participant->nip, 'nama' => $participant->nama, 'jam_scan' => '2026-07-15 08:00:00', 'sesi_id' => $session->id]);
+
+    expect(Absensi::where('nip', 2300)->where('sesi_id', $session->id)->first()?->is($absensi))->toBeTrue();
 });
