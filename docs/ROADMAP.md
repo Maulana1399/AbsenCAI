@@ -455,7 +455,24 @@ Deliverables:
 
 #### S3.9B Category Foundation
 
-Status: PENDING
+Status: ✅ COMPLETE / VERIFIED
+
+Deliverables:
+- `category_definitions` table + `CategoryDefinition` model
+- `activity_categories` table + `ActivityCategory` model
+- `requires_category` support on `activities`
+- nullable `category_definition_id` on `activity_registrations`
+- Event-scoped invariants enforced:
+  - `activity_category.event_id == activity.event_id == category_definition.event_id`
+  - `activity_registration.event_id == participation.event_id == activity.event_id`
+  - when category is used: `activity_registration.event_id == category_definition.event_id`
+  - category must be available for the activity via `ActivityCategory`
+- `requires_category=true` rejects registrations without category
+- `requires_category=false` allows registration without category
+- Same category name can be reused in different events
+- Duplicate category and duplicate activity-category assignment are rejected
+- Legacy `pesertas` + `LegacyPesertaMapping` remain compatibility bridge and are not source of truth for new category domain
+- Verified with full regression suite: 425 passed, 1086 assertions, 7.24s
 
 #### S3.9C Venue + Rundown Foundation
 

@@ -36,11 +36,17 @@ Event
 Event
   -> ActivityGroup
       -> Activity
+          -> ActivityCategory
+              -> CategoryDefinition
+
+Event
+  -> CategoryDefinition
 
 Event
   -> Participation
       -> ActivityRegistration
           -> Activity
+          -> CategoryDefinition (nullable)
 ```
 
 ```

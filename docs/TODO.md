@@ -411,8 +411,18 @@ Status: ACTIVE / IN PROGRESS
 - [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
 - [x] Full regression suite verified: 411 passed, 1057 assertions
 
+#### S3.9B Category Foundation ✅ VERIFIED
+- [x] Create `category_definitions` table + `CategoryDefinition` model
+- [x] Create `activity_categories` table + `ActivityCategory` model
+- [x] Add `requires_category` support on `activities`
+- [x] Add nullable `category_definition_id` on `activity_registrations`
+- [x] Enforce event isolation for CategoryDefinition / ActivityCategory / ActivityRegistration category usage
+- [x] Enforce availability rules via ActivityCategory
+- [x] Enforce `requires_category` behavior on registration
+- [x] Keep LegacyPesertaMapping + peserta compatibility bridge intact
+- [x] Full regression suite verified: 425 passed, 1086 assertions, 7.24s
+
 #### Remaining S3.9 checkpoints
-- [ ] S3.9B Category Foundation
 - [ ] S3.9C Venue + Rundown Foundation
 - [ ] S3.9D Event Role / Committee Foundation
 - [ ] S3.9E Reporting / Export Integration

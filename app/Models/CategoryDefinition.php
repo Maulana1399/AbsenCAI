@@ -4,22 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Activity extends Model
+class CategoryDefinition extends Model
 {
     protected $fillable = [
         'event_id',
-        'activity_group_id',
         'name',
-        'slug',
-        'description',
-        'status',
-        'requires_category',
+        'code',
+        'sort_order',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
-            'requires_category' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -28,9 +26,9 @@ class Activity extends Model
         return $this->belongsTo(Event::class);
     }
 
-    public function activityGroup()
+    public function activityCategories()
     {
-        return $this->belongsTo(ActivityGroup::class);
+        return $this->hasMany(ActivityCategory::class);
     }
 
     public function activityRegistrations()

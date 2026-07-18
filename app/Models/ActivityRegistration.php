@@ -10,6 +10,7 @@ class ActivityRegistration extends Model
         'event_id',
         'participation_id',
         'activity_id',
+        'category_definition_id',
         'status',
         'registered_at',
         'source',
