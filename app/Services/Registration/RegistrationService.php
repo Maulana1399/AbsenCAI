@@ -107,8 +107,6 @@ class RegistrationService
 
             if ($mapping?->participation !== null) {
                 $mapping->participation->update([
-                    'participant_number' => $peserta->participant_number,
-                    'attendance_code' => $peserta->attendance_code,
                     'jenis_peserta' => $data['jenis_peserta'],
                 ]);
 
