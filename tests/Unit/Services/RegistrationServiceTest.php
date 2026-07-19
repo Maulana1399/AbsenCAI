@@ -74,6 +74,34 @@ test('create participant stores normalized participation identifiers', function 
         ->and($mapping?->person?->nama)->toBe('Peserta Registration');
 });
 
+test('update participant does not regenerate participant number or attendance code', function () {
+    $event = Event::create(['name' => 'Registration Event Update 2', 'slug' => 'registration-event-update-2', 'status' => 'active']);
+    app(ActiveEventContext::class)->set($event);
+
+    $participant = peserta::create([
+        'nama' => 'Peserta Lama',
+        'nip' => 1001,
+        'participant_number' => 'KL001',
+        'attendance_code' => 'KJA-OLD0001',
+        'jenis_kelamin' => 'Laki - Laki',
+    ]);
+    $person = Person::create(['nama' => 'Peserta Lama', 'nip' => 1001, 'jenis_kelamin' => 'L']);
+    $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-OLD0001', 'jenis_peserta' => peserta::JENIS_WAJIB]);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+
+    app(RegistrationService::class)->updateParticipant($participant->id, [
+        'nama' => 'Peserta Baru',
+        'jenis_kelamin' => 'Perempuan',
+        'jenis_peserta' => peserta::JENIS_KIRIMAN,
+        'desa_id' => null,
+        'kelompok_id' => null,
+        'regu_id' => null,
+    ]);
+
+    expect($participation->fresh()->participant_number)->toBe('KL001')
+        ->and($participation->fresh()->attendance_code)->toBe('KJA-OLD0001');
+});
+
 test('update participant persists changed identity fields to mapped participation', function () {
     $event = Event::create(['name' => 'Registration Event Update', 'slug' => 'registration-event-update', 'status' => 'active']);
     app(ActiveEventContext::class)->set($event);

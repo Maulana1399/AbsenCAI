@@ -15,11 +15,7 @@ class PlacementService
             ->where('event_id', $eventId)
             ->whereNotNull('participant_number')
             ->where('participant_number', 'like', $prefix.'%')
-            ->max('participant_number')
-            ?? peserta::query()
-                ->whereNotNull('participant_number')
-                ->where('participant_number', 'like', $prefix.'%')
-                ->max('participant_number');
+            ->max('participant_number');
 
         $nextNumber = $last
             ? ((int) substr($last, 2) + 1)

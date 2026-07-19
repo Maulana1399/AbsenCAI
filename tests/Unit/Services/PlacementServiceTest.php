@@ -43,7 +43,19 @@ test('generate participant number continues the next sequence for the same gende
     Participation::create(['person_id' => $personB->id, 'event_id' => $eventB->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-PLAC-B1', 'jenis_peserta' => 'Wajib']);
 
     expect(PlacementService::generateParticipantNumber($eventA->id, 'Laki - Laki'))->toBe('KL002')
-        ->and(PlacementService::generateParticipantNumber($eventB->id, 'Laki - Laki'))->toBe('KL002');
+        ->and(PlacementService::generateParticipantNumber($eventB->id, 'Laki - Laki'))->toBe('KL002')
+        ->and(PlacementService::generateParticipantNumber($eventA->id, 'Laki laki'))->toBe('KL002')
+        ->and(PlacementService::generateParticipantNumber($eventA->id, 'Laki - Laki '))->toBe('KL002');
+});
+
+test('generate participant number is isolated per event and ignores legacy peserta records from other events', function () {
+    $eventA = Event::create(['name' => 'Placement Event A2', 'slug' => 'placement-event-a2', 'status' => 'active']);
+    $eventB = Event::create(['name' => 'Placement Event B2', 'slug' => 'placement-event-b2', 'status' => 'active']);
+    $personA = Person::create(['nama' => 'Placement A2', 'nip' => 7001, 'jenis_kelamin' => 'L']);
+    Participation::create(['person_id' => $personA->id, 'event_id' => $eventA->id, 'participant_number' => 'KL003', 'attendance_code' => 'KJA-PLAC-A2', 'jenis_peserta' => 'Wajib']);
+    peserta::create(['nama' => 'Legacy Cross Event', 'nip' => 7002, 'participant_number' => 'KL999', 'jenis_kelamin' => 'Laki - Laki']);
+
+    expect(PlacementService::generateParticipantNumber($eventB->id, 'Laki - Laki'))->toBe('KL001');
 });
 
 test('least filled regu picks the regu with the fewest participants for the selected gender', function () {
