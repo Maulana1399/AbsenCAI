@@ -93,6 +93,14 @@ class AttendanceService
             return $byAttendanceCode;
         }
 
+        $mapping = LegacyPesertaMapping::with('participation')
+            ->whereRaw('LOWER(legacy_attendance_code) = ?', [strtolower($identifier)])
+            ->first();
+
+        if ($mapping?->peserta !== null) {
+            return $mapping->peserta;
+        }
+
         return peserta::where('nip', $identifier)->first();
     }
 

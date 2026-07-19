@@ -107,6 +107,19 @@ test('process scan still accepts legacy nip fallback', function () {
     $this->assertDatabaseHas('absensis', ['nip' => 1999, 'sesi_id' => $session->id]);
 });
 
+test('process scan accepts legacy attendance code through mapping and stays event safe', function () {
+    $event = attendanceTest_makeEvent();
+    $other = Event::create(['name' => 'Legacy Other', 'slug' => 'legacy-other-'.str()->random(6), 'status' => 'active']);
+    app(ActiveEventContext::class)->set($event);
+    [$participant] = attendanceTest_makeMappedLegacyPeserta(['nama' => 'Peserta Legacy Code', 'nip' => 1998, 'attendance_code' => 'KJA-LEGCODE1'], $event);
+    attendanceTest_makeMappedLegacyPeserta(['nama' => 'Peserta Legacy Code Other', 'nip' => 2998, 'attendance_code' => 'KJA-LEGCODE2'], $other);
+    SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Legacy Code', 'tanggal' => '2026-07-15', 'aktif' => true]);
+
+    $result = app(AttendanceService::class)->processScan('KJA-LEGCODE1');
+
+    expect($result['status'])->toBe('success')->and($result['peserta']->is($participant))->toBeTrue();
+});
+
 test('process scan rejects missing legacy mapping in CAI', function () {
     $event = attendanceTest_makeEvent(); app(ActiveEventContext::class)->set($event);
     peserta::create(['nama' => 'Peserta Tanpa Mapping', 'nip' => 2001, 'attendance_code' => 'KJA-NOMAP1', 'jenis_kelamin' => 'Laki - Laki']);
