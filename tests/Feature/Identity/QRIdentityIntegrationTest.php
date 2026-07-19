@@ -113,3 +113,46 @@ it('QR label Livewire download uses attendance code payload', function () {
     expect($fake->calls)->not->toBeEmpty();
     expect(collect($fake->calls)->every(fn ($call) => $call === 'KJA-QRLIVE1'))->toBeTrue();
 });
+
+it('QR label print preview uses attendance code payload and participant number label only', function () {
+    $event = Event::create([
+        'name' => 'QR Print Preview Event',
+        'slug' => 'qr-print-preview-event-'.str()->random(6),
+        'status' => 'active',
+    ]);
+    $person = Person::create([
+        'nama' => 'Peserta QR Preview',
+        'nip' => 4003,
+        'jenis_kelamin' => 'L',
+    ]);
+    $participant = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'participant_number' => 'KL777',
+        'attendance_code' => 'KJA-QRPREV1',
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    $fake = new class extends QRService {
+        public array $calls = [];
+
+        public function generatePng(string $attendanceCode): string
+        {
+            $this->calls[] = $attendanceCode;
+
+            return 'preview-png';
+        }
+    };
+
+    app()->instance(QRService::class, $fake);
+
+    $response = Livewire::test(QRLabelIndex::class)
+        ->set('selectedLabelParticipantId', $participant->id)
+        ->call('printSelectedLabel');
+
+    $response->assertOk();
+    expect($fake->calls)->not->toBeEmpty();
+    expect(array_values(array_unique($fake->calls)))->toBe(['KJA-QRPREV1']);
+    expect(collect($fake->calls)->contains('KL777'))->toBeFalse();
+    expect(collect($fake->calls)->contains(4003))->toBeFalse();
+});

@@ -28,10 +28,14 @@ function backfillTest_makeEvent(array $overrides = []): Event
 
 function backfillTest_makePeserta(array $overrides = []): peserta
 {
+    static $sequence = 920;
+
+    $participantNumber = $overrides['participant_number'] ?? ('KL'.str_pad((string) $sequence++, 3, '0', STR_PAD_LEFT));
+
     return peserta::create(array_merge([
         'nama' => 'Test Peserta',
         'nip' => random_int(1001, 9999),
-        'participant_number' => 'KL' . str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT),
+        'participant_number' => $participantNumber,
         'attendance_code' => 'KJA-' . strtoupper(Str::random(8)),
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => 'Wajib',
