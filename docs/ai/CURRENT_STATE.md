@@ -66,7 +66,7 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
 **UI Bug Fix Sprint — Batch 1 (Branding & Navigation)** — Bug #1, #2, #4, #6: **RESOLVED — VERIFIED** ✅ (908 tests passed / 2192 assertions).
 **UI Bug Fix Sprint — Batch 2 (Access Token UI & Security)** — Bug #5, #7, #8: **IMPLEMENTED / SECURITY AUDIT COMPLETE — PENDING RUNTIME VERIFICATION** ⏳.
 Authorization follow-up: cross-event isolation + authorization tests added. Menunggu runtime verification sebelum RESOLVED.
-Batch 3 (remaining bugs #3, #9, #11) menyusul.
+**UI Bug Fix Sprint — Batch 3 (Functional/UI Logic)** — Bug #3, #9: **IMPLEMENTED** ⏳. #3: tabel Belum Absen fixed (participation-person chain). #9: filter `wire:model.live` + Livewire component tests.
 
 **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
@@ -105,7 +105,7 @@ Priority saat ini:
 
 1. **UI Bug Fix Sprint — Batch 1** ✅ — Branding & Navigation — RESOLVED VERIFIED.
 2. **UI Bug Fix Sprint — Batch 2** 🔄 — Access Token UI & Security (#5, #7, #8) — IMPLEMENTED / SECURITY AUDIT COMPLETE, PENDING RUNTIME VERIFICATION. Cross-event isolation added.
-3. **UI Bug Fix Sprint — Batch 3** — Remaining bugs (#3 Dashboard stat, #9 Regional Report filter, #11 Responsive).
+3. **UI Bug Fix Sprint — Batch 3** 🔄 — Functional/UI Logic (#3, #9) — IMPLEMENTED, PENDING RUNTIME VERIFICATION.
 3. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
 3. Event switcher redirect/reload fix ✅ (PGM.16.3)
 4. Pengajian bulk import ✅ (PGM.16)
@@ -193,10 +193,7 @@ Database: SQLite
 - Navigation: KJA logo → home ✅ route('home'), no auto-select CAI
 - Navigation: Pengajian menu hidden in CAI ✅ sidebar.blade.php conditional
 
-**3. UI Bug Fix Sprint — Batch 3** — Remaining bugs:
-- Verify: Regional Report filter fixes (bug #9)
-- Dashboard "Alfa" stat behavior (bug #3)
-- Responsive layout /pengajian (bug #11)
+**4. Bug #11** — Responsive layout /pengajian — masih OPEN.
 
 **2. PGM.17 — Pilot Release.** Final checks before deployment:
 - Pilot data verification and end-to-end simulation

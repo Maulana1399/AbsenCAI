@@ -477,3 +477,108 @@ test('filter combination — No stale state between filter changes', function ()
     $list3 = $service->attendanceList($d['event']);
     expect($list3)->toHaveCount(3);
 });
+
+// ---------------------------------------------------------------------------
+// PGM.17 — Bug #9 Livewire Component Filter Integration
+// ---------------------------------------------------------------------------
+
+test('Livewire filterStatus update clears method when Belum Hadir', function () {
+    $d = pgm16_setup();
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($d['event']);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Pengajian\RegionalReport::class)
+        ->set('activeTab', 'list')
+        ->set('filterStatus', 'belum')
+        ->assertSet('filterMethod', null);
+});
+
+test('Livewire filter Hadir + Self combination', function () {
+    $d = pgm16_setup();
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($d['event']);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Pengajian\RegionalReport::class)
+        ->set('activeTab', 'list')
+        ->set('filterStatus', 'hadir')
+        ->set('filterMethod', 'self')
+        ->assertSee('Self Person')
+        ->assertDontSee('Operator Person')
+        ->assertDontSee('Belum Person');
+});
+
+test('Livewire filter Hadir + Operator combination', function () {
+    $d = pgm16_setup();
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($d['event']);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Pengajian\RegionalReport::class)
+        ->set('activeTab', 'list')
+        ->set('filterStatus', 'hadir')
+        ->set('filterMethod', 'operator')
+        ->assertSee('Operator Person')
+        ->assertDontSee('Self Person')
+        ->assertDontSee('Belum Person');
+});
+
+test('Livewire filter Belum Hadir shows only unattended', function () {
+    $d = pgm16_setup();
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($d['event']);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Pengajian\RegionalReport::class)
+        ->set('activeTab', 'list')
+        ->set('filterStatus', 'belum')
+        ->assertSee('Belum Person')
+        ->assertDontSee('Self Person')
+        ->assertDontSee('Operator Person');
+});
+
+test('Livewire filter Search + Status + Method combination', function () {
+    $d = pgm16_setup();
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($d['event']);
+
+    // Combined: search "Self" + status Hadir + method Self
+    // Note: search minimum length is 3 chars ("Self" == 4 chars, OK)
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Pengajian\RegionalReport::class)
+        ->set('activeTab', 'list')
+        ->set('listSearch', 'Self')
+        ->set('filterStatus', 'hadir')
+        ->set('filterMethod', 'self')
+        ->assertSee('Self Person')
+        ->assertDontSee('Operator Person')
+        ->assertDontSee('Belum Person');
+});
+
+test('Livewire filter changes without manual refresh', function () {
+    $d = pgm16_setup();
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($d['event']);
+
+    $component = Livewire::actingAs($user)
+        ->test(\App\Livewire\Pengajian\RegionalReport::class);
+
+    // Initially shows all
+    $component->set('activeTab', 'list')
+        ->assertSee('Self Person')
+        ->assertSee('Operator Person')
+        ->assertSee('Belum Person');
+
+    // Apply Hadir filter -> immediately changes (no refresh needed)
+    $component->set('filterStatus', 'hadir')
+        ->assertSee('Self Person')
+        ->assertSee('Operator Person')
+        ->assertDontSee('Belum Person');
+
+    // Add Self method -> further narrows
+    $component->set('filterMethod', 'self')
+        ->assertSee('Self Person')
+        ->assertDontSee('Operator Person')
+        ->assertDontSee('Belum Person');
+});

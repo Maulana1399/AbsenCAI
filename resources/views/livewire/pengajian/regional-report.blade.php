@@ -145,7 +145,7 @@
 
                 <div class="flex flex-col sm:flex-row gap-2">
                     <select
-                        wire:model="filterStatus"
+                        wire:model.live="filterStatus"
                         class="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                     >
                         <option value="">Semua Status</option>
@@ -154,7 +154,7 @@
                     </select>
 
                     <select
-                        wire:model="filterMethod"
+                        wire:model.live="filterMethod"
                         @if ($filterStatus === 'belum') disabled @endif
                         class="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white @if ($filterStatus === 'belum') opacity-50 @endif"
                     >

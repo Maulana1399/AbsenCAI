@@ -1262,13 +1262,13 @@ cp database/database.sqlite database/database.sqlite.backup-$(date +%Y%m%d-%H%M%
 |---|----------|-------------------|-----------|-------------|--------|
 | 1 | Branding | Halaman depan (`/`) masih tampilkan "CAI" dan "CINTA ALAM INDONESIA 2025" | Medium | `welcome.blade.php` | **RESOLVED — VERIFIED** ✅ |
 | 2 | Branding | Halaman login masih tampilkan "CAI" dan "Cinta Alam Indonesia" | Medium | `login.blade.php` | **RESOLVED — VERIFIED** ✅ |
-| 3 | UI Logic | Stat "Alfa" di dashboard — label dan logika perlu dicek (mungkin "-" saat tanpa sesi) | Medium | `Dashboard.php` | OPEN |
+| 3 | UI Logic | Stat "Alfa" di dashboard — tabel "Belum Absen" menampilkan "-" untuk semua baris | Medium | `Dashboard.php`, `dashboard.blade.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Fix: person chain di tabel |
 | 4 | Navigation | Menu "Pengajian" muncul di sidebar event CAI | Low | `sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ |
 | 5 | Access Token | Tidak ada tombol hapus permanen untuk token yang sudah dicabut | Medium | `AccessIndex.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ + cross-event isolation |
 | 6 | Navigation | Klik logo KJA → dashboard CAI, bukan halaman yang sesuai konteks | High | `sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ |
 | 7 | Security | Raw token ditampilkan penuh di modal pembuatan (sekali) | High | `access-index.blade.php` | **SECURITY AUDIT COMPLETE — PENDING RUNTIME FLOW VERIFICATION** ⏳ DB hanya hash, one-time reveal by design |
 | 8 | Access Token | Token overflow / layout kurang rapi | Medium | `access-index.blade.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Layout improved |
-| 9 | Filter | Filter Regional Report perlu verifikasi pasca-PGM.16 | Medium | `RegionalReport.php` | OPEN |
+| 9 | Filter | Filter Regional Report perlu verifikasi pasca-PGM.16 | Medium | `RegionalReport.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Fix: `wire:model.live` + Livewire component tests |
 | 11 | Responsive | `/pengajian` layout desktop — minor perbaikan | Low | `enter-token.blade.php` | OPEN |
 
 ---

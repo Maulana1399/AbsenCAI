@@ -939,7 +939,7 @@ Sprint dianggap selesai apabila:
 ```
 1. **UI Bug Fix Sprint — Batch 1** ✅✅ Branding & Navigation (bugs #1, #2, #4, #6) — RESOLVED VERIFIED (908 tests/2192 assertions)
 2. **UI Bug Fix Sprint — Batch 2** 🔄 Access Token UI & Security (bugs #5, #7, #8) — IMPLEMENTED / SECURITY AUDIT COMPLETE — PENDING RUNTIME VERIFICATION
-3. **UI Bug Fix Sprint — Batch 3** — Remaining bugs (#3, #9, #11)
+3. **UI Bug Fix Sprint — Batch 3** 🔄 — Functional/UI Logic (bugs #3, #9) — IMPLEMENTED, PENDING RUNTIME VERIFICATION
 3. **PGM.17 — Pilot Release** — PENDING
 3. **Pengajian Desa MVP** — PGM.12–PGM.16 ✅ Complete. PGM.17 pending.
 4. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)

@@ -35,7 +35,12 @@ class Dashboard extends Component
         $sesiAktif = $event
             ? SesiAbsensi::where('event_id', $event->id)->where('aktif', true)->first()
             : null;
-        $participationQuery = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event']);
+        $participationQuery = Participation::with([
+            'person.desa',
+            'person.legacyPesertaMapping.peserta.regu',
+            'person.legacyPesertaMapping.peserta.kelompok',
+            'event',
+        ]);
 
         if ($event !== null) {
             $participationQuery->where('event_id', $event->id);
