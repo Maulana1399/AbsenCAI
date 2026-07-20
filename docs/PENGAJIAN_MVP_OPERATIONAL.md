@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PGM.0–PGM.9 verified. PGM.10 production readiness closure.
+PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12 pilot bugfix COMPLETE.
 
 **Limited operational pilot** — not commercial production readiness.
 
@@ -316,3 +316,31 @@ Verify your actual `DB_DATABASE` path from `.env` if not using the default SQLit
 - **Pengajian Kelompok/Daerah**: Future scope — not part of this MVP.
 - **N+1 query in Desa report list**: Acceptable for pilot-level volume.
 - **No offline support**: Internet connection required for all flows.
+
+---
+
+## 10. PGM.12 — Pilot Bugfix Verification
+
+PGM.12 addresses UX/binding issues discovered during manual pilot verification of the Desa Dashboard.
+
+| Item | Status |
+|---|---|
+| QR/self attendance flow | ✅ PASS |
+| Operator attendance (success + sequential) | ✅ PASS |
+| Dashboard/statistik refresh | ✅ PASS |
+| Filter Status (Hadir/Belum) | ✅ PASS |
+| Filter Metode (Self/Operator) | ✅ PASS |
+| Search nama (partial, empty, no results) | ✅ PASS |
+| Kombinasi search + filter | ✅ PASS |
+| UI auto-reset after operator attendance | ✅ PASS |
+| Sequential operator tanpa Batal manual | ✅ PASS |
+
+**Full suite:** 762 passed, 1802 assertions, 0 failures. Duration: 11.85s.
+
+**Files changed:**
+
+| File | Change |
+|---|---|
+| `app/Livewire/Pengajian/DesaDashboard.php` | Add `$showingConfirmation` boolean; `searchList()` method; `setFilterStatus/setFilterMethod` methods; `wire:input`/`wire:change` event bindings |
+| `resources/views/livewire/pengajian/desa-dashboard.blade.php` | Replace `wire:model` with `wire:input`/`wire:change` for search/filter; use `$showingConfirmation` for state toggle |
+| `tests/Feature/Pengajian/PengajianAccessTest.php` | 13 new tests: filter (5), search (5), operator attendance UX (3) |

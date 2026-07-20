@@ -4,9 +4,11 @@ use App\Livewire\Pengajian\DesaDashboard;
 use App\Livewire\Pengajian\EnterToken;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
+use App\Models\Person;
 use App\Models\User;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
+use App\Services\Pengajian\PengajianAttendanceService;
 use Carbon\Carbon;
 use Livewire\Livewire;
 
@@ -409,4 +411,333 @@ test('findGrantByToken returns null for wrong token', function () {
     $grant = app(DesaAccessService::class)->findGrantByToken('kja-dgt-invalidtoken1234567890abcdefghij');
 
     expect($grant)->toBeNull();
+});
+
+// ---------------------------------------------------------------------------
+// Daftar Kehadiran – Filter
+// ---------------------------------------------------------------------------
+
+test('switch tab ke list memuat attendanceList', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    Person::create(['nama' => 'Jono', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Joni', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->assertSet('activeTab', 'attendance')
+        ->set('activeTab', 'list')
+        ->assertSet('attendanceList', fn ($list) => count($list) === 2);
+});
+
+test('setFilterStatus memfilter attendanceList', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $hadir = Person::create(['nama' => 'Jono Hadir', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Jono Belum', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($hadir, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('setFilterStatus', 'hadir')
+        ->assertSet('filterStatus', 'hadir')
+        ->assertSet('attendanceList', fn ($list) => count($list) === 1 && $list[0]['nama'] === 'Jono Hadir');
+});
+
+test('setFilterStatus kosong mengembalikan semua', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $hadir = Person::create(['nama' => 'Jono Hadir', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Jono Belum', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($hadir, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('setFilterStatus', 'hadir')
+        ->call('setFilterStatus', '')
+        ->assertSet('filterStatus', null)
+        ->assertSet('attendanceList', fn ($list) => count($list) === 2);
+});
+
+test('setFilterMethod memfilter attendanceList', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $op = Person::create(['nama' => 'Jono Op', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    $selfPerson = Person::create(['nama' => 'Jono Self', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'tanggal_lahir' => '2000-01-15']);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($op, $grant);
+    app(PengajianAttendanceService::class)->attendPersonPublicContext($selfPerson, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('setFilterMethod', 'operator')
+        ->assertSet('filterMethod', 'operator')
+        ->assertSet('attendanceList', fn ($list) => count($list) === 1 && $list[0]['method'] === 'operator');
+});
+
+test('setFilterMethod kosong mengembalikan semua', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $op = Person::create(['nama' => 'Jono Op', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    $selfPerson = Person::create(['nama' => 'Jono Self', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'tanggal_lahir' => '2000-01-15']);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($op, $grant);
+    app(PengajianAttendanceService::class)->attendPersonPublicContext($selfPerson, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('setFilterMethod', 'operator')
+        ->call('setFilterMethod', '')
+        ->assertSet('filterMethod', null)
+        ->assertSet('attendanceList', fn ($list) => count($list) === 2);
+});
+
+// ---------------------------------------------------------------------------
+// Daftar Kehadiran – Search
+// ---------------------------------------------------------------------------
+
+test('searchList partial name memfilter attendanceList', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+
+    Person::create(['nama' => 'Atta Halilintar', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Budi Santoso', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Siti Aisyah', 'jenis_kelamin' => 'P', 'desa_id' => $desa->id]);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $result['grant']->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('searchList', 'Atta')
+        ->assertSet('listSearch', 'Atta')
+        ->assertSet('attendanceList', fn ($list) =>
+            count($list) === 1 && $list[0]['nama'] === 'Atta Halilintar'
+        );
+});
+
+test('searchList empty string mengembalikan semua', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+
+    Person::create(['nama' => 'Atta Halilintar', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Budi Santoso', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $result['grant']->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('searchList', 'Atta')
+        ->call('searchList', '')
+        ->assertSet('listSearch', '')
+        ->assertSet('attendanceList', fn ($list) => count($list) === 2);
+});
+
+test('searchList tanpa hasil mengembalikan array kosong', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+
+    Person::create(['nama' => 'Atta Halilintar', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Budi Santoso', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $result['grant']->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('searchList', 'NonexistentXYZ')
+        ->assertSet('listSearch', 'NonexistentXYZ')
+        ->assertSet('attendanceList', []);
+});
+
+test('searchList + filterStatus kombinasi', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $hadir = Person::create(['nama' => 'Atta Hadir', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Atta Belum', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    Person::create(['nama' => 'Budi Lain', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($hadir, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('searchList', 'Atta')
+        ->call('setFilterStatus', 'hadir')
+        ->assertSet('listSearch', 'Atta')
+        ->assertSet('filterStatus', 'hadir')
+        ->assertSet('attendanceList', fn ($list) =>
+            count($list) === 1 && $list[0]['nama'] === 'Atta Hadir'
+        );
+});
+
+test('searchList + setFilterMethod kombinasi', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $op = Person::create(['nama' => 'Atta Operator', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    $selfPerson = Person::create(['nama' => 'Atta Self', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'tanggal_lahir' => '2000-01-15']);
+    Person::create(['nama' => 'Budi Lain', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($op, $grant);
+    app(PengajianAttendanceService::class)->attendPersonPublicContext($selfPerson, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->set('activeTab', 'list')
+        ->call('searchList', 'Atta')
+        ->call('setFilterMethod', 'operator')
+        ->assertSet('listSearch', 'Atta')
+        ->assertSet('filterMethod', 'operator')
+        ->assertSet('attendanceList', fn ($list) =>
+            count($list) === 1 && $list[0]['method'] === 'operator'
+        );
+});
+
+// ---------------------------------------------------------------------------
+// Operator Attendance – UX flow
+// ---------------------------------------------------------------------------
+
+test('confirmOperatorAttendance sukses mereset state UI', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $person = Person::create(['nama' => 'Jono', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    $component = Livewire::test(DesaDashboard::class);
+
+    $component->call('selectPerson', $person->id)
+        ->assertSet('showingConfirmation', true)
+        ->assertSet('selectedPersonId', $person->id)
+        ->assertSet('selectedPersonName', 'Jono');
+
+    $component->call('confirmOperatorAttendance')
+        ->assertSet('showingConfirmation', false)
+        ->assertSet('selectedPersonId', null)
+        ->assertSet('selectedPersonName', null)
+        ->assertSet('query', '')
+        ->assertSet('searchResults', [])
+        ->assertSet('successMessage', 'Kehadiran berhasil dicatat.');
+});
+
+test('sequential operator attendance tidak perlu Batal manual', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $jono = Person::create(['nama' => 'Jono', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+    $joni = Person::create(['nama' => 'Joni', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    $component = Livewire::test(DesaDashboard::class);
+
+    // Attendance Jono
+    $component->call('selectPerson', $jono->id)
+        ->assertSet('showingConfirmation', true)
+        ->call('confirmOperatorAttendance')
+        ->assertSet('showingConfirmation', false)
+        ->assertSet('selectedPersonId', null);
+
+    // Verify Jono tercatat
+    $component->assertSet('summary', fn ($s) => $s['sudah_hadir'] >= 1);
+
+    // Attendance Joni — langsung tanpa Batal
+    $component->call('selectPerson', $joni->id)
+        ->assertSet('showingConfirmation', true)
+        ->assertSet('selectedPersonId', $joni->id)
+        ->call('confirmOperatorAttendance')
+        ->assertSet('showingConfirmation', false)
+        ->assertSet('selectedPersonId', null);
+
+    // Verify keduanya tercatat
+    $component->assertSet('summary', fn ($s) => $s['sudah_hadir'] >= 2);
+});
+
+test('confirmOperatorAttendance gagal tidak mereset selected person', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $grant = $result['grant'];
+
+    $person = Person::create(['nama' => 'Jono', 'jenis_kelamin' => 'L', 'desa_id' => $desa->id]);
+
+    // Pre-attend to trigger duplicate error
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext($person, $grant);
+
+    session()->put('pengajian_access', [
+        'grant_id' => $grant->id, 'event_id' => $event->id, 'desa_id' => $desa->id,
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->call('selectPerson', $person->id)
+        ->assertSet('showingConfirmation', true)
+        ->assertSet('selectedPersonId', $person->id)
+        ->call('confirmOperatorAttendance')
+        ->assertSet('showingConfirmation', true)
+        ->assertSet('selectedPersonId', $person->id)
+        ->assertSet('errorMessage', 'Peserta sudah tercatat hadir.');
 });

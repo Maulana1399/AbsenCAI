@@ -10,6 +10,7 @@ use App\Services\Pengajian\PengajianAttendanceService;
 use App\Services\Pengajian\PengajianDesaReportService;
 use App\Services\Pengajian\PengajianIdentityService;
 use App\Services\QR\QRService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -33,6 +34,7 @@ class DesaDashboard extends Component
     public array $searchResults = [];
     public bool $searching = false;
 
+    public bool $showingConfirmation = false;
     public ?int $selectedPersonId = null;
     public ?string $selectedPersonName = null;
 
@@ -46,7 +48,7 @@ class DesaDashboard extends Component
     public ?string $filterMethod = null;
     public string $listSearch = '';
 
-    private ?DesaAccessGrant $grant = null;
+    public ?DesaAccessGrant $grant = null;
 
     public function mount(): void
     {
@@ -57,13 +59,16 @@ class DesaDashboard extends Component
             return;
         }
 
-        $this->grant = DesaAccessGrant::with('event', 'desa')->find($session['grant_id']);
+        $grant = DesaAccessGrant::with('event', 'desa')->find($session['grant_id']);
 
-        if ($this->grant === null) {
+        if ($grant === null) {
             session()->forget('pengajian_access');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }
+
+        $grant->makeHidden(['token_hash', 'token_prefix']);
+        $this->grant = $grant;
 
         if ((int) $this->grant->event_id !== (int) $session['event_id']
             || (int) $this->grant->desa_id !== (int) $session['desa_id']) {
@@ -98,7 +103,7 @@ class DesaDashboard extends Component
         $this->validFrom = $this->grant->valid_from->format('d M Y H:i');
         $this->validUntil = $this->grant->valid_until->format('d M Y H:i');
         $this->nonce = $this->grant->nonce;
-        $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce], absolute: false);
+        $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce]);
         $this->generateQr();
         $this->loadSummary();
     }
@@ -151,6 +156,7 @@ class DesaDashboard extends Component
 
         $this->selectedPersonId = $person->id;
         $this->selectedPersonName = $person->nama;
+        $this->showingConfirmation = true;
     }
 
     public function confirmOperatorAttendance(): void
@@ -180,6 +186,7 @@ class DesaDashboard extends Component
             );
 
             $this->successMessage = 'Kehadiran berhasil dicatat.';
+            $this->showingConfirmation = false;
             $this->selectedPersonId = null;
             $this->selectedPersonName = null;
             $this->query = '';
@@ -201,6 +208,7 @@ class DesaDashboard extends Component
 
     public function resetSelection(): void
     {
+        $this->showingConfirmation = false;
         $this->selectedPersonId = null;
         $this->selectedPersonName = null;
         $this->errorMessage = null;
@@ -216,7 +224,11 @@ class DesaDashboard extends Component
         try {
             $this->summary = app(PengajianDesaReportService::class)
                 ->summary($this->grant);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            Log::warning('DesaDashboard: summary gagal', [
+                'error' => $e->getMessage(),
+                'grant_id' => $this->grant->id,
+            ]);
             $this->summary = [];
         }
     }
@@ -235,7 +247,13 @@ class DesaDashboard extends Component
                     status: $this->filterStatus ?: null,
                     method: $this->filterMethod ?: null,
                 );
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            Log::warning('DesaDashboard: attendanceList gagal', [
+                'error' => $e->getMessage(),
+                'grant_id' => $this->grant->id,
+                'event_id' => $this->grant->event_id,
+                'desa_id' => $this->grant->desa_id,
+            ]);
             $this->attendanceList = [];
         }
     }
@@ -250,18 +268,21 @@ class DesaDashboard extends Component
         }
     }
 
-    public function updatedListSearch(): void
+    public function searchList(string $value): void
     {
+        $this->listSearch = $value;
         $this->loadAttendanceList();
     }
 
-    public function updatedFilterStatus(): void
+    public function setFilterStatus(string $value): void
     {
+        $this->filterStatus = $value ?: null;
         $this->loadAttendanceList();
     }
 
-    public function updatedFilterMethod(): void
+    public function setFilterMethod(string $value): void
     {
+        $this->filterMethod = $value ?: null;
         $this->loadAttendanceList();
     }
 
@@ -280,9 +301,11 @@ class DesaDashboard extends Component
         }
 
         app(DesaAccessService::class)->rotateNonce($grant);
-        $this->grant = $grant->fresh();
+        $fresh = $grant->fresh();
+        $fresh->makeHidden(['token_hash', 'token_prefix']);
+        $this->grant = $fresh;
         $this->nonce = $this->grant->nonce;
-        $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce], absolute: false);
+        $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce]);
         $this->generateQr();
     }
 
