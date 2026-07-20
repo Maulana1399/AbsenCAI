@@ -49,6 +49,11 @@
                     <flux:navlist.item :href="route('qr-label.index')" :current="request()->routeIs('qr-label.index')" wire:navigate>{{ __('QR & Label') }}</flux:navlist.item>
                 </flux:navlist.group>
 
+                <flux:navlist.group expandable heading="Pengajian" class="grid">
+                    <flux:navlist.item :href="route('pengajian.admin.access')" :current="request()->routeIs('pengajian.admin.access')" wire:navigate>{{ __('Akses Desa') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('pengajian.report')" :current="request()->routeIs('pengajian.report')" wire:navigate>{{ __('Regional Report') }}</flux:navlist.item>
+                </flux:navlist.group>
+
                 <flux:navlist.group expandable heading="Event" class="grid">
                     <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
                 </flux:navlist.group>

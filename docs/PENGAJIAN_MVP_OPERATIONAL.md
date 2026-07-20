@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12 pilot bugfix COMPLETE.
+PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12 pilot bugfix COMPLETE. PGM.13 admin UI COMPLETE.
 
 **Limited operational pilot** — not commercial production readiness.
 
@@ -305,7 +305,7 @@ Verify your actual `DB_DATABASE` path from `.env` if not using the default SQLit
 
 ## 15. Known Pilot Limitations
 
-- **Token management**: CLI only, no admin UI. Use `php artisan pengajian:create-desa-grant`.
+- **Token rotation**: Login token rotation not yet implemented. Use revoke + recreate instead.
 - **RBAC**: Not implemented. All authenticated users have equivalent access.
 - **Email verification**: `verified` middleware is no-op (User does not implement `MustVerifyEmail`).
 - **No permanent Person QR**: QR is session-bound, not person-bound.
@@ -344,3 +344,40 @@ PGM.12 addresses UX/binding issues discovered during manual pilot verification o
 | `app/Livewire/Pengajian/DesaDashboard.php` | Add `$showingConfirmation` boolean; `searchList()` method; `setFilterStatus/setFilterMethod` methods; `wire:input`/`wire:change` event bindings |
 | `resources/views/livewire/pengajian/desa-dashboard.blade.php` | Replace `wire:model` with `wire:input`/`wire:change` for search/filter; use `$showingConfirmation` for state toggle |
 | `tests/Feature/Pengajian/PengajianAccessTest.php` | 13 new tests: filter (5), search (5), operator attendance UX (3) |
+
+---
+
+## 11. PGM.13 — Desa Access Token Management UI
+
+Admin UI for managing Desa access grants (list, create with one-time token reveal, revoke).
+
+| Item | Status |
+|---|---|
+| Route `/pengajian/admin/access` under `auth,verified` | ✅ PASS |
+| Sidebar "Pengajian" → "Akses Desa" + "Regional Report" | ✅ PASS |
+| Grant list (safe data, no token_hash, status badges) | ✅ PASS |
+| Create grant form with validation | ✅ PASS |
+| One-time raw token reveal via browser event | ✅ PASS |
+| Copy-to-clipboard with success feedback | ✅ PASS |
+| Token wrapping/layout in modal | ✅ PASS |
+| Revoke grant with error handling | ✅ PASS |
+| Duplicate active grants allowed | ✅ PASS |
+| Security regression (no token in DB, no token in Livewire state, no token in session) | ✅ PASS |
+
+**Full suite:** 784 passed, 1851 assertions, 0 failures. Duration: 12.31s.
+
+**Files changed:**
+
+| File | Change |
+|---|---|
+| `app/Livewire/Pengajian/Admin/AccessIndex.php` | **NEW** — Livewire component: list, create, revoke; safeGrant mapping; dispatch raw token via browser event |
+| `resources/views/livewire/pengajian/admin/access-index.blade.php` | **NEW** — Blade view: table, form, Alpine modal with Clipboard API |
+| `routes/web.php` | Add `GET /pengajian/admin/access` route under `auth,verified` |
+| `resources/views/components/layouts/app/sidebar.blade.php` | Add "Pengajian" nav group with "Akses Desa" and "Regional Report" |
+| `tests/Feature/Pengajian/PengajianAdminAccessTest.php` | **NEW** — 22 tests: route (3), grant list (4), create+validation (7), security (2), revoke (4), duplicates (2) |
+| `docs/PENGAJIAN_MVP_OPERATIONAL.md` | Update status, known limitations, add PGM.13 section |
+
+**Known limitations:**
+- Login token rotation not yet implemented (use revoke + recreate)
+- Multiple active grants for same Event+Desa still allowed (existing domain behavior)
+- No RBAC on admin access page (all authenticated users can manage grants)

@@ -246,6 +246,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('koreksi.data');
     Route::get('pengajian/report', App\Livewire\Pengajian\RegionalReport::class)
         ->name('pengajian.report');
+    Route::get('pengajian/admin/access', App\Livewire\Pengajian\Admin\AccessIndex::class)
+        ->name('pengajian.admin.access');
 });
 
 Route::prefix('pengajian')->group(function () {

@@ -1,0 +1,165 @@
+<div class="space-y-6"
+     x-data="{
+         rawToken: null,
+         showTokenModal: false,
+         copied: false,
+         copyToken() {
+             navigator.clipboard.writeText(this.rawToken)
+                 .then(() => { this.copied = true })
+                 .catch(() => {})
+         },
+         closeModal() {
+             this.showTokenModal = false;
+             this.rawToken = null;
+             this.copied = false;
+         }
+     }"
+     x-on:pengajian-raw-token-created.window="rawToken = $event.detail.token; showTokenModal = true; copied = false">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Akses Desa</h1>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Kelola grant akses untuk desa.</p>
+        </div>
+        <flux:button wire:click="toggleCreateForm" variant="primary">
+            {{ $showCreateForm ? 'Batal' : 'Tambah Grant' }}
+        </flux:button>
+    </div>
+
+    @if (session('success'))
+        <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($showCreateForm)
+        <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+            <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Grant Baru</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Event</label>
+                    <select wire:model="eventId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                        <option value="">-- Pilih Event --</option>
+                        @foreach ($events as $event)
+                            <option value="{{ $event->id }}">{{ $event->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('eventId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Desa</label>
+                    <select wire:model="desaId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                        <option value="">-- Pilih Desa --</option>
+                        @foreach ($desas as $desa)
+                            <option value="{{ $desa->id }}">{{ $desa->desa_asal }}</option>
+                        @endforeach
+                    </select>
+                    @error('desaId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Berlaku Dari</label>
+                    <flux:input wire:model="validFrom" type="datetime-local" />
+                    @error('validFrom') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Berlaku Sampai</label>
+                    <flux:input wire:model="validUntil" type="datetime-local" />
+                    @error('validUntil') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-end">
+                <flux:button wire:click="create" variant="primary" :loading="$processing">
+                    Buat Grant
+                </flux:button>
+            </div>
+        </div>
+    @endif
+
+    <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+            <thead class="bg-zinc-50 dark:bg-zinc-900">
+                <tr>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Event</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Desa</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Token Prefix</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Status</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Berlaku</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Dibuat Oleh</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                @forelse ($grants as $grant)
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $grant['event_name'] }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">{{ $grant['desa_name'] }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm"><code class="text-xs text-zinc-500 dark:text-zinc-400">{{ $grant['token_prefix'] }}...</code></td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm">
+                            @php
+                                $badge = match ($grant['status']) {
+                                    'active' => ['bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', 'Active'],
+                                    'expired' => ['bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', 'Expired'],
+                                    'revoked' => ['bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', 'Revoked'],
+                                    default => ['bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', 'Scheduled'],
+                                };
+                            @endphp
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $badge[0] }}">{{ $badge[1] }}</span>
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                            {{ $grant['valid_from']?->format('d/m/Y H:i') ?? '-' }}<br>
+                            <span class="text-xs">s.d.</span><br>
+                            {{ $grant['valid_until']?->format('d/m/Y H:i') ?? '-' }}
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">{{ $grant['created_by'] ?? '-' }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm">
+                            @if ($grant['status'] === 'active' || $grant['status'] === 'scheduled')
+                                <flux:button wire:click="revoke({{ $grant['id'] }})" size="sm" variant="danger" icon-trailing="x-mark">Cabut</flux:button>
+                            @else
+                                <span class="text-xs text-zinc-400 dark:text-zinc-500">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Belum ada grant akses.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div x-show="showTokenModal && rawToken" style="display: none"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+         x-on:keydown.escape.window="closeModal()"
+         x-on:click.self="closeModal()">
+        <div class="w-full max-w-lg rounded-xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+            <p class="text-sm font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">Salin Token Ini</p>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Token hanya ditampilkan sekali. Salin dan simpan di tempat aman sebelum menutup dialog.</p>
+
+            <div class="mt-3 w-full rounded-lg border border-zinc-300 bg-zinc-50 p-3 dark:border-zinc-600 dark:bg-zinc-800">
+                <code class="block w-full max-w-full whitespace-normal break-all text-sm font-mono leading-6 text-zinc-800 dark:text-zinc-200" x-text="rawToken"></code>
+            </div>
+
+            <div class="mt-5 flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
+                <button type="button"
+                        x-on:click="closeModal()"
+                        class="rounded-lg border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700">Tutup</button>
+                <button type="button"
+                        x-on:click="copyToken()"
+                        class="inline-flex items-center justify-center rounded-lg bg-zinc-800 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                    <span x-show="!copied">Salin Token</span>
+                    <span x-show="copied">Tersalin</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
