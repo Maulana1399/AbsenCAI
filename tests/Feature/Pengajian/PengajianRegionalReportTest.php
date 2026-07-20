@@ -281,3 +281,29 @@ test('halaman report dapat diakses oleh user terverifikasi', function () {
 
     $response->assertOk();
 });
+
+test('halaman report tidak 500 ketika tidak ada active event', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('pengajian.report'));
+
+    $response->assertOk();
+    $response->assertSee('Tidak ada event aktif');
+    $response->assertSee('Kelola Event');
+});
+
+test('halaman report dengan active event tetap berfungsi normal', function () {
+    $event = pgm9_event();
+    $desa = pgm9_desa();
+    pgm9_person('Jono', 'L', $desa->id);
+
+    $user = User::factory()->create();
+    app(ActiveEventContext::class)->set($event);
+
+    $response = $this->actingAs($user)
+        ->get(route('pengajian.report'));
+
+    $response->assertOk();
+    $response->assertSee('Total Warga');
+});

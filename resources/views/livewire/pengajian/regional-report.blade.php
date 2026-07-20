@@ -6,7 +6,19 @@
         </div>
     </div>
 
-    @if (!empty($summary))
+    @if ($noActiveEvent)
+        <div class="rounded-xl border border-dashed border-amber-300 bg-amber-50 p-8 text-center dark:border-amber-800 dark:bg-amber-950">
+            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Tidak ada event aktif. Silakan pilih atau aktifkan event terlebih dahulu.
+            </p>
+            <a
+                href="{{ route('events.index') }}"
+                class="mt-4 inline-flex items-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+            >
+                Kelola Event
+            </a>
+        </div>
+    @elseif (!empty($summary))
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div class="rounded-xl border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                 <p class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $summary['total_warga'] }}</p>

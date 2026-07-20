@@ -25,6 +25,8 @@ class RegionalReport extends Component
 
     public string $activeTab = 'summary';
 
+    public bool $noActiveEvent = false;
+
     public function mount(): void
     {
         $this->loadReport();
@@ -32,7 +34,11 @@ class RegionalReport extends Component
 
     public function loadReport(): void
     {
-        $event = app(ActiveEventContext::class)->requireCurrent();
+        $event = $this->resolveActiveEvent();
+
+        if ($event === null) {
+            return;
+        }
 
         try {
             $service = app(PengajianRegionalReportService::class);
@@ -61,7 +67,11 @@ class RegionalReport extends Component
 
     public function loadAttendanceList(): void
     {
-        $event = app(ActiveEventContext::class)->requireCurrent();
+        $event = $this->resolveActiveEvent();
+
+        if ($event === null) {
+            return;
+        }
 
         try {
             $this->attendanceList = app(PengajianRegionalReportService::class)
@@ -101,10 +111,28 @@ class RegionalReport extends Component
 
     public function render()
     {
-        if ($this->activeTab === 'list' && empty($this->attendanceList)) {
+        if (! $this->noActiveEvent && $this->activeTab === 'list' && empty($this->attendanceList)) {
             $this->loadAttendanceList();
         }
 
         return view('livewire.pengajian.regional-report');
+    }
+
+    private function resolveActiveEvent(): ?Event
+    {
+        try {
+            $event = app(ActiveEventContext::class)->requireCurrent();
+
+            $this->noActiveEvent = false;
+
+            return $event;
+        } catch (\RuntimeException) {
+            $this->noActiveEvent = true;
+            $this->summary = [];
+            $this->desaBreakdown = [];
+            $this->attendanceList = [];
+
+            return null;
+        }
     }
 }
