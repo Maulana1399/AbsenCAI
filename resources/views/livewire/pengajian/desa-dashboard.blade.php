@@ -44,10 +44,58 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-6 text-center dark:border-zinc-700 dark:bg-zinc-900/50">
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">
-            Fitur QR akses dan absensi akan tersedia di checkpoint berikutnya.
-        </p>
+    {{-- QR Section --}}
+    <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            QR Akses
+        </h2>
+
+        <div class="mt-4 flex flex-col items-center gap-3">
+            @if ($qrBase64)
+                <img src="data:image/png;base64,{{ $qrBase64 }}"
+                     alt="QR Absen"
+                     class="h-56 w-56">
+            @else
+                <div class="flex h-56 w-56 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/50">
+                    <p class="text-xs text-zinc-400">QR tidak tersedia</p>
+                </div>
+            @endif
+
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                Scan QR untuk melakukan absensi mandiri
+            </p>
+
+            <div class="flex gap-2">
+                <flux:button
+                    wire:click="refreshNonce"
+                    variant="ghost"
+                    size="sm"
+                    :loading="$processing"
+                >
+                    Segarkan QR
+                </flux:button>
+
+                <flux:button
+                    onclick="window.open('{{ route('pengajian.qr-print', absolute: false) }}', 'print', 'width=600,height=800')"
+                    variant="ghost"
+                    size="sm"
+                >
+                    Cetak QR
+                </flux:button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Public URL --}}
+    <div class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/50">
+        <h3 class="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            URL Absensi
+        </h3>
+        @if ($qrUrl)
+            <p class="mt-2 text-xs text-zinc-400 break-all font-mono">
+                {{ url($qrUrl) }}
+            </p>
+        @endif
     </div>
 
     <div class="flex flex-col gap-3">

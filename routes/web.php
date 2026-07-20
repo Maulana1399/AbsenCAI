@@ -250,6 +250,13 @@ Route::prefix('pengajian')->group(function () {
 
     Route::get('desa', App\Livewire\Pengajian\DesaDashboard::class)
         ->name('pengajian.desa');
+
+    Route::get('desa/qr/print', App\Livewire\Pengajian\QrPrint::class)
+        ->name('pengajian.qr-print');
+
+    Route::get('hadir/{nonce}', App\Livewire\Pengajian\SelfAttendance::class)
+        ->middleware('throttle:30,1')
+        ->name('pengajian.hadir');
 });
 
 require __DIR__.'/auth.php';

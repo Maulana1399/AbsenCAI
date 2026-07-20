@@ -369,10 +369,11 @@ test('Person tanpa desa tidak bisa submit correction', function () {
 test('Public context tidak auto-assign Person.desa_id', function () {
     $event = pgm5_makeEvent();
     $desa = pgm5_makeDesa();
+    $grant = pgm5_makeGrant($event, $desa);
     $person = pgm5_makePerson('Jono', 'L', $desa->id);
 
     app(PengajianAttendanceService::class)->attendPersonPublicContext(
-        $person, $event->id, $desa->id,
+        $person, $grant,
     );
 
     expect($person->fresh()->desa_id)->toBe($desa->id);
@@ -381,10 +382,11 @@ test('Public context tidak auto-assign Person.desa_id', function () {
 test('Public context Person tanpa desa_id ditolak', function () {
     $event = pgm5_makeEvent();
     $desa = pgm5_makeDesa();
+    $grant = pgm5_makeGrant($event, $desa);
     $person = pgm5_makePerson('Jono', 'L', null);
 
     expect(fn () => app(PengajianAttendanceService::class)->attendPersonPublicContext(
-        $person, $event->id, $desa->id,
+        $person, $grant,
     ))->toThrow(\RuntimeException::class, 'tidak memiliki desa');
 
     expect(EventAttendance::count())->toBe(0)
@@ -395,10 +397,11 @@ test('Public context Person desa_id tidak match ditolak', function () {
     $event = pgm5_makeEvent();
     $desaA = pgm5_makeDesa(['desa_asal' => 'Desa A']);
     $desaB = pgm5_makeDesa(['desa_asal' => 'Desa B']);
+    $grant = pgm5_makeGrant($event, $desaA);
     $person = pgm5_makePerson('Jono', 'L', $desaB->id);
 
     expect(fn () => app(PengajianAttendanceService::class)->attendPersonPublicContext(
-        $person, $event->id, $desaA->id,
+        $person, $grant,
     ))->toThrow(\RuntimeException::class, 'tidak terdaftar di desa ini');
 
     expect(EventAttendance::count())->toBe(0)

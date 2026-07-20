@@ -5,6 +5,8 @@ namespace App\Livewire\Pengajian;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\desa;
+use App\Services\Pengajian\DesaAccessService;
+use App\Services\QR\QRService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -12,14 +14,17 @@ use Livewire\Component;
 class DesaDashboard extends Component
 {
     public ?string $eventName = null;
-
     public ?string $desaName = null;
-
     public ?string $validFrom = null;
-
     public ?string $validUntil = null;
 
+    public ?string $nonce = null;
+    public ?string $qrUrl = null;
+    public ?string $qrBase64 = null;
+
     public bool $processing = false;
+
+    private ?DesaAccessGrant $grant = null;
 
     public function mount(): void
     {
@@ -30,51 +35,70 @@ class DesaDashboard extends Component
             return;
         }
 
-        $grant = DesaAccessGrant::with('event', 'desa')->find($session['grant_id']);
+        $this->grant = DesaAccessGrant::with('event', 'desa')->find($session['grant_id']);
 
-        if ($grant === null) {
+        if ($this->grant === null) {
             session()->forget('pengajian_access');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }
 
-        if ((int) $grant->event_id !== (int) $session['event_id']) {
+        if ((int) $this->grant->event_id !== (int) $session['event_id']
+            || (int) $this->grant->desa_id !== (int) $session['desa_id']) {
             session()->forget('pengajian_access');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }
 
-        if ((int) $grant->desa_id !== (int) $session['desa_id']) {
-            session()->forget('pengajian_access');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
-            return;
-        }
-
-        if ($grant->revoked_at !== null) {
+        if ($this->grant->revoked_at !== null) {
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Sesi akses telah dicabut. Silakan hubungi Operator Daerah.');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }
 
-        if (now()->greaterThan($grant->valid_until)) {
+        if (now()->greaterThan($this->grant->valid_until)) {
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Masa berlaku akses telah habis. Silakan minta token baru.');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }
 
-        if (now()->lessThan($grant->valid_from)) {
+        if (now()->lessThan($this->grant->valid_from)) {
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Token belum dapat digunakan. Periksa kembali masa berlaku.');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }
 
-        $this->eventName = $grant->event->name;
-        $this->desaName = $grant->desa->desa_asal;
-        $this->validFrom = $grant->valid_from->format('d M Y H:i');
-        $this->validUntil = $grant->valid_until->format('d M Y H:i');
+        $this->eventName = $this->grant->event->name;
+        $this->desaName = $this->grant->desa->desa_asal;
+        $this->validFrom = $this->grant->valid_from->format('d M Y H:i');
+        $this->validUntil = $this->grant->valid_until->format('d M Y H:i');
+        $this->nonce = $this->grant->nonce;
+        $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce], absolute: false);
+        $this->generateQr();
+    }
+
+    public function refreshNonce(): void
+    {
+        if ($this->grant === null) {
+            return;
+        }
+
+        $grant = $this->grant->fresh();
+
+        if ($grant === null || ! $grant->isValid()) {
+            session()->forget('pengajian_access');
+            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            return;
+        }
+
+        app(DesaAccessService::class)->rotateNonce($grant);
+        $this->grant = $grant->fresh();
+        $this->nonce = $this->grant->nonce;
+        $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce], absolute: false);
+        $this->generateQr();
     }
 
     public function logout(): void
@@ -87,5 +111,19 @@ class DesaDashboard extends Component
     public function render()
     {
         return view('livewire.pengajian.desa-dashboard');
+    }
+
+    private function generateQr(): void
+    {
+        if ($this->qrUrl === null) {
+            return;
+        }
+
+        try {
+            $png = app(QRService::class)->generatePng($this->qrUrl);
+            $this->qrBase64 = base64_encode($png);
+        } catch (\Throwable) {
+            $this->qrBase64 = null;
+        }
     }
 }

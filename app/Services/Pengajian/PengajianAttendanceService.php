@@ -2,6 +2,7 @@
 
 namespace App\Services\Pengajian;
 
+use App\Models\DesaAccessGrant;
 use App\Models\EventAttendance;
 use App\Models\Participation;
 use App\Models\Person;
@@ -84,21 +85,29 @@ class PengajianAttendanceService
         );
     }
 
-    public function attendPersonPublicContext(Person $person, int $eventId, ?int $desaId, ?int $recordedBy = null): EventAttendance
+    public function attendPersonPublicContext(Person $person, DesaAccessGrant $grant): EventAttendance
     {
+        if (! $grant->isNonceValid()) {
+            throw new \RuntimeException('Sesi QR tidak valid atau sudah kedaluwarsa.');
+        }
+
         if ($person->desa_id === null) {
             throw new \RuntimeException('Person tidak memiliki desa assignment.');
         }
 
-        if ($desaId !== null && $person->desa_id !== $desaId) {
+        if ((int) $person->desa_id !== (int) $grant->desa_id) {
             throw new \RuntimeException('Person tidak terdaftar di desa ini.');
         }
 
-        $participation = $this->findOrCreateParticipation($person, $eventId, $desaId, allowDesaAutoAssign: false);
+        $participation = $this->findOrCreateParticipation(
+            $person, $grant->event_id, $grant->desa_id,
+            allowDesaAutoAssign: false,
+        );
 
         return $this->recordAttendance(
-            $participation, $eventId, $desaId,
-            recordedBy: $recordedBy,
+            $participation, $grant->event_id, $grant->desa_id,
+            method: 'self',
+            recordedBy: null,
         );
     }
 }
