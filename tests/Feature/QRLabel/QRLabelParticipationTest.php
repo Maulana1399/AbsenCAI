@@ -5,6 +5,8 @@ use App\Models\Event;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
+use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -88,8 +90,24 @@ test('same person with participations in two events uses correct event specific 
     $participationB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'attendance_code' => 'KJA-MULTI-B', 'participant_number' => 'KL302', 'jenis_peserta' => 'Wajib']);
 
     app(ActiveEventContext::class)->set($eventA);
-    Livewire::test(Index::class)->assertSee('Multi Person');
+    Livewire::test(Index::class)->assertSee('Multi Person')->assertDontSee('KL302');
 
     app(ActiveEventContext::class)->set($eventB);
-    Livewire::test(Index::class)->assertSee('Multi Person');
+    Livewire::test(Index::class)->assertSee('Multi Person')->assertDontSee('KL301');
+});
+
+test('direct print route rejects cross-event legacy participant access', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $eventA = qrLabelTest_makeEvent();
+    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    app(ActiveEventContext::class)->set($eventA);
+
+    $person = Person::create(['nama' => 'Print Person', 'nip' => 5007, 'jenis_kelamin' => 'L']);
+    $participation = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'attendance_code' => 'KJA-PRINT-B', 'participant_number' => 'KL401', 'jenis_peserta' => 'Wajib']);
+    $legacy = peserta::create(['nama' => 'Print Person', 'nip' => 5007, 'participant_number' => 'KL401', 'attendance_code' => 'KJA-PRINT-B', 'jenis_kelamin' => 'Laki - Laki']);
+    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $eventB->id, 'legacy_nip' => 5007, 'legacy_participant_number' => 'KL401', 'legacy_attendance_code' => 'KJA-PRINT-B', 'migrated_at' => now()]);
+
+    $this->get('/qr-label/print/selected/'.$legacy->id)->assertNotFound();
 });

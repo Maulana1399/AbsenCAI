@@ -167,10 +167,16 @@ class Index extends Component
 
     private function resolveLabelParticipant(int $participantId): Participation
     {
-        $participation = Participation::with(['person', 'event', 'legacyPesertaMapping'])
-            ->findOrFail($participantId);
+        $event = app(ActiveEventContext::class)->current();
 
-        return $participation;
+        $query = Participation::with(['person', 'event', 'legacyPesertaMapping'])
+            ->whereKey($participantId);
+
+        if ($event !== null) {
+            $query->where('event_id', $event->id);
+        }
+
+        return $query->firstOrFail();
     }
 
     private function syncLabelPreview(?Collection $participants = null): void

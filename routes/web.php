@@ -69,9 +69,11 @@ Route::get('qr-label', QRLabelIndex::class)
     ->name('qr-label.index');
 
 Route::get('qr-label/print/selected/{participant}', function (peserta $participant) {
+    $event = app(App\Support\ActiveEventContext::class)->current();
     $mapping = $participant->legacyPesertaMapping()->with(['participation.person'])->first();
 
     abort_if($mapping === null || $mapping->participation === null, 404);
+    abort_if($event !== null && (int) $mapping->event_id !== (int) $event->id, 404);
 
     $participation = $mapping->participation;
 
