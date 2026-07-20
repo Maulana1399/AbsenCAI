@@ -15,9 +15,9 @@ class PengajianAttendanceService
         private readonly RegistrationService $registrationService,
     ) {}
 
-    public function findOrCreateParticipation(Person $person, int $eventId, ?int $desaId = null): Participation
+    public function findOrCreateParticipation(Person $person, int $eventId, ?int $desaId = null, bool $allowDesaAutoAssign = true): Participation
     {
-        return DB::transaction(function () use ($person, $eventId, $desaId) {
+        return DB::transaction(function () use ($person, $eventId, $desaId, $allowDesaAutoAssign) {
             $locked = Person::query()
                 ->lockForUpdate()
                 ->findOrFail($person->id);
@@ -31,10 +31,12 @@ class PengajianAttendanceService
                 return $participation;
             }
 
-            $targetDesaId = $locked->desa_id ?? $person->desa_id ?? $desaId;
+            if ($allowDesaAutoAssign) {
+                $targetDesaId = $locked->desa_id ?? $person->desa_id ?? $desaId;
 
-            if ($targetDesaId !== null && $locked->desa_id === null) {
-                $locked->update(['desa_id' => $targetDesaId]);
+                if ($targetDesaId !== null && $locked->desa_id === null) {
+                    $locked->update(['desa_id' => $targetDesaId]);
+                }
             }
 
             $gender = PlacementService::normalizePersonGender($locked->jenis_kelamin);
@@ -75,6 +77,24 @@ class PengajianAttendanceService
     public function attendPerson(Person $person, int $eventId, ?int $desaId, ?int $recordedBy = null): EventAttendance
     {
         $participation = $this->findOrCreateParticipation($person, $eventId, $desaId);
+
+        return $this->recordAttendance(
+            $participation, $eventId, $desaId,
+            recordedBy: $recordedBy,
+        );
+    }
+
+    public function attendPersonPublicContext(Person $person, int $eventId, ?int $desaId, ?int $recordedBy = null): EventAttendance
+    {
+        if ($person->desa_id === null) {
+            throw new \RuntimeException('Person tidak memiliki desa assignment.');
+        }
+
+        if ($desaId !== null && $person->desa_id !== $desaId) {
+            throw new \RuntimeException('Person tidak terdaftar di desa ini.');
+        }
+
+        $participation = $this->findOrCreateParticipation($person, $eventId, $desaId, allowDesaAutoAssign: false);
 
         return $this->recordAttendance(
             $participation, $eventId, $desaId,

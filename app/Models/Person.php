@@ -9,9 +9,17 @@ class Person extends Model
     protected $fillable = [
         'nama',
         'jenis_kelamin',
+        'tanggal_lahir',
         'desa_id',
         'nip',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'tanggal_lahir' => 'date',
+        ];
+    }
 
     public function desa()
     {
