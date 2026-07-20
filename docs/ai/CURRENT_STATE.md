@@ -63,7 +63,7 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
   - Migration: kelompok_id to people table, event_type to events table
 - PGM.17 Pilot Release — PENDING
 
-**UI Bug Fix Sprint** — teridentifikasi 11 area perbaikan dari audit 2026-07-20. Bug #8 (token overflow) dan #10 (dark mode) sudah resolved. 9 bug aktif perlu penanganan.
+**UI Bug Fix Sprint — Batch 1 (Branding & Navigation)** — Bug #1, #2, #4, #6: **RESOLVED — VERIFIED** ✅ (908 tests passed / 2192 assertions, runtime verification 1–5 berhasil). Bug #8 (token overflow) dan #10 (dark mode) sudah resolved. Batch 2+ menyusul.
 
 **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
@@ -100,8 +100,9 @@ Completed foundation work:
 
 Priority saat ini:
 
-1. **UI Bug Fix Sprint** — 9 active bugs (Branding & Navigation, Access Token UI, Filter, Responsive Layout)
-2. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
+1. **UI Bug Fix Sprint — Batch 1 Complete** ✅ — Branding & Navigation bugs #1, #2, #4, #6 — RESOLVED VERIFIED (908 tests/2192 assertions).
+2. **UI Bug Fix Sprint — Batch 2** — Access Token UI, remaining bugs.
+3. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
 3. Event switcher redirect/reload fix ✅ (PGM.16.3)
 4. Pengajian bulk import ✅ (PGM.16)
 5. Contextual navigation ✅ (PGM.16)
@@ -182,9 +183,13 @@ Database: SQLite
 
 # Next Work
 
-**1. UI Bug Fix Sprint** — Fix 9 confirmed UI bugs:
-- Branding: Landing page and login page (welcome.blade.php, login.blade.php)
-- Navigation: KJA logo default route, "Pengajian" menu in CAI context (sidebar.blade.php)
+**1. UI Bug Fix Sprint — Batch 1 (DONE — PENDING RUNTIME VERIFICATION)**
+- Branding: Landing page ✅ Implemented (welcome.blade.php → KJA Event Manager)
+- Branding: Login page ✅ Implemented (login.blade.php → KJA Event Manager)  
+- Navigation: KJA logo → home ✅ route('home'), no auto-select CAI
+- Navigation: Pengajian menu hidden in CAI ✅ sidebar.blade.php conditional
+
+**2. UI Bug Fix Sprint — Batch 2** — Remaining bugs:
 - Access Token: Add hard-delete for revoked tokens, audit raw token display (AccessIndex)
 - Verify: Regional Report filter fixes, Dashboard "Alfa" stat behavior
 

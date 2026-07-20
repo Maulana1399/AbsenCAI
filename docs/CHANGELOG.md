@@ -8,6 +8,39 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (UI Bug Fix Sprint — Batch 1 Branding & Navigation)
+
+### Verification
+- **Full test suite**: 908 passed, 2192 assertions, 0 failures
+- **Runtime verification 1–5**: `/` (guest), `/` (auth), `/login`, sidebar CAI (no Pengajian), sidebar Pengajian (shows Pengajian) — all confirmed
+- **Bug status**: #1, #2, #4, #6 → RESOLVED — VERIFIED ✅
+
+### Bug #1 — Landing Page Branding
+- **Root cause**: `resources/views/welcome.blade.php` masih menggunakan branding CAI
+- **Change**: Diganti ke KJA Event Manager — logo "KJ", judul "KJA Event Manager", subtitle "Platform Manajemen Event Multi-Event", deskripsi baru, gradient dari emerald
+- **Authenticated view**: Welcome page untuk user login menjadi KJA global home dengan link ke Dashboard Event, Kelola Event, dan Akses Pengajian Desa
+- **Files**: `resources/views/welcome.blade.php`
+
+### Bug #2 — Login Page Branding
+- **Root cause**: `resources/views/livewire/auth/login.blade.php` masih menampilkan "CAI" dan "Cinta Alam Indonesia"
+- **Change**: Logo diganti "KJ" (emerald-600), judul "KJA Event Manager", subtitle "Administrator", deskripsi "Masuk untuk mengakses dashboard manajemen event"
+- **Files**: `resources/views/livewire/auth/login.blade.php`
+
+### Bug #4 — Event-Aware Sidebar (Pengajian menu in CAI context)
+- **Root cause**: Sidebar CAI (`@else` block) menampilkan grup "Pengajian" dengan link Akses Desa dan Regional Report
+- **Change**: Grup "Pengajian" dihapus dari sidebar CAI. Menu Pengajian hanya muncul ketika `$isPengajian === true` (event bertipe Pengajian)
+- **Mechanism**: Menggunakan `ActiveEventContext::current()->isPengajian()` yang sudah ada
+- **Files**: `resources/views/components/layouts/app/sidebar.blade.php`
+
+### Bug #6 — KJA Logo Global Navigation
+- **Root cause**: Logo KJA di sidebar mengarah ke `route('dashboard')` yang merupakan dashboard CAI
+- **Change**: Logo diubah arah ke `route('home')`. Untuk user terautentikasi, halaman home menampilkan KJA global home dengan pilihan navigasi — tidak auto-select event CAI
+- **Event context safety**: ActiveEventContext tidak berubah saat mengklik logo. Event hanya dipilih melalui EventSwitcher
+- **Files**: `resources/views/components/layouts/app/sidebar.blade.php`, `resources/views/welcome.blade.php`
+
+### Tests Added
+- `tests/Feature/Branding/BrandingTest.php` — 8 test cases untuk verifikasi branding dan navigasi
+
 ## Added (Documentation Audit & Bug Backlog — 2026-07-20)
 
 ### Audit Findings

@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ config('kjam.mvp_name') }} | Sistem Registrasi & Absensi</title>
+    <title>{{ config('kjam.name') }} | {{ config('kjam.mvp_name') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-slate-950 via-blue-900 to-sky-600 text-white">
+<body class="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-900 to-emerald-600 text-white">
 
 <div class="min-h-screen flex flex-col justify-center items-center px-6 py-10">
 
@@ -19,139 +19,104 @@
         <div class="mb-6">
 
             <div class="mx-auto h-24 w-24 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-3xl font-bold shadow-xl">
-
-                CAI
-
+                KJ
             </div>
 
         </div>
 
         {{-- Judul --}}
         <h1 class="text-5xl md:text-6xl font-extrabold tracking-wide">
-
-            CINTA ALAM
-
+            KJA Event Manager
         </h1>
 
-        <h2 class="text-3xl md:text-4xl font-semibold text-sky-300 mt-2">
-
-            INDONESIA 2025
-
+        <h2 class="text-3xl md:text-4xl font-semibold text-emerald-300 mt-2">
+            Platform Manajemen Event Multi-Event
         </h2>
 
-        <p class="mt-8 text-xl">
+        @auth
 
-            Platform Registrasi & Absensi Peserta
+            {{-- Authenticated: KJA Global Home --}}
+            <p class="mt-8 text-xl">
+                Selamat datang, {{ auth()->user()->name }}
+            </p>
 
-        </p>
+            <p class="mt-3 text-slate-300 max-w-3xl mx-auto">
+                Pilih event untuk memulai, atau kelola pengaturan sistem.
+            </p>
 
-        <p class="mt-3 text-slate-300 max-w-3xl mx-auto">
-
-            Sistem digital untuk membantu proses registrasi,
-            absensi peserta, serta monitoring kegiatan secara
-            cepat, aman, dan real-time.
-
-        </p>
-
-        {{-- Login Button --}}
-        <div class="mt-10">
-
-            @auth
-
-                <a href="{{ url('/dashboard') }}"
-                    class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-sky-500 hover:bg-sky-400 transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
-
-                    🚀 Masuk Dashboard
-
+            <div class="mt-10 flex flex-wrap justify-center gap-4">
+                <a href="{{ route('dashboard') }}"
+                    class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
+                    Buka Dashboard Event
                 </a>
 
-            @else
+                <a href="{{ route('events.index') }}"
+                    class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
+                    Kelola Event
+                </a>
 
+                <a href="{{ route('pengajian.enter-token') }}"
+                    class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
+                    Akses Pengajian Desa
+                </a>
+            </div>
+
+        @else
+
+            {{-- Unauthenticated: Welcome --}}
+            <p class="mt-8 text-xl">
+                Satu platform untuk seluruh kebutuhan event organisasi Anda.
+            </p>
+
+            <p class="mt-3 text-slate-300 max-w-3xl mx-auto">
+                Kelola registrasi peserta, absensi QR, laporan kehadiran, dan
+                operasional event lainnya dalam satu sistem terintegrasi.
+            </p>
+
+            {{-- Login Button --}}
+            <div class="mt-10">
                 <a href="{{ route('login') }}"
-                    class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-sky-500 hover:bg-sky-400 transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
-
-                    🚀 Login Admin
-
+                    class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
+                    Login Admin
                 </a>
+            </div>
 
-            @endauth
+            {{-- Feature --}}
+            <div class="grid md:grid-cols-3 gap-6 mt-14">
 
-        </div>
-
-        {{-- Feature --}}
-        <div class="grid md:grid-cols-3 gap-6 mt-14">
-
-            <div class="rounded-2xl bg-white/10 backdrop-blur border border-white/10 p-6 hover:scale-105 transition duration-300">
-
-                <div class="text-5xl mb-4">
-                    👥
+                <div class="rounded-2xl bg-white/10 backdrop-blur border border-white/10 p-6 hover:scale-105 transition duration-300">
+                    <div class="text-5xl mb-4">👥</div>
+                    <h3 class="text-xl font-bold">Registrasi</h3>
+                    <p class="text-slate-300 mt-3">Kelola data peserta dengan mudah dan cepat.</p>
                 </div>
 
-                <h3 class="text-xl font-bold">
-                    Registrasi
-                </h3>
+                <div class="rounded-2xl bg-white/10 backdrop-blur border border-white/10 p-6 hover:scale-105 transition duration-300">
+                    <div class="text-5xl mb-4">✅</div>
+                    <h3 class="text-xl font-bold">Absensi QR</h3>
+                    <p class="text-slate-300 mt-3">Monitoring kehadiran peserta secara real-time.</p>
+                </div>
 
-                <p class="text-slate-300 mt-3">
-                    Kelola data peserta dengan mudah dan cepat.
-                </p>
+                <div class="rounded-2xl bg-white/10 backdrop-blur border border-white/10 p-6 hover:scale-105 transition duration-300">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-xl font-bold">Laporan</h3>
+                    <p class="text-slate-300 mt-3">Statistik peserta dan laporan kegiatan.</p>
+                </div>
 
             </div>
 
-            <div class="rounded-2xl bg-white/10 backdrop-blur border border-white/10 p-6 hover:scale-105 transition duration-300">
-
-                <div class="text-5xl mb-4">
-                    ✅
-                </div>
-
-                <h3 class="text-xl font-bold">
-                    Absensi
-                </h3>
-
-                <p class="text-slate-300 mt-3">
-                    Monitoring kehadiran peserta secara real-time.
-                </p>
-
-            </div>
-
-            <div class="rounded-2xl bg-white/10 backdrop-blur border border-white/10 p-6 hover:scale-105 transition duration-300">
-
-                <div class="text-5xl mb-4">
-                    📊
-                </div>
-
-                <h3 class="text-xl font-bold">
-                    Dashboard
-                </h3>
-
-                <p class="text-slate-300 mt-3">
-                    Statistik peserta dan laporan kegiatan.
-                </p>
-
-            </div>
-
-        </div>
+        @endauth
 
     </div>
 
     {{-- Footer --}}
     <footer class="mt-16 text-center text-sm text-slate-300">
 
-        <div class="font-semibold text-sky-300">
-
+        <div class="font-semibold text-emerald-300">
             Powered by KJA Techno
-
-        </div>
-
-        <div class="mt-1">
-
-            Cinta Alam Indonesia 2025
-
         </div>
 
         <div class="mt-1 opacity-70">
-
-            Version 1.0.0
-
+            {{ config('kjam.name') }} v1.0.0
         </div>
 
     </footer>

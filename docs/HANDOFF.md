@@ -1258,19 +1258,19 @@ cp database/database.sqlite database/database.sqlite.backup-$(date +%Y%m%d-%H%M%
 > Berdasarkan audit codebase 2026-07-20, berikut daftar bug antarmuka yang perlu diperbaiki.
 > **JANGAN** menganggap semua bug ini masih aktif — verifikasi terhadap codebase aktual terlebih dahulu.
 
-| # | Kategori | Deskripsi Singkat | Prioritas | File Terkait |
-|---|----------|-------------------|-----------|-------------|
-| 1 | Branding | Halaman depan (`/`) masih tampilkan "CAI" dan "CINTA ALAM INDONESIA 2025" | Medium | `welcome.blade.php` |
-| 2 | Branding | Halaman login masih tampilkan "CAI" dan "Cinta Alam Indonesia" | Medium | `login.blade.php` |
-| 3 | UI Logic | Stat "Alfa" di dashboard — label dan logika perlu dicek (mungkin "-" saat tanpa sesi) | Medium | `Dashboard.php` |
-| 4 | Navigation | Menu "Pengajian" muncul di sidebar event CAI | Low | `sidebar.blade.php` |
-| 5 | Access Token | Tidak ada tombol hapus permanen untuk token yang sudah dicabut | Medium | `AccessIndex.php` |
-| 6 | Navigation | Klik logo KJA → dashboard CAI, bukan halaman yang sesuai konteks | High | `sidebar.blade.php` |
-| 7 | Security | Raw token ditampilkan penuh di modal pembuatan (sekali) | High | `access-index.blade.php` |
-| 9 | Filter | Filter Regional Report perlu verifikasi pasca-PGM.16 | Medium | `RegionalReport.php` |
-| 11 | Responsive | `/pengajian` layout desktop — minor perbaikan | Low | `enter-token.blade.php` |
+| # | Kategori | Deskripsi Singkat | Prioritas | File Terkait | Status |
+|---|----------|-------------------|-----------|-------------|--------|
+| 1 | Branding | Halaman depan (`/`) masih tampilkan "CAI" dan "CINTA ALAM INDONESIA 2025" | Medium | `welcome.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 2 | Branding | Halaman login masih tampilkan "CAI" dan "Cinta Alam Indonesia" | Medium | `login.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 3 | UI Logic | Stat "Alfa" di dashboard — label dan logika perlu dicek (mungkin "-" saat tanpa sesi) | Medium | `Dashboard.php` | OPEN |
+| 4 | Navigation | Menu "Pengajian" muncul di sidebar event CAI | Low | `sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 5 | Access Token | Tidak ada tombol hapus permanen untuk token yang sudah dicabut | Medium | `AccessIndex.php` | OPEN |
+| 6 | Navigation | Klik logo KJA → dashboard CAI, bukan halaman yang sesuai konteks | High | `sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 7 | Security | Raw token ditampilkan penuh di modal pembuatan (sekali) | High | `access-index.blade.php` | OPEN |
+| 9 | Filter | Filter Regional Report perlu verifikasi pasca-PGM.16 | Medium | `RegionalReport.php` | OPEN |
+| 11 | Responsive | `/pengajian` layout desktop — minor perbaikan | Low | `enter-token.blade.php` | OPEN |
 
-**Catatan:** Bug #8 (token overflow) dan #10 (dark mode) sudah terverifikasi **resolved** di codebase saat ini.
+**Catatan:** Bug #8 (token overflow) dan #10 (dark mode) resolved. Bug #1, #2, #4, #6 Batch 1 — RESOLVED VERIFIED (908 tests passed / 2192 assertions, runtime verification 1–5 berhasil).
 
 ---
 

@@ -1,20 +1,20 @@
 <div class="flex flex-col gap-6">
     <div class="text-center mb-4">
 
-        <div class="mx-auto h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold text-white shadow-xl">
-            CAI
+        <div class="mx-auto h-20 w-20 rounded-full bg-emerald-600 flex items-center justify-center text-3xl font-bold text-white shadow-xl">
+            KJ
         </div>
 
         <h1 class="mt-6 text-3xl font-bold text-zinc-900 dark:text-white">
-            Cinta Alam Indonesia
+            KJA Event Manager
         </h1>
 
-        <p class="text-blue-500 text-lg mt-2">
-            Administrator Login
+        <p class="text-emerald-600 text-lg mt-2">
+            Administrator
         </p>
 
         <p class="text-zinc-500 mt-3">
-            Masuk untuk mengakses Dashboard Registrasi & Absensi
+            Masuk untuk mengakses dashboard manajemen event.
         </p>
 
     </div>

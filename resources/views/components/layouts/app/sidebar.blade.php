@@ -14,7 +14,7 @@
         ])>
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+            <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
             </a>
 
@@ -76,11 +76,6 @@
 
                     <flux:navlist.group expandable heading="QR & Label" class="grid">
                         <flux:navlist.item :href="route('qr-label.index')" :current="request()->routeIs('qr-label.index')" wire:navigate>{{ __('QR & Label') }}</flux:navlist.item>
-                    </flux:navlist.group>
-
-                    <flux:navlist.group expandable heading="Pengajian" class="grid">
-                        <flux:navlist.item :href="route('pengajian.admin.access')" :current="request()->routeIs('pengajian.admin.access')" wire:navigate>{{ __('Akses Desa') }}</flux:navlist.item>
-                        <flux:navlist.item :href="route('pengajian.report')" :current="request()->routeIs('pengajian.report')" wire:navigate>{{ __('Regional Report') }}</flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group expandable heading="Event" class="grid">

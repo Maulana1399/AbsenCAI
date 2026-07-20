@@ -88,7 +88,7 @@ Last verified test suite (archived):
 
 70 tests passed, 198 assertions, 0 failures.
 
-Last documented full regression: 459 passed, 1140 assertions (S3.9E). Actual count needs `php artisan test` to verify.
+Latest verified regression: **908 passed, 2192 assertions** (UI Bug Fix Sprint Batch 1, 2026-07-21).
 
 ### Deferred Backlog
 
@@ -270,10 +270,10 @@ Berdasarkan audit dokumentasi dan codebase pada 2026-07-20, teridentifikasi 11 a
 
 | # | Kategori | Deskripsi | Prioritas | File Utama | Status Verifikasi |
 |---|----------|-----------|-----------|------------|-------------------|
-| 1 | Branding & Navigation | Landing page (`/`) masih branding CAI: logo "CAI", judul "CINTA ALAM INDONESIA 2025" | Medium | `resources/views/welcome.blade.php` | **Confirmed** — perlu update ke KJA Event Manager |
-| 2 | Branding & Navigation | Login page masih branding CAI: logo "CAI", judul "Cinta Alam Indonesia" | Medium | `resources/views/livewire/auth/login.blade.php` | **Confirmed** — perlu update |
-| 6 | Branding & Navigation | KJA logo di sidebar mengarah ke dashboard CAI (`route('dashboard')`), bukan global/KJA dashboard | High | `resources/views/components/layouts/app/sidebar.blade.php` | **Confirmed** — navigasi default harus event-aware |
-| 4 | Branding & Navigation | Menu "Pengajian" (Akses Desa, Regional Report) muncul di event CAI | Low | `resources/views/components/layouts/app/sidebar.blade.php` | **Confirmed** — sidebar CAI mode menampilkan grup "Pengajian" |
+| 1 | Branding & Navigation | Landing page (`/`) masih branding CAI: logo "CAI", judul "CINTA ALAM INDONESIA 2025" | Medium | `resources/views/welcome.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
+| 2 | Branding & Navigation | Login page masih branding CAI: logo "CAI", judul "Cinta Alam Indonesia" | Medium | `resources/views/livewire/auth/login.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
+| 6 | Branding & Navigation | KJA logo di sidebar mengarah ke dashboard CAI (`route('dashboard')`), bukan global/KJA dashboard | High | `resources/views/components/layouts/app/sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
+| 4 | Branding & Navigation | Menu "Pengajian" (Akses Desa, Regional Report) muncul di event CAI | Low | `resources/views/components/layouts/app/sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
 | 5 | Access Token UI | Tidak ada tombol delete/hard-delete untuk access token yang sudah di-revoke | Medium | `app/Livewire/Pengajian/Admin/AccessIndex.php` | **Confirmed** — hanya "Cabut" (revoke) tersedia |
 | 7 | Access Token UI & Security | Raw token ditampilkan penuh di modal creation (sekali saja), token_prefix di tabel pendek | High | `access-index.blade.php` | **Design choice** — token full ditampilkan sekali saat creation via modal. Tabel hanya show prefix + "...". Perlu audit apakah perlu masked display |
 | 8 | Access Token UI | Token overflow di card — **No issue found** | Resolved | `access-index.blade.php` | **Resolved** — `break-all` + `whitespace-normal` + `max-w-full` sudah menangani overflow |

@@ -937,8 +937,9 @@ Sprint dianggap selesai apabila:
 # Current Priority
 
 ```
-1. **UI Bug Fix Sprint** — 11 bugs identified (Branding, Navigation, Filters, Dark Mode, Responsive)
-2. **PGM.17 — Pilot Release** — PENDING
+1. **UI Bug Fix Sprint — Batch 1** ✅✅ Branding & Navigation (bugs #1, #2, #4, #6) — RESOLVED VERIFIED (908 tests/2192 assertions)
+2. **UI Bug Fix Sprint — Batch 2** — Access Token UI & Security, remaining bugs
+3. **PGM.17 — Pilot Release** — PENDING
 3. **Pengajian Desa MVP** — PGM.12–PGM.16 ✅ Complete. PGM.17 pending.
 4. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
 5. **S01–S04 Foundation** ✅ Complete
