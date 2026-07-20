@@ -10,6 +10,7 @@ class Event extends Model
     protected $fillable = [
         'name',
         'slug',
+        'event_type',
         'description',
         'start_date',
         'end_date',
@@ -37,6 +38,26 @@ class Event extends Model
     public function isArchived(): bool
     {
         return $this->status === 'archived';
+    }
+
+    public function isCai(): bool
+    {
+        return $this->event_type === 'cai';
+    }
+
+    public function isPengajian(): bool
+    {
+        return $this->event_type === 'pengajian';
+    }
+
+    public function scopeCai($query)
+    {
+        return $query->where('event_type', 'cai');
+    }
+
+    public function scopePengajian($query)
+    {
+        return $query->where('event_type', 'pengajian');
     }
 
     public function participations()

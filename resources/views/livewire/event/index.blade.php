@@ -37,6 +37,15 @@
                     @error('newSlug') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Tipe Event</label>
+                    <select wire:model="newEventType" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                        <option value="cai">CAI</option>
+                        <option value="pengajian">Pengajian Desa</option>
+                    </select>
+                    @error('newEventType') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="sm:col-span-2">
                     <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Deskripsi</label>
                     <textarea wire:model="newDescription" placeholder="Deskripsi event (opsional)" rows="3" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400"></textarea>
@@ -69,7 +78,7 @@
             <thead class="bg-zinc-50 dark:bg-zinc-900">
                 <tr>
                     <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Nama</th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Slug</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Tipe</th>
                     <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Status</th>
                     <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Tanggal Mulai</th>
                     <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Tanggal Selesai</th>
@@ -80,7 +89,13 @@
                 @forelse ($events as $event)
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
                         <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $event->name }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400"><code class="text-xs">{{ $event->slug }}</code></td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm">
+                            @if ($event->isPengajian())
+                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Pengajian</span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">CAI</span>
+                            @endif
+                        </td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm">
                             @if ($event->isActive())
                                 <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
@@ -103,7 +118,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Belum ada event.</td>
+                        <td colspan="7" class="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Belum ada event.</td>
                     </tr>
                 @endforelse
             </tbody>

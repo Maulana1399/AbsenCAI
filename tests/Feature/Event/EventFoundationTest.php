@@ -383,9 +383,9 @@ test('event switcher shows current event name', function () {
         ->assertSee('Active Event');
 });
 
-test('event switcher can switch events', function () {
+test('event switcher redirects to CAI dashboard when switching to CAI event', function () {
     $eventA = EventFoundation_makeEvent(['name' => 'Switch A', 'slug' => 'switch-a']);
-    $eventB = EventFoundation_makeEvent(['name' => 'Switch B', 'slug' => 'switch-b']);
+    $eventB = EventFoundation_makeEvent(['name' => 'CAI Event', 'slug' => 'cai-event', 'event_type' => 'cai']);
     $user = EventFoundation_makeUser();
     $this->actingAs($user);
 
@@ -393,8 +393,50 @@ test('event switcher can switch events', function () {
 
     Livewire::test(\App\Livewire\Event\EventSwitcher::class)
         ->call('switchTo', $eventB->id)
-        ->assertSet('currentEventId', $eventB->id)
-        ->assertSet('currentEventName', 'Switch B');
+        ->assertRedirect(route('dashboard'));
+});
+
+test('event switcher redirects to Pengajian report when switching to Pengajian event', function () {
+    $eventA = EventFoundation_makeEvent(['name' => 'Switch A', 'slug' => 'switch-a']);
+    $eventB = EventFoundation_makeEvent(['name' => 'Pengajian Event', 'slug' => 'pengajian-event', 'event_type' => 'pengajian']);
+    $user = EventFoundation_makeUser();
+    $this->actingAs($user);
+
+    app(ActiveEventContext::class)->set($eventA);
+
+    Livewire::test(\App\Livewire\Event\EventSwitcher::class)
+        ->call('switchTo', $eventB->id)
+        ->assertRedirect(route('pengajian.report'));
+});
+
+test('event switcher does not redirect when switching to invalid event', function () {
+    $eventA = EventFoundation_makeEvent(['name' => 'Switch A', 'slug' => 'switch-a']);
+    $user = EventFoundation_makeUser();
+    $this->actingAs($user);
+
+    app(ActiveEventContext::class)->set($eventA);
+
+    Livewire::test(\App\Livewire\Event\EventSwitcher::class)
+        ->call('switchTo', 99999)
+        ->assertSet('currentEventId', $eventA->id)
+        ->assertSet('currentEventName', 'Switch A')
+        ->assertNoRedirect();
+});
+
+test('event switcher does not redirect when switching to archived event', function () {
+    $eventA = EventFoundation_makeEvent(['name' => 'Switch A', 'slug' => 'switch-a']);
+    $eventB = EventFoundation_makeEvent(['name' => 'Archived', 'slug' => 'archived-event']);
+    $eventB->update(['status' => 'archived']);
+    $user = EventFoundation_makeUser();
+    $this->actingAs($user);
+
+    app(ActiveEventContext::class)->set($eventA);
+
+    Livewire::test(\App\Livewire\Event\EventSwitcher::class)
+        ->call('switchTo', $eventB->id)
+        ->assertSet('currentEventId', $eventA->id)
+        ->assertSet('currentEventName', 'Switch A')
+        ->assertNoRedirect();
 });
 
 // ---------------------------------------------------------------------------

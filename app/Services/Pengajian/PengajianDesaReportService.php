@@ -96,12 +96,17 @@ class PengajianDesaReportService
 
         if ($status === 'hadir') {
             $query->whereNotNull('event_attendances.id');
+
+            if ($method !== null && $method !== '') {
+                $query->where('event_attendances.method', $method);
+            }
         } elseif ($status === 'belum') {
             $query->whereNull('event_attendances.id');
-        }
-
-        if ($method !== null && $method !== '') {
-            $query->where('event_attendances.method', $method);
+        } else {
+            if ($method !== null && $method !== '') {
+                $query->whereNotNull('event_attendances.id')
+                    ->where('event_attendances.method', $method);
+            }
         }
 
         $rows = $query->orderBy('people.nama')->get();

@@ -347,3 +347,133 @@ test('regional attendanceList untuk peserta belum hadir memberikan null attended
     expect($list[0]['hadir'])->toBeFalse();
     expect($list[0]['attended_at'])->toBeNull();
 });
+
+// ===========================================================================
+// PGM.16 — Filter Combination Tests
+// ===========================================================================
+
+function pgm16_setup(): array
+{
+    $event = pgm9_event();
+    $desa = pgm9_desa();
+    $grant = pgm9_grant($event, $desa);
+
+    $selfPerson = pgm9_person('Self Person', 'L', $desa->id, '2000-01-15');
+    $opPerson = pgm9_person('Operator Person', 'L', $desa->id, '1990-06-20');
+    $belumPerson = pgm9_person('Belum Person', 'P', $desa->id, '1985-03-10');
+
+    pgm9_attend($selfPerson, $grant, 'self');
+    pgm9_attend($opPerson, $grant, 'operator');
+
+    return compact('event', 'desa', 'grant', 'selfPerson', 'opPerson', 'belumPerson');
+}
+
+test('filter combination — Semua Status + Semua Metode shows all', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event']);
+
+    expect($list)->toHaveCount(3);
+});
+
+test('filter combination — Hadir + Semua Metode shows all attended', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], status: 'hadir');
+
+    expect($list)->toHaveCount(2)
+        ->and($list[0]['hadir'])->toBeTrue()
+        ->and($list[1]['hadir'])->toBeTrue();
+});
+
+test('filter combination — Hadir + Self shows only self attendance', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], status: 'hadir', method: 'self');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Self Person');
+});
+
+test('filter combination — Hadir + Operator shows only operator attendance', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], status: 'hadir', method: 'operator');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Operator Person');
+});
+
+test('filter combination — Belum Hadir ignores method filter', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], status: 'belum', method: 'self');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Belum Person')
+        ->and($list[0]['hadir'])->toBeFalse();
+});
+
+test('filter combination — Search combines with status Hadir', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], search: 'Self', status: 'hadir');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Self Person');
+});
+
+test('filter combination — Search combines with status Belum', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], search: 'Belum', status: 'belum');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Belum Person');
+});
+
+test('filter combination — Search with Hadir + Method Self', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], search: 'Self', status: 'hadir', method: 'self');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Self Person');
+});
+
+test('filter combination — Method-only filter (no status) shows only attended with that method', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], method: 'self');
+
+    expect($list)->toHaveCount(1)
+        ->and($list[0]['nama'])->toBe('Self Person')
+        ->and($list[0]['hadir'])->toBeTrue();
+});
+
+test('filter combination — Empty search returns all when ≥ 3 chars', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+    $list = $service->attendanceList($d['event'], search: 'xy'); // less than 3 chars
+
+    expect($list)->toHaveCount(3);
+});
+
+test('filter combination — No stale state between filter changes', function () {
+    $d = pgm16_setup();
+    $service = app(PengajianRegionalReportService::class);
+
+    // Apply Hadir + Self
+    $list1 = $service->attendanceList($d['event'], status: 'hadir', method: 'self');
+    expect($list1)->toHaveCount(1)
+        ->and($list1[0]['method'])->toBe('self');
+
+    // Change to Hadir + Operator — should not carry over self filter
+    $list2 = $service->attendanceList($d['event'], status: 'hadir', method: 'operator');
+    expect($list2)->toHaveCount(1)
+        ->and($list2[0]['method'])->toBe('operator');
+
+    // Change to Semua Status + Semua Method — should see all 3
+    $list3 = $service->attendanceList($d['event']);
+    expect($list3)->toHaveCount(3);
+});

@@ -650,6 +650,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'pengajian/admin/manual-entry',
         App\Livewire\Pengajian\Admin\ManualEntry::class
     )->name('pengajian.admin.manual-entry');
+
+    Route::get(
+        'pengajian/admin/import-massal',
+        App\Livewire\Pengajian\Admin\ImportMassal::class
+    )->name('pengajian.import-massal');
 });
 
 Route::prefix('pengajian')->group(function () {

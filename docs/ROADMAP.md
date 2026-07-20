@@ -563,8 +563,7 @@ Deliverables:
 - future enhancements remain deferred and non-blocking
 
 Next checkpoint:
-- PGM.15 Dashboard Desa UX Redesign
-- PGM.16 Pilot Data Validation
+- PGM.16 completed (Pengajian UX, Contextual Navigation, Bulk Import)
 - PGM.17 Pilot Release
 
 ---
@@ -573,8 +572,8 @@ Next checkpoint:
 
 ## Status
 
-✅ PGM.12–PGM.14.5 COMPLETE. Pilot end-to-end functional.
-PGM.15–PGM.17 PENDING.
+✅ PGM.12–PGM.16 COMPLETE. Pilot end-to-end functional, UI/UX refined, bulk import ready.
+PGM.17 PENDING.
 
 ## Goal
 
@@ -608,14 +607,6 @@ Separate from CAI Operational; no legacy peserta/LegacyPesertaMapping dependency
 - Pengajian participants appear in QR & Label without legacy peserta IDs
 - 789 passed (1865 assertions)
 
-### PGM.14.1 — Security & Reliability Closure
-- EnterToken rate limiting (IP-based, 5 failed attempts/min, reset on success)
-- SelfAttendance database-agnostic duplicate handling (domain `RuntimeException`, no MySQL error codes)
-- QrPrint session/grant integrity check (matching DesaDashboard/ManualEntry pattern)
-- P0/P1 severity reclassified: no true P0 blockers remain for SQLite production
-- 9 new tests (rate limiting, QrPrint integrity, SelfAttendance duplicate via Livewire)
-- 828+ passed, 1969+ assertions
-
 ### PGM.14.5 — Manual Participant Entry
 - ManualParticipantRegistrationService (shared service, no ActiveEventContext dependency)
 - Operator Desa manual entry with server-resolved grant context
@@ -624,29 +615,85 @@ Separate from CAI Operational; no legacy peserta/LegacyPesertaMapping dependency
 - Timggal lahir required; Kelompok selection scoped to Desa
 - Grant/session security — revalidateGrant() compares DB against session
 - 38 tests (25 service + 7 grant consistency + 6 kelompok/tanggal_lahir)
-- 828 passed, 1969 assertions, 12.79s
 
-## Pending
+### PGM.15 — Dashboard & Report Optimization
+- [x] N+1 query optimization in PengajianDesaReportService and PengajianRegionalReportService (PGM.15)
+- [x] Operator search by name and participant_number
+- [x] Attendance status indicators (Hadir/Belum badge)
+- [x] Operator confirmation flow
+- [x] Datetime raw-join Carbon regression fix
+- [x] Regional/Desa report filter fixes (PGM.16 Phase D):
+  - [x] Search + Status + Method combine correctly
+  - [x] Hadir + Self shows only self attendance
+  - [x] Hadir + Operator shows only operator attendance
+  - [x] Belum Hadir ignores/clears method filter
+  - [x] Method filter disabled when status is Belum Hadir
+  - [x] Debounced search (300ms) prevents N+1 per keystroke
+  - [x] No stale Livewire state between filter changes
+  - [x] Filter combination regression tests (12 tests)
 
-### PGM.15 — Dashboard Desa UX Redesign
-- [ ] Visual attendance status per participant
-- [ ] Improved search UX
-- [ ] Confirmation dialogs on critical actions
-- [ ] N+1 query optimization (PengajianDesaReportService, PengajianRegionalReportService)
+### PGM.16 — Pengajian UX, Contextual Navigation & Bulk Import
 
-### PGM.16 — Pilot Data Validation
-- [ ] Pilot data verification
-- [ ] End-to-end pilot simulation
-- [ ] Data quality documentation
+#### Event Type Architecture
+- Added `event_type` column (`cai` / `pengajian`) to events table (migration: `2026_08_02_000001`)
+- `Event` model: `isCai()`, `isPengajian()`, `scopeCai()`, `scopePengajian()`
+- `ActiveEventContext`: `currentEventType()`, `isCurrentCai()`, `isCurrentPengajian()`
+- Event creation form allows selecting event type (CAI/Pengajian)
+- Event index table shows event type badge
 
-### PGM.17 — Pilot Release
-- [ ] Final go/no-go
-- [ ] Production deployment
-- [ ] Operator training documentation
+#### Contextual Sidebar Navigation
+- Sidebar is now event-type-aware via `ActiveEventContext::current()`
+- **CAI active** — full CAI operational menu (Absensi, Registrasi, Database, Laporan, QR & Label, Pengajian, Event, Sekretariat)
+- **Pengajian active** — clean Pengajian nav:
+  - Pengajian → Regional Report
+  - Peserta → Daftar Peserta, Import Massal
+  - Operasional Desa → Akses Desa
+  - Event → Kelola Event
+- CAI-only menus (Absensi, Regu, Registrasi Ulang, QR & Label, etc.) hidden
+- **Hidden navigation is NOT authorization** — all routes remain server-side accessible
+- Event switcher now redirects to context-appropriate landing page after switching:
+  - CAI events → dashboard
+  - Pengajian events → pengajian.report
+
+#### KJA Branding
+- App logo shows "KJA Event Manager" instead of "CAI"
+- Branding consistent with KJA product direction
+
+#### Pengajian Bulk Import (`/pengajian/admin/import-massal`)
+- Dedicated import for Pengajian participants
+- Fields: nama, jenis_kelamin, tanggal_lahir, desa, kelompok
+- Preview/validate before final import
+- Row-level validation errors with clear messages
+- Desa resolved case-insensitively
+- Kelompok scoped to Desa during lookup (deterministic — no name-only `first()`)
+- Person identity matching reuses canonical `ManualParticipantRegistrationService` pattern:
+  - Match by normalized nama + desa_id + PHP-level tanggal_lahir comparison
+  - Existing Person reused when identity matches
+  - Different birth date → new Person (no false matches)
+  - Same identity in different Desa → no cross-Desa match
+- Participation created with `jenis_peserta='Pengajian Desa'`
+- No Regu assignment, no CAI PlacementService
+- Duplicate Participation (person_id + event_id) prevention
+- Import summary: created_persons, matched_persons, created_participations, skipped_duplicates, failed_rows
+- Desa isolation: same identity in different Desa does not match
+- Same kelompok name in different Desa resolves to correct kelompok
+- 25+ dedicated tests
+
+#### Responsive UI
+- **Regional Report**: responsive stat grid (2→4 cols), desa breakdown in multi-column grid, stacked filters on mobile, scrollable tabs
+- **Desa Dashboard**: max-w-4xl container, responsive header/KJA logo, 3-col stat grid, QR image responsive sizing
+- **Sidebar**: mobile drawer preserved, event-type context aware
+
+#### Migration: `2026_08_01_000001_add_kelompok_id_to_people_table.php`
+- Adds `kelompok_id` FK (nullable, nullOnDelete) to `people` table — enables Pengajian peserta group assignment
 
 ---
 
 # Sprint 4
+
+## Status
+
+✅ COMPLETE 100% — Identity & QR
 
 ## Goal
 
@@ -654,11 +701,11 @@ Identity & QR.
 
 ## Features
 
-* Attendance Code finalization
-* QR identity hardening
-* participant_number compatibility rules
-* legacy NIP fallback maintenance
-* scan identifier normalization
+* [x] Attendance Code finalization
+* [x] QR identity hardening
+* [x] participant_number compatibility rules
+* [x] legacy NIP fallback maintenance
+* [x] scan identifier normalization
 
 ---
 
@@ -737,10 +784,10 @@ Sprint 2 — Secretariat Operational
 
 Current progress:
 
-* S01 Foundation completed.
-* S02 Registration/Placement foundation completed.
-* S03 Attendance architecture completed.
-* S04 Identity & QR completed.
+* S01 Foundation: COMPLETE 100%.
+* S02 Registration/Placement: COMPLETE 100%.
+* S03 Attendance: COMPLETE 100%.
+* S04 Identity & QR: COMPLETE 100%.
 * Sprint 1 CAI Operational closed for current operational scope.
 * Manual Attendance is implemented and verified.
 * Attendance status Hadir/Izin/Alfa is implemented and verified.
@@ -750,15 +797,20 @@ Current progress:
 * Sprint 2 Print Log completed: Surat Izin print, QR label single/batch/A4 print views integrated with ActivityLogService (action: print_viewed).
 * Sprint 2 Export Log completed: participant data Excel export integrated with ActivityLogService (action: exported).
 * Sprint 2 QR Log completed: single QR PNG download and batch QR export to storage integrated with ActivityLogService (action: downloaded / batch_exported).
-* Latest verified baseline: 186 tests, 432 assertions.
+* Latest documented baseline: 459 tests, 1140 assertions (S3.9E). Actual count needs verification via `php artisan test`.
 * Sprint 2 remaining scope: Riwayat Izin, Scoring, Storage — **DEFERRED to 2027**.
-* **Sprint 3 ACTIVE — HIGHEST PRIORITY.** Multi Event required for August 2026.
+* **Sprint 3 (Multi Event)** ✅ COMPLETE/VERIFIED. Required for August 2026.
 * S3.0 Architecture & Database Audit: COMPLETE.
-* S3.1 Event Foundation: COMPLETE. Event model, events table, Legacy CAI bootstrap, ActiveEventContext service, event switcher UI, event management CRUD. Existing app backward compatible.
-* S3.2 Universal Person: COMPLETE. People table, Person model. Clean foundational table — no participation wiring.
-* S3.3 Participation Foundation: COMPLETE. Participations table, Participation model, Person↔Event relationships. No legacy backfill.
-* S3.4 Active Event Context Hardening: COMPLETE. requireCurrent(), resolveDefault(), stale/inactive event safety. No legacy module scoping.
-* S3.5 Legacy Data Backfill: COMPLETE — Production backfill executed 2026-07-17. 144 Person, 144 Participation, 144 Mapping created. 0 conflicts. Idempotency verified. Runtime architecture unchanged — peserta table remains active source.
+* S3.1 Event Foundation: COMPLETE.
+* S3.2 Universal Person: COMPLETE.
+* S3.3 Participation Foundation: COMPLETE.
+* S3.4 Active Event Context Hardening: COMPLETE.
+* S3.5 Legacy Data Backfill: COMPLETE — Production backfill executed 2026-07-17. 144 Person, 144 Participation, 144 Mapping created. 0 conflicts.
+* S3.6 Attendance Event Scoping: COMPLETE.
+* S3.7 Participant/QR Migration: COMPLETE.
+* S3.8 Dashboard & Report Scoping: COMPLETE.
+* S3.9A–S3.9E Multi Role/Venue/Category: COMPLETE/VERIFIED.
+* S3.10 Regression & Production Readiness: COMPLETE/VERIFIED.
 
 Notes:
 
@@ -885,18 +937,13 @@ Sprint dianggap selesai apabila:
 # Current Priority
 
 ```
-1. Multi Event (Sprint 3) — HIGHEST PRIORITY, August 2026 target
-2. Event Foundation ✅ Complete (S3.1)
-3. Universal Person ✅ Complete (S3.2)
-4. Participation Foundation ✅ Complete (S3.3)
-5. Active Event Context Hardening ✅ Complete (S3.4)
-6. Legacy Data Backfill ✅ Complete — PRODUCTION BACKFILL EXECUTED (S3.5)
-7. Attendance Event Scoping ✅ Complete (S3.6)
-8. Participant/QR Migration (S3.7)
-9. Dashboard & Report Scoping (S3.8)
-10. Regression & Production Readiness (S3.10)
-11. Competition (future sprint)
-12. Commercial (future sprint)
+1. **UI Bug Fix Sprint** — 11 bugs identified (Branding, Navigation, Filters, Dark Mode, Responsive)
+2. **PGM.17 — Pilot Release** — PENDING
+3. **Pengajian Desa MVP** — PGM.12–PGM.16 ✅ Complete. PGM.17 pending.
+4. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
+5. **S01–S04 Foundation** ✅ Complete
+6. **Competition** (future sprint)
+7. **Commercial** (future sprint)
 ```
 
 ---

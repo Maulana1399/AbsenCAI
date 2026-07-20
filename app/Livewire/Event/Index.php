@@ -13,6 +13,7 @@ class Index extends Component
 
     public string $newName = '';
     public string $newSlug = '';
+    public string $newEventType = 'cai';
     public string $newDescription = '';
     public string $newStartDate = '';
     public string $newEndDate = '';
@@ -43,6 +44,7 @@ class Index extends Component
             $this->validate([
                 'newName' => 'required|string|max:255',
                 'newSlug' => 'required|string|max:255|unique:events,slug|regex:/^[a-z0-9-]+$/',
+                'newEventType' => 'required|in:cai,pengajian',
                 'newDescription' => 'nullable|string',
                 'newStartDate' => 'nullable|date',
                 'newEndDate' => 'nullable|date|after_or_equal:newStartDate',
@@ -51,6 +53,7 @@ class Index extends Component
             Event::create([
                 'name' => $this->newName,
                 'slug' => $this->newSlug,
+                'event_type' => $this->newEventType,
                 'description' => $this->newDescription ?: null,
                 'start_date' => $this->newStartDate ?: null,
                 'end_date' => $this->newEndDate ?: null,
@@ -100,7 +103,8 @@ class Index extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['newName', 'newSlug', 'newDescription', 'newStartDate', 'newEndDate']);
+        $this->reset(['newName', 'newSlug', 'newEventType', 'newDescription', 'newStartDate', 'newEndDate']);
+        $this->newEventType = 'cai';
         $this->resetErrorBag();
     }
 }

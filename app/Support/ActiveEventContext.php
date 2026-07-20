@@ -80,4 +80,19 @@ class ActiveEventContext
     {
         return $this->current() !== null;
     }
+
+    public function currentEventType(): ?string
+    {
+        return $this->current()?->event_type;
+    }
+
+    public function isCurrentCai(): bool
+    {
+        return $this->current()?->isCai() ?? false;
+    }
+
+    public function isCurrentPengajian(): bool
+    {
+        return $this->current()?->isPengajian() ?? false;
+    }
 }

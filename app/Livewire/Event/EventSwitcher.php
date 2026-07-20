@@ -29,6 +29,12 @@ class EventSwitcher extends Component
         if ($event) {
             $this->currentEventName = $event->name;
             $this->currentEventId = $event->id;
+
+            $route = $event->isPengajian()
+                ? route('pengajian.report', absolute: false)
+                : route('dashboard', absolute: false);
+
+            $this->redirect($route, navigate: true);
         }
 
         $this->dispatch('eventSwitched');

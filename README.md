@@ -1,61 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# KJA Event Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform Event Management berbasis web — modular, multi-event, dan scalable.
 
-## About Laravel
+Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Event Management umum yang mendukung berbagai jenis event.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Current Status
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Area | Status |
+|------|--------|
+| CAI Operational | ✅ Stable — all modules operational |
+| S01 Foundation | ✅ COMPLETE 100% |
+| S02 Placement & Registration | ✅ COMPLETE 100% |
+| S03 Attendance | ✅ COMPLETE 100% |
+| S04 Identity & QR | ✅ COMPLETE 100% |
+| Multi Event Architecture | ✅ S3.0–S3.10 Complete |
+| Pengajian Desa MVP | ✅ PGM.12–PGM.16 Complete — PGM.17 Pending |
+| Pilot Readiness | 🟡 Feature-complete — final validation pending |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Tech Stack
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Backend:** Laravel 12
+- **Frontend:** Livewire v3, Flux UI, Tailwind CSS v4
+- **Database:** SQLite (current), MariaDB (future)
+- **QR:** Internal PHP QR generator (PNG)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Key Architecture
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+Event (type: cai | pengajian)
+  → Participation (event-scoped enrollment)
+    → Person (canonical identity)
+    → EventAttendance (attendance fact)
 
-### Premium Partners
+Event
+  → DesaAccessGrant (token-based desa access)
+    → EventAttendance (scoped per event + desa)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+peserta (legacy runtime)
+  → LegacyPesertaMapping (compatibility bridge)
+    → Person → Participation → Event
+```
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Navigation
 
-## Code of Conduct
+Sidebar is event-type-aware:
+- **CAI events** → full operational menu (Absensi, Registrasi, Database, Laporan, QR & Label, etc.)
+- **Pengajian events** → clean Pengajian menu (Regional Report, Peserta, Import Massal, Akses Desa)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## Modules
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### CAI Operational
+- Attendance (QR scan, manual, self-register)
+- Participant registration and import
+- Reports and exports
+- Permission letters (Surat Izin)
+- Activity log
+
+### Pengajian Desa MVP
+- Token-based desa operator access
+- Self-attendance via QR
+- Operator-assisted attendance
+- Manual participant entry
+- **Bulk participant import** (CSV/Excel)
+- Regional and desa-level reports
+- Identity correction workflow
+
+---
+
+## UI Bug Backlog
+
+Teridentifikasi 11 area perbaikan UI yang perlu ditangani di sprint mendatang. Lihat `docs/TODO.md` → **UI Bug Fix Sprint** untuk detail.
+
+| Kategori | Item |
+|----------|------|
+| Branding & Navigation | Landing page, Login, KJA logo default, "Pengajian" menu in CAI |
+| Access Token UI & Security | Raw token display, token overflow, missing delete button |
+| Functional/UI Logic | Dashboard "Belum Absen" stat, "Pengajian" menu in CAI event |
+| Filter/Regional Report | Report filter combinations (Hadir/Tidak/Metode) |
+| Dark Mode | Text contrast on Akses Desa / Kelola Event pages |
+| Responsive Layout | /pengajian page on desktop |
+
+---
+
+## Documentation
+
+See `docs/` directory for full documentation.
+
+| Document | Description |
+|----------|-------------|
+| `ROADMAP.md` | Product roadmap and sprint plan |
+| `TODO.md` | Active task list + Bug Backlog |
+| `HANDOFF.md` | Non-technical project overview |
+| `PENGAJIAN_MVP_OPERATIONAL.md` | Pengajian module operational guide |
+| `ai/CURRENT_STATE.md` | Current development snapshot |
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proprietary — KJA Techno

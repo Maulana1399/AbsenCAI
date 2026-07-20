@@ -12,7 +12,7 @@ KJA Event Manager
 
 Current MVP:
 
-CAI Operational
+CAI Operational + Pengajian Desa MVP
 
 ---
 
@@ -20,23 +20,26 @@ CAI Operational
 
 Version:
 
-v1.0
+v1.5
 
 Stage:
 
-MVP Development
+MVP Development + Pilot
 
 ---
 
 # Current Sprint
 
-Sprint 3 — Multi Event Architecture + Pengajian Desa MVP
+Sprint 3 — Multi Event Architecture + Pengajian Desa MVP (COMPLETE)
 
 Status:
 
-✅ COMPLETE — PENG A JIAN DESA MVP PILOT RELEASED
+✅ PGM.12–PGM.16 COMPLETE — PGM.17 PENDING
+✅ S01–S04 Foundation COMPLETE 100%
+✅ S3.0–S3.10 all COMPLETE/VERIFIED
+🟡 UI Bug Fix Sprint — Backlog (11 items identified)
 
-Target: August 2026 operational use.
+Target: August 2026 pilot release.
 
 Focus:
 
@@ -47,20 +50,20 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
 - PGM.13 Token Management UI ✅ COMPLETE
 - PGM.14 Event Context/Isolation ✅ COMPLETE
 - PGM.14.1 Security & Reliability Closure ✅ COMPLETE
-  - EnterToken rate limiting (IP-based, 5/min, reset on success)
-  - SelfAttendance database-agnostic duplicate handling (domain exception, no MySQL error codes)
-  - QrPrint session/grant integrity check (matching DesaDashboard pattern)
-  - P0/P1 severity reclassification
 - PGM.14.5 Manual Participant Entry ✅ COMPLETE
-  - PGM.14.5A Audit ✅
-  - PGM.14.5B Shared service ✅
-  - PGM.14.5C Operator manual entry ✅
-  - PGM.14.5D Admin manual entry ✅
-  - PGM.14.5E Person matching ✅
-  - PGM.14.5F Isolation + regression tests ✅
-- PGM.15 Dashboard Desa UX Redesign — PENDING
-- PGM.16 Pilot Data Validation — PENDING
-- PGM.17 Pilot Release — PENDING (pilot end-to-end functional, final validation pending)
+- PGM.15 Dashboard & Report Optimization ✅ COMPLETE
+- PGM.16 Pengajian UX, Contextual Navigation & Bulk Import ✅ COMPLETE
+  - event_type architecture (cai / pengajian)
+  - Contextual sidebar (CAI vs Pengajian menus)
+  - KJA Event Manager branding
+  - Pengajian bulk import (CSV/Excel with preview)
+  - Regional/Desa report filter fixes
+  - Responsive Regional Report and Desa Dashboard
+  - Event switcher redirect/reload fix
+  - Migration: kelompok_id to people table, event_type to events table
+- PGM.17 Pilot Release — PENDING
+
+**UI Bug Fix Sprint** — teridentifikasi 11 area perbaikan dari audit 2026-07-20. Bug #8 (token overflow) dan #10 (dark mode) sudah resolved. 9 bug aktif perlu penanganan.
 
 **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
@@ -69,7 +72,7 @@ Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 # Current Goal
 
-Sprint 3 Multi Event Architecture telah ditutup secara resmi. Fokus berikutnya mengikuti roadmap pada fase S3.9 yang masih design-only.
+Pengajian Desa MVP pilot is feature-complete. Next step: PGM.17 Pilot Release.
 
 Completed foundation work:
 
@@ -83,50 +86,13 @@ Completed foundation work:
 * S3.2 Universal Person completed.
 * S3.3 Participation Foundation completed.
 * S3.4 Active Event Context Hardening completed.
-* S3.5 Legacy Data Backfill COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17. 144 Person, 144 Participation, 144 LegacyPesertaMapping created. 0 conflicts, 0 errors. Idempotency verified. Pre-backfill backup saved. **Runtime architecture unchanged** — peserta table remains active source. People/participations populated but NOT yet runtime-migrated.
-
-Current Sprint 1 attendance state:
-
-* Attendance Code implemented.
-* Internal QR Generator implemented.
-* QR Regeneration supported through on-demand generation from `attendance_code`.
-* Manual Attendance implemented.
-* Manual Hadir implemented.
-* Manual Izin implemented.
-* Attendance Status Hadir/Izin/Alfa implemented.
-* Hadir remains stored in `Absensi`.
-* Izin is stored separately in `IzinAbsensi`.
-* Alfa is derived and is not persisted as a database row.
-* Hadir ↔ Izin conflicts are prevented.
-* Rekap Hadir/Izin/Alfa implemented.
-* Dashboard Hadir/Izin/Alfa summary implemented.
-* `attendance_code` remains the primary scan and QR identifier.
-* Legacy NIP fallback remains supported.
-
-Deferred Sprint 1 backlog:
-
-* QR PDF Export.
-* Report PDF Export.
-* Dashboard PJ Regu.
-* Live Monitoring.
-
-Verification:
-
-* Full test suite passed.
-* 186 tests passed.
-* 432 assertions.
-* 0 failures.
-* Sprint 3 Event Foundation: 30+ dedicated Event tests added.
-
-Sprint 2 Activity Log integration verified:
-
-| Module | Actions | Boundaries |
-|---|---|---|
-| `surat_izin` | created, submitted, approved, rejected, returned | SuratIzinService |
-| `print` | print_viewed | 4 route closures (surat-izin.print, qr-label.print.*) |
-| `export` | exported | RekapPeserta::exportExcel() |
-| `qr` | downloaded, batch_exported | QRLabel\Index::downloadPng(), generateBatchExport() |
-| UI | search, filter, paginate | ActivityLogIndex Livewire |
+* S3.5 Legacy Data Backfill COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17.
+* S3.6 Attendance Event Scoping COMPLETE.
+* S3.7 Participant/QR Migration COMPLETE.
+* S3.8 Dashboard & Report Scoping COMPLETE.
+* S3.9A–S3.9E Multi Role/Venue/Category COMPLETE.
+* S3.10 Regression & Production Readiness COMPLETE.
+* PGM.12–PGM.16 Pengajian Desa MVP COMPLETE.
 
 ---
 
@@ -134,211 +100,108 @@ Sprint 2 Activity Log integration verified:
 
 Priority saat ini:
 
-1. **Sprint 3: Multi Event Architecture** — ✅ COMPLETE / VERIFIED.
-2. S3.0 Architecture & Database Audit ✅ COMPLETE.
-3. S3.1 Event Foundation ✅ COMPLETE — Event model, events table, Legacy CAI bootstrap, ActiveEventContext, event switcher UI, event management CRUD.
-4. S3.2 Universal Person ✅ COMPLETE — People table, Person model.
-5. S3.3 Participation Foundation ✅ COMPLETE — Participations table, Participation model, Person↔Event relationships. No legacy backfill yet.
-6. S3.4 Active Event Context Hardening ✅ COMPLETE — requireCurrent(), resolveDefault(), stale/inactive safety. Route middleware deferred.
-7. S3.5 Legacy Data Backfill ✅ COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created; 0 conflicts). Runtime architecture unchanged — peserta remains active source.
-8. S3.6 Attendance Event Scoping ✅ COMPLETE.
-9. S3.7 Participant/QR Migration ✅ COMPLETE.
-10. S3.8 Dashboard & Report Scoping ✅ COMPLETE / VERIFIED.
-11. S3.9 Multi Role/Venue/Category — DEFERRED DESIGN ONLY.
-12. S3.10 Regression & Production Readiness — PENDING / future work.
-13. Sprint 2 remaining features (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
+1. **UI Bug Fix Sprint** — 9 active bugs (Branding & Navigation, Access Token UI, Filter, Responsive Layout)
+2. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
+3. Event switcher redirect/reload fix ✅ (PGM.16.3)
+4. Pengajian bulk import ✅ (PGM.16)
+5. Contextual navigation ✅ (PGM.16)
+6. Remaining P2/P3 technical debt items.
 
-Development follows `docs/ROADMAP.md` as the primary product roadmap.
-Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
+---
 
 # Project Status
 
 ## Documentation
 
-🟢 Stable
-
----
+🟢 Stable — updated for PGM.16
 
 ## Architecture
 
-🟢 Stable for CAI Operational
-
----
+🟢 Stable — Multi Event architecture complete with event_type discriminator
 
 ## Database
 
-🟢 Stable
-
----
+🟢 Stable — 2 new migrations in PGM.16 (kelompok_id on people, event_type on events)
 
 ## Core Feature
 
-🟢 Stable
-
-* Import
-* Registrasi
-* Registrasi Ulang
-* Scan QR
-* Dashboard
-* Rekap
-* Surat Izin
-* Activity Log
-
----
-
-## UI
-
-🟢 Stable for CAI Operational
-
-Target:
-
-* Dark Mode completed.
-* Responsive Mobile completed.
-* Menu Refactor completed.
-* Reusable Components foundation completed through Flux UI and centralized layouts.
-
----
+🟢 Stable — all CAI + Pengajian features operational
 
 ## Security
 
-🟢 Stable
-
----
-
-## Permission
-
-🟢 Stable
+🟢 Stable — contextual sidebar is navigation UX, NOT route-level authorization
 
 ---
 
 # Current Technical Stack
 
-Backend
-
-* Laravel 12
-
-Frontend
-
-* Livewire
-* Flux UI
-* Tailwind CSS
-
-Database
-
-Current
-
-* SQLite
-
-Future
-
-* MariaDB
-
-Infrastructure
-
-* Rocky Linux
-* Proxmox
-* TrueNAS
-* Nextcloud
+Backend: Laravel 12
+Frontend: Livewire, Flux UI, Tailwind CSS
+Database: SQLite
 
 ---
 
 # Current Risks
 
 ## High
-
-* SQLite belum cocok untuk concurrent access dalam skala besar.
-* QR masih menggunakan NIP sebagai legacy fallback.
-* Multi Event S3.1 Event Foundation is context-only — no existing queries are yet event-scoped. Modules must be migrated one by one.
-
----
+- SQLite not suitable for concurrent large-scale access
+- Multi Event is context-only — modules must be migrated one by one
+- Raw access token ditampilkan penuh di modal creation — potensi security issue jika pengguna tidak menyalin token dengan aman
 
 ## Medium
-
-* QR PDF Export deferred.
-* Report PDF Export deferred.
-* Dashboard PJ Regu deferred.
-* Live Monitoring deferred.
-* EditSesi page references sesi_id from SuratIzin as editable data — needs architectural review.
-* Riwayat Izin belum diimplementasikan.
-* Batch mode "Print All Filtered" via Livewire `printAllFiltered()` is not logged (blade in label mode uses route which is logged; batch mode uses Livewire method directly — minor gap).
-
----
+- P2: Admin ManualEntry no RBAC
+- P2: Two parallel identity correction submission paths
+- P2: No XLSX template download for Pengajian import
+- Landing page dan login page masih menggunakan branding CAI — membingungkan pengguna baru KJA Event Manager
 
 ## Low
-
-* API belum dibutuhkan.
-* Mobile App masih tahap perencanaan.
+- API not yet needed
+- Mobile App still planning
+- KJA logo navigasi ke dashboard CAI — perlu event-aware routing
 
 ---
 
 # Current Technical Debt
 
-* SVG QR generation remains deferred technical debt; active PNG QR runtime uses the internal QR service.
-* Attendance masih menggunakan NIP sebagai legacy fallback, sementara attendance_code menjadi identifier utama scan.
-* Struktur database masih berorientasi pada CAI.
-* EditSesi page treats SuratIzin.sesi_id as editable session data — this needs architectural review.
-* Activity Log's "failed submit" test has a dead assertion after `expectException`.
-* Event Foundation is context infrastructure only — no existing queries are yet event-scoped.
-* Person table is populated with 144 production records — NOT yet runtime source.
-* Participation is populated with 144 production records — runtime integration in QR/registration write-path is in progress; legacy peserta architecture remains operational.
-* LegacyPesertaMapping populated with 144 production records — compatibility bridge between legacy peserta and normalized Person→Participation→Event domain. Production backfill executed 2026-07-17.
-* ActiveEventContext hardening complete — stale cache removed, fallback to first active event added, clear() prevents fallback. Route middleware and legacy module scoping are not yet implemented. Switching active event has zero effect on operational modules.
-* S3.6 complete: attendance sessions are event-scoped, participant resolution is event-safe, and cross-event persistence is blocked.
-* S3.7D verified: RegistrationService now writes normalized participant identifiers through Participation, with LegacyPesertaMapping preserving compatibility.
-* S3.8 COMPLETE and VERIFIED — Dashboard and report scoping now follow active-event boundaries across RekapPeserta, PesertaExport, Dashboard, and RekapAbsensi.
-* Architecture contract:
-  * Event = event boundary
-  * Person = canonical identity
-  * Participation = event-scoped participation and runtime identifiers
-  * Event -> Participation -> Person
-  * Attendance = Event -> SesiAbsensi -> Absensi
-  * LegacyPesertaMapping + peserta = intentional backward-compatibility bridge
-* Remaining legacy dependencies are intentional compatibility, not Sprint 3 blockers, and may be reduced in later roadmap phases if required.
-* Full suite verified: 828 tests passed, 1969 assertions, duration 12.79s (post-Pengajian MVP pilot).
-* Pengajian Desa module: 200+ dedicated tests across token access, grant security, operator dashboard, self-attendance, manual entry, identity matching, admin access, reports, and identity correction.
+- Legacy `pesertas` table remains operational — intentional compatibility bridge
+- `RegistrationService` still creates legacy `peserta` records alongside Person/Participation
+- `PlacementService` has mixed responsibilities (legacy NIP + participant_number generation)
+- Two parallel identity correction paths (PengajianIdentityService vs IdentityCorrectionService)
+- Sidebar is static Blade — doesn't live-render on event switch (page navigation resolves)
+- No RBAC system for admin UI modules
+- Pengajian import template XLSX not yet downloadable from UI
+- Event edit form does not allow changing event_type after creation
+- No dedicated Pengajian admin dashboard (Regional Report serves as landing)
+- Landing page (`/`) still uses CAI branding — needs KJA Event Manager rebrand
+- Login page still uses CAI branding — needs KJA Event Manager rebrand
+- No hard-delete for revoked DesaAccessGrants — only soft revocation
+- `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
+- Test suite count stale — last documented 459/1140 (S3.9E), actual needs `php artisan test`
 
 ---
 
 # Next Work
 
-Current next task:
+**1. UI Bug Fix Sprint** — Fix 9 confirmed UI bugs:
+- Branding: Landing page and login page (welcome.blade.php, login.blade.php)
+- Navigation: KJA logo default route, "Pengajian" menu in CAI context (sidebar.blade.php)
+- Access Token: Add hard-delete for revoked tokens, audit raw token display (AccessIndex)
+- Verify: Regional Report filter fixes, Dashboard "Alfa" stat behavior
 
-**PGM.15 — Dashboard Desa UX Redesign.** Improve the operator Desa Dashboard for pilot release. Key tasks:
-- Add visual indicators for attendance status per participant
-- Improve search UX on the attendance list
-- Add confirmation dialogs for critical actions
-- Optimize N+1 queries in `PengajianDesaReportService` and `PengajianRegionalReportService`
+**2. PGM.17 — Pilot Release.** Final checks before deployment:
+- Pilot data verification and end-to-end simulation
+- Data quality documentation
+- Final go/no-go decision
+- Production deployment
+- Operator training documentation
 
-**PGM.16 — Pilot Data Validation.** Before pilot release:
-- Validate that all pilot data (events, desas, grants, participants) is correctly loaded
-- Run end-to-end pilot simulation
-- Document any data quality issues
-- Finalize pilot scope with stakeholders
-
-After PGM.15 and PGM.16: **PGM.17 — Pilot Release.**
-
-Longer-term:
-- P0 security fix: Add rate limiting to EnterToken submit() and token brute-force hardening
-- P1 fix: Resolve N+1 queries in report services (affects desas with 500+ residents)
-- P1 fix: Remove `attendPerson()` legacy method if unused
-- P2 improvement: SelfAttendance MySQL-specific error code → database-agnostic exception
-- P2 improvement: Two parallel identity correction submission paths
-
-Deferred Sprint 1 items remain in backlog until operationally required.
-Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **deferred to 2027**.
+After bug sprint: Penetration testing, performance optimization, CAI 2027 feature cycle.
 
 Architecture source: `docs/ROADMAP.md`, `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
-Latest verified baseline: 828 tests passed, 1969 assertions, 12.79s.
-
-Sprint 5 Document & Certificate remains deferred until required.
 
 ---
 
 # Development Rules
-
-# Development Rules
-
-Current development rules:
 
 * Follow `docs/ROADMAP.md` as the primary roadmap.
 * Audit existing functionality before implementing new functionality.
@@ -352,28 +215,15 @@ Current development rules:
 
 # Success Criteria
 
-Sprint 0 dianggap selesai apabila:
-
-* Dokumentasi lengkap.
-* Struktur proyek konsisten.
-* Roadmap final.
-* Security final.
-* Permission final.
-* AI dapat memahami proyek hanya dengan membaca dokumentasi.
+PGM.17 dianggap selesai apabila:
+- Pilot data verified
+- End-to-end simulation passes
+- Production deployment successful
+- Operator training materials complete
 
 ---
 
 # Notes
 
 CURRENT_STATE.md adalah snapshot kondisi proyek.
-
 Dokumen ini akan diperbarui setiap kali sprint selesai.
-
-Dokumen ini **bukan** tempat mencatat roadmap, changelog, atau keputusan desain.
-
-Gunakan dokumen lain sesuai fungsinya:
-
-* ROADMAP.md → Rencana pengembangan.
-* CHANGELOG.md → Riwayat perubahan.
-* DECISION.md → Keputusan arsitektur.
-* TODO.md → Pekerjaan aktif.

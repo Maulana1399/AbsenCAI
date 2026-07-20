@@ -1,15 +1,15 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6 max-w-4xl mx-auto px-4 sm:px-0">
     {{-- Header --}}
     <div class="text-center mb-2">
-        <div class="mx-auto h-20 w-20 rounded-full bg-emerald-600 flex items-center justify-center text-3xl font-bold text-white shadow-xl">
+        <div class="mx-auto h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-emerald-600 flex items-center justify-center text-2xl sm:text-3xl font-bold text-white shadow-xl">
             KJA
         </div>
 
-        <h1 class="mt-6 text-2xl font-bold text-zinc-900 dark:text-white">
+        <h1 class="mt-4 sm:mt-6 text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
             Dashboard Desa
         </h1>
 
-        <p class="text-emerald-600 text-lg mt-1">
+        <p class="text-emerald-600 text-base sm:text-lg mt-1">
             {{ $eventName }}
         </p>
 
@@ -19,32 +19,32 @@
     </div>
 
     {{-- Tabs --}}
-    <div class="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
+    <div class="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800 overflow-x-auto">
         <button
             type="button"
             wire:click="$set('activeTab', 'attendance')"
-            class="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'attendance' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
+            class="whitespace-nowrap flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'attendance' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
         >
             Absen Peserta
         </button>
         <button
             type="button"
             wire:click="$set('activeTab', 'list')"
-            class="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'list' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
+            class="whitespace-nowrap flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'list' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
         >
             Daftar Kehadiran
         </button>
         <button
             type="button"
             wire:click="$set('activeTab', 'qr')"
-            class="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'qr' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
+            class="whitespace-nowrap flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'qr' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
         >
             QR Absensi
         </button>
         <button
             type="button"
             wire:click="$set('activeTab', 'tambah')"
-            class="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'tambah' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
+            class="whitespace-nowrap flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'tambah' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
         >
             Tambah
         </button>
@@ -52,7 +52,7 @@
 
     {{-- Summary Cards --}}
     @if (!empty($summary))
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="rounded-xl border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                 <p class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $summary['total_warga'] }}</p>
                 <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Total Warga</p>
@@ -224,10 +224,10 @@
                     class="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder-zinc-500"
                 />
 
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <select
                         wire:change="setFilterStatus($event.target.value)"
-                        class="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                        class="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                     >
                         <option value="">Semua Status</option>
                         <option value="hadir">Hadir</option>
@@ -236,7 +236,8 @@
 
                     <select
                         wire:change="setFilterMethod($event.target.value)"
-                        class="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                        @if ($filterStatus === 'belum') disabled @endif
+                        class="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white @if ($filterStatus === 'belum') opacity-50 @endif"
                     >
                         <option value="">Semua Metode</option>
                         <option value="self">Self</option>
@@ -249,8 +250,8 @@
             <div class="mt-4 space-y-2">
                 @forelse ($attendanceList as $item)
                     <div class="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-700">
-                        <div>
-                            <p class="text-sm font-medium text-zinc-900 dark:text-white">{{ $item['nama'] }}</p>
+                        <div class="min-w-0 flex-1 mr-2">
+                            <p class="text-sm font-medium text-zinc-900 dark:text-white truncate">{{ $item['nama'] }}</p>
                             @if ($item['hadir'])
                                 <p class="text-xs text-zinc-400">
                                     {{ $item['attended_at'] }}
@@ -262,11 +263,11 @@
                             @endif
                         </div>
                         @if ($item['hadir'])
-                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                            <span class="shrink-0 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
                                 Hadir
                             </span>
                         @else
-                            <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                            <span class="shrink-0 inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
                                 Belum Hadir
                             </span>
                         @endif
@@ -295,9 +296,9 @@
                 @if ($qrBase64)
                     <img src="data:image/png;base64,{{ $qrBase64 }}"
                          alt="QR Absen"
-                         class="h-56 w-56">
+                         class="h-48 w-48 sm:h-56 sm:w-56 max-w-full">
                 @else
-                    <div class="flex h-56 w-56 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/50">
+                    <div class="flex h-48 w-48 sm:h-56 sm:w-56 max-w-full items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900/50">
                         <p class="text-xs text-zinc-400">QR tidak tersedia</p>
                     </div>
                 @endif

@@ -295,6 +295,11 @@ class DesaDashboard extends Component
     public function setFilterStatus(string $value): void
     {
         $this->filterStatus = $value ?: null;
+
+        if ($this->filterStatus === 'belum') {
+            $this->filterMethod = null;
+        }
+
         $this->loadAttendanceList();
     }
 

@@ -8,7 +8,46 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
-## Added
+## Added (Documentation Audit & Bug Backlog — 2026-07-20)
+
+### Audit Findings
+- **11 UI areas audited** across codebase. 9 confirmed active bugs, 2 resolved.
+- Bug backlog documented in TODO.md → **UI Bug Fix Sprint**
+- Branding & Navigation: Landing page, login page, KJA logo route, Pengajian menu in CAI
+- Access Token: Missing delete for revoked tokens, raw token display audit
+- Regional Report filters: PGM.16 fixes verified as code-correct, need test verification
+- Dark Mode: Verified resolved — all elements have proper `dark:text-*` classes
+- Token overflow: Verified resolved — `break-all` + `whitespace-normal` prevents overflow
+
+### Documentation Synchronized
+- README.md: Updated sprint statuses, added bug backlog overview
+- ROADMAP.md: S04 → COMPLETE 100%, S3.9 status → COMPLETE, added Bug Fix Sprint priority
+- TODO.md: Added UI Bug Fix Sprint section, fixed S3.9 stale status, added test count notes
+- HANDOFF.md: Added Known UI Bugs section, updated project name
+- CURRENT_STATE.md: Updated sprint status, risks, technical debt, next work
+- FEATURE.md: Updated all module statuses (Dashboard→Stable, QR→Stable, Event→Stable, Category→Stable, Venue→Stable)
+- INDEX.md: Updated current sprint and priority, added document list
+
+## Added (PGM.16 — Pengajian UX, Contextual Navigation & Bulk Import)
+
+- **Event type discriminator** — `event_type` column (`cai`/`pengajian`) on events table (migration `2026_08_02_000001`)
+- **Contextual sidebar** — navigation changes based on active event type (CAI vs Pengajian menus)
+- **KJA Event Manager branding** — replaced CAI branding in app logo
+- **Pengajian bulk import** — dedicated CSV/Excel import at `/pengajian/admin/import-massal` with preview, row-level validation, identity matching, and summary counters
+- **Desa-scoped kelompok lookup** — kelompok resolution now scoped to resolved desa (deterministic)
+- **Event switcher redirect** — switching event navigates to appropriate landing page (CAI→dashboard, Pengajian→pengajian.report)
+- **Filter fixes** — Regional/Desa report method filter disabled when status is Belum Hadir; search debounced at 300ms
+- **Responsive UI** — Regional Report and Desa Dashboard layouts improved for mobile/tablet/desktop
+- **`kelompok_id` on `people` table** — migration `2026_08_01_000001`
+
+## Changed
+
+- `EventSwitcher::switchTo()` now redirects to event-type landing page after successful switch
+- RegionalReport and DesaDashboard method filter is cleared when status=belum
+- PengajianImportService identity matching uses PHP-level date comparison (same as ManualParticipantRegistrationService)
+- Sidebar is now event-type-aware with conditional menu groups
+
+## Added (Previous)
 
 * QR & Label module with individual QR, batch export preview, and label 4x4 UI
 * Sprint 1 CAI Operational closed for current operational scope

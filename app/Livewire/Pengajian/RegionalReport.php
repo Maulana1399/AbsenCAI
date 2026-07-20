@@ -101,6 +101,10 @@ class RegionalReport extends Component
 
     public function updatedFilterStatus(): void
     {
+        if ($this->filterStatus === 'belum') {
+            $this->filterMethod = null;
+        }
+
         $this->loadAttendanceList();
     }
 

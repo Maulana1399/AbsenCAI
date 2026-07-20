@@ -63,7 +63,7 @@ Future
 
 Status
 
-🟡 Development
+🟢 Stable
 
 Priority
 
@@ -77,9 +77,16 @@ Features
 
 * Dashboard Admin
 * Dashboard Divisi
-* Dashboard PJ Regu
+* Dashboard PJ Regu (Deferred)
 * Live Progress
 * Statistics
+* Attendance summary (Hadir / Izin / Alfa)
+
+Notes:
+
+* Dashboard Admin stabil dan event-scoped.
+* Dashboard PJ Regu dan Live Monitoring — DEFERRED.
+* DashboardService belum diimplementasikan — stats dihitung inline di Livewire.
 
 Future
 
@@ -92,7 +99,7 @@ Future
 
 Status
 
-🟡 Development
+🟢 Stable
 
 Priority
 
@@ -104,14 +111,16 @@ Sprint
 
 Features
 
-* CRUD Person
+* CRUD Person (via RegistrationService + Participation)
 * Import Excel
 * Search
-* History
+* Universal Person Database (Person model + People table)
 
-Future
+Notes:
 
-* Universal Person Database
+* Person adalah canonical identity — satu identitas per orang.
+* Person dihubungkan ke Event via Participation.
+* Legacy peserta compatibility melalui LegacyPesertaMapping.
 
 ---
 
@@ -147,7 +156,7 @@ Future
 
 Status
 
-🟡 Development
+🟢 Stable
 
 Priority
 
@@ -159,15 +168,14 @@ Sprint
 
 Features
 
-* QR Scan
-* Manual Input
-* Attendance Code
+* QR Scan (via AttendanceService)
+* Manual Input (manual hadir/izin)
+* Attendance Code (primary QR payload)
 * Attendance History
-* Hadir
-* Izin
-* Alfa
-* Session
+* Hadir / Izin / Alfa summary
+* Session (SesiAbsensi)
 * Live Status
+* Surat Izin integration (IzinAbsensi)
 
 Future
 
@@ -181,7 +189,7 @@ Future
 
 Status
 
-🟡 Development
+🟢 Stable
 
 Priority
 
@@ -193,11 +201,17 @@ Sprint
 
 Features
 
-* Generate Individual QR
+* Generate Individual QR (QRService + QRIdentityResolver)
 * Download PNG
-* Download SVG
-* Batch QR Export
-* Print Label 4×4
+* Batch QR Export (BatchQRExportService)
+* Print Label 4×4 (PrintEngine + Label4x4Template)
+* QR Log (ActivityLog integration)
+
+Notes:
+
+* QR content menggunakan attendance_code.
+* SVG generation — deferred (stub exists).
+* PDF Export — deferred.
 
 Future
 
@@ -211,7 +225,7 @@ Future
 
 Status
 
-🟡 Development
+🟢 Stable
 
 Priority
 
@@ -223,12 +237,17 @@ Sprint
 
 Features
 
-* Export Excel
-* Export PDF
-* Rekap Per Regu
-* Rekap Per Desa
-* Rekap Per Kelompok
+* Export Excel (PesertaExport, ActivityRegistrationExport)
+* Rekap Per Regu / Per Desa / Per Kelompok
 * Rekap Belum Hadir
+* Rekap Absensi event-scoped
+* Regional Report (Pengajian)
+* Desa-level Report (Pengajian)
+
+Future
+
+* Export PDF
+* Scheduled Report
 
 Future
 
@@ -316,17 +335,18 @@ Features
 * [x] Print Log — Surat Izin print, QR label print views (single/batch/A4) logged via ActivityLogService
 * [x] Export Log — participant data Excel export logged via ActivityLogService
 * [x] QR Log — single QR download and batch QR export logged via ActivityLogService
+* [x] Auditable commands — CreateDesaGrant, BackfillLegacyPeserta
 
 Notes:
 
 * `ActivityLogService::log()` provides a single entry point for all audit logging with automatic user/IP/user-agent detection.
-* Logged modules: `surat_izin` (created/submitted/approved/rejected/returned), `print` (print_viewed), `export` (exported), `qr` (downloaded/batch_exported).
+* Logged modules: `surat_izin` (created/submitted/approved/rejected/returned), `print` (print_viewed), `export` (exported), `qr` (downloaded/batch_exported), `grant`, `backfill`.
 * Logs are written after successful business operations only — no false logs on failure/forbidden.
 * User fallback: "Sistem" when user_id is null or user deleted.
 * Schema is extensible: properties JSON column, polymorphic subject, nullable ip_address/user_agent.
 * Physical print limitation: `print_viewed` action records print-page generation/access, not guaranteed physical printer completion.
 * Low-level `QRService::generatePng()` is intentionally NOT logged to prevent duplicate logs from internal rendering.
-* Latest verified test baseline: 186 tests, 432 assertions.
+* Latest documented baseline: 459 tests, 1140 assertions (S3.9E). Actual count needs verification.
 
 ---
 
@@ -380,7 +400,7 @@ Features
 
 Status
 
-⚪ Future
+🟢 Stable
 
 Priority
 
@@ -392,7 +412,14 @@ Sprint
 
 Features
 
-* Multi Event
+* Multi Event (Event model, events table, ActiveEventContext, event switcher UI)
+* Event CRUD (create, edit, archive/activate)
+* Event Type (cai / pengajian)
+* Event Role / Committee (EventRole + EventCommitteeAssignment)
+* Activity Groups & Activities
+
+Future
+
 * Event Template
 * Event Archive
 
@@ -402,7 +429,7 @@ Features
 
 Status
 
-⚪ Future
+🟢 Stable (CategoryDefinition + ActivityCategory)
 
 Priority
 
@@ -414,9 +441,9 @@ Sprint
 
 Features
 
-* Multi Category
-* Multi Level
-* Multi Class
+* Category Definitions (event-scoped)
+* Activity Categories (link activities to allowed categories)
+* requires_category flag on activities
 
 ---
 
@@ -424,7 +451,7 @@ Features
 
 Status
 
-⚪ Future
+🟢 Stable (Venue + Rundown + RundownItem)
 
 Priority
 
@@ -436,9 +463,15 @@ Sprint
 
 Features
 
-* Multi Venue
+* Multi Venue (event-scoped Venue model)
+* Rundown management (Rundown + RundownItem)
+* Time validation (ends_at > starts_at)
+* Parallel activities support
+
+Future
+
 * Venue Dashboard
-* Room Management
+* Schedule conflict detection
 
 ---
 
@@ -554,23 +587,35 @@ Features
 
 # Current MVP
 
-Target MVP (CAI)
+Target MVP (CAI Operational + Pengajian Desa)
 
 ✅ Authentication
 
-✅ Registration
+✅ Registration (CAI + Pengajian)
 
-✅ Attendance
+✅ Attendance (CAI QR scan + Pengajian self/operator)
 
 ✅ Dashboard
 
-✅ Report
+✅ Report (Excel export, Rekap Peserta/Absensi, Regional Report)
 
-🟡 QR
+✅ QR (QRService, BatchQRExport, PrintEngine)
 
-🟡 Permission
+✅ Permission (Surat Izin — created/submit/approve/reject/return)
 
-🟡 UI
+✅ Audit (Activity Log, Print Log, Export Log, QR Log)
+
+✅ UI (Dark Mode, Responsive, Flux UI)
+
+✅ Multi Event (Event model, ActiveEventContext, event switcher)
+
+✅ Event Role/Committee (EventRole + EventCommitteeAssignment)
+
+✅ Venue/Rundown (Venue, Rundown, RundownItem)
+
+✅ Category (CategoryDefinition, ActivityCategory)
+
+✅ Pengajian Desa MVP (Token access, Self-attendance, Regional Report, Bulk Import)
 
 ---
 
@@ -637,17 +682,15 @@ Tidak diperbolehkan membuat fitur baru tanpa memperbarui FEATURE.md terlebih dah
 
 # Current Development Focus
 
-Sprint 1
+**UI Bug Fix Sprint** — 9 active bugs (Branding, Navigation, Access Token, Filters, Responsive)
 
-P0
+Prioritas tertinggi saat ini:
 
-* Attendance Code
-* Internal QR Generator
-* Manual Attendance
-* Attendance Status
-* Print QR
-* Export
-* Dashboard
-* UI Refactor
+1. Perbaikan branding CAI → KJA Event Manager (landing page + login page)
+2. Perbaikan navigasi default KJA logo (event-aware routing)
+3. Hard-delete untuk revoked access token
+4. Audit/masking raw token di modal creation
+5. Verifikasi filter Regional Report
+6. Menu "Pengajian" hanya muncul di event Pengajian
 
 Semua fitur di luar Sprint aktif masuk ke Backlog hingga Sprint berjalan selesai.

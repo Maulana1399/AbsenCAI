@@ -1,5 +1,5 @@
-# HANDOFF DOCUMENT — AbsenCAI
-## Sistem Absensi CAI berbasis Laravel Livewire
+# HANDOFF DOCUMENT — KJA Event Manager
+## Sistem Manajemen Event Multi-Event berbasis Laravel Livewire (f.k.a. AbsenCAI)
 
 **Dokumen ini dibuat untuk developer baru atau panitia teknis yang melanjutkan project.**
 Tidak perlu menguasai coding untuk membaca dokumen ini. Setiap bagian teknis akan dijelaskan dengan bahasa sehari-hari.
@@ -292,6 +292,8 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 | `2026_07_02_000001_add_unique_constraints_to_tables.php` | Menambah aturan unik (tidak boleh duplikat) |
 | `2026_07_03_000001_add_unique_participant_identity_to_pesertas_table.php` | Menambah constraint unik gabungan nama+desa+kelompok |
 | `2026_07_07_125113_add_jenis_peserta_to_pesertas_table.php` | Menambah kolom `jenis_peserta` (Wajib/Kiriman/Person) |
+| `2026_08_01_000001_add_kelompok_id_to_people_table.php` (PGM.16) | Menambah kolom `kelompok_id` ke tabel `people` — untuk Pengajian group assignment |
+| `2026_08_02_000001_add_event_type_to_events_table.php` (PGM.16) | Menambah kolom `event_type` (`cai`/`pengajian`) ke tabel `events` |
 
 **`database/seeders/DatabaseSeeder.php`:**
 Berisi data contoh untuk testing: 1 user admin, 2 desa, 2 kelompok, 4 regu (2 laki-laki, 2 perempuan), 10 peserta contoh.
@@ -327,7 +329,11 @@ Berisi data contoh untuk testing: 1 user admin, 2 desa, 2 kelompok, 4 regu (2 la
 | `/sesi-absensi` | `sesi.absensi` | Kelola sesi absensi |
 | `/rekap-peserta` | `rekap.peserta` | Laporan peserta |
 | `/rekap-absensi` | `rekap.absensi` | Laporan absensi |
-| `/import/peserta` | `import.peserta` | Upload Excel peserta (POST) |
+| `/import/peserta` | `import.peserta` | Upload Excel peserta CAI (POST) |
+| `/pengajian/report` | `pengajian.report` | Regional Report Pengajian |
+| `/pengajian/admin/access` | `pengajian.admin.access` | Kelola akses token desa |
+| `/pengajian/admin/manual-entry` | `pengajian.admin.manual-entry` | Tambah peserta Pengajian manual |
+| `/pengajian/admin/import-massal` | `pengajian.import-massal` | Import massal peserta Pengajian |
 
 ---
 
@@ -716,16 +722,23 @@ Menu sidebar ada di satu file terpusat:
 
 **File:** `resources/views/components/layouts/app/sidebar.blade.php`
 
+**Catatan PGM.16 — Sidebar Kontekstual:**
+Sidebar sekarang menyesuaikan dengan tipe event aktif:
+- **CAI Event** → menu CAI lengkap
+- **Pengajian Event** → menu Pengajian saja
+Logika ini ada di bagian `@php $isPengajian = ...` di awal file sidebar.
+
 **Cara tambah menu baru:**
 1. Buka file tersebut
 2. Temukan grup menu yang sesuai (mis: `heading="Database"`)
 3. Tambahkan baris baru mengikuti pola yang ada:
-   ```html
-   <flux:navlist.item :href="route('nama.route')" wire:navigate>
-       Nama Menu Baru
-   </flux:navlist.item>
-   ```
+    ```html
+    <flux:navlist.item :href="route('nama.route')" wire:navigate>
+        Nama Menu Baru
+    </flux:navlist.item>
+    ```
 4. Pastikan `nama.route` sudah terdaftar di `routes/web.php`
+5. Jika menu spesifik untuk CAI atau Pengajian, letakkan di dalam blok `@if ($isPengajian)` atau `@else` yang sesuai
 
 ---
 
@@ -1238,6 +1251,29 @@ cp database/database.sqlite database/database.sqlite.backup-$(date +%Y%m%d-%H%M%
 
 ---
 
+---
+
+## 9. KNOWN UI BUGS — Masalah Antarmuka yang Diketahui
+
+> Berdasarkan audit codebase 2026-07-20, berikut daftar bug antarmuka yang perlu diperbaiki.
+> **JANGAN** menganggap semua bug ini masih aktif — verifikasi terhadap codebase aktual terlebih dahulu.
+
+| # | Kategori | Deskripsi Singkat | Prioritas | File Terkait |
+|---|----------|-------------------|-----------|-------------|
+| 1 | Branding | Halaman depan (`/`) masih tampilkan "CAI" dan "CINTA ALAM INDONESIA 2025" | Medium | `welcome.blade.php` |
+| 2 | Branding | Halaman login masih tampilkan "CAI" dan "Cinta Alam Indonesia" | Medium | `login.blade.php` |
+| 3 | UI Logic | Stat "Alfa" di dashboard — label dan logika perlu dicek (mungkin "-" saat tanpa sesi) | Medium | `Dashboard.php` |
+| 4 | Navigation | Menu "Pengajian" muncul di sidebar event CAI | Low | `sidebar.blade.php` |
+| 5 | Access Token | Tidak ada tombol hapus permanen untuk token yang sudah dicabut | Medium | `AccessIndex.php` |
+| 6 | Navigation | Klik logo KJA → dashboard CAI, bukan halaman yang sesuai konteks | High | `sidebar.blade.php` |
+| 7 | Security | Raw token ditampilkan penuh di modal pembuatan (sekali) | High | `access-index.blade.php` |
+| 9 | Filter | Filter Regional Report perlu verifikasi pasca-PGM.16 | Medium | `RegionalReport.php` |
+| 11 | Responsive | `/pengajian` layout desktop — minor perbaikan | Low | `enter-token.blade.php` |
+
+**Catatan:** Bug #8 (token overflow) dan #10 (dark mode) sudah terverifikasi **resolved** di codebase saat ini.
+
+---
+
 ## Ringkasan Kontak & Referensi
 
 | Sumber | Link |
@@ -1249,5 +1285,5 @@ cp database/database.sqlite database/database.sqlite.backup-$(date +%Y%m%d-%H%M%
 
 ---
 
-*Dokumen ini dibuat berdasarkan analisa kode project AbsenCAI per Juli 2026.*
+*Dokumen ini dibuat berdasarkan analisa kode project KJA Event Manager per Juli 2026.*
 *Jika ada perubahan besar pada project, update dokumen ini agar tetap relevan.*

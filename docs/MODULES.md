@@ -36,107 +36,123 @@ Status Legend
 
 # Event
 
-🔴
+🟢
 
-- Event
+- Event (CRUD, event_type, ActiveEventContext)
+- Event Role / Committee
 - Venue
-- Category
-- Competition
-- Session
+- Rundown
+- Category (CategoryDefinition + ActivityCategory)
+- Activity Group / Activity
+- Activity Registration
 
----
+Future
+
+- Competition
+- Event Template
+- Event Archive
 
 # Registration
 
 🟢
 
-- Registrasi
+- Registrasi (CAI + Pengajian)
 - Registrasi Ulang
 - Search Person
-
-Future
-
 - Self Registration
+- Import Excel (CAI + Pengajian bulk import)
+- Manual Participant Entry (Pengajian)
 
 ---
 
 # Attendance
 
-🟡
+🟢
 
-Current
-
-- QR Scan
-
-- Session
-
-- Dashboard
-
-Planned
-
-- Attendance Code
-
-- Manual Input
-
-- Izin
-
-- Alfa
-
+- QR Scan (via AttendanceService + QRIdentityResolver)
+- Attendance Code (KJA-XXXXXXXX format)
+- Session (SesiAbsensi)
+- Manual Input (Hadir + Izin via Scan Livewire)
+- Izin / Alfa / Hadir summary
 - History
 
-- Batch Scan
+---
+
+# Pengajian Attendance
+
+🟢
+
+- Token-based desa operator access (DesaAccessGrant)
+- Self-attendance via QR (SelfAttendance)
+- Operator-assisted attendance (DesaDashboard)
+- Identity correction workflow
+- Regional Report (event-scoped)
+- Desa-level Report
 
 ---
 
 # Dashboard
 
-🟡
+🟢
 
 Current
 
-- Statistik
+- Statistik (total peserta, desa, kelompok, regu)
+- Attendance summary (Hadir/Izin/Alfa)
+- Event-scoped (via ActiveEventContext)
+- Regu filter
+- Session management
 
 Future
 
 - Universal Dashboard
-
 - Division Dashboard
-
 - Venue Dashboard
-
 - Live Monitoring
+- DashboardService (business logic extraction)
 
 ---
 
 # Report
 
-🟡
+🟢
 
-- Excel
+- Excel Export (PesertaExport, ActivityRegistrationExport)
+- Rekap Peserta (event-scoped, Participation-based)
+- Rekap Absensi (event-scoped, session-based)
+- Regional Report (Pengajian, with filters)
+- Desa-level Report (Pengajian)
 
-- PDF
+Future
 
-- Attendance
-
-- Registration
-
-- Violation
-
-- Score
-
----
+- PDF Export
+- Scheduled Report
+- Violation Report
+- Score Report
 
 # Permission
 
-🔴
+🟢
 
-- Surat Izin
+- Surat Izin (create, submit, approve, reject, cancel, return)
+- Print Surat (A5 landscape template with Kop Surat)
+- Return Tracking (selectable return date, attendance cleanup)
+- Surat Izin Activity Logging
 
-- Print
+Future
 
-- Return
+- Riwayat Izin History
 
-- History
+---
+
+# Audit
+
+🟢
+
+- Activity Log Foundation (model, service, read-only UI)
+- Print Log (Surat Izin, QR label print logging)
+- Export Log (participant Excel export logging)
+- QR Log (single download + batch export logging)
 
 ---
 
@@ -169,6 +185,25 @@ Future
 - Judge
 
 - Winner
+
+---
+
+# QR & Label
+
+🟢
+
+- QRService (PNG generation via BaconQrCode)
+- QRIdentityResolver (resolves attendance_code → Participation)
+- BatchQRExportService (bulk export to storage)
+- PrintEngine + Label4x4Template (4×4 cm QR labels)
+- Single + Batch + A4 print views
+- QR Log integration (ActivityLog)
+
+Future
+
+- SVG generation
+- PDF Export
+- ID Card
 
 ---
 

@@ -84,9 +84,11 @@ Status: CLOSED / COMPLETED FOR CURRENT OPERATIONAL SCOPE
 - [x] Hadir/Izin/Alfa summary verified
 - [x] Full regression suite verified
 
-Last verified test suite:
+Last verified test suite (archived):
 
 70 tests passed, 198 assertions, 0 failures.
+
+Last documented full regression: 459 passed, 1140 assertions (S3.9E). Actual count needs `php artisan test` to verify.
 
 ### Deferred Backlog
 
@@ -254,6 +256,34 @@ Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 ---
 
+## UI Bug Fix Sprint
+
+Status: 🟡 Backlog — NOT STARTED
+
+Priority: Critical/High
+
+### Background
+
+Berdasarkan audit dokumentasi dan codebase pada 2026-07-20, teridentifikasi 11 area perbaikan UI. Berikut hasil audit terhadap implementasi aktual:
+
+### Actual Active Bug Backlog
+
+| # | Kategori | Deskripsi | Prioritas | File Utama | Status Verifikasi |
+|---|----------|-----------|-----------|------------|-------------------|
+| 1 | Branding & Navigation | Landing page (`/`) masih branding CAI: logo "CAI", judul "CINTA ALAM INDONESIA 2025" | Medium | `resources/views/welcome.blade.php` | **Confirmed** — perlu update ke KJA Event Manager |
+| 2 | Branding & Navigation | Login page masih branding CAI: logo "CAI", judul "Cinta Alam Indonesia" | Medium | `resources/views/livewire/auth/login.blade.php` | **Confirmed** — perlu update |
+| 6 | Branding & Navigation | KJA logo di sidebar mengarah ke dashboard CAI (`route('dashboard')`), bukan global/KJA dashboard | High | `resources/views/components/layouts/app/sidebar.blade.php` | **Confirmed** — navigasi default harus event-aware |
+| 4 | Branding & Navigation | Menu "Pengajian" (Akses Desa, Regional Report) muncul di event CAI | Low | `resources/views/components/layouts/app/sidebar.blade.php` | **Confirmed** — sidebar CAI mode menampilkan grup "Pengajian" |
+| 5 | Access Token UI | Tidak ada tombol delete/hard-delete untuk access token yang sudah di-revoke | Medium | `app/Livewire/Pengajian/Admin/AccessIndex.php` | **Confirmed** — hanya "Cabut" (revoke) tersedia |
+| 7 | Access Token UI & Security | Raw token ditampilkan penuh di modal creation (sekali saja), token_prefix di tabel pendek | High | `access-index.blade.php` | **Design choice** — token full ditampilkan sekali saat creation via modal. Tabel hanya show prefix + "...". Perlu audit apakah perlu masked display |
+| 8 | Access Token UI | Token overflow di card — **No issue found** | Resolved | `access-index.blade.php` | **Resolved** — `break-all` + `whitespace-normal` + `max-w-full` sudah menangani overflow |
+| 3 | Functional/UI Logic | Stat "Peserta Belum Absen" — label "Alfa", nilai selalu integer, tidak pernah "-" | Medium | `Dashboard.php` & `dashboard.blade.php` | **Needs UI verification** — code review shows count always displayed. Bug mungkin merujuk ke kondisi tanpa sesi aktif |
+| 9 | Filter/Regional Report | Filter Hadir/Tidak + Metode di Regional Report | Medium | `RegionalReport.php` | **Probably resolved** — PGM.16 Phase D claims fix. Code looks correct. Need test verification |
+| 10 | Dark Mode | Dark mode text contrast pada Akses Desa & Kelola Event | - | `access-index.blade.php`, `event/index.blade.php` | **Resolved** — audit shows all elements have proper `dark:text-*` classes |
+| 11 | Responsive Layout | `/pengajian` (enter-token) layout on desktop | Low | `enter-token.blade.php` | **Partially addressed** — uses `flex flex-col gap-6`, Flux responsive. Minor: fixed logo size |
+
+---
+
 ## Sprint 3
 
 Status: ✅ COMPLETE / VERIFIED
@@ -399,7 +429,7 @@ Next roadmap checkpoint: S3.9B Category Foundation
 
 ### S3.9 Multi Role/Venue/Category
 
-Status: ACTIVE / IN PROGRESS
+Status: ✅ COMPLETE / VERIFIED
 
 #### S3.9A Domain Foundation ✅ VERIFIED
 - [x] Create `activity_groups` table + `ActivityGroup` model
@@ -592,7 +622,7 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 ## Pengajian Desa MVP (PGM Series)
 
-Status: PGM.12–PGM.14.5 COMPLETE. PGM.14.1 COMPLETE. Pilot end-to-end functional.
+Status: PGM.12–PGM.16 COMPLETE. Pilot end-to-end functional. PGM.17 PENDING.
 
 ### PGM.12 Functional Fix ✅
 - [x] ActiveEventContext fails closed — no arbitrary fallback
@@ -617,23 +647,6 @@ Status: PGM.12–PGM.14.5 COMPLETE. PGM.14.1 COMPLETE. Pilot end-to-end function
 - [x] Tanggal lahir required; Kelompok scoped to Desa
 - [x] Grant/session validated via revalidateGrant() comparing DB against session
 - [x] 38 dedicated tests
-- [x] Full suite: 828 passed, 0 failures
-
-### PGM.15 Dashboard Desa UX Redesign 🔲 PENDING
-- [ ] Visual attendance status per participant
-- [ ] Improved search UX
-- [ ] Confirmation dialogs
-- [ ] N+1 query optimization
-
-### PGM.16 Pilot Data Validation 🔲 PENDING
-- [ ] Pilot data verification
-- [ ] End-to-end simulation
-- [ ] Data quality documentation
-
-### PGM.17 Pilot Release 🔲 PENDING
-- [ ] Final go/no-go
-- [ ] Production deployment
-- [ ] Operator training
 
 ### PGM.14.1 Security & Reliability Closure ✅
 - [x] EnterToken rate limiting (IP-based, 5 failed attempts/min, reset on success)
@@ -642,10 +655,44 @@ Status: PGM.12–PGM.14.5 COMPLETE. PGM.14.1 COMPLETE. Pilot end-to-end function
 - [x] P0/P1 severity reclassification
 - [x] 9 new tests
 
+### PGM.15 Dashboard & Report Optimization ✅
+- [x] N+1 query optimization (PengajianDesaReportService, PengajianRegionalReportService)
+- [x] Operator search by name and participant_number
+- [x] Attendance status indicators
+- [x] Operator confirmation flow
+- [x] Datetime raw-join Carbon regression fix
+- [x] Regression tests for attendance list formatting
+
+### PGM.16 Pengajian UX, Contextual Navigation & Bulk Import ✅
+- [x] event_type architecture (cai / pengajian)
+- [x] ActiveEventContext event-type awareness
+- [x] Contextual sidebar (CAI vs Pengajian menus)
+- [x] KJA Event Manager branding
+- [x] Pengajian bulk import (CSV/Excel with preview)
+- [x] Pengajian import identity matching (PHP-level date comparison)
+- [x] Desa-scoped kelompok lookup (deterministic, no name-only first())
+- [x] Regional/Desa report filter fixes (Hadir+Method, Belum ignores method)
+- [x] Responsive Regional Report layout
+- [x] Responsive Desa Dashboard layout
+- [x] Event switcher redirect/reload (CAI→dashboard, Pengajian→pengajian.report)
+- [x] Migration: add kelompok_id to people table
+- [x] Migration: add event_type to events table
+- [x] 25+ dedicated import tests
+- [x] 14+ dedicated event-type tests (sidebar, context, redirect)
+
+### PGM.17 Pilot Release 🔲 PENDING
+- [ ] Pilot data verification / end-to-end simulation
+- [ ] Data quality documentation
+- [ ] Final go/no-go
+- [ ] Production deployment
+- [ ] Operator training
+
 ### Known issues (should fix before PGM.17)
-- P1: N+1 queries in PengajianDesaReportService and PengajianRegionalReportService
 - P1: Two parallel identity correction submission paths (PengajianIdentityService vs IdentityCorrectionService)
 - P2: Admin ManualEntry no RBAC (documented known limitation)
+- P2: Pengajian import XLSX template download not yet implemented
+- P2: Ability to edit event_type safely after event creation
+- P3: Sidebar remains static until page navigation (acceptable — page navigates on event switch)
 
 ---
 

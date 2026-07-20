@@ -2,9 +2,17 @@
 
 ## 1. Status
 
-PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12 pilot bugfix COMPLETE. PGM.13 admin UI COMPLETE.
+PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12–PGM.16 COMPLETE. PGM.17 PENDING.
 
 **Limited operational pilot** — not commercial production readiness.
+
+### PGM.16 Key Changes
+- Event type discriminator (`event_type: cai | pengajian`) added
+- Contextual sidebar — Pengajian menus hide CAI-only items
+- KJA branding throughout app
+- **Bulk participant import** at `/pengajian/admin/import-massal`
+- Responsive UI for Regional Report and Desa Dashboard
+- Event switcher now navigates to event-type landing page on switch
 
 ## 2. Architecture
 
@@ -314,7 +322,8 @@ Verify your actual `DB_DATABASE` path from `.env` if not using the default SQLit
 - **Limited activity logging**: Grant creation/revocation not audited.
 - **Visual polish**: Minimal UI, future improvement.
 - **Pengajian Kelompok/Daerah**: Future scope — not part of this MVP.
-- **N+1 query in Desa report list**: Acceptable for pilot-level volume.
+- **No import XLSX template download**: Users must know column format for bulk import.
+- **No edit event_type after creation**: Event type must be set at creation time.
 - **No offline support**: Internet connection required for all flows.
 
 ---
@@ -381,3 +390,110 @@ Admin UI for managing Desa access grants (list, create with one-time token revea
 - Login token rotation not yet implemented (use revoke + recreate)
 - Multiple active grants for same Event+Desa still allowed (existing domain behavior)
 - No RBAC on admin access page (all authenticated users can manage grants)
+
+---
+
+## 12. PGM.16 — Pengajian UX, Contextual Navigation & Bulk Import
+
+PGM.16 makes Pengajian Desa feel like a native event type inside KJA Event Manager.
+
+### 12.1 Event Type Architecture
+
+Events now have an `event_type` column (`cai` / `pengajian`) via migration `2026_08_02_000001`.
+- `Event::isCai()` / `Event::isPengajian()`
+- `ActiveEventContext::isCurrentCai()` / `isCurrentPengajian()`
+- Event creation form allows selecting event type
+
+### 12.2 Contextual Sidebar
+
+The sidebar now renders different navigation based on active event type:
+
+| Event Type | Menu Items |
+|---|---|
+| **CAI** | Dashboard, Absensi, Registrasi, Database, Laporan, QR & Label, Pengajian, Event, Sekretariat (full CAI operational menu) |
+| **Pengajian** | Pengajian (Regional Report), Peserta (Daftar Peserta, Import Massal), Operasional Desa (Akses Desa), Event (Kelola Event) |
+
+CAI-only menus (Scan Absensi, Sesi Absensi, Regu, Registrasi Ulang, QR & Label, Surat Izin, Activity Log) are hidden.
+**Hidden navigation is NOT authorization** — all routes remain server-side accessible.
+
+### 12.3 Event Switcher Navigation
+
+Switching active event now redirects to the event-type landing page:
+- CAI → Dashboard (`/dashboard`)
+- Pengajian → Regional Report (`/pengajian/report`)
+
+The sidebar is fully re-rendered after the navigation.
+
+### 12.4 Bulk Import
+
+**Route:** `/pengajian/admin/import-massal` (auth, verified)
+
+**Import flow:**
+1. Upload CSV or Excel file (columns: nama, jenis_kelamin, tanggal_lahir, desa, kelompok)
+2. Preview parsed rows with validation errors
+3. Execute import
+
+**Identity matching** (same as ManualParticipantRegistrationService):
+- Match by normalized nama + desa_id + tanggal_lahir (PHP-level Carbon format comparison)
+- Existing Person reused when identity matches
+- Different birth date → new Person created
+- Same identity in different Desa → no cross-Desa match
+
+**Import summary counters:**
+| Counter | Meaning |
+|---|---|
+| `created_persons` | New Person records created |
+| `matched_persons` | Existing Person records matched (identity resolved) |
+| `created_participations` | New Participation records created |
+| `skipped_duplicates` | Participation already existed (person_id + event_id) |
+| `failed_rows` | Rows that failed validation |
+
+**No Regu / No CAI PlacementService** — Pengajian participants are not assigned to Regu.
+
+### 12.5 Filter Fixes (Regional & Desa Reports)
+
+| Status | Method | Behavior |
+|---|---|---|
+| Semua | Semua | All rows |
+| Semua | Self | Only attended rows with method=self |
+| Hadir | Semua | All attended rows |
+| Hadir | Self | Only self-attended rows |
+| Hadir | Operator | Only operator-attended rows |
+| Belum | any | Method filter is cleared/ignored (semantically correct — belum hadir has no method) |
+
+Search is debounced at 300ms.
+
+### 12.6 Responsive UI
+
+**Regional Report:**
+- Mobile: compact cards, stacked filters, scrollable tabs
+- Desktop: 4-column stat grid, 3-column desa breakdown
+- Labels and tab active states more readable
+
+**Desa Dashboard:**
+- Centered max-w-4xl container
+- Reduced header whitespace
+- Responsive KJA logo sizing
+- 3-column stat grid on desktop (was fixed 3-col)
+- QR image responsive (`max-w-full`)
+
+### 12.7 Key Files Changed in PGM.16
+
+| File | Change |
+|---|---|
+| `database/migrations/2026_08_02_000001_add_event_type_to_events_table.php` | Add event_type column |
+| `app/Models/Event.php` | Add event_type fillable, isCai/isPengajian methods, scopes |
+| `app/Support/ActiveEventContext.php` | Add event-type helper methods |
+| `resources/views/components/layouts/app/sidebar.blade.php` | Contextual CAI/Pengajian navigation |
+| `resources/views/components/app-logo.blade.php` | KJA branding |
+| `app/Services/Pengajian/PengajianImportService.php` | NEW — bulk import logic |
+| `app/Livewire/Pengajian/Admin/ImportMassal.php` | NEW — import Livewire component |
+| `resources/views/livewire/pengajian/admin/import-massal.blade.php` | NEW — import UI |
+| `routes/web.php` | Add import-massal route |
+| `app/Livewire/Event/EventSwitcher.php` | Redirect to event-type landing on switch |
+| `app/Services/Pengajian/PengajianRegionalReportService.php` | Filter combination fix |
+| `app/Services/Pengajian/PengajianDesaReportService.php` | Filter combination fix |
+| `app/Livewire/Pengajian/RegionalReport.php` | Clear method on status=belum |
+| `app/Livewire/Pengajian/DesaDashboard.php` | Clear method on status=belum |
+| `resources/views/livewire/pengajian/regional-report.blade.php` | Responsive layout + filter UX |
+| `resources/views/livewire/pengajian/desa-dashboard.blade.php` | Responsive layout
