@@ -3,25 +3,15 @@
 namespace App\Services\Pengajian;
 
 use App\Models\Event;
-use App\Models\EventAttendance;
-use App\Models\Participation;
 use App\Models\Person;
-use App\Models\desa;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PengajianRegionalReportService
 {
     public function summary(Event $event): array
     {
         $eventId = $event->id;
-
-        $desas = desa::query()
-            ->whereExists(function ($q) use ($eventId) {
-                $q->selectRaw('1')
-                    ->from('people')
-                    ->whereColumn('people.desa_id', 'desas.id');
-            })
-            ->orderBy('desa_asal')
-            ->get();
 
         $totalWarga = Person::query()
             ->whereNotNull('desa_id')
@@ -38,27 +28,21 @@ class PengajianRegionalReportService
             })
             ->count();
 
-        $selfCount = EventAttendance::query()
-            ->where('method', 'self')
-            ->whereExists(function ($q) use ($eventId) {
+        $attendanceCounts = DB::table('event_attendances')
+            ->join('participations', 'participations.id', '=', 'event_attendances.participation_id')
+            ->where('participations.event_id', $eventId)
+            ->selectRaw("method, COUNT(*) as cnt")
+            ->groupBy('method')
+            ->pluck('cnt', 'method');
+
+        $totalDesa = DB::table('desas')
+            ->whereExists(function ($q) {
                 $q->selectRaw('1')
-                    ->from('participations')
-                    ->whereColumn('participations.id', 'event_attendances.participation_id')
-                    ->where('participations.event_id', $eventId);
+                    ->from('people')
+                    ->whereColumn('people.desa_id', 'desas.id');
             })
             ->count();
 
-        $operatorCount = EventAttendance::query()
-            ->where('method', 'operator')
-            ->whereExists(function ($q) use ($eventId) {
-                $q->selectRaw('1')
-                    ->from('participations')
-                    ->whereColumn('participations.id', 'event_attendances.participation_id')
-                    ->where('participations.event_id', $eventId);
-            })
-            ->count();
-
-        $totalDesa = $desas->count();
         $desaHadir = Person::query()
             ->whereNotNull('people.desa_id')
             ->whereExists(function ($q) use ($eventId) {
@@ -68,15 +52,15 @@ class PengajianRegionalReportService
                     ->whereColumn('participations.person_id', 'people.id')
                     ->where('participations.event_id', $eventId);
             })
-            ->distinct('people.desa_id')
+            ->distinct()
             ->count('people.desa_id');
 
         return [
             'total_warga' => $totalWarga,
             'sudah_hadir' => $sudahHadir,
             'belum_hadir' => $totalWarga - $sudahHadir,
-            'self' => $selfCount,
-            'operator' => $operatorCount,
+            'self' => $attendanceCounts->get('self', 0),
+            'operator' => $attendanceCounts->get('operator', 0),
             'total_desa' => $totalDesa,
             'desa_hadir' => $desaHadir,
         ];
@@ -86,43 +70,37 @@ class PengajianRegionalReportService
     {
         $eventId = $event->id;
 
-        $desas = desa::query()
-            ->whereExists(function ($q) use ($eventId) {
-                $q->selectRaw('1')
-                    ->from('people')
-                    ->whereColumn('people.desa_id', 'desas.id');
+        $rows = DB::table('desas')
+            ->leftJoin('people', 'people.desa_id', '=', 'desas.id')
+            ->leftJoin('participations', function ($join) use ($eventId) {
+                $join->on('participations.person_id', '=', 'people.id')
+                    ->where('participations.event_id', '=', $eventId);
             })
-            ->orderBy('desa_asal')
-            ->get(['id', 'desa_asal']);
+            ->leftJoin('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
+            ->whereExists(function ($q) {
+                $q->selectRaw('1')
+                    ->from('people as p2')
+                    ->whereColumn('p2.desa_id', 'desas.id');
+            })
+            ->select([
+                'desas.id as desa_id',
+                'desas.desa_asal as desa_name',
+                DB::raw('COUNT(DISTINCT people.id) as total_warga'),
+                DB::raw('COUNT(DISTINCT event_attendances.id) as sudah_hadir'),
+            ])
+            ->groupBy('desas.id', 'desas.desa_asal')
+            ->orderBy('desas.desa_asal')
+            ->get();
 
-        $result = [];
-
-        foreach ($desas as $desaRow) {
-            $total = Person::query()
-                ->where('desa_id', $desaRow->id)
-                ->count();
-
-            $hadir = Person::query()
-                ->where('people.desa_id', $desaRow->id)
-                ->whereExists(function ($q) use ($eventId) {
-                    $q->selectRaw('1')
-                        ->from('participations')
-                        ->join('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
-                        ->whereColumn('participations.person_id', 'people.id')
-                        ->where('participations.event_id', $eventId);
-                })
-                ->count();
-
-            $result[] = [
-                'desa_id' => $desaRow->id,
-                'desa_name' => $desaRow->desa_asal,
-                'total_warga' => $total,
-                'sudah_hadir' => $hadir,
-                'belum_hadir' => $total - $hadir,
+        return $rows->map(function ($row) {
+            return [
+                'desa_id' => (int) $row->desa_id,
+                'desa_name' => $row->desa_name,
+                'total_warga' => (int) $row->total_warga,
+                'sudah_hadir' => (int) $row->sudah_hadir,
+                'belum_hadir' => (int) $row->total_warga - (int) $row->sudah_hadir,
             ];
-        }
-
-        return $result;
+        })->all();
     }
 
     public function attendanceList(
@@ -135,6 +113,20 @@ class PengajianRegionalReportService
         $eventId = $event->id;
 
         $query = Person::query()
+            ->select([
+                'people.id',
+                'people.nama',
+                'people.desa_id',
+                'participations.participant_number',
+                'event_attendances.id as attendance_id',
+                'event_attendances.method as attendance_method',
+                'event_attendances.attended_at',
+            ])
+            ->leftJoin('participations', function ($join) use ($eventId) {
+                $join->on('participations.person_id', '=', 'people.id')
+                    ->where('participations.event_id', '=', $eventId);
+            })
+            ->leftJoin('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
             ->whereNotNull('people.desa_id');
 
         if ($desaId !== null) {
@@ -142,53 +134,36 @@ class PengajianRegionalReportService
         }
 
         if ($search !== null && mb_strlen(trim($search)) >= 3) {
-            $query->where('people.nama', 'like', '%'.trim($search).'%');
+            $trimmed = trim($search);
+            $query->where(function ($q) use ($trimmed) {
+                $q->where('people.nama', 'like', '%'.$trimmed.'%')
+                    ->orWhere('participations.participant_number', 'like', '%'.$trimmed.'%');
+            });
         }
 
-        $query->orderBy('people.nama');
+        if ($status === 'hadir') {
+            $query->whereNotNull('event_attendances.id');
+        } elseif ($status === 'belum') {
+            $query->whereNull('event_attendances.id');
+        }
 
-        $persons = $query->get(['people.id', 'people.nama']);
+        if ($method !== null && $method !== '') {
+            $query->where('event_attendances.method', $method);
+        }
 
-        $result = [];
+        $rows = $query->orderBy('people.nama')->get();
 
-        foreach ($persons as $person) {
-            $participation = Participation::query()
-                ->where('person_id', $person->id)
-                ->where('event_id', $eventId)
-                ->first();
+        return $rows->map(function ($row) {
+            $hadir = $row->attendance_id !== null;
 
-            $attendance = null;
-            if ($participation) {
-                $attendance = EventAttendance::query()
-                    ->where('participation_id', $participation->id)
-                    ->first();
-            }
-
-            $hadir = $attendance !== null;
-            $itemMethod = $hadir ? $attendance->method : null;
-            $attendedAt = $hadir ? $attendance->attended_at->format('d M Y H:i') : null;
-
-            if ($status === 'hadir' && ! $hadir) {
-                continue;
-            }
-
-            if ($status === 'belum' && $hadir) {
-                continue;
-            }
-
-            if ($method !== null && $method !== '' && $itemMethod !== $method) {
-                continue;
-            }
-
-            $result[] = [
-                'id' => $person->id,
-                'nama' => $person->nama,
+            return [
+                'id' => $row->id,
+                'nama' => $row->nama,
+                'participant_number' => $row->participant_number,
                 'hadir' => $hadir,
-                'attended_at' => $attendedAt,
-                'method' => $itemMethod,
+                'attended_at' => $hadir && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null,
+                'method' => $hadir ? $row->attendance_method : null,
             ];
-        }
-
-        return $result;
+        })->all();
     }
 }

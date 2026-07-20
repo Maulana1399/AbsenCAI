@@ -105,32 +105,55 @@
             @if ($showingConfirmation && $selectedPersonId !== null)
                 {{-- Selected person confirmation --}}
                 <div class="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Peserta dipilih:</p>
+                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Konfirmasi peserta:</p>
                     <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-white">{{ $selectedPersonName }}</p>
-                    <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ $desaName }}</p>
+                    @if ($selectedPersonNumber)
+                        <p class="text-sm text-zinc-500">No. Peserta: {{ $selectedPersonNumber }}</p>
+                    @endif
+                    @if ($selectedPersonKelompok)
+                        <p class="text-sm text-zinc-500">Kelompok: {{ $selectedPersonKelompok }}</p>
+                    @endif
+                    <p class="text-sm text-zinc-500">{{ $desaName }}</p>
+                    @if ($selectedPersonHadir)
+                        <div class="mt-2 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                            Sudah Hadir
+                        </div>
+                    @endif
                 </div>
 
-                <div class="mt-4 flex gap-2">
-                    <flux:button
-                        wire:click="confirmOperatorAttendance"
-                        :loading="$processing"
-                    >
-                        Tandai Hadir
-                    </flux:button>
+                @if (!$selectedPersonHadir)
+                    <div class="mt-4 flex gap-2">
+                        <flux:button
+                            wire:click="confirmOperatorAttendance"
+                            :loading="$processing"
+                        >
+                            Tandai Hadir
+                        </flux:button>
 
-                    <flux:button
-                        wire:click="resetSelection"
-                        variant="ghost"
-                    >
-                        Batal
-                    </flux:button>
-                </div>
+                        <flux:button
+                            wire:click="resetSelection"
+                            variant="ghost"
+                        >
+                            Batal
+                        </flux:button>
+                    </div>
+                @else
+                    <div class="mt-4">
+                        <flux:button
+                            wire:click="resetSelection"
+                            variant="ghost"
+                            class="w-full"
+                        >
+                            Kembali
+                        </flux:button>
+                    </div>
+                @endif
             @else
                 {{-- Search --}}
                 <div class="mt-4">
                     <flux:input
                         wire:model="query"
-                        placeholder="Cari nama peserta (min. 3 karakter)..."
+                        placeholder="Cari nama atau no. peserta..."
                         class="w-full"
                     />
 
@@ -151,13 +174,29 @@
                         @foreach ($searchResults as $result)
                             <button
                                 type="button"
-                                wire:click="selectPerson({{ $result['id'] }})"
+                                wire:click="selectPerson({{ $result['id'] }}, '{{ $result['participant_number'] }}', '{{ $result['kelompok'] }}', {{ $result['hadir'] ? 'true' : 'false' }})"
                                 class="w-full rounded-lg border border-zinc-200 px-4 py-3 text-left text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
                             >
-                                <span class="font-medium text-zinc-900 dark:text-white">{{ $result['nama'] }}</span>
-                                @if ($result['has_birth_date'])
-                                    <span class="text-zinc-400 ml-2">({{ $result['birth_date_masked'] }})</span>
-                                @endif
+                                <div class="flex items-center justify-between">
+                                    <div class="min-w-0 flex-1">
+                                        <span class="font-medium text-zinc-900 dark:text-white">{{ $result['nama'] }}</span>
+                                        @if ($result['participant_number'])
+                                            <span class="text-xs text-zinc-400 ml-2">{{ $result['participant_number'] }}</span>
+                                        @endif
+                                        @if ($result['kelompok'])
+                                            <span class="text-xs text-zinc-400 ml-1">({{ $result['kelompok'] }})</span>
+                                        @endif
+                                    </div>
+                                    @if ($result['hadir'])
+                                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 shrink-0 ml-2">
+                                            Hadir
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 shrink-0 ml-2">
+                                            Belum Hadir
+                                        </span>
+                                    @endif
+                                </div>
                             </button>
                         @endforeach
                     </div>

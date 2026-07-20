@@ -307,3 +307,43 @@ test('halaman report dengan active event tetap berfungsi normal', function () {
     $response->assertOk();
     $response->assertSee('Total Warga');
 });
+
+// ===========================================================================
+// PGM.15 — Regional attendanceList attended_at from raw join
+// ===========================================================================
+
+test('regional attendanceList attended_at diformat dengan benar dari raw join', function () {
+    $event = pgm9_event();
+    $desa = pgm9_desa();
+    $person = pgm9_person('Jono', 'L', $desa->id);
+
+    $now = Carbon::now();
+    $result = app(DesaAccessService::class)->createGrant(
+        $event, $desa,
+        $now->copy()->subHour(),
+        $now->copy()->addHour(),
+    );
+    $grant = $result['grant'];
+
+    app(PengajianAttendanceService::class)->attendPersonPublicContext(
+        $person, $grant,
+    );
+
+    $list = app(PengajianRegionalReportService::class)->attendanceList($event);
+
+    expect($list)->toHaveCount(1);
+    expect($list[0]['hadir'])->toBeTrue();
+    expect($list[0]['attended_at'])->toMatch('/^\d{2} [A-Za-z]{3} \d{4} \d{2}:\d{2}$/');
+});
+
+test('regional attendanceList untuk peserta belum hadir memberikan null attended_at', function () {
+    $event = pgm9_event();
+    $desa = pgm9_desa();
+    pgm9_person('Jono', 'L', $desa->id);
+
+    $list = app(PengajianRegionalReportService::class)->attendanceList($event);
+
+    expect($list)->toHaveCount(1);
+    expect($list[0]['hadir'])->toBeFalse();
+    expect($list[0]['attended_at'])->toBeNull();
+});

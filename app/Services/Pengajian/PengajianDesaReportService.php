@@ -4,8 +4,9 @@ namespace App\Services\Pengajian;
 
 use App\Models\DesaAccessGrant;
 use App\Models\EventAttendance;
-use App\Models\Participation;
 use App\Models\Person;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PengajianDesaReportService
 {
@@ -70,56 +71,52 @@ class PengajianDesaReportService
         $desaId = $grant->desa_id;
 
         $query = Person::query()
+            ->select([
+                'people.id',
+                'people.nama',
+                'participations.participant_number',
+                'event_attendances.id as attendance_id',
+                'event_attendances.method as attendance_method',
+                'event_attendances.attended_at',
+            ])
+            ->leftJoin('participations', function ($join) use ($eventId) {
+                $join->on('participations.person_id', '=', 'people.id')
+                    ->where('participations.event_id', '=', $eventId);
+            })
+            ->leftJoin('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
             ->where('people.desa_id', $desaId);
 
         if ($search !== null && mb_strlen(trim($search)) >= 3) {
-            $query->where('people.nama', 'like', '%'.trim($search).'%');
+            $trimmed = trim($search);
+            $query->where(function ($q) use ($trimmed) {
+                $q->where('people.nama', 'like', '%'.$trimmed.'%')
+                    ->orWhere('participations.participant_number', 'like', '%'.$trimmed.'%');
+            });
         }
 
-        $query->orderBy('people.nama');
+        if ($status === 'hadir') {
+            $query->whereNotNull('event_attendances.id');
+        } elseif ($status === 'belum') {
+            $query->whereNull('event_attendances.id');
+        }
 
-        $persons = $query->get(['people.id', 'people.nama']);
+        if ($method !== null && $method !== '') {
+            $query->where('event_attendances.method', $method);
+        }
 
-        $result = [];
+        $rows = $query->orderBy('people.nama')->get();
 
-        foreach ($persons as $person) {
-            $participation = Participation::query()
-                ->where('person_id', $person->id)
-                ->where('event_id', $eventId)
-                ->first();
+        return $rows->map(function ($row) {
+            $hadir = $row->attendance_id !== null;
 
-            $attendance = null;
-            if ($participation) {
-                $attendance = EventAttendance::query()
-                    ->where('participation_id', $participation->id)
-                    ->first();
-            }
-
-            $hadir = $attendance !== null;
-            $itemMethod = $hadir ? $attendance->method : null;
-            $attendedAt = $hadir ? $attendance->attended_at->format('d M Y H:i') : null;
-
-            if ($status === 'hadir' && ! $hadir) {
-                continue;
-            }
-
-            if ($status === 'belum' && $hadir) {
-                continue;
-            }
-
-            if ($method !== null && $method !== '' && $itemMethod !== $method) {
-                continue;
-            }
-
-            $result[] = [
-                'id' => $person->id,
-                'nama' => $person->nama,
+            return [
+                'id' => $row->id,
+                'nama' => $row->nama,
+                'participant_number' => $row->participant_number,
                 'hadir' => $hadir,
-                'attended_at' => $attendedAt,
-                'method' => $itemMethod,
+                'attended_at' => $hadir && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null,
+                'method' => $hadir ? $row->attendance_method : null,
             ];
-        }
-
-        return $result;
+        })->all();
     }
 }

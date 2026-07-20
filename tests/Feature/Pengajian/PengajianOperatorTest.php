@@ -256,7 +256,7 @@ test('Existing operator attendance tidak dioverwrite oleh self', function () {
 
     expect(fn () => app(PengajianAttendanceService::class)->attendPersonPublicContext(
         $person, $grant,
-    ))->toThrow(\Illuminate\Database\QueryException::class);
+    ))->toThrow(\RuntimeException::class, 'Peserta sudah tercatat hadir.');
 
     expect(EventAttendance::count())->toBe(1);
     expect($attendance->fresh()->method)->toBe('operator');
@@ -437,4 +437,60 @@ test('Public self-attendance PGM.6 tetap bekerja', function () {
 
     expect($attendance->method)->toBe('self');
     expect($attendance->recorded_by)->toBeNull();
+});
+
+// ===========================================================================
+// PGM.15 — Operator search with attended_at from raw join
+// ===========================================================================
+
+test('operator search attended participant returns status Hadir tanpa exception', function () {
+    $event = pgm7_event();
+    $desa = pgm7_desa();
+    $grant = pgm7_grant($event, $desa);
+    $person = pgm7_person('Rasen Hadir', 'L', $desa->id);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext(
+        $person, $grant,
+    );
+
+    $results = app(PengajianIdentityService::class)
+        ->searchPersonsForOperator($grant, 'Rasen');
+
+    expect($results)->toHaveCount(1);
+    expect($results[0]['nama'])->toBe('Rasen Hadir');
+    expect($results[0]['hadir'])->toBeTrue();
+});
+
+test('operator search non-attended participant returns null attended_at', function () {
+    $event = pgm7_event();
+    $desa = pgm7_desa();
+    $grant = pgm7_grant($event, $desa);
+    pgm7_person('Belum Absen', 'L', $desa->id);
+
+    $results = app(PengajianIdentityService::class)
+        ->searchPersonsForOperator($grant, 'Belum');
+
+    expect($results)->toHaveCount(1);
+    expect($results[0]['hadir'])->toBeFalse();
+    expect($results[0]['attended_at'])->toBeNull();
+    expect($results[0]['method'])->toBeNull();
+});
+
+test('operator search with mixed attended and unattended returns correct statuses', function () {
+    $event = pgm7_event();
+    $desa = pgm7_desa();
+    $grant = pgm7_grant($event, $desa);
+
+    $hadir = pgm7_person('Siti Hadir', 'P', $desa->id);
+    pgm7_person('Siti Belum', 'P', $desa->id);
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext(
+        $hadir, $grant,
+    );
+
+    $results = app(PengajianIdentityService::class)
+        ->searchPersonsForOperator($grant, 'Siti');
+
+    expect($results)->toHaveCount(2);
+    expect(collect($results)->firstWhere('hadir', true)['nama'])->toBe('Siti Hadir');
+    expect(collect($results)->firstWhere('hadir', false)['nama'])->toBe('Siti Belum');
 });

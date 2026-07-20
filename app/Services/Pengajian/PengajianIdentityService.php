@@ -6,6 +6,7 @@ use App\Models\DesaAccessGrant;
 use App\Models\IdentityCorrectionRequest;
 use App\Models\Person;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class PengajianIdentityService
 {
@@ -14,7 +15,7 @@ class PengajianIdentityService
 
     private const BIRTH_DATE_FORMAT_MASKED = 'd M';
 
-    public function searchPersons(DesaAccessGrant $grant, string $query): array
+    public function searchPersons(DesaAccessGrant $grant, string $query, bool $includeIdentifiers = false): array
     {
         if ($grant->desa_id === null) {
             throw new \RuntimeException('Grant tidak memiliki desa scope.');
@@ -26,16 +27,42 @@ class PengajianIdentityService
             return [];
         }
 
-        $persons = Person::query()
-            ->where('desa_id', $grant->desa_id)
-            ->where(function (Builder $q) use ($trimmed) {
-                $q->where('nama', 'like', '%'.$trimmed.'%');
-            })
-            ->orderBy('nama')
-            ->limit(self::MAX_RESULTS)
-            ->get(['id', 'nama', 'tanggal_lahir', 'desa_id']);
+        $eventId = $grant->event_id;
 
-        return $persons->map(fn (Person $person) => $this->toSearchResult($person))->all();
+        $persons = Person::query()
+            ->where('people.desa_id', $grant->desa_id)
+            ->where(function (Builder $q) use ($trimmed, $includeIdentifiers) {
+                $q->where('people.nama', 'like', '%'.$trimmed.'%');
+                if ($includeIdentifiers) {
+                    $q->orWhere('participations.participant_number', 'like', '%'.$trimmed.'%');
+                }
+            })
+            ->leftJoin('participations', function ($join) use ($eventId) {
+                $join->on('participations.person_id', '=', 'people.id')
+                    ->where('participations.event_id', '=', $eventId);
+            })
+            ->leftJoin('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
+            ->leftJoin('kelompoks', 'kelompoks.id', '=', 'people.kelompok_id')
+            ->orderBy('people.nama')
+            ->limit(self::MAX_RESULTS)
+            ->get([
+                'people.id',
+                'people.nama',
+                'people.tanggal_lahir',
+                'people.desa_id',
+                'participations.participant_number',
+                'event_attendances.id as attendance_id',
+                'event_attendances.method as attendance_method',
+                'event_attendances.attended_at',
+                'kelompoks.kelompok_asal',
+            ]);
+
+        return $persons->map(fn ($row) => $this->toSearchResult($row, $includeIdentifiers))->all();
+    }
+
+    public function searchPersonsForOperator(DesaAccessGrant $grant, string $query): array
+    {
+        return $this->searchPersons($grant, $query, includeIdentifiers: true);
     }
 
     public function findPersonInDesa(int $personId, int $desaId): ?Person
@@ -98,13 +125,27 @@ class PengajianIdentityService
         ]);
     }
 
-    private function toSearchResult(Person $person): array
+    private function toSearchResult($row, bool $includeIdentifiers): array
     {
-        return [
-            'id' => $person->id,
-            'nama' => $person->nama,
-            'birth_date_masked' => $person->tanggal_lahir?->format(self::BIRTH_DATE_FORMAT_MASKED),
-            'has_birth_date' => $person->tanggal_lahir !== null,
+        $hadir = $row->attendance_id !== null;
+        $method = $hadir ? $row->attendance_method : null;
+        $attendedAt = $hadir && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null;
+
+        $result = [
+            'id' => $row->id,
+            'nama' => $row->nama,
+            'hadir' => $hadir,
+            'attended_at' => $attendedAt,
+            'method' => $method,
+            'birth_date_masked' => $row->tanggal_lahir?->format(self::BIRTH_DATE_FORMAT_MASKED),
+            'has_birth_date' => $row->tanggal_lahir !== null,
         ];
+
+        if ($includeIdentifiers) {
+            $result['participant_number'] = $row->participant_number;
+            $result['kelompok'] = $row->kelompok_asal;
+        }
+
+        return $result;
     }
 }

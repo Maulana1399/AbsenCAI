@@ -37,6 +37,9 @@ class DesaDashboard extends Component
     public bool $showingConfirmation = false;
     public ?int $selectedPersonId = null;
     public ?string $selectedPersonName = null;
+    public ?string $selectedPersonNumber = null;
+    public ?string $selectedPersonKelompok = null;
+    public bool $selectedPersonHadir = false;
 
     public ?string $successMessage = null;
     public ?string $errorMessage = null;
@@ -126,7 +129,7 @@ class DesaDashboard extends Component
 
         try {
             $this->searchResults = app(PengajianIdentityService::class)
-                ->searchPersons($this->grant, $trimmed);
+                ->searchPersonsForOperator($this->grant, $trimmed);
         } catch (\Throwable $e) {
             $this->errorMessage = 'Pencarian gagal. Silakan coba lagi.';
             $this->searchResults = [];
@@ -135,7 +138,7 @@ class DesaDashboard extends Component
         }
     }
 
-    public function selectPerson(int $personId): void
+    public function selectPerson(int $personId, ?string $participantNumber = null, ?string $kelompok = null, bool $hadir = false): void
     {
         if ($this->grant === null) {
             return;
@@ -156,6 +159,9 @@ class DesaDashboard extends Component
 
         $this->selectedPersonId = $person->id;
         $this->selectedPersonName = $person->nama;
+        $this->selectedPersonNumber = $participantNumber;
+        $this->selectedPersonKelompok = $kelompok;
+        $this->selectedPersonHadir = $hadir;
         $this->showingConfirmation = true;
     }
 
@@ -169,6 +175,12 @@ class DesaDashboard extends Component
         $this->processing = true;
         $this->errorMessage = null;
         $this->successMessage = null;
+
+        if ($this->selectedPersonHadir) {
+            $this->errorMessage = 'Peserta sudah tercatat hadir.';
+            $this->processing = false;
+            return;
+        }
 
         $person = app(PengajianIdentityService::class)
             ->findPersonInDesa($this->selectedPersonId, $this->grant->desa_id);
@@ -189,6 +201,9 @@ class DesaDashboard extends Component
             $this->showingConfirmation = false;
             $this->selectedPersonId = null;
             $this->selectedPersonName = null;
+            $this->selectedPersonNumber = null;
+            $this->selectedPersonKelompok = null;
+            $this->selectedPersonHadir = false;
             $this->query = '';
             $this->searchResults = [];
             $this->loadSummary();
@@ -211,6 +226,9 @@ class DesaDashboard extends Component
         $this->showingConfirmation = false;
         $this->selectedPersonId = null;
         $this->selectedPersonName = null;
+        $this->selectedPersonNumber = null;
+        $this->selectedPersonKelompok = null;
+        $this->selectedPersonHadir = false;
         $this->errorMessage = null;
         $this->successMessage = null;
     }

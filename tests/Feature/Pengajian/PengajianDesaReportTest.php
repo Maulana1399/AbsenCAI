@@ -612,3 +612,59 @@ test('Cross-Desa attendance tidak muncul di list', function () {
     expect($listA[0]['nama'])->toBe('Jono A');
     expect($listA[0]['hadir'])->toBeTrue();
 });
+
+// ===========================================================================
+// PGM.15 — attended_at format from raw join regression
+// ===========================================================================
+
+test('attendanceList attended_at diformat dengan benar dari raw join', function () {
+    $event = pgm7r_event();
+    $desa = pgm7r_desa();
+    $grant = pgm7r_grant($event, $desa);
+    $person = pgm7r_person('Jono', 'L', $desa->id);
+
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext(
+        $person, $grant,
+    );
+
+    $list = app(PengajianDesaReportService::class)->attendanceList($grant);
+
+    expect($list)->toHaveCount(1);
+    expect($list[0]['hadir'])->toBeTrue();
+    expect($list[0]['attended_at'])->toMatch('/^\d{2} [A-Za-z]{3} \d{4} \d{2}:\d{2}$/');
+    expect($list[0]['method'])->toBe('operator');
+});
+
+test('attendanceList untuk peserta belum hadir memberikan null attended_at', function () {
+    $event = pgm7r_event();
+    $desa = pgm7r_desa();
+    $grant = pgm7r_grant($event, $desa);
+    pgm7r_person('Jono', 'L', $desa->id);
+
+    $list = app(PengajianDesaReportService::class)->attendanceList($grant);
+
+    expect($list)->toHaveCount(1);
+    expect($list[0]['hadir'])->toBeFalse();
+    expect($list[0]['attended_at'])->toBeNull();
+    expect($list[0]['method'])->toBeNull();
+});
+
+test('attendanceList dengan multiple peserta dan attendance menghasilkan attended_at yang benar', function () {
+    $event = pgm7r_event();
+    $desa = pgm7r_desa();
+    $grant = pgm7r_grant($event, $desa);
+
+    $hadir = pgm7r_person('Jono', 'L', $desa->id);
+    pgm7r_person('Joni', 'L', $desa->id);
+    app(PengajianAttendanceService::class)->attendPersonOperatorContext(
+        $hadir, $grant,
+    );
+
+    $list = app(PengajianDesaReportService::class)->attendanceList($grant);
+
+    expect($list)->toHaveCount(2);
+    $hadirItem = collect($list)->firstWhere('hadir', true);
+    expect($hadirItem['attended_at'])->toMatch('/^\d{2} [A-Za-z]{3} \d{4} \d{2}:\d{2}$/');
+    $belumItem = collect($list)->firstWhere('hadir', false);
+    expect($belumItem['attended_at'])->toBeNull();
+});
