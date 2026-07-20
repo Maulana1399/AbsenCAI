@@ -22,7 +22,8 @@ class Dashboard extends Component
 
     public function mount()
     {
-        $this->totalPeserta = Participation::count();
+        $event = app(ActiveEventContext::class)->current();
+        $this->totalPeserta = $event ? Participation::where('event_id', $event->id)->count() : 0;
         $this->totalDesa = desa::count();
         $this->totalKelompok = kelompok::count();
         $this->totalRegu = regu::count();

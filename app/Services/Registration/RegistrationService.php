@@ -157,6 +157,6 @@ class RegistrationService
     {
         $context = app(ActiveEventContext::class);
 
-        return $context->current() ?? $context->resolveDefault() ?? throw new \RuntimeException('No active event available.');
+        return $context->current() ?? throw new \RuntimeException('No active event available.');
     }
 }

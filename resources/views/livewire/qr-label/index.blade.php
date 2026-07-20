@@ -53,7 +53,7 @@
                         <div class="grid gap-3">
                             @forelse($results as $participant)
                                 <button type="button" wire:click="selectParticipant({{ $participant->id }})" class="w-full rounded-xl border p-3 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-900 {{ $selectedParticipantId === $participant->id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950' }}">
-                                    <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->nama }}</div>
+                                    <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->person?->nama ?? '-' }}</div>
                                     <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{{ $participant->participant_number }} · {{ $participant->attendance_code }}</div>
                                 </button>
                             @empty
@@ -68,7 +68,7 @@
 
                     @if($selectedParticipant)
                         <div class="mt-4 space-y-3 text-sm text-zinc-700 dark:text-zinc-300">
-                            <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900"><span class="font-medium">Nama:</span> <span>{{ $selectedParticipant->nama }}</span></div>
+                            <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900"><span class="font-medium">Nama:</span> <span>{{ $selectedParticipant->person?->nama ?? '-' }}</span></div>
                             <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900"><span class="font-medium">Participant Number:</span> <span>{{ $selectedParticipant->participant_number }}</span></div>
                             <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900"><span class="font-medium">Attendance Code:</span> <span>{{ $selectedParticipant->attendance_code }}</span></div>
                         </div>
@@ -165,7 +165,7 @@
                     <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                         @forelse($batchParticipants as $participant)
                             <button type="button" wire:click="selectParticipant({{ $participant->id }})" class="rounded-xl border p-3 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-800 {{ $selectedParticipantId === $participant->id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900' }}">
-                                <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->nama }}</div>
+                                <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->person?->nama ?? '-' }}</div>
                                 <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{{ $participant->participant_number }} · {{ $participant->attendance_code }}</div>
                             </button>
                         @empty
@@ -236,7 +236,7 @@
                         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                             @forelse($labelPreview as $participant)
                                 <button type="button" wire:click="selectLabelParticipant({{ $participant->id }})" class="cursor-pointer rounded-xl border p-3 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-800 {{ $selectedLabelParticipantId === $participant->id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900' }}">
-                                    <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->nama }}</div>
+                                    <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->person?->nama ?? '-' }}</div>
                                     <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{{ $participant->participant_number }} · {{ $participant->attendance_code }}</div>
                                 </button>
                             @empty

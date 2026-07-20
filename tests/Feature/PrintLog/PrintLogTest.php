@@ -9,6 +9,45 @@ use App\Models\SuratIzin;
 use App\Models\User;
 use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
+use App\Support\ActiveEventContext;
+
+function printLog_createMappedPeserta(Event $event, array $overrides = []): peserta
+{
+    $nip = $overrides['nip'] ?? fake()->unique()->numberBetween(9000, 9999);
+    $name = $overrides['nama'] ?? 'Peserta '.$nip;
+    $gender = $overrides['jenis_kelamin'] ?? 'Laki - Laki';
+    $attendanceCode = $overrides['attendance_code'] ?? 'KJA-'.strtoupper(str()->random(8));
+
+    $peserta = peserta::create([
+        'nama' => $name,
+        'nip' => (int) $nip,
+        'attendance_code' => $attendanceCode,
+        'jenis_kelamin' => $gender,
+    ]);
+
+    $person = Person::create([
+        'nama' => $name,
+        'nip' => (int) $nip,
+        'jenis_kelamin' => $gender === 'Laki - Laki' ? 'L' : 'P',
+    ]);
+
+    $participation = Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'participant_number' => $overrides['participant_number'] ?? 'KL'.str_pad((string) $peserta->id, 3, '0', STR_PAD_LEFT),
+        'attendance_code' => $attendanceCode,
+        'jenis_peserta' => $overrides['jenis_peserta'] ?? 'Wajib',
+    ]);
+
+    LegacyPesertaMapping::create([
+        'peserta_id' => $peserta->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
+    ]);
+
+    return $peserta;
+}
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -20,7 +59,7 @@ beforeEach(function () {
         'attendance_code' => 'KJA-PRINT-TEST',
         'jenis_kelamin'   => 'Laki - Laki',
     ]);
-    $event = Event::create([
+    $this->event = Event::create([
         'name' => 'Print QR Event',
         'slug' => 'print-qr-event-'.str()->random(6),
         'status' => 'active',
@@ -32,7 +71,7 @@ beforeEach(function () {
     ]);
     $participation = Participation::create([
         'person_id' => $person->id,
-        'event_id' => $event->id,
+        'event_id' => $this->event->id,
         'participant_number' => 'KL001',
         'attendance_code' => $this->peserta->attendance_code,
         'jenis_peserta' => 'Wajib',
@@ -41,8 +80,10 @@ beforeEach(function () {
         'peserta_id' => $this->peserta->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,
-        'event_id' => $event->id,
+        'event_id' => $this->event->id,
     ]);
+
+    app(ActiveEventContext::class)->set($this->event);
 });
 
 // ---------------------------------------------------------------------------
@@ -210,8 +251,8 @@ test('qr label single print response remains successful', function () {
 // ---------------------------------------------------------------------------
 
 test('qr label batch filtered print creates exactly one activity log entry', function () {
-    peserta::create(['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
-    peserta::create(['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
 
     $this->get(route('qr-label.print.filtered'));
 
@@ -222,8 +263,8 @@ test('qr label batch filtered print creates exactly one activity log entry', fun
 });
 
 test('qr label batch filtered print stores correct count', function () {
-    peserta::create(['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
-    peserta::create(['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
 
     $this->get(route('qr-label.print.filtered'));
 
@@ -237,7 +278,7 @@ test('qr label batch filtered print stores correct count', function () {
 });
 
 test('qr label batch filtered print response remains successful', function () {
-    peserta::create(['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
 
     $this->get(route('qr-label.print.filtered'))
         ->assertStatus(200);
@@ -248,8 +289,8 @@ test('qr label batch filtered print response remains successful', function () {
 // ---------------------------------------------------------------------------
 
 test('qr label batch a4 print creates exactly one activity log entry', function () {
-    peserta::create(['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
-    peserta::create(['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
 
     $this->get(route('qr-label.print.a4'));
 
@@ -260,7 +301,7 @@ test('qr label batch a4 print creates exactly one activity log entry', function 
 });
 
 test('qr label batch a4 print stores correct count and format', function () {
-    peserta::create(['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
 
     $this->get(route('qr-label.print.a4'));
 
@@ -274,7 +315,7 @@ test('qr label batch a4 print stores correct count and format', function () {
 });
 
 test('qr label batch a4 print response remains successful', function () {
-    peserta::create(['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
+    printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
 
     $this->get(route('qr-label.print.a4'))
         ->assertStatus(200);

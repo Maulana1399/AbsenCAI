@@ -7,6 +7,7 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
 use App\Services\QR\QRService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -19,10 +20,12 @@ beforeEach(function () {
         'slug' => 'qr-log-event-'.str()->random(6),
         'status' => 'active',
     ]);
+    app(ActiveEventContext::class)->set($event);
+
     $person = Person::create([
         'nama' => 'Peserta QR Log',
         'nip' => 5001,
-        'jenis_kelamin' => 'L',
+        'jenis_kelamin' => 'P',
     ]);
     $this->participant = Participation::create([
         'person_id' => $person->id,
@@ -195,6 +198,8 @@ test('generateBatchExport creates activity log entry', function () {
         'slug' => 'qr-batch-event-'.str()->random(6),
         'status' => 'active',
     ]);
+    app(ActiveEventContext::class)->set($event);
+
     $person = Person::create([
         'nama' => 'Peserta Batch 2',
         'nip' => 5002,
@@ -226,6 +231,8 @@ test('generateBatchExport stores correct module and action', function () {
         'slug' => 'qr-batch-event-3-'.str()->random(6),
         'status' => 'active',
     ]);
+    app(ActiveEventContext::class)->set($event);
+
     $person = Person::create([
         'nama' => 'Peserta Batch 3',
         'nip' => 5003,
@@ -273,6 +280,8 @@ test('generateBatchExport stores correct properties', function () {
         'slug' => 'qr-batch-event-4-'.str()->random(6),
         'status' => 'active',
     ]);
+    app(ActiveEventContext::class)->set($event);
+
     $person = Person::create([
         'nama' => 'Peserta Batch 4',
         'nip' => 5004,
@@ -309,7 +318,7 @@ test('generateBatchExport stores correct properties', function () {
     expect($log->properties)->toMatchArray([
         'qr_type'      => 'batch',
         'format'       => 'png',
-        'record_count' => 1,
+        'record_count' => 2,
         'skipped'      => 0,
         'failed'       => 0,
         'directory'    => 'qr-exports',

@@ -116,7 +116,11 @@ class RekapAbsensi extends Component
     {
         $event = app(ActiveEventContext::class)->current();
 
-        return SesiAbsensi::query()->when($event !== null, fn ($query) => $query->where('event_id', $event->id));
+        if ($event === null) {
+            return SesiAbsensi::query()->whereRaw('0 = 1');
+        }
+
+        return SesiAbsensi::query()->where('event_id', $event->id);
     }
 
     private function presentParticipation(Participation $participation): object

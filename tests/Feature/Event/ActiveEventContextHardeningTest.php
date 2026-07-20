@@ -149,48 +149,41 @@ test('requireCurrent throws when no events exist', function () {
         ->toThrow(\RuntimeException::class, 'No active event available.');
 });
 
-test('requireCurrent returns default when no event explicitly selected', function () {
-    $event = ActiveEvent_makeEvent();
+test('requireCurrent throws when no event explicitly selected even if active events exist', function () {
+    ActiveEvent_makeEvent();
     $context = app(ActiveEventContext::class);
 
-    expect($context->requireCurrent()->is($event))->toBeTrue();
+    expect(fn () => $context->requireCurrent())
+        ->toThrow(\RuntimeException::class, 'No active event available.');
 });
 
 // ---------------------------------------------------------------------------
-// resolveDefault
+// containsExplicitSession
 // ---------------------------------------------------------------------------
 
-test('resolveDefault returns first active event when available', function () {
-    $event = ActiveEvent_makeEvent(['name' => 'Default Event', 'slug' => 'default-event']);
+test('containsExplicitSession returns false when no session set', function () {
     $context = app(ActiveEventContext::class);
 
-    $result = $context->resolveDefault();
-
-    expect($result)->not->toBeNull()
-        ->and($result->id)->toBe($event->id);
+    expect($context->containsExplicitSession())->toBeFalse();
 });
 
-test('resolveDefault returns null when no active events exist', function () {
-    $context = app(ActiveEventContext::class);
-
-    expect($context->resolveDefault())->toBeNull();
-});
-
-test('resolveDefault returns null when only archived events exist', function () {
-    $event = ActiveEvent_makeEvent();
-    $event->update(['status' => 'archived']);
-    $context = app(ActiveEventContext::class);
-
-    expect($context->resolveDefault())->toBeNull();
-});
-
-test('resolveDefault does not modify session', function () {
+test('containsExplicitSession returns true after set', function () {
     $event = ActiveEvent_makeEvent();
     $context = app(ActiveEventContext::class);
 
-    $context->resolveDefault();
+    $context->set($event);
 
-    expect($context->id())->toBe($event->id);
+    expect($context->containsExplicitSession())->toBeTrue();
+});
+
+test('containsExplicitSession returns false after clear', function () {
+    $event = ActiveEvent_makeEvent();
+    $context = app(ActiveEventContext::class);
+
+    $context->set($event);
+    $context->clear();
+
+    expect($context->containsExplicitSession())->toBeFalse();
 });
 
 // ---------------------------------------------------------------------------
@@ -227,9 +220,9 @@ test('stale session id for archived event is cleared', function () {
         ->and($fresh->id())->toBeNull();
 });
 
-test('stale session falls back to other active event', function () {
+test('stale session does not fall back to other active event', function () {
     $target = ActiveEvent_makeEvent(['name' => 'Target', 'slug' => 'target']);
-    $other = ActiveEvent_makeEvent(['name' => 'Other', 'slug' => 'other']);
+    ActiveEvent_makeEvent(['name' => 'Other', 'slug' => 'other']);
     $context = app(ActiveEventContext::class);
 
     $context->set($target);
@@ -237,8 +230,8 @@ test('stale session falls back to other active event', function () {
 
     $fresh = app(ActiveEventContext::class);
 
-    expect($fresh->hasActiveEvent())->toBeTrue()
-        ->and($fresh->id())->toBe($other->id);
+    expect($fresh->hasActiveEvent())->toBeFalse()
+        ->and($fresh->id())->toBeNull();
 });
 
 // ---------------------------------------------------------------------------
@@ -379,6 +372,7 @@ test('no-event state is safe for all legacy routes', function () {
 });
 
 test('no active event — event switcher shows Pilih Event', function () {
+    ActiveEvent_makeEvent();
     $user = ActiveEvent_makeUser();
     $this->actingAs($user);
 

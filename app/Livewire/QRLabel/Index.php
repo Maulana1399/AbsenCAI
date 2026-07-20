@@ -167,16 +167,12 @@ class Index extends Component
 
     private function resolveLabelParticipant(int $participantId): Participation
     {
-        $event = app(ActiveEventContext::class)->current();
+        $event = app(ActiveEventContext::class)->requireCurrent();
 
-        $query = Participation::with(['person', 'event', 'legacyPesertaMapping'])
-            ->whereKey($participantId);
-
-        if ($event !== null) {
-            $query->where('event_id', $event->id);
-        }
-
-        return $query->firstOrFail();
+        return Participation::with(['person', 'event', 'legacyPesertaMapping'])
+            ->whereKey($participantId)
+            ->where('event_id', $event->id)
+            ->firstOrFail();
     }
 
     private function syncLabelPreview(?Collection $participants = null): void
@@ -220,18 +216,19 @@ class Index extends Component
 
     private function participantSearchResults(): Collection
     {
-        return $this->filteredParticipations()->map(fn (Participation $participation) => $participation->person)->filter()->values();
+        return $this->filteredParticipations();
     }
 
     private function filteredParticipations(): Collection
     {
         $event = app(ActiveEventContext::class)->current();
 
-        $query = Participation::with(['person.desa', 'event']);
-
-        if ($event !== null) {
-            $query->where('event_id', $event->id);
+        if ($event === null) {
+            return collect();
         }
+
+        $query = Participation::with(['person.desa', 'event'])
+            ->where('event_id', $event->id);
 
         if ($this->filterDesa !== '') {
             $query->whereHas('person', fn ($builder) => $builder->where('desa_id', $this->filterDesa));

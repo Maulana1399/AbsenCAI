@@ -22,8 +22,13 @@ class ActivityRegistrationExport implements FromCollection, WithHeadings, Should
     {
         $eventId = $this->event_id ?? app(ActiveEventContext::class)->current()?->id;
 
-        $query = ActivityRegistration::with(['participation.person.desa', 'activity.activityGroup', 'categoryDefinition'])
-            ->when($eventId !== null, fn ($builder) => $builder->where('event_id', $eventId));
+        $query = ActivityRegistration::with(['participation.person.desa', 'activity.activityGroup', 'categoryDefinition']);
+
+        if ($eventId !== null) {
+            $query->where('event_id', $eventId);
+        } else {
+            $query->whereRaw('0 = 1');
+        }
 
         if ($this->activity_group_id) {
             $query->whereHas('activity', fn ($builder) => $builder->where('activity_group_id', $this->activity_group_id));

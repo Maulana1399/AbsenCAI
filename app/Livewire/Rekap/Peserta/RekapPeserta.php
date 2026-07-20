@@ -38,6 +38,8 @@ class RekapPeserta extends Component
 
         if ($event !== null) {
             $query->where('event_id', $event->id);
+        } else {
+            $query->whereRaw('0 = 1');
         }
 
         if ($this->regu_id) {
@@ -100,6 +102,14 @@ class RekapPeserta extends Component
 
     public function exportExcel()
     {
+        $eventId = app(ActiveEventContext::class)->current()?->id;
+
+        if ($eventId === null) {
+            session()->flash('error', 'Pilih event terlebih dahulu.');
+
+            return;
+        }
+
         $fileName = 'rekap-peserta-'.now()->format('YmdHis').'.xlsx';
 
         $filters = [];
@@ -110,7 +120,7 @@ class RekapPeserta extends Component
         $this->jenis_peserta && $filters['jenis_peserta'] = $this->jenis_peserta;
 
         $pesertaExport = new PesertaExport(
-            app(ActiveEventContext::class)->current()?->id,
+            $eventId,
             $this->regu_id,
             $this->kelompok_id,
             $this->desa_id,

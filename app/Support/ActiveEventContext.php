@@ -9,8 +9,6 @@ class ActiveEventContext
 {
     private const SESSION_KEY = 'active_event_id';
 
-    private bool $cleared = false;
-
     public function current(): ?Event
     {
         $sessionId = Session::get(self::SESSION_KEY);
@@ -25,11 +23,7 @@ class ActiveEventContext
             Session::forget(self::SESSION_KEY);
         }
 
-        if ($this->cleared) {
-            return null;
-        }
-
-        return Event::active()->orderBy('id')->first();
+        return null;
     }
 
     public function id(): ?int
@@ -48,9 +42,11 @@ class ActiveEventContext
         return $event;
     }
 
-    public function resolveDefault(): ?Event
+    public function containsExplicitSession(): bool
     {
-        return Event::active()->orderBy('id')->first();
+        $sessionId = Session::get(self::SESSION_KEY);
+
+        return $sessionId !== null && Event::active()->where('id', $sessionId)->exists();
     }
 
     public function set(Event $event): void
@@ -60,7 +56,6 @@ class ActiveEventContext
         }
 
         Session::put(self::SESSION_KEY, $event->id);
-        $this->cleared = false;
     }
 
     public function switchTo(int $eventId): ?Event
@@ -79,7 +74,6 @@ class ActiveEventContext
     public function clear(): void
     {
         Session::forget(self::SESSION_KEY);
-        $this->cleared = true;
     }
 
     public function hasActiveEvent(): bool

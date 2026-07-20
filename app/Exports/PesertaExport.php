@@ -40,6 +40,8 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         if ($this->event_id !== null) {
             $query->where('event_id', $this->event_id);
+        } else {
+            $query->whereRaw('0 = 1');
         }
 
         if ($this->regu_id) {

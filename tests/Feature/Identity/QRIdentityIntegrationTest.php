@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\User;
 use App\Models\peserta;
 use App\Services\QR\QRService;
+use App\Support\ActiveEventContext;
 
 use Livewire\Livewire;
 
@@ -60,6 +61,8 @@ it('QR label print route encodes attendance code and keeps participant number as
         'event_id' => $event->id,
     ]);
 
+    app(ActiveEventContext::class)->set($event);
+
     $response = $this->get('/qr-label/print/selected/'.$legacy->id);
 
     $response->assertOk();
@@ -104,9 +107,10 @@ it('QR label Livewire download uses attendance code payload', function () {
 
     app()->instance(QRService::class, $fake);
 
+    app(ActiveEventContext::class)->set($event);
+
     $response = Livewire::test(QRLabelIndex::class)
-        ->set('selectedParticipantId', $participant->id)
-        ->set('selectedParticipant', $participant->person)
+        ->set('selectedLabelParticipantId', $participant->id)
         ->call('downloadPng');
 
     $response->assertOk();

@@ -31,8 +31,13 @@ class ActivityRegistrationReport extends Component
     public function render()
     {
         $event = app(ActiveEventContext::class)->current();
-        $query = ActivityRegistration::with(['participation.person', 'activity.activityGroup', 'categoryDefinition'])
-            ->when($event !== null, fn ($builder) => $builder->where('event_id', $event->id));
+        $query = ActivityRegistration::with(['participation.person', 'activity.activityGroup', 'categoryDefinition']);
+
+        if ($event !== null) {
+            $query->where('event_id', $event->id);
+        } else {
+            $query->whereRaw('0 = 1');
+        }
 
         if ($this->activity_group_id) {
             $query->whereHas('activity', fn ($builder) => $builder->where('activity_group_id', $this->activity_group_id));
