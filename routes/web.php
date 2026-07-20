@@ -244,6 +244,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('events', EventIndex::class)->name('events.index');
     Route::get('koreksi-data', App\Livewire\Pengajian\IdentityCorrectionReview::class)
         ->name('koreksi.data');
+    Route::get('pengajian/report', App\Livewire\Pengajian\RegionalReport::class)
+        ->name('pengajian.report');
 });
 
 Route::prefix('pengajian')->group(function () {
