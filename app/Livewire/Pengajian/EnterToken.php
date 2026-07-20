@@ -3,6 +3,8 @@
 namespace App\Livewire\Pengajian;
 
 use App\Services\Pengajian\DesaAccessService;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -25,13 +27,25 @@ class EnterToken extends Component
             'token' => ['required', 'string', 'min:16'],
         ]);
 
+        $throttleKey = 'pengajian-token:'.request()->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $this->processing = false;
+            $this->addError('token', 'Terlalu banyak percobaan. Silakan coba kembali dalam '.$seconds.' detik.');
+            return;
+        }
+
         $grant = app(DesaAccessService::class)->findGrantByToken($this->token);
 
         if ($grant === null) {
+            RateLimiter::hit($throttleKey, 60);
             $this->processing = false;
             $this->addError('token', 'Token tidak valid atau sudah tidak berlaku.');
             return;
         }
+
+        RateLimiter::clear($throttleKey);
 
         session()->put('pengajian_access', [
             'grant_id' => $grant->id,

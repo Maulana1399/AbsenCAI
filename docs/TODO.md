@@ -590,6 +590,65 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 ---
 
+## Pengajian Desa MVP (PGM Series)
+
+Status: PGM.12–PGM.14.5 COMPLETE. PGM.14.1 COMPLETE. Pilot end-to-end functional.
+
+### PGM.12 Functional Fix ✅
+- [x] ActiveEventContext fails closed — no arbitrary fallback
+- [x] Cross-event isolation hardened
+
+### PGM.13 Token Management UI ✅
+- [x] DesaAccessGrant CRUD
+- [x] Token generation, validation, revocation
+- [x] Nonce rotation
+- [x] Token entry UI for operators
+
+### PGM.14 Event Context / Isolation ✅
+- [x] QR & Label migrated to Participation-based flow
+- [x] Event-scoped QR Print
+- [x] 789 passed (1865 assertions)
+
+### PGM.14.5 Manual Participant Entry ✅
+- [x] Shared service (ManualParticipantRegistrationService)
+- [x] Operator Desa manual entry with grant/session security
+- [x] Admin manual entry with explicit event/desa selection
+- [x] Conservative Person matching (nama+desa_id+tanggal_lahir)
+- [x] Tanggal lahir required; Kelompok scoped to Desa
+- [x] Grant/session validated via revalidateGrant() comparing DB against session
+- [x] 38 dedicated tests
+- [x] Full suite: 828 passed, 0 failures
+
+### PGM.15 Dashboard Desa UX Redesign 🔲 PENDING
+- [ ] Visual attendance status per participant
+- [ ] Improved search UX
+- [ ] Confirmation dialogs
+- [ ] N+1 query optimization
+
+### PGM.16 Pilot Data Validation 🔲 PENDING
+- [ ] Pilot data verification
+- [ ] End-to-end simulation
+- [ ] Data quality documentation
+
+### PGM.17 Pilot Release 🔲 PENDING
+- [ ] Final go/no-go
+- [ ] Production deployment
+- [ ] Operator training
+
+### PGM.14.1 Security & Reliability Closure ✅
+- [x] EnterToken rate limiting (IP-based, 5 failed attempts/min, reset on success)
+- [x] SelfAttendance database-agnostic duplicate handling (domain RuntimeException, no MySQL error codes)
+- [x] QrPrint session/grant integrity check (matching DesaDashboard/ManualEntry pattern)
+- [x] P0/P1 severity reclassification
+- [x] 9 new tests
+
+### Known issues (should fix before PGM.17)
+- P1: N+1 queries in PengajianDesaReportService and PengajianRegionalReportService
+- P1: Two parallel identity correction submission paths (PengajianIdentityService vs IdentityCorrectionService)
+- P2: Admin ManualEntry no RBAC (documented known limitation)
+
+---
+
 ## Sprint 2 Activity Log — Verified Integration Points
 
 | Module | Action(s) | User Boundaries | Tests |

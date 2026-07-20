@@ -563,7 +563,86 @@ Deliverables:
 - future enhancements remain deferred and non-blocking
 
 Next checkpoint:
-- Sprint 4 / future roadmap follow-up
+- PGM.15 Dashboard Desa UX Redesign
+- PGM.16 Pilot Data Validation
+- PGM.17 Pilot Release
+
+---
+
+# Pengajian Desa MVP (PGM Series)
+
+## Status
+
+✅ PGM.12–PGM.14.5 COMPLETE. Pilot end-to-end functional.
+PGM.15–PGM.17 PENDING.
+
+## Goal
+
+Desa-level attendance module for Pengajian (religious study) events.
+Built on S3 Person→Participation→Attendance architecture.
+Separate from CAI Operational; no legacy peserta/LegacyPesertaMapping dependency.
+
+## Completed
+
+### PGM.14.1 — Security & Reliability Closure
+- EnterToken rate limiting (IP-based, 5 failed attempts/min, reset on successful entry)
+- SelfAttendance duplicate handling database-agnostic (domain RuntimeException, no MySQL error codes)
+- QrPrint session/grant integrity check (same pattern as DesaDashboard/ManualEntry)
+- P0/P1 reclassified: no true P0 blockers remain on SQLite production
+- 9 new tests
+
+### PGM.12 — Functional Fix
+- ActiveEventContext no longer silently falls back to arbitrary/default events
+- Missing event context fails closed
+- Cross-event data isolation hardened
+
+### PGM.13 — Token Management UI
+- DesaAccessGrant CRUD (admin)
+- Token generation, validation, revocation
+- Nonce rotation for QR session security
+- Token entry UI for operators
+
+### PGM.14 — Event Context / Isolation
+- QR Label individual print migrated to Participation-based flow
+- QR Print All Filtered and Print All A4 migrated to event-scoped Participation data
+- Pengajian participants appear in QR & Label without legacy peserta IDs
+- 789 passed (1865 assertions)
+
+### PGM.14.1 — Security & Reliability Closure
+- EnterToken rate limiting (IP-based, 5 failed attempts/min, reset on success)
+- SelfAttendance database-agnostic duplicate handling (domain `RuntimeException`, no MySQL error codes)
+- QrPrint session/grant integrity check (matching DesaDashboard/ManualEntry pattern)
+- P0/P1 severity reclassified: no true P0 blockers remain for SQLite production
+- 9 new tests (rate limiting, QrPrint integrity, SelfAttendance duplicate via Livewire)
+- 828+ passed, 1969+ assertions
+
+### PGM.14.5 — Manual Participant Entry
+- ManualParticipantRegistrationService (shared service, no ActiveEventContext dependency)
+- Operator Desa manual entry with server-resolved grant context
+- Admin manual entry with event/desa selection
+- Conservative Person matching (name+desa+dob)
+- Timggal lahir required; Kelompok selection scoped to Desa
+- Grant/session security — revalidateGrant() compares DB against session
+- 38 tests (25 service + 7 grant consistency + 6 kelompok/tanggal_lahir)
+- 828 passed, 1969 assertions, 12.79s
+
+## Pending
+
+### PGM.15 — Dashboard Desa UX Redesign
+- [ ] Visual attendance status per participant
+- [ ] Improved search UX
+- [ ] Confirmation dialogs on critical actions
+- [ ] N+1 query optimization (PengajianDesaReportService, PengajianRegionalReportService)
+
+### PGM.16 — Pilot Data Validation
+- [ ] Pilot data verification
+- [ ] End-to-end pilot simulation
+- [ ] Data quality documentation
+
+### PGM.17 — Pilot Release
+- [ ] Final go/no-go
+- [ ] Production deployment
+- [ ] Operator training documentation
 
 ---
 

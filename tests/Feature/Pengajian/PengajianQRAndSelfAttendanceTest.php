@@ -156,6 +156,68 @@ test('QrPrint page mounts with absolute QR URL', function () {
         ->assertSet('qrUrl', fn ($url) => str_contains($url, $grant->nonce));
 });
 
+test('QrPrint without session redirects to enter-token', function () {
+    Livewire::test(QrPrint::class)
+        ->assertRedirect(route('pengajian.enter-token'));
+});
+
+test('QrPrint with mismatched event_id in session redirects', function () {
+    $eventA = pgm6_event(['name' => 'Event A']);
+    $eventB = pgm6_event(['name' => 'Event B']);
+    $desa = pgm6_desa();
+    $result = pgm6_grant($eventA, $desa);
+    $grant = $result['grant'];
+
+    session([
+        'pengajian_access' => [
+            'grant_id' => $grant->id,
+            'event_id' => $eventB->id,
+            'desa_id' => $grant->desa_id,
+        ],
+    ]);
+
+    Livewire::test(QrPrint::class)
+        ->assertRedirect(route('pengajian.enter-token'));
+});
+
+test('QrPrint with mismatched desa_id in session redirects', function () {
+    $event = pgm6_event();
+    $desaA = pgm6_desa(['desa_asal' => 'Desa A']);
+    $desaB = pgm6_desa(['desa_asal' => 'Desa B']);
+    $result = pgm6_grant($event, $desaA);
+    $grant = $result['grant'];
+
+    session([
+        'pengajian_access' => [
+            'grant_id' => $grant->id,
+            'event_id' => $grant->event_id,
+            'desa_id' => $desaB->id,
+        ],
+    ]);
+
+    Livewire::test(QrPrint::class)
+        ->assertRedirect(route('pengajian.enter-token'));
+});
+
+test('QrPrint with revoked grant redirects', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $grant->update(['revoked_at' => Carbon::now()]);
+
+    session([
+        'pengajian_access' => [
+            'grant_id' => $grant->id,
+            'event_id' => $grant->event_id,
+            'desa_id' => $grant->desa_id,
+        ],
+    ]);
+
+    Livewire::test(QrPrint::class)
+        ->assertRedirect(route('pengajian.enter-token'));
+});
+
 test('refresh QR nonce keeps absolute URL', function () {
     $event = pgm6_event();
     $desa = pgm6_desa();
@@ -684,9 +746,35 @@ test('duplicate submit tidak membuat row kedua', function () {
 
     expect(fn () => app(PengajianAttendanceService::class)
         ->attendPersonPublicContext($person, $grant))
-        ->toThrow(\Illuminate\Database\QueryException::class);
+        ->toThrow(\RuntimeException::class, 'sudah tercatat hadir');
 
     expect(EventAttendance::count())->toBe(1);
+});
+
+test('duplicate submit via Livewire SelfAttendance component shows duplicate message', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Jono', 'L', $desa->id, '2000-01-15');
+
+    app(PengajianAttendanceService::class)
+        ->attendPersonPublicContext($person, $grant);
+
+    $component = Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce]);
+
+    $component->set('query', 'Jono')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-01-15')
+        ->call('verifyBirthDate');
+
+    $component->assertSet('step', 4);
+
+    $component->call('confirmAttendance');
+
+    $component->assertSet('step', 5);
+    $component->assertSet('attendanceAlreadyExists', true);
 });
 
 test('existing Participation direuse', function () {
@@ -701,7 +789,7 @@ test('existing Participation direuse', function () {
 
     expect(fn () => app(PengajianAttendanceService::class)
         ->attendPersonPublicContext($person, $grant))
-        ->toThrow(\Illuminate\Database\QueryException::class);
+        ->toThrow(\RuntimeException::class, 'sudah tercatat hadir');
 
     expect(Participation::count())->toBe(1);
 });
@@ -722,7 +810,7 @@ test('existing identifiers tidak berubah', function () {
 
     expect(fn () => app(PengajianAttendanceService::class)
         ->attendPersonPublicContext($person, $grant))
-        ->toThrow(\Illuminate\Database\QueryException::class);
+        ->toThrow(\RuntimeException::class, 'sudah tercatat hadir');
 
     expect($participation->fresh()->participant_number)->toBe($originalNumber);
     expect($participation->fresh()->attendance_code)->toBe($originalCode);

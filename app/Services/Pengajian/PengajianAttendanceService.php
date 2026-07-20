@@ -105,6 +105,14 @@ class PengajianAttendanceService
             allowDesaAutoAssign: false,
         );
 
+        $existing = EventAttendance::query()
+            ->where('participation_id', $participation->id)
+            ->first();
+
+        if ($existing) {
+            throw new \RuntimeException('Peserta sudah tercatat hadir.');
+        }
+
         return $this->recordAttendance(
             $participation, $grant->event_id, $grant->desa_id,
             method: 'self',

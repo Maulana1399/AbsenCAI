@@ -161,6 +161,43 @@ test('raw token tidak tersimpan di session', function () {
     expect($sessionData)->not->toHaveKey('token');
 });
 
+test('rate limiting blocks excessive failed token attempts', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $throttleKey = 'pengajian-token:'.request()->ip();
+
+    Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
+
+    for ($i = 0; $i < 6; $i++) {
+        Livewire::test(EnterToken::class)
+            ->set('token', 'kja-dgt-fake-attempt-'.str_pad((string) $i, 4, '0', STR_PAD_LEFT))
+            ->call('submit');
+    }
+
+    expect(Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5))->toBeTrue();
+    expect(session()->has('pengajian_access'))->toBeFalse();
+});
+
+test('valid token resets rate limiter', function () {
+    $event = pgm3_makeEvent();
+    $desa = pgm3_makeDesa();
+    $result = pgm3_createValidGrant($event, $desa);
+    $throttleKey = 'pengajian-token:'.request()->ip();
+
+    Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
+
+    Livewire::test(EnterToken::class)
+        ->set('token', 'kja-dgt-fake-reset-test')
+        ->call('submit');
+
+    Livewire::test(EnterToken::class)
+        ->set('token', $result['raw_token'])
+        ->call('submit')
+        ->assertRedirect(route('pengajian.desa'));
+
+    expect(Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5))->toBeFalse();
+});
+
 // ---------------------------------------------------------------------------
 // Dashboard access validation
 // ---------------------------------------------------------------------------

@@ -26,7 +26,14 @@ class QrPrint extends Component
 
         $grant = DesaAccessGrant::with('event', 'desa')->find($session['grant_id']);
 
-        if ($grant === null || $grant->isRevoked() || ! $grant->isValid()) {
+        if ($grant === null || $grant->revoked_at !== null || now()->greaterThan($grant->valid_until) || now()->lessThan($grant->valid_from)) {
+            session()->forget('pengajian_access');
+            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            return;
+        }
+
+        if ((int) $grant->event_id !== (int) $session['event_id'] || (int) $grant->desa_id !== (int) $session['desa_id']) {
+            session()->forget('pengajian_access');
             $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
             return;
         }

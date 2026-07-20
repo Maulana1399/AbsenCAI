@@ -30,25 +30,40 @@ MVP Development
 
 # Current Sprint
 
-Sprint 3 — Multi Event Architecture
+Sprint 3 — Multi Event Architecture + Pengajian Desa MVP
 
 Status:
 
-✅ COMPLETE / VERIFIED
+✅ COMPLETE — PENG A JIAN DESA MVP PILOT RELEASED
 
 Target: August 2026 operational use.
 
 Focus:
 
-Multi Event Foundation completed and verified. S3.0 Architecture Audit COMPLETE. S3.1 Event Foundation COMPLETE. S3.2 Universal Person COMPLETE. S3.3 Participation Foundation COMPLETE. S3.4 Active Event Context Hardening COMPLETE. S3.5 Legacy Data Backfill COMPLETE — PRODUCTION BACKFILL EXECUTED 2026-07-17 (144 people, participations, mappings created. 0 conflicts. Idempotency verified). S3.6 Attendance Event Scoping COMPLETE. S3.7 Participant/QR Migration COMPLETE. S3.8 Dashboard & Report Scoping COMPLETE / VERIFIED. **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
+Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIED.
+
+**Pengajian Desa MVP (PGM series)** implemented on top of S3 architecture:
+- PGM.12 Functional Fix ✅ COMPLETE
+- PGM.13 Token Management UI ✅ COMPLETE
+- PGM.14 Event Context/Isolation ✅ COMPLETE
+- PGM.14.1 Security & Reliability Closure ✅ COMPLETE
+  - EnterToken rate limiting (IP-based, 5/min, reset on success)
+  - SelfAttendance database-agnostic duplicate handling (domain exception, no MySQL error codes)
+  - QrPrint session/grant integrity check (matching DesaDashboard pattern)
+  - P0/P1 severity reclassification
+- PGM.14.5 Manual Participant Entry ✅ COMPLETE
+  - PGM.14.5A Audit ✅
+  - PGM.14.5B Shared service ✅
+  - PGM.14.5C Operator manual entry ✅
+  - PGM.14.5D Admin manual entry ✅
+  - PGM.14.5E Person matching ✅
+  - PGM.14.5F Isolation + regression tests ✅
+- PGM.15 Dashboard Desa UX Redesign — PENDING
+- PGM.16 Pilot Data Validation — PENDING
+- PGM.17 Pilot Release — PENDING (pilot end-to-end functional, final validation pending)
+
+**Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
-S3.9 Multi Role/Venue/Category is **COMPLETE / VERIFIED**.
-S3.9A Domain Foundation is **COMPLETE / VERIFIED**.
-S3.9B Category Foundation is **COMPLETE / VERIFIED**.
-S3.9C Venue + Rundown Foundation is **COMPLETE / VERIFIED**.
-S3.9D Event Role / Committee Foundation is **COMPLETE / VERIFIED**.
-S3.9E Reporting / Export Integration is **COMPLETE / VERIFIED**.
-S3.10 Regression & Production Readiness is **COMPLETE / VERIFIED**.
 
 ---
 
@@ -279,7 +294,8 @@ Infrastructure
   * Attendance = Event -> SesiAbsensi -> Absensi
   * LegacyPesertaMapping + peserta = intentional backward-compatibility bridge
 * Remaining legacy dependencies are intentional compatibility, not Sprint 3 blockers, and may be reduced in later roadmap phases if required.
-* Full suite verified: 401 tests passed, 1035 assertions, duration 7.11s.
+* Full suite verified: 828 tests passed, 1969 assertions, duration 12.79s (post-Pengajian MVP pilot).
+* Pengajian Desa module: 200+ dedicated tests across token access, grant security, operator dashboard, self-attendance, manual entry, identity matching, admin access, reports, and identity correction.
 
 ---
 
@@ -287,28 +303,32 @@ Infrastructure
 
 Current next task:
 
-**Sprint 3.8 — Dashboard & Report Scoping.** COMPLETE and VERIFIED. Dashboard counters and attendance/report views are now event-scoped with required legacy compatibility preserved.
+**PGM.15 — Dashboard Desa UX Redesign.** Improve the operator Desa Dashboard for pilot release. Key tasks:
+- Add visual indicators for attendance status per participant
+- Improve search UX on the attendance list
+- Add confirmation dialogs for critical actions
+- Optimize N+1 queries in `PengajianDesaReportService` and `PengajianRegionalReportService`
 
-S3.5 Legacy Data Backfill is COMPLETE — production backfill executed 2026-07-17. 144 people, participations, mappings created. 0 conflicts. Idempotency verified. Runtime architecture unchanged — peserta remains active source.
+**PGM.16 — Pilot Data Validation.** Before pilot release:
+- Validate that all pilot data (events, desas, grants, participants) is correctly loaded
+- Run end-to-end pilot simulation
+- Document any data quality issues
+- Finalize pilot scope with stakeholders
 
-S3.8 complete: RekapPeserta + PesertaExport scope to the active event via Participation, and Dashboard + RekapAbsensi are now event-safe as well.
+After PGM.15 and PGM.16: **PGM.17 — Pilot Release.**
 
-After S3.8: move to S3.9 only if a future design checkpoint is explicitly reactivated; otherwise maintain S3.8 as closed and verified.
-
-After S3.1 Event Foundation completion:
-
-Continue development according to `docs/ROADMAP.md` and `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
+Longer-term:
+- P0 security fix: Add rate limiting to EnterToken submit() and token brute-force hardening
+- P1 fix: Resolve N+1 queries in report services (affects desas with 500+ residents)
+- P1 fix: Remove `attendPerson()` legacy method if unused
+- P2 improvement: SelfAttendance MySQL-specific error code → database-agnostic exception
+- P2 improvement: Two parallel identity correction submission paths
 
 Deferred Sprint 1 items remain in backlog until operationally required.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **deferred to 2027**.
 
-Architecture source: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
-Latest verified baseline: 397 tests, 1019 assertions.
-Event Foundation: 30+ dedicated tests added.
-Person Foundation: 15+ dedicated tests added.
-Participation Foundation: 20+ dedicated tests added.
-Active Event Context Hardening: 25+ dedicated tests added (3 stale-session tests and 2 collateral tests updated for new fallback contract).
-LegacyPesertaMapping infrastructure: 20+ dedicated tests added. LegacyPesertaBackfill: 37+ dedicated tests added.
+Architecture source: `docs/ROADMAP.md`, `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
+Latest verified baseline: 828 tests passed, 1969 assertions, 12.79s.
 
 Sprint 5 Document & Certificate remains deferred until required.
 

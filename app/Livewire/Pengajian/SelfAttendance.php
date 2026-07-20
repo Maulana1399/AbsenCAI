@@ -197,21 +197,27 @@ class SelfAttendance extends Component
             $this->attendanceDone = true;
             $this->attendanceAlreadyExists = false;
             $this->step = 5;
-        } catch (\Illuminate\Database\QueryException $e) {
-            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'UNIQUE')) {
+        } catch (\RuntimeException $e) {
+            $message = $e->getMessage();
+
+            if ($message === 'Peserta sudah tercatat hadir.') {
                 $this->attendanceDone = true;
                 $this->attendanceAlreadyExists = true;
                 $this->step = 5;
             } else {
-                $this->errorMessage = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+                $this->errorMessage = match ($message) {
+                    'Person tidak memiliki desa assignment.' => 'Data peserta belum memiliki desa. Silakan hubungi operator.',
+                    'Person tidak terdaftar di desa ini.' => 'Peserta tidak terdaftar di desa ini.',
+                    'Sesi QR tidak valid atau sudah kedaluwarsa.' => 'Sesi QR sudah kedaluwarsa. Silakan scan QR ulang.',
+                    default => 'Terjadi kesalahan. Silakan coba lagi.',
+                };
             }
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->errorMessage = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+            report($e);
         } catch (\Throwable $e) {
-            $this->errorMessage = match ($e->getMessage()) {
-                'Person tidak memiliki desa assignment.' => 'Data peserta belum memiliki desa. Silakan hubungi operator.',
-                'Person tidak terdaftar di desa ini.' => 'Peserta tidak terdaftar di desa ini.',
-                'Sesi QR tidak valid atau sudah kedaluwarsa.' => 'Sesi QR sudah kedaluwarsa. Silakan scan QR ulang.',
-                default => 'Terjadi kesalahan. Silakan coba lagi.',
-            };
+            $this->errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+            report($e);
         } finally {
             $this->processing = false;
         }
