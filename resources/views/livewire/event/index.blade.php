@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Event</h1>
+            <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">Event</h1>
             <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Kelola event dalam sistem.</p>
         </div>
         <flux:button wire:click="toggleCreateForm" variant="primary">
@@ -88,7 +88,7 @@
             <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
                 @forelse ($events as $event)
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-                        <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $event->name }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-white">{{ $event->name }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm">
                             @if ($event->isPengajian())
                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Pengajian</span>

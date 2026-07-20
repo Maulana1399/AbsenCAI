@@ -15,6 +15,52 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 - **Runtime verification 1–5**: `/` (guest), `/` (auth), `/login`, sidebar CAI (no Pengajian), sidebar Pengajian (shows Pengajian) — all confirmed
 - **Bug status**: #1, #2, #4, #6 → RESOLVED — VERIFIED ✅
 
+## Added (UI Bug Fix Sprint — Batch 2 Access Token UI & Security)
+
+### Bug #5 — Delete Revoked Access Token
+- **Root cause**: `AccessIndex` Livewire + view hanya menyediakan tombol "Cabut" (revoke). Tidak ada mekanisme hard-delete untuk grant yang sudah di-revoke
+- **Change**:
+  - `DesaAccessService::deleteGrant()` — method baru, melempar `RuntimeException` jika grant belum di-revoke
+  - `AccessIndex::confirmDelete()`, `cancelDelete()`, `delete()` — Livewire methods untuk delete flow
+  - View: Tombol "Hapus" muncul hanya untuk status `revoked`. Delete confirmation modal dengan tombol "Batal"/"Ya, Hapus"
+- **Authorization**: Delete hanya untuk revoked grant. Active/scheduled grant tidak memiliki opsi delete. UI update real-time via Livewire
+- **Files**: `app/Services/Pengajian/DesaAccessService.php`, `app/Livewire/Pengajian/Admin/AccessIndex.php`, `resources/views/livewire/pengajian/admin/access-index.blade.php`
+
+### Bug #7 — Raw Token Security Audit
+- **Root cause**: Tidak ada security vulnerability. Raw token one-time reveal adalah desain yang benar
+- **Audit findings**:
+  - Database: hanya menyimpan `token_hash` (bcrypt) + `token_prefix` (16 karakter pertama) — ✅ AMAN
+  - Raw token: `'kja-dgt-'.Str::random(60)` — di-generate, di-hash, lalu raw-nya di-return SATU KALI
+  - Alpine.js state: `rawToken` di `x-data`, dibersihkan (`null`) saat modal ditutup via `closeModal()`
+  - Tidak disimpan di: Livewire public property, session, logs, URL, query string
+  - Tidak tampil di: table/list (hanya prefix + "..."), session, logs
+- **Changes**: Ditambahkan class `select-all` pada code block untuk memudahkan seleksi teks. Warning "Token hanya ditampilkan sekali" tetap dipertahankan
+- **Verdict**: Desain saat ini sudah sesuai security best practice untuk one-time token reveal
+
+### Bug #8 — Token Overflow / UI Layout
+- **Root cause**: Layout code block token terlalu sempit. Meskipun `break-all` sudah ada, padding dan line-height kurang optimal untuk token sepanjang ~68 karakter
+- **Changes**:
+  - `min-w-0` pada container code block — mencegah overflow flex/grid
+  - `leading-7` dari `leading-6` — lebih lega untuk wrapped text
+  - `p-4` dari `p-3` — padding lebih lega
+  - `select-all` pada code element — memudahkan copy seluruh token
+  - Modal tetap `max-w-lg` dengan `p-6` — tidak melebar berlebihan
+- **Files**: `resources/views/livewire/pengajian/admin/access-index.blade.php`
+
+### Tests Added
+- `tests/Feature/Pengajian/PengajianAdminAccessTest.php` — 12 new test cases:
+  - Active grant tidak memiliki tombol Hapus
+  - Revoked grant memiliki tombol Hapus
+  - Delete revoked grant berhasil (record benar-benar terhapus)
+  - Delete active grant ditolak (RuntimeException)
+  - Cancel delete membersihkan state
+  - Delete non-existent grant
+  - Revoke flow tetap bekerja setelah delete
+  - DB hanya menyimpan token_hash (bukan raw token)
+  - One-time modal clears state
+  - Token prefix truncated di list view
+  - Code block menggunakan break-all untuk overflow prevention
+
 ### Bug #1 — Landing Page Branding
 - **Root cause**: `resources/views/welcome.blade.php` masih menggunakan branding CAI
 - **Change**: Diganti ke KJA Event Manager — logo "KJ", judul "KJA Event Manager", subtitle "Platform Manajemen Event Multi-Event", deskripsi baru, gradient dari emerald

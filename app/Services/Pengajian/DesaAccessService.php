@@ -164,6 +164,15 @@ class DesaAccessService
         $grant->update(['revoked_at' => Carbon::now()]);
     }
 
+    public function deleteGrant(DesaAccessGrant $grant): void
+    {
+        if (! $grant->isRevoked()) {
+            throw new \RuntimeException('Hanya grant yang sudah di-revoke yang dapat dihapus.');
+        }
+
+        $grant->delete();
+    }
+
     public function rotateNonce(DesaAccessGrant $grant): string
     {
         return $this->exchangeForNonce($grant);

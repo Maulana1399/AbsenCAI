@@ -6,6 +6,7 @@ use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
+use App\Support\ActiveEventContext;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -19,6 +20,8 @@ class AccessIndex extends Component
     public string $validUntil = '';
 
     public bool $processing = false;
+
+    public ?int $deleteGrantId = null;
 
     public function render()
     {
@@ -99,8 +102,67 @@ class AccessIndex extends Component
             return;
         }
 
+        if (! $this->grantBelongsToActiveEvent($grant)) {
+            session()->flash('error', 'Grant tidak berada dalam event aktif.');
+
+            return;
+        }
+
         app(DesaAccessService::class)->revokeGrant($grant);
         session()->flash('success', 'Grant akses berhasil dicabut.');
+    }
+
+    public function confirmDelete(int $grantId): void
+    {
+        $this->deleteGrantId = $grantId;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->deleteGrantId = null;
+    }
+
+    public function delete(): void
+    {
+        if ($this->deleteGrantId === null) {
+            return;
+        }
+
+        $grant = DesaAccessGrant::find($this->deleteGrantId);
+
+        if (! $grant) {
+            session()->flash('error', 'Grant tidak ditemukan.');
+            $this->deleteGrantId = null;
+
+            return;
+        }
+
+        if (! $this->grantBelongsToActiveEvent($grant)) {
+            session()->flash('error', 'Grant tidak berada dalam event aktif.');
+            $this->deleteGrantId = null;
+
+            return;
+        }
+
+        try {
+            app(DesaAccessService::class)->deleteGrant($grant);
+            $this->deleteGrantId = null;
+            session()->flash('success', 'Grant akses berhasil dihapus.');
+        } catch (\RuntimeException $e) {
+            session()->flash('error', $e->getMessage());
+            $this->deleteGrantId = null;
+        }
+    }
+
+    private function grantBelongsToActiveEvent(DesaAccessGrant $grant): bool
+    {
+        $activeEventId = app(ActiveEventContext::class)->id();
+
+        if ($activeEventId === null) {
+            return false;
+        }
+
+        return (int) $grant->event_id === $activeEventId;
     }
 
     private function resetForm(): void

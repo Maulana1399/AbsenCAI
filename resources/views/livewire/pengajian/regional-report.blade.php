@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100">Rekap Kehadiran Daerah</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">Rekap Kehadiran Daerah</h1>
             <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Laporan kehadiran seluruh Desa dalam Event aktif.</p>
         </div>
     </div>
