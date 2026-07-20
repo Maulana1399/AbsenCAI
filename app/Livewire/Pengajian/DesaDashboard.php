@@ -6,6 +6,9 @@ use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
+use App\Services\Pengajian\PengajianAttendanceService;
+use App\Services\Pengajian\PengajianDesaReportService;
+use App\Services\Pengajian\PengajianIdentityService;
 use App\Services\QR\QRService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -23,6 +26,25 @@ class DesaDashboard extends Component
     public ?string $qrBase64 = null;
 
     public bool $processing = false;
+
+    public string $activeTab = 'attendance';
+
+    public string $query = '';
+    public array $searchResults = [];
+    public bool $searching = false;
+
+    public ?int $selectedPersonId = null;
+    public ?string $selectedPersonName = null;
+
+    public ?string $successMessage = null;
+    public ?string $errorMessage = null;
+
+    public array $summary = [];
+
+    public array $attendanceList = [];
+    public ?string $filterStatus = null;
+    public ?string $filterMethod = null;
+    public string $listSearch = '';
 
     private ?DesaAccessGrant $grant = null;
 
@@ -78,6 +100,169 @@ class DesaDashboard extends Component
         $this->nonce = $this->grant->nonce;
         $this->qrUrl = route('pengajian.hadir', ['nonce' => $this->grant->nonce], absolute: false);
         $this->generateQr();
+        $this->loadSummary();
+    }
+
+    public function searchPersons(): void
+    {
+        if ($this->grant === null) {
+            return;
+        }
+
+        $trimmed = trim($this->query);
+
+        if (mb_strlen($trimmed) < 3) {
+            $this->searchResults = [];
+            return;
+        }
+
+        $this->searching = true;
+        $this->errorMessage = null;
+
+        try {
+            $this->searchResults = app(PengajianIdentityService::class)
+                ->searchPersons($this->grant, $trimmed);
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Pencarian gagal. Silakan coba lagi.';
+            $this->searchResults = [];
+        } finally {
+            $this->searching = false;
+        }
+    }
+
+    public function selectPerson(int $personId): void
+    {
+        if ($this->grant === null) {
+            return;
+        }
+
+        $this->errorMessage = null;
+        $this->successMessage = null;
+
+        $person = app(PengajianIdentityService::class)
+            ->findPersonInDesa($personId, $this->grant->desa_id);
+
+        if ($person === null) {
+            $this->errorMessage = 'Peserta tidak valid.';
+            $this->selectedPersonId = null;
+            $this->selectedPersonName = null;
+            return;
+        }
+
+        $this->selectedPersonId = $person->id;
+        $this->selectedPersonName = $person->nama;
+    }
+
+    public function confirmOperatorAttendance(): void
+    {
+        if ($this->grant === null || $this->selectedPersonId === null) {
+            $this->errorMessage = 'Sesi tidak valid. Silakan refresh halaman.';
+            return;
+        }
+
+        $this->processing = true;
+        $this->errorMessage = null;
+        $this->successMessage = null;
+
+        $person = app(PengajianIdentityService::class)
+            ->findPersonInDesa($this->selectedPersonId, $this->grant->desa_id);
+
+        if ($person === null) {
+            $this->errorMessage = 'Data peserta tidak valid.';
+            $this->processing = false;
+            return;
+        }
+
+        try {
+            app(PengajianAttendanceService::class)->attendPersonOperatorContext(
+                $person,
+                $this->grant,
+            );
+
+            $this->successMessage = 'Kehadiran berhasil dicatat.';
+            $this->selectedPersonId = null;
+            $this->selectedPersonName = null;
+            $this->query = '';
+            $this->searchResults = [];
+            $this->loadSummary();
+        } catch (\RuntimeException $e) {
+            $this->errorMessage = match ($e->getMessage()) {
+                'Person tidak memiliki desa assignment.' => 'Peserta belum memiliki desa. Silakan hubungi operator.',
+                'Person tidak terdaftar di desa ini.' => 'Peserta tidak terdaftar di desa ini.',
+                'Peserta sudah tercatat hadir.' => 'Peserta sudah tercatat hadir.',
+                default => 'Peserta tidak dapat diproses.',
+            };
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Peserta tidak dapat diproses.';
+        } finally {
+            $this->processing = false;
+        }
+    }
+
+    public function resetSelection(): void
+    {
+        $this->selectedPersonId = null;
+        $this->selectedPersonName = null;
+        $this->errorMessage = null;
+        $this->successMessage = null;
+    }
+
+    public function loadSummary(): void
+    {
+        if ($this->grant === null) {
+            return;
+        }
+
+        try {
+            $this->summary = app(PengajianDesaReportService::class)
+                ->summary($this->grant);
+        } catch (\Throwable) {
+            $this->summary = [];
+        }
+    }
+
+    public function loadAttendanceList(): void
+    {
+        if ($this->grant === null) {
+            return;
+        }
+
+        try {
+            $this->attendanceList = app(PengajianDesaReportService::class)
+                ->attendanceList(
+                    $this->grant,
+                    search: $this->listSearch ?: null,
+                    status: $this->filterStatus ?: null,
+                    method: $this->filterMethod ?: null,
+                );
+        } catch (\Throwable) {
+            $this->attendanceList = [];
+        }
+    }
+
+    public function updatedActiveTab(): void
+    {
+        $this->successMessage = null;
+        $this->errorMessage = null;
+
+        if ($this->activeTab === 'list') {
+            $this->loadAttendanceList();
+        }
+    }
+
+    public function updatedListSearch(): void
+    {
+        $this->loadAttendanceList();
+    }
+
+    public function updatedFilterStatus(): void
+    {
+        $this->loadAttendanceList();
+    }
+
+    public function updatedFilterMethod(): void
+    {
+        $this->loadAttendanceList();
     }
 
     public function refreshNonce(): void
@@ -110,6 +295,10 @@ class DesaDashboard extends Component
 
     public function render()
     {
+        if ($this->activeTab === 'list' && empty($this->attendanceList)) {
+            $this->loadAttendanceList();
+        }
+
         return view('livewire.pengajian.desa-dashboard');
     }
 

@@ -6,6 +6,7 @@ use App\Models\DesaAccessGrant;
 use App\Models\EventAttendance;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\User;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
 use Illuminate\Support\Facades\DB;
@@ -108,6 +109,43 @@ class PengajianAttendanceService
             $participation, $grant->event_id, $grant->desa_id,
             method: 'self',
             recordedBy: null,
+        );
+    }
+
+    public function attendPersonOperatorContext(
+        Person $person,
+        DesaAccessGrant $grant,
+        ?User $recordedBy = null,
+    ): EventAttendance {
+        if (! $grant->isValid()) {
+            throw new \RuntimeException('Sesi akses tidak valid. Silakan hubungi Operator Daerah.');
+        }
+
+        if ($person->desa_id === null) {
+            throw new \RuntimeException('Person tidak memiliki desa assignment.');
+        }
+
+        if ((int) $person->desa_id !== (int) $grant->desa_id) {
+            throw new \RuntimeException('Person tidak terdaftar di desa ini.');
+        }
+
+        $participation = $this->findOrCreateParticipation(
+            $person, $grant->event_id, $grant->desa_id,
+            allowDesaAutoAssign: false,
+        );
+
+        $existing = EventAttendance::query()
+            ->where('participation_id', $participation->id)
+            ->first();
+
+        if ($existing) {
+            throw new \RuntimeException('Peserta sudah tercatat hadir.');
+        }
+
+        return $this->recordAttendance(
+            $participation, $grant->event_id, $grant->desa_id,
+            method: 'operator',
+            recordedBy: $recordedBy?->id,
         );
     }
 }
