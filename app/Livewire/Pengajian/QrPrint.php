@@ -33,7 +33,7 @@ class QrPrint extends Component
 
         $this->eventName = $grant->event->name;
         $this->desaName = $grant->desa->desa_asal;
-        $this->qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce], absolute: false);
+        $this->qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce]);
 
         try {
             $png = app(QRService::class)->generatePng($this->qrUrl);

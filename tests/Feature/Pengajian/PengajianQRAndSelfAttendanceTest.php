@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Pengajian\DesaDashboard;
+use App\Livewire\Pengajian\QrPrint;
 use App\Livewire\Pengajian\SelfAttendance;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
@@ -55,6 +56,131 @@ function pgm6_person(string $nama, string $gender = 'L', ?int $desaId = null, ?s
         'tanggal_lahir' => $birthDate,
     ]);
 }
+
+// ===========================================================================
+// QR ACCESS — Absolute URL contract (PILOT BUG fix)
+// ===========================================================================
+
+test('QR payload is absolute URL with scheme', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+
+    $url = route('pengajian.hadir', ['nonce' => $grant->nonce]);
+
+    expect($url)->toMatch('/^https?:\/\//');
+});
+
+test('QR payload route resolves correctly with valid nonce', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+
+    $response = $this->get(route('pengajian.hadir', ['nonce' => $grant->nonce]));
+
+    $response->assertStatus(200);
+    $response->assertSee($event->name);
+});
+
+test('QR payload contains nonce but not raw token or token_hash', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $rawToken = $result['raw_token'];
+
+    $url = route('pengajian.hadir', ['nonce' => $grant->nonce]);
+
+    expect($url)->toContain($grant->nonce);
+    expect($url)->not->toContain($rawToken);
+    expect($url)->not->toContain('token_hash');
+    expect($url)->not->toContain('/grants/');
+    expect($url)->not->toContain('grant_id=');
+    expect($url)->not->toContain('event_id=');
+    expect($url)->not->toContain('desa_id=');
+});
+
+test('QR payload does not contain grant ID or internal IDs', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+
+    $url = route('pengajian.hadir', ['nonce' => $grant->nonce]);
+
+    expect($url)->not->toContain('/grants/');
+    expect($url)->not->toContain('grant_id=');
+    expect($url)->not->toContain('event_id=');
+    expect($url)->not->toContain('desa_id=');
+    expect($url)->toContain('/pengajian/hadir/');
+    expect($url)->toContain($grant->nonce);
+});
+
+test('DesaDashboard mounts with absolute QR URL', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+
+    session([
+        'pengajian_access' => [
+            'grant_id' => $grant->id,
+            'event_id' => $event->id,
+            'desa_id' => $desa->id,
+        ],
+    ]);
+
+    Livewire::test(DesaDashboard::class)
+        ->assertSet('qrUrl', fn ($url) => preg_match('/^https?:\/\//', $url) === 1)
+        ->assertSet('qrUrl', fn ($url) => str_contains($url, $grant->nonce));
+});
+
+test('QrPrint page mounts with absolute QR URL', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+
+    session([
+        'pengajian_access' => [
+            'grant_id' => $grant->id,
+            'event_id' => $event->id,
+            'desa_id' => $desa->id,
+        ],
+    ]);
+
+    Livewire::test(QrPrint::class)
+        ->assertSet('qrUrl', fn ($url) => preg_match('/^https?:\/\//', $url) === 1)
+        ->assertSet('qrUrl', fn ($url) => str_contains($url, $grant->nonce));
+});
+
+test('refresh QR nonce keeps absolute URL', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+
+    session([
+        'pengajian_access' => [
+            'grant_id' => $grant->id,
+            'event_id' => $event->id,
+            'desa_id' => $desa->id,
+        ],
+    ]);
+
+    $component = Livewire::test(DesaDashboard::class);
+
+    $originalUrl = $component->get('qrUrl');
+
+    $component->call('refreshNonce');
+
+    $newUrl = $component->get('qrUrl');
+
+    expect($newUrl)->toMatch('/^https?:\/\//');
+    expect($newUrl)->not->toBe($originalUrl);
+});
 
 // ===========================================================================
 // QR ACCESS — Nonce validation
@@ -180,9 +306,10 @@ test('QR payload menggunakan nonce URL', function () {
     $result = pgm6_grant($event, $desa);
     $grant = $result['grant'];
 
-    $expectedUrl = route('pengajian.hadir', ['nonce' => $grant->nonce], absolute: false);
+    $expectedUrl = route('pengajian.hadir', ['nonce' => $grant->nonce]);
 
-    expect($expectedUrl)->toContain('/pengajian/hadir/')
+    expect($expectedUrl)->toMatch('/^https?:\/\//')
+        ->and($expectedUrl)->toContain('/pengajian/hadir/')
         ->and($expectedUrl)->not->toContain('token')
         ->and($expectedUrl)->toContain($grant->nonce);
 });
@@ -194,8 +321,9 @@ test('QR payload tidak mengandung raw operator token', function () {
     $grant = $result['grant'];
     $rawToken = $result['raw_token'];
 
-    $qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce], absolute: false);
+    $qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce]);
 
+    expect($qrUrl)->toMatch('/^https?:\/\//');
     expect($qrUrl)->not->toContain($rawToken);
     expect($qrUrl)->not->toContain('token');
 });
@@ -215,8 +343,9 @@ test('QR payload tidak mengandung Person attendance_code', function () {
         'jenis_peserta' => 'Pengajian Desa',
     ]);
 
-    $qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce], absolute: false);
+    $qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce]);
 
+    expect($qrUrl)->toMatch('/^https?:\/\//');
     expect($qrUrl)->not->toContain($participation->attendance_code);
 });
 
@@ -226,8 +355,9 @@ test('QR payload tidak mengandung NIP', function () {
     $result = pgm6_grant($event, $desa);
     $grant = $result['grant'];
 
-    $qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce], absolute: false);
+    $qrUrl = route('pengajian.hadir', ['nonce' => $grant->nonce]);
 
+    expect($qrUrl)->toMatch('/^https?:\/\//');
     expect($qrUrl)->not->toContain('nip');
     expect($qrUrl)->not->toContain('12345');
 });
