@@ -41,6 +41,13 @@
         >
             QR Absensi
         </button>
+        <button
+            type="button"
+            wire:click="$set('activeTab', 'tambah')"
+            class="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition {{ $activeTab === 'tambah' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white' }}"
+        >
+            Tambah
+        </button>
     </div>
 
     {{-- Summary Cards --}}
@@ -290,6 +297,27 @@
                     {{ url($qrUrl) }}
                 </p>
             @endif
+        </div>
+    @endif
+
+    {{-- Tab: Tambah Peserta --}}
+    @if ($activeTab === 'tambah')
+        <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Tambah Peserta Baru
+            </h2>
+            <p class="mt-1 text-xs text-zinc-400">
+                Daftarkan warga desa yang belum terdaftar sebagai peserta.
+            </p>
+            <div class="mt-4">
+                <flux:button
+                    onclick="window.location.href='{{ route('pengajian.desa.tambah') }}'"
+                    variant="primary"
+                    class="w-full"
+                >
+                    Tambah Peserta Baru
+                </flux:button>
+            </div>
         </div>
     @endif
 

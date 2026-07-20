@@ -11,6 +11,7 @@ class Person extends Model
         'jenis_kelamin',
         'tanggal_lahir',
         'desa_id',
+        'kelompok_id',
         'nip',
     ];
 
@@ -24,6 +25,11 @@ class Person extends Model
     public function desa()
     {
         return $this->belongsTo(desa::class);
+    }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(kelompok::class);
     }
 
     public function participations()

@@ -645,6 +645,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'pengajian/admin/access',
         App\Livewire\Pengajian\Admin\AccessIndex::class
     )->name('pengajian.admin.access');
+
+    Route::get(
+        'pengajian/admin/manual-entry',
+        App\Livewire\Pengajian\Admin\ManualEntry::class
+    )->name('pengajian.admin.manual-entry');
 });
 
 Route::prefix('pengajian')->group(function () {
@@ -657,6 +662,11 @@ Route::prefix('pengajian')->group(function () {
         'desa',
         App\Livewire\Pengajian\DesaDashboard::class
     )->name('pengajian.desa');
+
+    Route::get(
+        'desa/tambah',
+        App\Livewire\Pengajian\ManualEntry::class
+    )->name('pengajian.desa.tambah');
 
     Route::get(
         'desa/qr/print',
