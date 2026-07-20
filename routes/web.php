@@ -244,4 +244,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('events', EventIndex::class)->name('events.index');
 });
 
+Route::prefix('pengajian')->group(function () {
+    Route::get('/', App\Livewire\Pengajian\EnterToken::class)
+        ->name('pengajian.enter-token');
+
+    Route::get('desa', App\Livewire\Pengajian\DesaDashboard::class)
+        ->name('pengajian.desa');
+});
+
 require __DIR__.'/auth.php';
