@@ -98,6 +98,15 @@ class PlacementService
         };
     }
 
+    public static function normalizePersonGender(string $jenisKelamin): string
+    {
+        return match ($jenisKelamin) {
+            'L' => 'Laki - Laki',
+            'P' => 'Perempuan',
+            default => $jenisKelamin,
+        };
+    }
+
     private static function normalizeGender(?string $jenisKelamin = null): ?string
     {
         $jk = strtolower(
