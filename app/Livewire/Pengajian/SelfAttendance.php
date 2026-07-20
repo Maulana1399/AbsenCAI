@@ -7,9 +7,9 @@ use App\Models\Event;
 use App\Models\Person;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
+use App\Services\Pengajian\IdentityCorrectionService;
 use App\Services\Pengajian\PengajianAttendanceService;
 use App\Services\Pengajian\PengajianIdentityService;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -37,6 +37,8 @@ class SelfAttendance extends Component
     public bool $verificationSkipped = false;
 
     public string $correctionReason = '';
+    public string $correctionName = '';
+    public string $correctionBirthDate = '';
     public bool $correctionSubmitted = false;
 
     public ?string $errorMessage = null;
@@ -222,15 +224,14 @@ class SelfAttendance extends Component
             return;
         }
 
-        $resolved = app(DesaAccessService::class)->resolveNonce($this->nonce);
+        $grant = $this->resolveValidGrant();
 
-        if ($resolved === null) {
-            $this->errorMessage = 'Sesi QR sudah kedaluwarsa. Silakan ulangi dari awal.';
+        if ($grant === null) {
             return;
         }
 
         $person = app(PengajianIdentityService::class)
-            ->findPersonInDesa($this->selectedPersonId, $resolved['desa_id']);
+            ->findPersonInDesa($this->selectedPersonId, $grant->desa_id);
 
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak valid.';
@@ -240,18 +241,28 @@ class SelfAttendance extends Component
         $this->processing = true;
         $this->errorMessage = null;
 
+        $proposed = ['reason' => $this->correctionReason ?: null];
+
+        if (trim($this->correctionName) !== '') {
+            $proposed['requested_name'] = trim($this->correctionName);
+        }
+
+        if (trim($this->correctionBirthDate) !== '') {
+            $proposed['requested_birth_date'] = trim($this->correctionBirthDate);
+        }
+
         try {
-            app(PengajianIdentityService::class)->submitCorrection(
+            app(IdentityCorrectionService::class)->submitFromPublicContext(
                 $person,
-                ['reason' => $this->correctionReason],
-                $resolved['event_id'],
-                $resolved['desa_id'],
+                $grant,
+                $proposed,
             );
 
             $this->correctionSubmitted = true;
         } catch (\Throwable $e) {
             $this->errorMessage = match ($e->getMessage()) {
-                'Sudah ada permintaan koreksi yang pending untuk person ini.' => 'Permintaan koreksi sudah dikirim sebelumnya.',
+                'Permintaan koreksi yang identik sudah menunggu review.' => 'Permintaan koreksi sudah dikirim sebelumnya.',
+                'Tidak ada perubahan data yang perlu dikoreksi.' => 'Tidak ada perubahan data. Isi field yang ingin diperbaiki.',
                 default => 'Terjadi kesalahan saat mengirim koreksi.',
             };
         } finally {
@@ -272,6 +283,8 @@ class SelfAttendance extends Component
         $this->birthDateVerified = false;
         $this->verificationSkipped = false;
         $this->correctionReason = '';
+        $this->correctionName = '';
+        $this->correctionBirthDate = '';
         $this->correctionSubmitted = false;
         $this->errorMessage = null;
         $this->attendanceDone = false;

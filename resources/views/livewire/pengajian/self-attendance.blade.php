@@ -170,28 +170,41 @@
                     Data saya tidak sesuai
                 </h3>
                 <p class="mt-1 text-xs text-zinc-400">
-                    Laporkan jika data nama atau tanggal lahir Anda tidak sesuai.
+                    Isi data yang ingin diperbaiki. Biarkan kosong jika tidak ada perubahan.
                 </p>
 
-                <div class="mt-3 flex gap-2">
+                <div class="mt-3 space-y-3">
                     <flux:input
-                        wire:model="correctionReason"
-                        placeholder="Jelaskan perbedaan data Anda"
-                        class="flex-1"
+                        wire:model="correctionName"
+                        placeholder="Nama yang benar"
                         autocomplete="off"
                     />
+
+                    <flux:input
+                        wire:model="correctionBirthDate"
+                        placeholder="Tanggal lahir yang benar (2000-01-15)"
+                        autocomplete="off"
+                    />
+
+                    <flux:input
+                        wire:model="correctionReason"
+                        placeholder="Alasan koreksi (opsional)"
+                        autocomplete="off"
+                    />
+
                     <flux:button
                         wire:click="submitCorrection"
                         variant="ghost"
                         :loading="$processing"
+                        class="w-full"
                     >
-                        Kirim
+                        Ajukan Koreksi
                     </flux:button>
                 </div>
             </div>
         @else
             <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
-                Laporan koreksi telah dikirim dan akan ditinjau oleh operator.
+                Pengajuan koreksi berhasil dikirim untuk ditinjau.
             </div>
         @endif
     @endif
