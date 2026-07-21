@@ -6,6 +6,41 @@
 
 # Feature Status
 
+## Master Data
+
+Status
+
+🟢 Landing page + all global CRUD complete.
+
+Priority
+
+P1
+
+Sprint
+
+Feature
+
+- Master Data landing page at `/master-data` with navigation cards
+- Sidebar single link "Master Data" → `/master-data`
+- Person CRUD
+- Desa CRUD (existing)
+- Kelompok CRUD (existing)
+
+Notes:
+- Regu dikeluarkan dari Master Data (Legacy CAI Operational — route `/regu` tetap ada)
+- Master Data accessible without active event context
+- Appears for all authenticated users (no RBAC yet)
+
+Future
+
+- Venue CRUD
+- CategoryDefinition CRUD
+- RBAC for Master Data
+
+---
+
+# Feature Status
+
 | Status         | Meaning                                 |
 | -------------- | --------------------------------------- |
 | 🔵 Planned     | Sudah dirancang tetapi belum dikerjakan |
@@ -112,8 +147,14 @@ Sprint
 Features
 
 * CRUD Person (via RegistrationService + Participation)
-* Import Excel
-* Search
+* **Dedicated Person master data page** — `/person` (IndexPerson Livewire)
+* Create Person (modal form, global identity only, no Participation created)
+* Edit Person (modal form, preserves relationships)
+* Delete Person (safety-guarded: blocks if has Participations/LegacyPesertaMapping)
+* Search by name or NIP
+* Pagination
+* Person sidebar menu in Master Data group
+* Import Excel (via RegistrationService)
 * Universal Person Database (Person model + People table)
 
 Notes:
@@ -121,6 +162,8 @@ Notes:
 * Person adalah canonical identity — satu identitas per orang.
 * Person dihubungkan ke Event via Participation.
 * Legacy peserta compatibility melalui LegacyPesertaMapping.
+* Person CRUD tidak membuat Participation, tidak melakukan auto-placement, tidak generate NIP.
+* Person adalah global master data — tidak bergantung pada ActiveEventContext.
 
 ---
 

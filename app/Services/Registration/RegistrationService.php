@@ -45,6 +45,7 @@ class RegistrationService
                     'nip' => $data['nip'],
                     'jenis_kelamin' => $data['jenis_kelamin'] === 'Perempuan' ? 'P' : 'L',
                     'desa_id' => $data['desa_id'],
+                    'kelompok_id' => $data['kelompok_id'] ?? null,
                 ]);
 
                 $participation = Participation::create([
@@ -114,6 +115,7 @@ class RegistrationService
                     'nama' => $data['nama'],
                     'jenis_kelamin' => $data['jenis_kelamin'] === 'Perempuan' ? 'P' : 'L',
                     'desa_id' => $data['desa_id'],
+                    'kelompok_id' => $data['kelompok_id'] ?? null,
                 ]);
             }
 

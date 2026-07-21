@@ -628,6 +628,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::view('master-data', 'master-data.index')
+        ->name('master-data.index');
+
+    Route::view('person', 'master-data.person.index')
+        ->name('person.index');
+
     Route::get('events', EventIndex::class)
         ->name('events.index');
 

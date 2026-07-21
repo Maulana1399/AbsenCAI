@@ -35,10 +35,24 @@
                             <td class="px-6 py-2">{{ $peserta->desa->desa_asal ?? '-' }}</td>
                             <td class="px-6 py-2">{{ $peserta->kelompok->kelompok_asal ?? '-' }}</td>
                             <td class="px-6 py-2">{{ $peserta->regu->regu ?? '-' }}</td>
-                            <td class="px-6 py-2 space-x-2">
-                                <flux:button wire:click="edit({{ $peserta->id }})">Edit</flux:button>
-                                <flux:button variant="danger" wire:click="delete({{ $peserta->id }})">Delete</flux:button>
-                            </td>
+                            <td class="px-6 py-2">
+                            <div class="flex flex-wrap gap-2">
+                                <flux:button wire:click="edit({{ $peserta->id }})">
+                                    Edit
+                                </flux:button>
+
+                                <flux:button wire:click="ganti({{ $peserta->id }})">
+                                    Ganti
+                                </flux:button>
+
+                                <flux:button
+                                    variant="danger"
+                                    wire:click="delete({{ $peserta->id }})"
+                                >
+                                    Delete
+                                </flux:button>
+                            </div>
+                        </td>
                         </tr>
                     @endforeach
                 @endif

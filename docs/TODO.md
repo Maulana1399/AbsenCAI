@@ -1,5 +1,24 @@
 # Backlog
 
+## Master Data Module
+
+### Implemented
+- [x] Master Data landing page at `/master-data` with Person, Desa, Kelompok cards
+- [x] Sidebar: single "Master Data" link → `/master-data`
+- [x] Regu removed from Master Data (reclassified as Legacy CAI Operational; route preserved)
+- [x] Tests for Master Data landing page, sidebar link, backward compatibility
+
+### Next (Priority Order)
+- [x] **Master Data Landing Page** — `/master-data` dengan Person, Desa, Kelompok cards.
+- [x] **Person CRUD** — Implemented: index, create, edit, delete with safety guard. Lihat `/person`.
+- [x] **Person → Legacy sync** — Implemented: `PersonLegacySyncService` syncs identity fields (nama, jenis_kelamin, desa_id, kelompok_id) from Person to mapped legacy peserta. NIP locked for mapped Persons.
+- [ ] **Venue CRUD** — Venue is event-scoped (has event_id). Needs CRUD UI for event configuration.
+- [ ] **CategoryDefinition CRUD** — Category is event-scoped (has event_id). Needs CRUD UI for event configuration.
+- [ ] **RBAC for Master Data** — Currently all authenticated users see Master Data. Need role-based access.
+- [ ] **Person search/page** — Landing page for Person master data
+
+---
+
 ## S01 Step 2 (Foundation Service Tests)
 
 - [x] Audit existing tests for service behavior coverage

@@ -70,14 +70,6 @@
                         >
                             {{ __('Daftar Peserta') }}
                         </flux:navlist.item>
-
-                        <flux:navlist.item
-                            :href="route('regu')"
-                            :current="request()->routeIs('regu')"
-                            wire:navigate
-                        >
-                            {{ __('Regu') }}
-                        </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group expandable heading="Laporan" class="grid">
@@ -102,23 +94,14 @@
 
 
             <flux:navlist variant="outline">
-                <flux:navlist.group expandable heading="Administrasi" class="grid">
-                    <flux:navlist.item
-                        :href="route('desa')"
-                        :current="request()->routeIs('desa')"
-                        wire:navigate
-                    >
-                        {{ __('Desa') }}
-                    </flux:navlist.item>
-
-                    <flux:navlist.item
-                        :href="route('kelompok')"
-                        :current="request()->routeIs('kelompok')"
-                        wire:navigate
-                    >
-                        {{ __('Kelompok') }}
-                    </flux:navlist.item>
-                </flux:navlist.group>
+                <flux:navlist.item
+                    icon="folder"
+                    :href="route('master-data.index')"
+                    :current="request()->routeIs('master-data.index') || request()->routeIs('person.index') || request()->routeIs('desa') || request()->routeIs('kelompok')"
+                    wire:navigate
+                >
+                    {{ __('Master Data') }}
+                </flux:navlist.item>
             </flux:navlist>
 
             <flux:spacer />

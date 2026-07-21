@@ -8,6 +8,151 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (Security & Data Integrity — NIP Enforcement + Kelompok Sync)
+
+### Server-side NIP Enforcement
+- **Vulnerability fixed**: NIP lock was UI-only (disabled HTML input). Livewire state manipulation could bypass NIP immutability for mapped Persons.
+- **`PersonLegacySyncService::resolveNip()`** — new server-side guard: for mapped Persons, always returns the existing database NIP regardless of submitted value. For standalone Persons, returns the submitted value.
+- **`EditPerson::update()`** — now uses `resolveNip()` instead of relying on the front-end `nipLocked` boolean. The Person model update always includes `nip` (resolved server-side), eliminating the split `if (! nipLocked)` code path.
+- Tests confirm: manipulated `nip` and `nipLocked` Livewire state cannot change NIP for mapped Persons.
+
+### RegistrationService kelompok_id Sync (Data Consistency Fix)
+- **`createParticipant()`** — now sets `kelompok_id` on the newly created Person (was missing, causing Person.kelompok_id to always be null for event-registered participants).
+- **`updateParticipant()`** — now syncs `kelompok_id` to Person when a legacy peserta is edited via CAI Database UI (was missing, causing two-way identity inconsistency where Person.kelompok_id could differ from peserta.kelompok_id).
+- This closes a real two-way sync gap: now both `desa_id` and `kelompok_id` are consistently synced in both directions (Person ↔ peserta).
+
+### Tests Added
+- 12 new tests covering: NIP server-side enforcement, mapped Person NIP immutability, peserta.nip unchanged, standalone NIP change still works, identity sync after enforcement, no Participation created, RegistrationService createParticipant kelompok_id sync, RegistrationService updateParticipant kelompok_id sync.
+
+---
+
+## Added (Person-Legacy Sync)
+
+### PersonLegacySyncService
+- **New service** `App\Services\Person\PersonLegacySyncService` — handles safe one-way sync from Person → legacy peserta
+- **Sync boundary**: Only `nama`, `jenis_kelamin`, `desa_id`, `kelompok_id` are synced
+- **NOT synced**: `nip`, `regu_id`, `participant_number`, `attendance_code`, `status_registrasi`
+- **Gender normalization**: Person's `L`/`P` is converted to `Laki - Laki`/`Perempuan` via `PlacementService::normalizePersonGender()`
+- **Transaction safety**: Uses `DB::transaction` for atomic updates
+- Only runs when Person has a valid `LegacyPesertaMapping` — standalone Persons are not affected
+
+### EditPerson (Master Data)
+- **Auto-sync**: When editing a mapped Person, identity fields are automatically synced to the legacy peserta record
+- **NIP locked**: For mapped Persons, NIP field is disabled/read-only to protect attendance history and legacy compatibility. Standalone Persons can still set NIP.
+- **Legacy indicator**: Badge "Terhubung dengan data peserta legacy" shown in edit modal for mapped Persons
+- **No Participation created**: Edit Person does not create new Participation records
+
+### Files Created
+- `app/Services/Person/PersonLegacySyncService.php`
+
+### Files Changed
+- `app/Livewire/MasterData/Person/EditPerson.php` — injected sync service, NIP lock, legacy mapping detection
+- `resources/views/livewire/master-data/person/edit-person.blade.php` — NIP disabled state, legacy mapping badge
+
+### Tests Added
+- 14 new tests in `tests/Feature/MasterData/PersonMasterDataTest.php`:
+  - Sync nama, desa, kelompok, gender (L/P) to peserta
+  - participant_number, attendance_code, regu_id unchanged
+  - No new Participation created
+  - Standalone Person does not create peserta
+  - NIP locked for mapped; NIP changeable for standalone
+  - Delete guard still works
+
+---
+
+## Added (Master Data Landing Page & Navigation Refactor)
+
+### Master Data Landing Page
+- **New route** `GET /master-data` (named `master-data.index`) — authenticated, global, no event dependency
+- **Landing page** at `/master-data` with navigation hub design:
+  - 3 clickable cards: Person, Desa, Kelompok
+  - Each card has unique icon + description + named route link
+  - Responsive: 1-col mobile, 2-col tablet, 3-col desktop
+  - Dark mode, hover/focus states
+
+### Sidebar Refactor
+- **Before**: Expandable group "Master Data" with 4 sub-items (Person, Desa, Kelompok, Regu)
+- **After**: Single `flux:navlist.item` "Master Data" pointing to `/master-data`
+- Active state covers `/master-data`, `/person`, `/desa`, `/kelompok` (Regu excluded)
+- `wire:navigate` preserved for SPA navigation
+
+### Reclassification: Regu
+- **Removed** from Master Data navigation and landing page
+- **Preserved**: route `/regu`, Livewire components, model, table — fully backward compatible
+- Reclassified as **Legacy CAI Operational Structure** (not global master data)
+- Regu will be moved to CAI/event-scoped configuration in a future refactor
+
+### Files Created
+- `resources/views/master-data/index.blade.php` — Master Data landing page
+
+### Files Changed
+- `routes/web.php` — added `master-data.index` route
+- `resources/views/components/layouts/app/sidebar.blade.php` — Master Data → single link
+
+### Tests Updated
+- `tests/Feature/MasterData/MasterDataNavigationTest.php` — rewritten for new architecture: landing page cards, sidebar link, Regu backward compat, guest/auth access, event context isolation
+- `tests/Feature/MasterData/PersonMasterDataTest.php` — sidebar submenu tests replaced with landing page card tests
+
+---
+
+## Added (Person Master Data CRUD)
+
+### Person CRUD (Global Master Data)
+- **New Person CRUD** at `/person` — dedicated management page for Person global identity
+- **Index** — table with search, pagination, fields: Nama, Jenis Kelamin, Desa, Kelompok, NIP, Tanggal Lahir
+- **Create** — modal form with validation; creates Person only (no Participation, no auto-placement, no NIP generation)
+- **Edit** — modal form with validation; preserves relationships
+- **Delete** — safety-guarded: blocks deletion if Person has Participations, LegacyPesertaMapping, or CommitteeAssignments; safe deletion for unattached Persons
+- **Sidebar** — "Person" added as first submenu under Master Data
+- **Route** — `GET /person` (named `person.index`) with `auth` + `verified` middleware
+- **ActiveEventContext** — Person page is fully global; no event dependency; does not modify context
+- **No database migration** — uses existing `people` table schema
+
+### Files Created
+- `app/Livewire/MasterData/Person/IndexPerson.php`
+- `app/Livewire/MasterData/Person/CreatePerson.php`
+- `app/Livewire/MasterData/Person/EditPerson.php`
+- `app/Livewire/MasterData/Person/DeletePerson.php`
+- `resources/views/livewire/master-data/person/index-person.blade.php`
+- `resources/views/livewire/master-data/person/create-person.blade.php`
+- `resources/views/livewire/master-data/person/edit-person.blade.php`
+- `resources/views/livewire/master-data/person/delete-person.blade.php`
+- `resources/views/master-data/person/index.blade.php`
+
+### Files Changed
+- `routes/web.php` — added `person.index` route
+- `resources/views/components/layouts/app/sidebar.blade.php` — added Person to Master Data
+
+### Tests Added
+- `tests/Feature/MasterData/PersonMasterDataTest.php` — 26 tests covering route integrity, guest/auth access, sidebar visibility, no-active-event rendering, context isolation, CRUD create/edit/delete safety, search, empty state, and regression on Desa/Kelompok/Regu
+
+### Documentation Updated
+- `docs/TODO.md`, `docs/ROADMAP.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`, `docs/FEATURE.md`, `docs/MODULES.md`, `docs/ai/CURRENT_STATE.md`
+
+---
+
+## Added (Master Data Navigation)
+
+### Master Data Menu
+- **New "Master Data" navigation group** added to sidebar — appears for all authenticated users regardless of event context
+- Submenu items: **Desa** (`/desa`), **Kelompok** (`/kelompok`), **Regu** (`/regu`) — all are global master data (no `event_id`)
+- **Administrasi** group removed from sidebar (Desa and Kelompok moved to Master Data)
+- **Regu** removed from "Peserta CAI" group (moved to Master Data as global data)
+- Parent menu "Master Data" replaces former "Administrasi" section with added Regu entry
+- Global master data pages render correctly with or without active event context
+- ActiveEventContext is not affected by Master Data navigation
+
+### Files Changed
+- `resources/views/components/layouts/app/sidebar.blade.php` — added Master Data group, removed Administrasi group, moved Regu from Peserta CAI
+
+### Tests Added
+- `tests/Feature/MasterData/MasterDataNavigationTest.php` — 21 tests covering visibility, accessibility, guest restriction, route integrity, ActiveEventContext isolation, and submenu rendering
+
+### Documentation Updated
+- `docs/TODO.md`, `docs/ROADMAP.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`, `docs/MODULES.md`, `docs/FEATURE.md`, `docs/ai/CURRENT_STATE.md`, `docs/TERMINOLOGY.md`, `docs/DATAFLOW.md`, `docs/DATABASE.md`
+
+---
+
 ## Added (UI Bug Fix Sprint — Batch 1 Branding & Navigation)
 
 ### Verification

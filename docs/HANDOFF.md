@@ -119,7 +119,8 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 
 | File | Fungsi | Kapan Diedit |
 |------|--------|--------------|
-| `peserta.php` | Data peserta CAI. Berisi: auto-generate NIP, pembagian regu otomatis, relasi ke desa/kelompok/regu, status registrasi (Belum Registrasi / Self Register / Registrasi Ulang), jenis peserta (Wajib / Kiriman / Person) | Jika ada kolom baru peserta, aturan NIP berubah, atau cara pembagian regu berubah |
+| `Person.php` | Data identitas global seseorang (Master Data). Berisi: nama, jenis_kelamin (L/P), desa_id, kelompok_id, nip, tanggal_lahir. Tidak tergantung event. Sync service (`PersonLegacySyncService`) menyinkronkan identity fields ke mapped legacy peserta. | Jika ada kolom baru pada identitas Person |
+| `peserta.php` | Data peserta CAI legacy. Berisi: auto-generate NIP, pembagian regu otomatis, relasi ke desa/kelompok/regu, status registrasi (Belum Registrasi / Self Register / Registrasi Ulang), jenis peserta (Wajib / Kiriman / Person) | Jika ada kolom baru peserta, aturan NIP berubah, atau cara pembagian regu berubah |
 | `regu.php` | Data regu. Menyimpan nama regu dan jenis kelamin regu (Laki-Laki / Perempuan) | Jika ada kolom baru pada tabel regu |
 | `desa.php` | Data desa asal peserta | Jika ada kolom baru pada tabel desa |
 | `kelompok.php` | Data kelompok asal peserta. Setiap kelompok terhubung ke satu desa | Jika ada kolom baru pada tabel kelompok |
@@ -156,7 +157,16 @@ Folder ini berisi semua logika bisnis. Dibagi menjadi beberapa sub-folder:
 | `Registrasi/SelfRegister.php` | Form pendaftaran mandiri oleh peserta. Mengisi nama, desa, kelompok, jenis kelamin — NIP dan regu terisi otomatis | Jika form self-register berubah |
 | `Registrasi/Ulang.php` | Panitia mencari peserta by nama/NIP, lalu klik "Registrasi Ulang" untuk menandai peserta sudah datang | Jika alur registrasi ulang berubah |
 
-**Grup: Database (manajemen data master)**
+**Grup: Master Data (data referensi global)**
+
+| File | Fungsi | Kapan Diedit |
+|------|--------|--------------|
+| `MasterData/Person/IndexPerson.php` | Tabel daftar Person dengan search dan pagination | Jika ada kolom baru di tabel people |
+| `MasterData/Person/CreatePerson.php` | Form tambah Person baru (global, tanpa Participation) | Jika ada kolom baru |
+| `MasterData/Person/EditPerson.php` | Form edit identitas Person | Jika ada kolom baru |
+| `MasterData/Person/DeletePerson.php` | Hapus Person dengan safety guard (blokir jika memiliki relasi) | Jika aturan hapus berubah |
+
+**Grup: Database (manajemen data peserta legacy CAI)**
 
 | File | Fungsi | Kapan Diedit |
 |------|--------|--------------|
@@ -728,17 +738,30 @@ Sidebar sekarang menyesuaikan dengan tipe event aktif:
 - **Pengajian Event** → menu Pengajian saja
 Logika ini ada di bagian `@php $isPengajian = ...` di awal file sidebar.
 
+**Master Data Navigation:**
+Menu "Master Data" muncul di luar blok event-type conditional — selalu tampil untuk semua authenticated user sebagai single sidebar link menuju `/master-data`.
+
+Halaman `/master-data` berisi navigation cards:
+- **Person** (`/person`) — CRUD Person (identitas global)
+- **Desa** (`/desa`) — CRUD desa
+- **Kelompok** (`/kelompok`) — CRUD kelompok
+
+Semua Master Data bersifat global (tidak memiliki `event_id`) dan tidak bergantung pada ActiveEventContext.
+
+> **Catatan:** Regu sudah dikeluarkan dari Master Data. Regu adalah struktur operasional CAI legacy dan tetap dapat diakses melalui `/regu`. Lihat dokumentasi Regu untuk informasi lebih lanjut.
+
 **Cara tambah menu baru:**
 1. Buka file tersebut
-2. Temukan grup menu yang sesuai (mis: `heading="Database"`)
+2. Temukan grup menu yang sesuai atau buat grup baru di lokasi yang tepat
 3. Tambahkan baris baru mengikuti pola yang ada:
     ```html
-    <flux:navlist.item :href="route('nama.route')" wire:navigate>
+    <flux:navlist.item icon="icon-name" :href="route('nama.route')" :current="request()->routeIs('nama.route')" wire:navigate>
         Nama Menu Baru
     </flux:navlist.item>
     ```
 4. Pastikan `nama.route` sudah terdaftar di `routes/web.php`
 5. Jika menu spesifik untuk CAI atau Pengajian, letakkan di dalam blok `@if ($isPengajian)` atau `@else` yang sesuai
+6. Untuk menu Master Data, letakkan di luar kedua blok conditional (selalu tampil untuk authenticated user)
 
 ---
 

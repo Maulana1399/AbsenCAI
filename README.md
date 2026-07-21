@@ -51,9 +51,10 @@ peserta (legacy runtime)
 
 ## Navigation
 
-Sidebar is event-type-aware:
+Sidebar is event-type-aware with global Master Data:
 - **CAI events** → full operational menu (Absensi, Registrasi, Database, Laporan, QR & Label, etc.)
 - **Pengajian events** → clean Pengajian menu (Regional Report, Peserta, Import Massal, Akses Desa)
+- **All authenticated users** → **Master Data** menu → landing page (`/master-data`) with Person, Desa, Kelompok cards — always visible regardless of event context
 
 ---
 

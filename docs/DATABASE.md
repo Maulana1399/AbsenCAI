@@ -2,14 +2,41 @@
 
 ## Current Structure
 
+Person (global identity)
+│
+├── desa
+├── kelompok
+│
+└── Participation (event-scoped)
+       │
+       ├── Event
+       ├── LegacyPesertaMapping → peserta (legacy)
+       ├── Absensi
+       ├── EventAttendance
+       └── ActivityRegistration
+
 Desa
 │
 └── Kelompok
       │
-      └── Peserta
+      └── Peserta (legacy)
               │
               ├── Absensi
               └── Registrasi
+
+## People Table Schema
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | bigint PK | Auto-increment |
+| `nama` | string | Required |
+| `jenis_kelamin` | string(1) nullable | `L` or `P` |
+| `tanggal_lahir` | date nullable | Added PGM.14.5 |
+| `desa_id` | FK → desas nullable | `nullOnDelete` |
+| `kelompok_id` | FK → kelompoks nullable | Added PGM.16, `nullOnDelete` |
+| `nip` | integer nullable unique | Legacy compatibility |
+| `created_at` | timestamp | |
+| `updated_at` | timestamp | |
 
 Current participant identity columns:
 - `id`
@@ -51,15 +78,23 @@ Organization
 
 ---
 
-## Master Data
+## Master Data (Global — no event_id)
+
+| Entity | Table | Route | Status |
+|--------|-------|-------|--------|
+| **Person** | `people` | `/person` | CRUD ✅ |
+| **Desa** | `desas` | `/desa` | CRUD ✅ |
+| **Kelompok** | `kelompoks` | `/kelompok` | CRUD ✅ |
+
+## Legacy CAI Operational
+
+| Entity | Table | Route | Status |
+|--------|-------|-------|--------|
+| **Regu** | `regus` | `/regu` | CRUD ✅ (legacy CAI, not global master data) |
+
+Future:
 
 Organization
-
-Person
-
-Desa
-
-Kelompok
 
 Role
 
@@ -70,6 +105,33 @@ Venue
 Category
 
 Competition
+
+---
+
+## Identity Sync Strategy
+
+### Person → peserta (via PersonLegacySyncService)
+Dipicu saat Person diedit melalui Master Data CRUD dan memiliki LegacyPesertaMapping.
+
+| Field | Arah | Sync? |
+|-------|------|-------|
+| `nama` | Person → peserta | ✅ |
+| `jenis_kelamin` | Person (L/P) → peserta (Laki - Laki/Perempuan) | ✅ via `PlacementService::normalizePersonGender()` |
+| `desa_id` | Person → peserta | ✅ |
+| `kelompok_id` | Person → peserta | ✅ |
+| `nip` | — | ❌ Immutable untuk mapped Person |
+| `regu_id`, `participant_number`, `attendance_code` | — | ❌ Event-scoped, tidak disinkronkan |
+
+### peserta → Person (via RegistrationService::updateParticipant())
+Dipicu saat peserta diedit melalui CAI Database UI.
+
+| Field | Arah | Sync? |
+|-------|------|-------|
+| `nama` | peserta → Person | ✅ |
+| `jenis_kelamin` | peserta → Person (konversi) | ✅ |
+| `desa_id` | peserta → Person | ✅ |
+| `kelompok_id` | peserta → Person | ✅ (fixed 2026-07-21) |
+| `regu_id` | — | ❌ Event-scoped |
 
 ---
 

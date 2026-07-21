@@ -213,9 +213,14 @@ class CaiParticipantReplacementService
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
 
+                'desa_id' => $peserta->desa_id,
+                'kelompok_id' => $peserta->kelompok_id,
+                'regu_id' => $peserta->regu_id,
+
                 'reason' => $reason,
+                'replaced_by' => auth()->id(),
                 'replaced_at' => now(),
-            ]);
+            ]); 
 
             return [
                 'peserta' => $peserta->fresh(),

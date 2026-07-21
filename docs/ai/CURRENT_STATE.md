@@ -102,18 +102,82 @@ Completed foundation work:
 
 ---
 
+# Person-Legacy Sync
+
+## Status
+
+🟢 Complete (2026-07-21).
+
+### What was done
+- **PersonLegacySyncService** — one-way sync from Person → legacy peserta within a DB transaction
+- **Sync boundary**: nama, jenis_kelamin, desa_id, kelompok_id ONLY
+- **NIP locked** for mapped Persons to protect attendance history and legacy compatibility
+- **Server-side NIP enforcement**: `resolveNip()` method in service layer overrides submitted NIP with database value for mapped Persons, preventing Livewire state manipulation
+- **No-sync guarantee**: participant_number, attendance_code, regu_id, status_registrasi never change
+- **Gender normalization**: L → 'Laki - Laki', P → 'Perempuan' via PlacementService::normalizePersonGender()
+- **RegistrationService fix**: `createParticipant()` and `updateParticipant()` now sync `kelompok_id` to Person (was missing, causing two-way identity inconsistency)
+- **26 new tests** covering sync behavior, NIP enforcement, RegistrationService kelompok_id consistency, delete guard regression
+
+---
+
+# Person Master Data CRUD
+
+## Status
+
+🟢 Complete (2026-07-21).
+
+### What was done
+- **Person CRUD page** at `/person` with index, create, edit, and delete
+- **Sidebar** — Person added as first submenu under Master Data
+- **Global data** — Person page works without active event; does not modify ActiveEventContext
+- **Safe delete** — Person with participations, legacy mapping, or committee assignments cannot be deleted
+- **No Participation** — Create Person only creates a Person record; does not create Participation, generate NIP, or perform auto-placement
+- **26 dedicated tests** for Person CRUD, sidebar visibility, search, empty state, delete safety, and regression
+
+### Next (for Person domain)
+- RBAC for Master Data (currently all authenticated users can access)
+- Person → sync with legacy peserta on edit (currently RegistrationService handles this for event-registered persons only)
+
+---
+
+# Master Data Module
+
+## Status
+
+🟢 Landing page + navigation complete (2026-07-21).
+
+### What was done
+- **Master Data landing page** at `/master-data` with responsive navigation cards
+- **Sidebar**: single "Master Data" link → `/master-data` (replaces old expandable group with sub-items)
+- **Cards**: Person, Desa, Kelompok — each with icon, description, named route
+- **Regu removed** from Master Data — reclassified as Legacy CAI Operational
+- Regu route `/regu`, components, and model preserved for backward compatibility
+- Master Data is **global** — accessible without active event context
+- ActiveEventContext is not modified by Master Data navigation
+
+### Next
+- **Person CRUD** — Person is global master data but lacks dedicated management page
+- **Venue CRUD** — event-scoped, needs UI
+- **CategoryDefinition CRUD** — event-scoped, needs UI
+- **RBAC** for Master Data menus
+
+---
+
 # Current Priority
 
 Priority saat ini:
 
-1. **UI Bug Fix Sprint — Batch 1** ✅ — Branding & Navigation — RESOLVED VERIFIED.
-2. **UI Bug Fix Sprint — Batch 2** 🔄 — Access Token UI & Security (#5, #7, #8) — IMPLEMENTED / SECURITY AUDIT COMPLETE, PENDING RUNTIME VERIFICATION. Cross-event isolation added.
-3. **UI Bug Fix Sprint — Batch 3** 🔄 — Functional/UI Logic (#3, #9) — IMPLEMENTED, PENDING RUNTIME VERIFICATION.
-3. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
-3. Event switcher redirect/reload fix ✅ (PGM.16.3)
-4. Pengajian bulk import ✅ (PGM.16)
-5. Contextual navigation ✅ (PGM.16)
-6. Remaining P2/P3 technical debt items.
+1. **Master Data Landing Page** ✅ — `/master-data` navigation hub with Person, Desa, Kelompok cards.
+2. **Person-Legacy Sync + NIP Enforcement** ✅ — Person → peserta identity sync. Server-side NIP guard.
+3. **Person Master Data CRUD** ✅ — Full CRUD at `/person`.
+3. **UI Bug Fix Sprint — Batch 1** ✅ — Branding & Navigation — RESOLVED VERIFIED.
+3. **UI Bug Fix Sprint — Batch 2** 🔄 — Access Token UI & Security (#5, #7, #8) — IMPLEMENTED / SECURITY AUDIT COMPLETE, PENDING RUNTIME VERIFICATION. Cross-event isolation added.
+4. **UI Bug Fix Sprint — Batch 3** 🔄 — Functional/UI Logic (#3, #9) — IMPLEMENTED, PENDING RUNTIME VERIFICATION.
+5. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
+6. Event switcher redirect/reload fix ✅ (PGM.16.3)
+7. Pengajian bulk import ✅ (PGM.16)
+8. Contextual navigation ✅ (PGM.16)
+9. Remaining P2/P3 technical debt items.
 
 ---
 

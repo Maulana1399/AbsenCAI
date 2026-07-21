@@ -51,6 +51,11 @@ class Database extends Component
         $this->dispatch('editPeserta', id: $id);
     }
 
+    public function ganti($id)
+    {
+        $this->dispatch('gantiPeserta', id: $id);
+    }
+
     public function delete($id)
     {
         $this->dispatch('HapusPeserta', id: $id);

@@ -934,6 +934,51 @@ Sprint dianggap selesai apabila:
 
 ---
 
+# Master Data Module
+
+## Status
+
+🟢 Navigation infrastructure complete — submenu CRUD pages pre-existing.
+
+## Scope
+
+Master Data adalah pusat pengelolaan data referensi/master aplikasi yang bersifat GLOBAL (reusable lintas event).
+
+### Global Master Data (no event_id)
+| Entity | Table | Route | UI Status |
+|--------|-------|-------|-----------|
+| **Person** | `people` | `/person` | Full CRUD ✅ |
+| **Desa** | `desas` | `/desa` | Full CRUD ✅ |
+| **Kelompok** | `kelompoks` | `/kelompok` | Full CRUD ✅ |
+
+### Legacy CAI Operational (not global master data)
+| Entity | Table | Route | Status |
+|--------|-------|-------|--------|
+| **Regu** | `regus` | `/regu` | Full CRUD ✅ (legacy CAI only) |
+
+Regu tidak termasuk Master Data karena merupakan struktur operasional CAI.
+Regu tidak memiliki event_id saat ini — akan dipindahkan ke event-scoped config pada refactor terpisah.
+
+All entities accessible via Master Data landing page at `/master-data`.
+
+### Event-Scoped Data (NOT in Master Data)
+| Entity | Reason |
+|--------|--------|
+| Venue | Has `event_id` — event configuration |
+| CategoryDefinition | Has `event_id` — event configuration |
+| Participation | Transactional bridge between Person and Event |
+| SesiAbsensi | Event-scoped session management |
+
+## Navigation
+Master Data is a single sidebar link pointing to the landing page at `/master-data`. The landing page contains navigation cards for Person, Desa, and Kelompok. The sidebar link has active state for `/master-data`, `/person`, `/desa`, and `/kelompok`. Regu is excluded from Master Data and remains accessible only via its dedicated route.
+
+Master Data appears in sidebar for all authenticated users regardless of event context (CAI, Pengajian, or no active event).
+
+## Authorization Gap
+Master Data is currently visible to all authenticated users. RBAC has not been implemented yet. See `docs/PERMISSION.md` for the planned permission matrix.
+
+---
+
 # Current Priority
 
 ```

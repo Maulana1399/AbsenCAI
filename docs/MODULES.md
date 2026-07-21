@@ -25,12 +25,26 @@ Status Legend
 
 # Master Data
 
-🟢
+🟢 Landing page + all global master data CRUD complete.
 
-- Person
-- Desa
-- Kelompok
-- Group
+| Entity | Scope | Route | UI Status |
+|--------|-------|-------|-----------|
+| **Person** | Global (no event_id) | `/person` | Full CRUD ✅ |
+| **Desa** | Global (no event_id) | `/desa` | Full CRUD ✅ |
+| **Kelompok** | Global (no event_id) | `/kelompok` | Full CRUD ✅ |
+
+Master Data landing page at `/master-data` serves as navigation hub with clickable cards.
+
+Notes:
+- Menu Master Data di sidebar adalah single link menuju `/master-data`
+- Person, Desa, Kelompok adalah global master data (reusable lintas event)
+- Person CRUD hanya mengelola data identitas global — tidak membuat Participation
+- Person Delete dilindungi safety guard
+- Regu sudah dikeluarkan dari Master Data — reklasifikasi sebagai Legacy CAI Operational
+- Venue dan CategoryDefinition bersifat event-scoped — tidak masuk Master Data
+
+Future:
+- RBAC untuk Master Data
 
 ---
 
