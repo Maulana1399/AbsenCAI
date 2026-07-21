@@ -13,7 +13,7 @@ use App\Services\Pengajian\PengajianIdentityService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.auth.simple')]
+#[Layout('components.layouts.pengajian')]
 class SelfAttendance extends Component
 {
     public string $nonce;

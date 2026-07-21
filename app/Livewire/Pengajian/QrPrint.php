@@ -7,7 +7,7 @@ use App\Services\QR\QRService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.auth.simple')]
+#[Layout('components.layouts.pengajian')]
 class QrPrint extends Component
 {
     public ?string $eventName = null;

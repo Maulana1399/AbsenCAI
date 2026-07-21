@@ -15,6 +15,46 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 - **Runtime verification 1–5**: `/` (guest), `/` (auth), `/login`, sidebar CAI (no Pengajian), sidebar Pengajian (shows Pengajian) — all confirmed
 - **Bug status**: #1, #2, #4, #6 → RESOLVED — VERIFIED ✅
 
+## Added (UI Bug Fix Sprint — Batch 4 Final UI Polish)
+
+### Bug #11 — Responsive `/pengajian` Layout
+- **Root cause**: Layout `simple.blade.php` memiliki `max-w-sm` permanen yang berlaku untuk semua breakpoint, menyebabkan halaman terlihat seperti mobile pada desktop
+- **Changes**:
+  - `simple.blade.php`: `max-w-sm` → `max-w-sm md:max-w-xl lg:max-w-2xl`
+  - `enter-token.blade.php`: tambah `max-w-sm md:max-w-lg mx-auto`
+- **Responsive behavior**:
+  - Mobile (<768px): `max-w-sm` (384px) — compact, nyaman digunakan
+  - Tablet (768px-1024px): `max-w-xl` (576px) — sedikit lebih lebar
+  - Desktop (>1024px): `max-w-2xl` (672px) — memanfaatkan ruang desktop
+- **Files**: `resources/views/components/layouts/auth/simple.blade.php`, `resources/views/livewire/pengajian/enter-token.blade.php`
+- **Status**: IMPLEMENTED — PENDING RUNTIME VERIFICATION
+
+### Bug #10 — Dark Mode
+- **Audit result**: Semua elemen sudah memiliki dark mode classes yang tepat (`dark:text-white`, `dark:text-zinc-300`, `dark:bg-zinc-900`, dll)
+- **Status**: IMPLEMENTED — PENDING RUNTIME VERIFICATION
+- **Note**: Runtime verification diperlukan untuk memastikan tidak ada masalah spesifik di device/browser tertentu
+
+---
+
+## Added (UI Bug Fix Sprint — Batch 3 Functional/UI Logic)
+
+### Bug #3 — Dashboard "Belum Absen" Statistics
+- **Root cause**: Tabel "Peserta yang Belum Absen" di `dashboard.blade.php` mengakses properti legacy `peserta` (`$peserta->nama`, `$peserta->nip`, dll) padahal `$pesertaBelumAbsen` adalah koleksi `Participation` model
+- **Changes**:
+  - Eager loading ditambah: `person.legacyPesertaMapping.peserta.regu`, `person.legacyPesertaMapping.peserta.kelompok`
+  - View: `$peserta->nama` → `$participation->person?->nama`, `$peserta->nip` → `$participation->person?->nip`, dll
+- **Files**: `app/Livewire/Dashboard/Dashboard.php`, `resources/views/livewire/dashboard/dashboard.blade.php`
+- **Status**: IMPLEMENTED — PENDING RUNTIME VERIFICATION
+
+### Bug #9 — Regional Report Filter Reactivity
+- **Root cause**: Filter logic di `PengajianRegionalReportService::attendanceList()` sudah benar (dibuktikan 12 test PGM.16 lolos), namun binding Livewire `wire:model` tanpa modifier tidak menjamin reaktivitas segera
+- **Changes**: `wire:model` → `wire:model.live` untuk kedua `<select>` filter (Status dan Metode)
+- **Files**: `resources/views/livewire/pengajian/regional-report.blade.php`
+- **Tests added**: 6 Livewire component filter tests (PGM.17)
+- **Status**: IMPLEMENTED — PENDING RUNTIME VERIFICATION
+
+---
+
 ## Added (UI Bug Fix Sprint — Batch 2 Access Token UI & Security)
 
 ### Bug #5 — Delete Revoked Access Token

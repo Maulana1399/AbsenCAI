@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.auth.simple')]
+#[Layout('components.layouts.pengajian')]
 class DesaDashboard extends Component
 {
     public ?string $eventName = null;

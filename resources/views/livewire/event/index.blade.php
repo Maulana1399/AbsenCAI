@@ -23,7 +23,7 @@
 
     @if ($showCreateForm)
         <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-            <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Event Baru</h2>
+            <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">Event Baru</h2>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Nama Event</label>
@@ -39,7 +39,7 @@
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Tipe Event</label>
-                    <select wire:model="newEventType" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                    <select wire:model="newEventType" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                         <option value="cai">CAI</option>
                         <option value="pengajian">Pengajian Desa</option>
                     </select>
@@ -48,7 +48,7 @@
 
                 <div class="sm:col-span-2">
                     <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Deskripsi</label>
-                    <textarea wire:model="newDescription" placeholder="Deskripsi event (opsional)" rows="3" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400"></textarea>
+                    <textarea wire:model="newDescription" placeholder="Deskripsi event (opsional)" rows="3" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:border-zinc-400"></textarea>
                     @error('newDescription') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 

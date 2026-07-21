@@ -66,7 +66,10 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
 **UI Bug Fix Sprint — Batch 1 (Branding & Navigation)** — Bug #1, #2, #4, #6: **RESOLVED — VERIFIED** ✅ (908 tests passed / 2192 assertions).
 **UI Bug Fix Sprint — Batch 2 (Access Token UI & Security)** — Bug #5, #7, #8: **IMPLEMENTED / SECURITY AUDIT COMPLETE — PENDING RUNTIME VERIFICATION** ⏳.
 Authorization follow-up: cross-event isolation + authorization tests added. Menunggu runtime verification sebelum RESOLVED.
-**UI Bug Fix Sprint — Batch 3 (Functional/UI Logic)** — Bug #3, #9: **IMPLEMENTED** ⏳. #3: tabel Belum Absen fixed (participation-person chain). #9: filter `wire:model.live` + Livewire component tests.
+**UI Bug Fix Sprint — Batch 4 (Final UI Polish)** — Bug #10, #11, #12: **RE-OPENED — FIX IN PROGRESS** ⏳.
+- #11 Responsive: Layout baru `pengajian.blade.php` dibuat dengan `max-w-4xl` untuk Dashboard Desa dan semua halaman operasional Pengajian. Butuh runtime verification.
+- #10 Dark Mode: `dark:text-zinc-100` → `dark:text-white` di select, textarea, heading. Butuh runtime verification ulang.
+- #12 Event Isolation: Query `render()` di AccessIndex tidak filter berdasarkan active event. Fixed: tambah `where('event_id', $activeEventId)`. Butuh runtime verification.
 
 **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.

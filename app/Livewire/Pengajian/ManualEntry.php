@@ -8,7 +8,7 @@ use App\Services\Registration\ManualParticipantRegistrationService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.auth.simple')]
+#[Layout('components.layouts.pengajian')]
 class ManualEntry extends Component
 {
     public bool $processing = false;

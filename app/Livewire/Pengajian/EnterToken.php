@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('components.layouts.auth.simple')]
+#[Layout('components.layouts.pengajian')]
 class EnterToken extends Component
 {
     public string $token = '';

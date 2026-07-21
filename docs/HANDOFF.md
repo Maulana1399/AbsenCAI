@@ -1269,7 +1269,9 @@ cp database/database.sqlite database/database.sqlite.backup-$(date +%Y%m%d-%H%M%
 | 7 | Security | Raw token ditampilkan penuh di modal pembuatan (sekali) | High | `access-index.blade.php` | **SECURITY AUDIT COMPLETE — PENDING RUNTIME FLOW VERIFICATION** ⏳ DB hanya hash, one-time reveal by design |
 | 8 | Access Token | Token overflow / layout kurang rapi | Medium | `access-index.blade.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Layout improved |
 | 9 | Filter | Filter Regional Report perlu verifikasi pasca-PGM.16 | Medium | `RegionalReport.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Fix: `wire:model.live` + Livewire component tests |
-| 11 | Responsive | `/pengajian` layout desktop — minor perbaikan | Low | `enter-token.blade.php` | OPEN |
+| 10 | Dark Mode | Heading dan table text masih gelap di dark mode | Medium | Multiple files | **RE-OPENED — RUNTIME VERIFICATION FAILED** ⏳ Fixed: `dark:text-zinc-100` → `dark:text-white` di select, textarea, heading. Butuh runtime verification ulang |
+| 11 | Responsive | `/pengajian` layout desktop — HTTP 500 regression | Low | `enter-token.blade.php`, `simple.blade.php` | **RE-OPENED — HTTP 500 REGRESSION** ⏳ Fixed: `str_replace()` syntax error di `simple.blade.php`. Butuh runtime verification |
+| 12 | Event Isolation | Access Desa menampilkan grant dari event lain | High | `AccessIndex.php` | **OPEN — LOGIC GAP FOUND** ⏳ Query `render()` tidak filter berdasarkan active event. Fixed: tambah `where('event_id', $activeEventId)` |
 
 ---
 

@@ -25,10 +25,16 @@ class AccessIndex extends Component
 
     public function render()
     {
-        $grants = DesaAccessGrant::with('event', 'desa', 'creator')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn ($g) => $this->safeGrant($g));
+        $activeEventId = app(ActiveEventContext::class)->id();
+
+        $grantsQuery = DesaAccessGrant::with('event', 'desa', 'creator')
+            ->orderBy('created_at', 'desc');
+
+        if ($activeEventId !== null) {
+            $grantsQuery->where('event_id', $activeEventId);
+        }
+
+        $grants = $grantsQuery->get()->map(fn ($g) => $this->safeGrant($g));
 
         return view('livewire.pengajian.admin.access-index', [
             'grants' => $grants,

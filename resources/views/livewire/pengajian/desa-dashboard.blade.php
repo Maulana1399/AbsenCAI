@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-6 max-w-4xl mx-auto px-4 sm:px-0">
+<div class="flex w-full flex-col gap-6">
     {{-- Header --}}
     <div class="text-center mb-2">
         <div class="mx-auto h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-emerald-600 flex items-center justify-center text-2xl sm:text-3xl font-bold text-white shadow-xl">
@@ -52,7 +52,7 @@
 
     {{-- Summary Cards --}}
     @if (!empty($summary))
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="rounded-xl border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                 <p class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $summary['total_warga'] }}</p>
                 <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Total Warga</p>
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="rounded-xl border border-zinc-200 bg-white p-3 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                 <p class="text-lg font-bold text-blue-700 dark:text-blue-400">{{ $summary['self'] }}</p>
                 <p class="text-xs text-zinc-500 dark:text-zinc-400">Via Self</p>

@@ -39,11 +39,11 @@
 
     @if ($showCreateForm)
         <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-            <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Grant Baru</h2>
+            <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">Grant Baru</h2>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Event</label>
-                    <select wire:model="eventId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                    <select wire:model="eventId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                         <option value="">-- Pilih Event --</option>
                         @foreach ($events as $event)
                             <option value="{{ $event->id }}">{{ $event->name }}</option>
@@ -54,7 +54,7 @@
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Desa</label>
-                    <select wire:model="desaId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+                    <select wire:model="desaId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                         <option value="">-- Pilih Desa --</option>
                         @foreach ($desas as $desa)
                             <option value="{{ $desa->id }}">{{ $desa->desa_asal }}</option>
@@ -116,7 +116,7 @@
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
                             {{ $grant['valid_from']?->format('d/m/Y H:i') ?? '-' }}<br>
-                            <span class="text-xs">s.d.</span><br>
+                            <span class="text-xs dark:text-zinc-400">s.d.</span><br>
                             {{ $grant['valid_until']?->format('d/m/Y H:i') ?? '-' }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">{{ $grant['created_by'] ?? '-' }}</td>
