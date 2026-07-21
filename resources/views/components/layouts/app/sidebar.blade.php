@@ -62,11 +62,22 @@
                         <flux:navlist.item :href="route('registrasi.ulang')" :current="request()->routeIs('registrasi.ulang')" wire:navigate>{{ __('Registrasi Ulang') }}</flux:navlist.item>
                     </flux:navlist.group>
 
-                    <flux:navlist.group expandable heading="Database" class="grid">
-                        <flux:navlist.item :href="route('database')" :current="request()->routeIs('database')" wire:navigate>{{ __('Database Peserta') }}</flux:navlist.item>
-                        <flux:navlist.item :href="route('desa')" :current="request()->routeIs('desa')" wire:navigate>{{ __('Desa') }}</flux:navlist.item>
-                        <flux:navlist.item :href="route('kelompok')" :current="request()->routeIs('kelompok')" wire:navigate>{{ __('Kelompok') }}</flux:navlist.item>
-                        <flux:navlist.item :href="route('regu')" :current="request()->routeIs('regu')" wire:navigate>{{ __('Regu') }}</flux:navlist.item>
+                    <flux:navlist.group expandable heading="Peserta CAI" class="grid">
+                        <flux:navlist.item
+                            :href="route('database')"
+                            :current="request()->routeIs('database')"
+                            wire:navigate
+                        >
+                            {{ __('Daftar Peserta') }}
+                        </flux:navlist.item>
+
+                        <flux:navlist.item
+                            :href="route('regu')"
+                            :current="request()->routeIs('regu')"
+                            wire:navigate
+                        >
+                            {{ __('Regu') }}
+                        </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group expandable heading="Laporan" class="grid">
@@ -89,10 +100,28 @@
                 </flux:navlist>
             @endif
 
-            <flux:spacer />
 
             <flux:navlist variant="outline">
+                <flux:navlist.group expandable heading="Administrasi" class="grid">
+                    <flux:navlist.item
+                        :href="route('desa')"
+                        :current="request()->routeIs('desa')"
+                        wire:navigate
+                    >
+                        {{ __('Desa') }}
+                    </flux:navlist.item>
+
+                    <flux:navlist.item
+                        :href="route('kelompok')"
+                        :current="request()->routeIs('kelompok')"
+                        wire:navigate
+                    >
+                        {{ __('Kelompok') }}
+                    </flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
+
+            <flux:spacer />
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
