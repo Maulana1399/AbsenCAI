@@ -7,6 +7,7 @@ use App\Models\kelompok;
 use App\Models\peserta;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -59,6 +60,8 @@ class SelfRegister extends Component
 
     public function register(): void
     {
+        Gate::authorize('manage-registration');
+
         if ($this->processing) {
             return;
         }

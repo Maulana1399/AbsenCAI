@@ -4,6 +4,7 @@ namespace App\Livewire\Pengajian;
 
 use App\Models\IdentityCorrectionRequest;
 use App\Services\Pengajian\IdentityCorrectionService;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class IdentityCorrectionReview extends Component
@@ -25,6 +26,8 @@ class IdentityCorrectionReview extends Component
 
     public function approve(int $requestId): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing) {
             return;
         }
@@ -65,6 +68,8 @@ class IdentityCorrectionReview extends Component
 
     public function reject(int $requestId): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing) {
             return;
         }

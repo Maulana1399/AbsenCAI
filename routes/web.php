@@ -2,6 +2,7 @@
 
 use App\Livewire\Audit\ActivityLogIndex;
 use App\Livewire\Event\Index as EventIndex;
+use App\Livewire\MasterData\User\IndexUser;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -22,31 +23,31 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:view-dashboard'])
     ->name('dashboard');
 
 Route::view('registrasi', 'registrasi.peserta')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-registration'])
     ->name('registrasi.peserta');
 
 Route::get('registrasi/self', SelfRegister::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-registration'])
     ->name('registrasi.self');
 
 Route::view('registrasi/ulang', 'registrasi.ulang')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-registration'])
     ->name('registrasi.ulang');
 
 Route::view('database', 'database.database')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-participants'])
     ->name('database');
 
 Route::view('desa', 'database.desa')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:view-master-data'])
     ->name('desa');
 
 Route::view('kelompok', 'database.kelompok')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:view-master-data'])
     ->name('kelompok');
 
 Route::view('regu', 'database.regu')
@@ -54,19 +55,19 @@ Route::view('regu', 'database.regu')
     ->name('regu');
 
 Route::view('sesi-absensi', 'database.sesi')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-sessions'])
     ->name('sesi.absensi');
 
 Route::view('rekap-peserta', 'rekap.peserta')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:view-reports'])
     ->name('rekap.peserta');
 
 Route::view('rekap-absensi', 'rekap.absensi')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:view-reports'])
     ->name('rekap.absensi');
 
 Route::get('qr-label', QRLabelIndex::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-qr-labels'])
     ->name('qr-label.index');
 
 /*
@@ -115,7 +116,7 @@ Route::get('qr-label/print/selected/{participant}', function (Participation $par
     );
 
     return response($html)->header('Content-Type', 'text/html');
-})->middleware(['auth', 'verified'])->name('qr-label.print.selected');
+})->middleware(['auth', 'verified', 'can:manage-qr-labels'])->name('qr-label.print.selected');
 
 /*
 |--------------------------------------------------------------------------
@@ -289,7 +290,7 @@ Route::get('qr-label/print/filtered', function () {
         '</body>
         </html>'
     )->header('Content-Type', 'text/html');
-})->middleware(['auth', 'verified'])->name('qr-label.print.filtered');
+})->middleware(['auth', 'verified', 'can:manage-qr-labels'])->name('qr-label.print.filtered');
 
 /*
 |--------------------------------------------------------------------------
@@ -567,14 +568,14 @@ Route::get('qr-label/print/a4', function () {
 
         </html>'
     )->header('Content-Type', 'text/html');
-})->middleware(['auth', 'verified'])->name('qr-label.print.a4');
+})->middleware(['auth', 'verified', 'can:manage-qr-labels'])->name('qr-label.print.a4');
 
 Route::view('absensi', 'dashboard.absensi')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-attendance'])
     ->name('absensi');
 
 Route::view('surat-izin', 'surat-izin.index')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:manage-secretariat'])
     ->name('surat-izin');
 
 Route::get('surat-izin/{surat}/print', function (SuratIzin $surat) {
@@ -594,10 +595,10 @@ Route::get('surat-izin/{surat}/print', function (SuratIzin $surat) {
     );
 
     return view('surat-izin.print', compact('surat'));
-})->middleware(['auth', 'verified'])->name('surat-izin.print');
+})->middleware(['auth', 'verified', 'can:manage-secretariat'])->name('surat-izin.print');
 
 Route::get('activity-log', ActivityLogIndex::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'can:view-activity-log'])
     ->name('activity-log.index');
 
 Route::middleware(['auth'])->group(function () {
@@ -615,24 +616,34 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('import/desa', [ImportDataController::class, 'desa'])
+        ->middleware('can:manage-master-data')
         ->name('import.desa');
 
     Route::post('import/kelompok', [ImportDataController::class, 'kelompok'])
+        ->middleware('can:manage-master-data')
         ->name('import.kelompok');
 
     Route::post('import/regu', [ImportDataController::class, 'regu'])
+        ->middleware('can:manage-participants')
         ->name('import.regu');
 
     Route::post('import/peserta', [ImportDataController::class, 'peserta'])
+        ->middleware('can:manage-participants')
         ->name('import.peserta');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('master-data', 'master-data.index')
+        ->middleware('can:view-master-data')
         ->name('master-data.index');
 
     Route::view('person', 'master-data.person.index')
+        ->middleware('can:view-master-data')
         ->name('person.index');
+
+    Route::get('users', IndexUser::class)
+        ->middleware('can:manage-users')
+        ->name('users.index');
 
     Route::get('events', EventIndex::class)
         ->name('events.index');
@@ -640,27 +651,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get(
         'koreksi-data',
         App\Livewire\Pengajian\IdentityCorrectionReview::class
-    )->name('koreksi.data');
+    )->middleware('can:manage-pengajian')->name('koreksi.data');
 
     Route::get(
         'pengajian/report',
         App\Livewire\Pengajian\RegionalReport::class
-    )->name('pengajian.report');
+    )->middleware('can:view-reports')->name('pengajian.report');
 
     Route::get(
         'pengajian/admin/access',
         App\Livewire\Pengajian\Admin\AccessIndex::class
-    )->name('pengajian.admin.access');
+    )->middleware('can:manage-pengajian')->name('pengajian.admin.access');
 
     Route::get(
         'pengajian/admin/manual-entry',
         App\Livewire\Pengajian\Admin\ManualEntry::class
-    )->name('pengajian.admin.manual-entry');
+    )->middleware('can:manage-pengajian')->name('pengajian.admin.manual-entry');
 
     Route::get(
         'pengajian/admin/import-massal',
         App\Livewire\Pengajian\Admin\ImportMassal::class
-    )->name('pengajian.import-massal');
+    )->middleware('can:manage-pengajian')->name('pengajian.import-massal');
 });
 
 Route::prefix('pengajian')->group(function () {

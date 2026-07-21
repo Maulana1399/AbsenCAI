@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\User;
 use App\Models\Event;
 use App\Support\ActiveEventContext;
@@ -74,14 +75,14 @@ test('guest cannot access regu page', function () {
 // ---------------------------------------------------------------------------
 
 test('authenticated user can access master-data page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/master-data')->assertOk();
 });
 
 test('master-data page renders without active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     expect(app(ActiveEventContext::class)->current())->toBeNull();
@@ -89,7 +90,7 @@ test('master-data page renders without active event', function () {
 });
 
 test('visiting master-data does not change ActiveEventContext', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = md_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
@@ -106,7 +107,7 @@ test('visiting master-data does not change ActiveEventContext', function () {
 // ---------------------------------------------------------------------------
 
 test('master-data landing shows heading', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/master-data');
@@ -115,7 +116,7 @@ test('master-data landing shows heading', function () {
 });
 
 test('master-data landing shows Person card', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/master-data');
@@ -125,7 +126,7 @@ test('master-data landing shows Person card', function () {
 });
 
 test('master-data landing shows Desa card', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/master-data');
@@ -135,7 +136,7 @@ test('master-data landing shows Desa card', function () {
 });
 
 test('master-data landing shows Kelompok card', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/master-data');
@@ -145,7 +146,7 @@ test('master-data landing shows Kelompok card', function () {
 });
 
 test('master-data landing does not show Regu as navigation card', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/master-data');
@@ -158,7 +159,7 @@ test('master-data landing does not show Regu as navigation card', function () {
 // ---------------------------------------------------------------------------
 
 test('sidebar shows Master Data link', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/dashboard');
@@ -167,7 +168,7 @@ test('sidebar shows Master Data link', function () {
 });
 
 test('sidebar Master Data link visible when no active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/dashboard');
@@ -176,7 +177,7 @@ test('sidebar Master Data link visible when no active event', function () {
 });
 
 test('sidebar Master Data link visible in CAI event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = md_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
@@ -187,7 +188,7 @@ test('sidebar Master Data link visible in CAI event context', function () {
 });
 
 test('sidebar Master Data link visible in Pengajian event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = md_event(['event_type' => 'pengajian']);
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
@@ -221,21 +222,21 @@ test('regu page renders without active event', function () {
 // ---------------------------------------------------------------------------
 
 test('person page still accessible', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/person')->assertOk();
 });
 
 test('desa page still accessible', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/desa')->assertOk();
 });
 
 test('kelompok page still accessible', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/kelompok')->assertOk();

@@ -6,6 +6,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
 use App\Services\Person\PersonLegacySyncService;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Flux\Flux;
@@ -45,6 +46,8 @@ class EditPerson extends Component
 
     public function update(): void
     {
+        Gate::authorize('manage-master-data');
+
         $this->validate();
 
         $person = Person::findOrFail($this->person_id);

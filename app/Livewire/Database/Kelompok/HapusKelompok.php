@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Kelompok;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\kelompok;
+use Illuminate\Support\Facades\Gate;
 use Flux\Flux;
 
 class HapusKelompok extends Component
@@ -24,6 +25,8 @@ class HapusKelompok extends Component
     }
     public function destroy()
     {
+        Gate::authorize('manage-master-data');
+
         $kelompok = kelompok::find($this->kelompok_id);
         if ($kelompok) {
             $kelompok->delete();

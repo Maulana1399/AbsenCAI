@@ -9,10 +9,11 @@ use App\Models\User;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\Role;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($this->user);
 
     $event = Event::create([

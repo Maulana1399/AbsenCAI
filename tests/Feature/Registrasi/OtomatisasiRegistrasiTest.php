@@ -1,8 +1,10 @@
 <?php
 
 use App\Livewire\Database\Peserta\TambahPeserta;
+use App\Enums\Role;
 use App\Imports\PesertaImport;
 use App\Livewire\Registrasi\SelfRegister;
+use App\Models\User;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
@@ -13,6 +15,8 @@ use App\Services\Placement\PlacementService;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    $this->user = User::factory()->create(['role' => Role::Admin]);
+    $this->actingAs($this->user);
     app(ActiveEventContext::class)->set(Event::create(['name' => 'Default Event', 'slug' => 'default-event', 'status' => 'active']));
     $this->desa = desa::create(['desa_asal' => 'Desa A']);
     $this->kelompok = kelompok::create([

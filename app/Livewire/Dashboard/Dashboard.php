@@ -10,6 +10,7 @@ use App\Models\kelompok;
 use App\Models\regu;
 use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -113,6 +114,8 @@ class Dashboard extends Component
 
     public function activateSesi($id)
 {
+    Gate::authorize('manage-sessions');
+
     $event = app(ActiveEventContext::class)->requireCurrent();
 
     SesiAbsensi::where('event_id', $event->id)->update([

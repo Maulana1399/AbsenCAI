@@ -7,6 +7,7 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SuratIzin;
 use App\Models\User;
+use App\Enums\Role;
 use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
 use App\Support\ActiveEventContext;
@@ -50,7 +51,7 @@ function printLog_createMappedPeserta(Event $event, array $overrides = []): pese
 }
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($this->user);
 
     $this->peserta = peserta::create([

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
@@ -9,7 +10,7 @@ use App\Support\ActiveEventContext;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(User::factory()->create(['role' => Role::Admin]));
     app(ActiveEventContext::class)->set(Event::create(['name' => 'Default Event', 'slug' => 'default-event', 'status' => 'active']));
 });
 

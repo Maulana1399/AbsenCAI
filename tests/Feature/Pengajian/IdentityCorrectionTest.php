@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
@@ -56,7 +57,7 @@ function pgm8_person(string $nama, string $gender = 'L', ?int $desaId = null, ?s
 
 function pgm8_user(): User
 {
-    return User::factory()->create();
+    return User::factory()->create(['role' => Role::Admin]);
 }
 
 // ---------------------------------------------------------------------------

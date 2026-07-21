@@ -52,6 +52,11 @@ class Person extends Model
         return $this->hasMany(EventCommitteeAssignment::class);
     }
 
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
     public function getJenisKelaminLabelAttribute(): string
     {
         return match ($this->jenis_kelamin) {

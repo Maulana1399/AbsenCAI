@@ -2,6 +2,7 @@
 
 use App\Models\Event;
 use App\Models\User;
+use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -23,7 +24,7 @@ function et_event(array $overrides = []): Event
 
 function et_user(): User
 {
-    return User::factory()->create();
+    return User::factory()->create(['role' => Role::Admin]);
 }
 
 // ---------------------------------------------------------------------------

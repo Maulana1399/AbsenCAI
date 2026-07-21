@@ -12,10 +12,11 @@ use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Support\ActiveEventContext;
+use App\Enums\Role;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($this->user);
     $this->eventA = Event::create(['name' => 'Event A', 'slug' => 'event-a-'.str()->random(6), 'status' => 'active']);
     $this->eventB = Event::create(['name' => 'Event B', 'slug' => 'event-b-'.str()->random(6), 'status' => 'active']);

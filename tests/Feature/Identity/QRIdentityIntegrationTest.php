@@ -10,10 +10,11 @@ use App\Models\peserta;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
 
+use App\Enums\Role;
 use Livewire\Livewire;
 
 it('QR label print route encodes attendance code and keeps participant number as label only', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $event = Event::create([
@@ -76,6 +77,8 @@ it('QR label print route encodes attendance code and keeps participant number as
 });
 
 it('QR label Livewire download uses attendance code payload', function () {
+    $user = User::factory()->create(['role' => Role::Admin]);
+    $this->actingAs($user);
     $event = Event::create([
         'name' => 'QR Livewire Event',
         'slug' => 'qr-livewire-event-'.str()->random(6),
@@ -119,6 +122,8 @@ it('QR label Livewire download uses attendance code payload', function () {
 });
 
 it('QR label print preview uses attendance code payload and participant number label only', function () {
+    $user = User::factory()->create(['role' => Role::Admin]);
+    $this->actingAs($user);
     $event = Event::create([
         'name' => 'QR Print Preview Event',
         'slug' => 'qr-print-preview-event-'.str()->random(6),

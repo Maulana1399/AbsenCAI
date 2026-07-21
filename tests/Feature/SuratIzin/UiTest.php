@@ -8,10 +8,11 @@ use App\Models\SuratIzin;
 use App\Models\User;
 use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
+use App\Enums\Role;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($this->user);
 
     $this->peserta = peserta::create([

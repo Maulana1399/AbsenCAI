@@ -5,6 +5,7 @@ namespace App\Livewire\MasterData\Person;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Flux\Flux;
 
@@ -29,6 +30,8 @@ class CreatePerson extends Component
 
     public function simpan(): void
     {
+        Gate::authorize('manage-master-data');
+
         if ($this->processing) {
             return;
         }

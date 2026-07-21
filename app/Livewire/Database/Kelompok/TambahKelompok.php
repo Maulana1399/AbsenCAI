@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Kelompok;
 use App\Models\kelompok;
 use Livewire\Component;
 use App\Models\desa;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class TambahKelompok extends Component
@@ -22,6 +23,8 @@ class TambahKelompok extends Component
 
 
     public function simpan(){
+        Gate::authorize('manage-master-data');
+
         if ($this->processing) {
             return;
         }

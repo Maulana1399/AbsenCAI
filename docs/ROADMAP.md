@@ -180,6 +180,58 @@ Notes:
 
 🟢 Operational Stable / Partially Deferred
 
+---
+
+# Phase 4 — RBAC (Security & Permission)
+
+## Status
+
+🟢 **S1 RBAC Foundation**: Complete. Role enum, users.role migration, Gate definitions, Artisan command `user:set-role`.
+✅ **S3**: Complete — Event Management & CAI Operational Protection.
+🟡 **S4–S7**: Not yet implemented.
+
+## Goal
+
+Menerapkan Role-Based Access Control (RBAC) di seluruh aplikasi sesuai permission matrix di `docs/PERMISSION.md`.
+
+## Phases
+
+### S1 — RBAC Foundation ✅
+- [x] `Role` enum (9 roles)
+- [x] `users.role` migration (nullable string)
+- [x] User model: role cast, hasRole(), hasAnyRole()
+- [x] Gate definitions (15 abilities) + Super Admin bypass
+- [x] Artisan command `php artisan user:set-role`
+
+### S2 — Master Data Protection ✅
+- [x] Route protection: `/master-data`, `/person`, `/desa`, `/kelompok` via `can:view-master-data`
+- [x] Import protection: `/import/desa`, `/import/kelompok` via `can:manage-master-data`
+- [x] Livewire mutation authorization: Person, Desa, Kelompok CRUD + Import
+- [x] Sidebar visibility: `@can('view-master-data')` on Master Data menu
+- [x] Regu explicitly excluded from Master Data protection
+- [x] 36 dedicated tests
+
+### S3 — Route/Livewire Protection ✅
+- [x] Event Management protection (manage-events)
+- [x] CAI module permissions: registration, participants, attendance, sessions, QR labels, secretariat, reports, activity log, dashboard
+
+### S3 — Livewire Action Authorization ✅
+- [x] Authorize Livewire mutations per component (16 components, 25+ mutation methods)
+
+### S4 — Pengajian Admin Protection 🔲
+- [ ] Separate admin Pengajian routes from role-based access
+
+### S5 — CAI Module Permissions 🔲
+- [ ] Registration, attendance, QR, session, import permissions
+
+### S6 — Sidebar Visibility ✅
+- [x] `@can()` directives for all menu items
+
+### S7 — Security Regression Tests 🔲
+- [ ] Full role × module × allowed/denied test matrix
+
+---
+
 Permission feature group completed.
 Activity Log foundation + Export/Print/QR Log completed.
 Riwayat Izin, Scoring, Storage **deferred** to 2027.
@@ -979,6 +1031,28 @@ Master Data is currently visible to all authenticated users. RBAC has not been i
 
 ---
 
+# User Management
+
+## Status
+
+✅ COMPLETE (2026-07-21).
+
+## Goal
+
+Super Admin manages user accounts (create, edit, reset password, delete).
+
+## Deliverables
+
+- [x] Route `/users` protected with `manage-users` ability
+- [x] Livewire components: Index, Create, Edit, ResetPassword, Delete
+- [x] `UserManagementService` for centralized user business logic
+- [x] Delete safety: cannot delete self, cannot delete last Super Admin
+- [x] Super Admin only access
+- [x] Activity Log integration (created, updated, role_changed, password_reset, deleted)
+- [x] Password hashing and security compliance
+
+---
+
 # Current Priority
 
 ```
@@ -1006,3 +1080,58 @@ CAI bukan tujuan akhir.
 CAI adalah MVP.
 
 KJA Event Manager adalah platform Event Management yang dapat digunakan oleh sekolah, organisasi, komunitas, universitas, hingga penyelenggara kejuaraan dan festival dengan arsitektur modular yang siap dikembangkan dalam jangka panjang.
+
+---
+
+# S4 Completion — Pengajian Admin Protection ✅
+
+**Status:** COMPLETE (2026-07-21).
+
+Previously tracked as:
+```
+### S4 — Pengajian Admin Protection 🔲
+- [ ] Separate admin Pengajian routes from role-based access
+```
+
+**Completed:**
+- ✅ 4 Pengajian admin routes protected with `can:manage-pengajian` middleware:
+  - `/koreksi-data` — Identity Correction Review
+  - `/pengajian/admin/access` — Access Token Management
+  - `/pengajian/admin/manual-entry` — Manual Participant Entry
+  - `/pengajian/admin/import-massal` — Bulk Import
+- ✅ 4 Livewire components gated with `Gate::authorize('manage-pengajian')`
+- ✅ Access matrix verified per role (super_admin, admin, sekretariat)
+- ✅ Public token flow unchanged — remains accessible without authentication
+- ✅ Pre-S4 audit documented: routes previously accessible by ALL authenticated users
+
+**Phase 4 RBAC updated status:**
+- 🟢 S1 RBAC Foundation: ✅ Complete
+- 🟢 S2 Master Data Protection: ✅ Complete
+- 🟢 S3 Operational Protection: ✅ Complete
+- 🟢 **S4 Pengajian Admin Protection: ✅ Complete**
+- 🟢 **S5 CAI Module Permissions: ✅ Complete**
+- 🟢 **S6 Sidebar Visibility: ✅ Complete**
+- 🟡 S7: Not yet implemented
+
+### S5 — CAI Module Permissions ✅ COMPLETE (2026-07-21)
+
+**Previously tracked as:**
+```
+### S5 — CAI Module Permissions 🔲
+- [ ] Registration, attendance, QR, session, import permissions
+```
+
+**Completed:**
+- ✅ `manage-import` ability applied to `/import/peserta` and `/import/regu` routes
+- ✅ Livewire ImportPeserta and ImportRegu mutations gated with `Gate::authorize('manage-import')`
+- ✅ Full CAI permission matrix verified (all 15 abilities)
+- ✅ `manage-import` access matrix verified per role (super_admin, admin, sekretariat)
+
+**Phase 4 RBAC updated status:**
+- 🟢 S1 RBAC Foundation: ✅ Complete
+- 🟢 S2 Master Data Protection: ✅ Complete
+- 🟢 S3 Operational Protection: ✅ Complete
+- 🟢 S4 Pengajian Admin Protection: ✅ Complete
+- 🟢 **S5 CAI Module Permissions: ✅ Complete**
+- 🟢 **S6 Sidebar Visibility: ✅ Complete**
+- 🟡 S7: Not yet implemented

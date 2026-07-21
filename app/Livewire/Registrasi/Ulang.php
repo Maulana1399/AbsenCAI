@@ -7,6 +7,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Services\Registration\RegistrationService;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Ulang extends Component
@@ -25,6 +26,8 @@ class Ulang extends Component
 
     public function registrasiUlang(int $id): void
     {
+        Gate::authorize('manage-registration');
+
         app(RegistrationService::class)->updateParticipantStatus(
             $id,
             peserta::STATUS_REGISTRASI_ULANG
@@ -52,6 +55,8 @@ class Ulang extends Component
 
     public function updatePeserta()
     {
+        Gate::authorize('manage-registration');
+
         app(RegistrationService::class)->updateParticipant($this->editId, [
             'nama' => $this->editNama,
             'jenis_kelamin' => $this->editJenisKelamin,

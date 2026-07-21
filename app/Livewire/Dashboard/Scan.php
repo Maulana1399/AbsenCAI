@@ -7,6 +7,7 @@ use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceService;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use App\Services\Attendance\AttendanceExceptionService;
 use Illuminate\Validation\ValidationException;
@@ -66,6 +67,8 @@ class Scan extends Component
 
     public function manualAttend(): void
     {
+        Gate::authorize('manage-attendance');
+
         $participant = $this->selectedManualParticipantId
             ? peserta::find($this->selectedManualParticipantId)
             : null;
@@ -99,6 +102,8 @@ class Scan extends Component
 
     public function manualIzin(): void
     {
+        Gate::authorize('manage-attendance');
+
         $participant = $this->selectedManualParticipantId
             ? peserta::find($this->selectedManualParticipantId)
             : null;
@@ -131,6 +136,8 @@ class Scan extends Component
 
     public function scanPeserta($data)
     {
+        Gate::authorize('manage-attendance');
+
         $result = app(AttendanceService::class)->processScan((string) $data, $this->sesi_id ? (int) $this->sesi_id : null);
 
         $this->message = $result['message'];

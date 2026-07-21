@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Services\Registration\ManualParticipantRegistrationService;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class ManualEntry extends Component
@@ -60,6 +61,8 @@ class ManualEntry extends Component
 
     public function submit(): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing) {
             return;
         }
@@ -96,6 +99,8 @@ class ManualEntry extends Component
 
     public function confirmMatch(int $personId): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing) {
             return;
         }
@@ -129,6 +134,8 @@ class ManualEntry extends Component
 
     public function createNewPerson(): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing) {
             return;
         }

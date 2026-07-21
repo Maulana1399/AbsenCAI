@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Desa;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DesaImport;
+use Illuminate\Support\Facades\Gate;
 use Livewire\WithFileUploads;
 
 class ImportDesa extends Component
@@ -16,6 +17,8 @@ class ImportDesa extends Component
 
     public function import()
     {
+        Gate::authorize('manage-master-data');
+
         $this->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);

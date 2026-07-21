@@ -5,6 +5,7 @@ namespace App\Livewire\SuratIzin;
 use App\Models\SuratIzin;
 use App\Services\Attendance\SuratIzinService;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Index extends Component
@@ -44,6 +45,8 @@ class Index extends Component
 
     public function submit(int $id)
     {
+        Gate::authorize('manage-secretariat');
+
         $surat = SuratIzin::findOrFail($id);
         try {
             app(SuratIzinService::class)->submit($surat);
@@ -62,6 +65,8 @@ class Index extends Component
 
     public function approve()
     {
+        Gate::authorize('manage-secretariat');
+
         $surat = SuratIzin::findOrFail($this->approveSuratId);
         try {
             $this->approveResult = app(SuratIzinService::class)->approve($surat, auth()->user());
@@ -73,6 +78,8 @@ class Index extends Component
 
     public function reject(int $id)
     {
+        Gate::authorize('manage-secretariat');
+
         $surat = SuratIzin::findOrFail($id);
         try {
             app(SuratIzinService::class)->reject($surat);
@@ -92,6 +99,8 @@ class Index extends Component
 
     public function markReturned()
     {
+        Gate::authorize('manage-secretariat');
+
         $this->validate([
             'returnDate' => 'required|date',
         ]);

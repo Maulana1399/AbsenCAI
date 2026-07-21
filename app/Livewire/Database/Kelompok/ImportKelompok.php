@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Kelompok;
 use Livewire\Component;
 use App\Imports\KelompokImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Gate;
 use Livewire\WithFileUploads;
 
 class ImportKelompok extends Component
@@ -15,6 +16,8 @@ class ImportKelompok extends Component
 
     public function import()
     {
+        Gate::authorize('manage-master-data');
+
         $this->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);

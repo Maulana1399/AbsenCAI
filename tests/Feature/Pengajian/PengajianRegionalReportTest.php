@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\Participation;
@@ -273,7 +274,7 @@ test('halaman report membutuhkan auth', function () {
 test('halaman report dapat diakses oleh user terverifikasi', function () {
     $event = pgm9_event();
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     $response = $this->actingAs($user)
@@ -283,7 +284,7 @@ test('halaman report dapat diakses oleh user terverifikasi', function () {
 });
 
 test('halaman report tidak 500 ketika tidak ada active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     $response = $this->actingAs($user)
         ->get(route('pengajian.report'));
@@ -298,7 +299,7 @@ test('halaman report dengan active event tetap berfungsi normal', function () {
     $desa = pgm9_desa();
     pgm9_person('Jono', 'L', $desa->id);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     $response = $this->actingAs($user)

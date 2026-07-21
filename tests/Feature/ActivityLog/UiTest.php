@@ -3,11 +3,12 @@
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\Audit\ActivityLogService;
+use App\Enums\Role;
 use Livewire\Livewire;
 use App\Livewire\Audit\ActivityLogIndex;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['role' => Role::Admin]);
 });
 
 // ---------------------------------------------------------------------------

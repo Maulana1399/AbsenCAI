@@ -48,6 +48,25 @@ Future:
 
 ---
 
+# User Management
+
+🟢
+
+- User Index (list users)
+- User Create (new user)
+- User Edit (profile + role)
+- User Reset Password (admin reset)
+- User Delete (with safety rules)
+- Activity Log integration (created, updated, role_changed, password_reset, deleted)
+
+Notes:
+- Hanya Super Admin yang dapat mengakses (`manage-users`)
+- Service layer: `UserManagementService`
+- Route: `/users` (middleware `can:manage-users`)
+- Delete safety: cannot delete self, cannot delete last Super Admin
+
+---
+
 # Event
 
 🟢

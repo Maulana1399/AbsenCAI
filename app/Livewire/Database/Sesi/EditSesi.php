@@ -4,6 +4,7 @@ namespace App\Livewire\Database\Sesi;
 
 use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Flux\Flux;
@@ -19,7 +20,18 @@ class EditSesi extends Component
     #[On('editSesi')]
     public function editSesi($id)
     {
-        $data = SesiAbsensi::find($id);
+        $eventId = app(ActiveEventContext::class)->id();
+
+        if ($eventId === null) {
+            return;
+        }
+
+        $data = SesiAbsensi::where('event_id', $eventId)->find($id);
+
+        if ($data === null) {
+            return;
+        }
+
         $this->sesi_id = $data->id;
         $this->nama_sesi = $data->nama_sesi;
         $this->tanggal = $data->tanggal;
@@ -29,6 +41,8 @@ class EditSesi extends Component
 
     public function update()
     {
+        Gate::authorize('manage-sessions');
+
         $this->validate([
             'nama_sesi' => 'required|string',
             'tanggal' => 'required|date',

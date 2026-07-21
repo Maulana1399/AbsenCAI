@@ -7,6 +7,7 @@ use App\Models\IzinAbsensi;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
+use App\Support\ActiveEventContext;
 use App\Services\Audit\ActivityLogService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,11 @@ class SuratIzinService
             $mulai = $surat->tanggal_mulai->toDateString();
             $selesai = $surat->tanggal_selesai->toDateString();
 
-            $sesis = SesiAbsensi::whereBetween('tanggal', [$mulai, $selesai])->get();
+            $eventId = app(ActiveEventContext::class)->id();
+
+            $sesis = SesiAbsensi::when($eventId, fn ($q) => $q->where('event_id', $eventId))
+                ->whereBetween('tanggal', [$mulai, $selesai])
+                ->get();
 
             $created      = [];
             $skippedHadir = [];

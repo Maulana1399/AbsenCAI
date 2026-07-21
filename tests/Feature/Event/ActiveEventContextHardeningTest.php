@@ -4,6 +4,7 @@ use App\Models\Event;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
+use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -20,7 +21,7 @@ function ActiveEvent_makeEvent(array $overrides = []): Event
 
 function ActiveEvent_makeUser(): User
 {
-    return User::factory()->create();
+    return User::factory()->create(['role' => Role::Admin]);
 }
 
 function ActiveEvent_makePerson(array $overrides = []): Person

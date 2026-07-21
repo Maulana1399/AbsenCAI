@@ -2,6 +2,7 @@
 
 use App\Models\Event;
 use App\Models\User;
+use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -24,7 +25,7 @@ function EventFoundation_makeEvent(array $overrides = []): Event
 
 function EventFoundation_makeUser(): User
 {
-    return User::factory()->create();
+    return User::factory()->create(['role' => Role::Admin]);
 }
 
 function EventFoundation_makeSession(array $overrides = []): \App\Models\SesiAbsensi
@@ -343,6 +344,8 @@ test('active session resolution remains event-scoped', function () {
 });
 
 test('activating a session for one event does not deactivate another event', function () {
+    $user = EventFoundation_makeUser();
+    $this->actingAs($user);
     $eventA = EventFoundation_makeEvent(['name' => 'Event A', 'slug' => 'event-a']);
     $eventB = EventFoundation_makeEvent(['name' => 'Event B', 'slug' => 'event-b']);
 
@@ -456,14 +459,14 @@ test('existing application works without selecting an event', function () {
     $this->get('/rekap-absensi')->assertStatus(200);
 });
 
-test('no existing identifier contracts change', function () {
+test('admin can access all operational and master data routes', function () {
     $user = EventFoundation_makeUser();
     $this->actingAs($user);
 
-    $this->get('/sesi-absensi')->assertStatus(200);
-    $this->get('/database')->assertStatus(200);
-    $this->get('/desa')->assertStatus(200);
-    $this->get('/kelompok')->assertStatus(200);
-    $this->get('/regu')->assertStatus(200);
-    $this->get('/qr-label')->assertStatus(200);
+    $this->get('/sesi-absensi')->assertOk();
+    $this->get('/database')->assertOk();
+    $this->get('/desa')->assertOk();
+    $this->get('/kelompok')->assertOk();
+    $this->get('/regu')->assertOk();
+    $this->get('/qr-label')->assertOk();
 });

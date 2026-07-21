@@ -565,7 +565,7 @@ Jika benar:
 
 ### Role & Hak Akses
 
-> **Saat ini aplikasi tidak memiliki sistem role (peran) yang terpisah.** Semua user yang login memiliki akses yang sama ke seluruh fitur.
+> **RBAC S1 Foundation** selesai. **S2 Master Data Protection** selesai. **S3 Event Management & CAI Operational Protection** selesai: semua operational routes (dashboard, registrasi, database, sesi, rekap, QR, absensi, surat-izin, activity-log) sudah dilindungi dengan `can:*` middleware dan Livewire mutations dengan `Gate::authorize()`. Sidebar visibility untuk seluruh modul sudah diimplementasikan dengan `@can()` directives (S6). Lihat `docs/PERMISSION.md` untuk access matrix detail.
 
 | Siapa | Bisa Apa |
 |-------|----------|
@@ -1311,3 +1311,93 @@ cp database/database.sqlite database/database.sqlite.backup-$(date +%Y%m%d-%H%M%
 
 *Dokumen ini dibuat berdasarkan analisa kode project KJA Event Manager per Juli 2026.*
 *Jika ada perubahan besar pada project, update dokumen ini agar tetap relevan.*
+
+---
+
+## S4 — Pengajian Admin Protection ✅
+
+S4 RBAC telah selesai (2026-07-21). Seluruh route admin Pengajian sekarang dilindungi dengan permission `manage-pengajian`.
+
+**Route yang diproteksi:**
+- `/koreksi-data` — Review koreksi identitas
+- `/pengajian/admin/access` — Kelola Access Token Desa
+- `/pengajian/admin/manual-entry` — Tambah Peserta Manual
+- `/pengajian/admin/import-massal` — Import Massal Peserta
+
+**Role yang memiliki akses:** Super Admin, Admin, Sekretariat.
+
+**Yang tidak berubah:** Alur publik Pengajian (enter token, self-attendance) tetap tidak memerlukan login.
+
+**Route `/pengajian/report`** telah diproteksi sejak S3 dengan `view-reports`.
+
+---
+
+## S0 — User Management ✅
+
+User Management telah selesai (2026-07-21). Super Admin dapat mengelola akun user melalui `/users`.
+
+**Fitur:**
+- **Index** — daftar semua user dengan pencarian
+- **Create** — tambah user baru (nama, email, password, role)
+- **Edit** — ubah profil dan role user
+- **Reset Password** — reset password user oleh admin
+- **Delete** — hapus user dengan safety guard
+
+**Keamanan:**
+- Hanya Super Admin yang bisa mengakses (ability `manage-users`)
+- Tidak bisa menghapus diri sendiri
+- Tidak bisa menghapus Super Admin terakhir
+- Password selalu di-hash, tidak pernah diekspos
+- Semua aksi tercatat di Activity Log
+
+**Route:** `/users` (middleware `can:manage-users`)
+
+---
+
+## S5 — CAI Module Permissions ✅
+
+S5 RBAC telah selesai (2026-07-21). Seluruh permission CAI module telah diverifikasi dan import routes diproteksi dengan ability `manage-import`.
+
+**Route yang diproteksi:**
+- `/import/peserta` — Import Peserta CAI (Excel/CSV)
+- `/import/regu` — Import Regu CAI (Excel/CSV)
+
+**Role yang memiliki akses:** Super Admin, Admin, Sekretariat.
+
+**Yang sudah selesai di S5:**
+- ✅ `manage-import` ability diterapkan ke route import peserta dan regu
+- ✅ Livewire ImportPeserta dan ImportRegu dilindungi dengan `Gate::authorize('manage-import')`
+- ✅ Seluruh 15 ability Gate telah diterapkan di route/Livewire mutation
+- ✅ Matrix akses CAI lengkap diverifikasi
+
+**Catatan:** `/import/desa` dan `/import/kelompok` telah diproteksi sejak S2 dengan `manage-master-data`. Sidebar visibility untuk semua modul telah diimplementasikan di S6.
+
+---
+
+## S6 — Sidebar Visibility (RBAC) ✅
+
+S6 RBAC telah selesai (2026-07-21). Seluruh menu sidebar sekarang difilter berdasarkan role menggunakan `@can()` directives.
+
+### Yang dilakukan:
+- ✅ Dashboard → `@can('view-dashboard')`
+- ✅ Absensi group (Scan, Sesi) → `@canany(['manage-attendance', 'manage-sessions'])`
+- ✅ Registrasi group → `@can('manage-registration')`
+- ✅ Peserta CAI → `@can('manage-participants')`
+- ✅ Laporan group → `@can('view-reports')`
+- ✅ QR & Label → `@can('manage-qr-labels')`
+- ✅ Sekretariat group → `@canany(['manage-secretariat', 'view-activity-log'])`
+- ✅ Surat Izin → `@can('manage-secretariat')`
+- ✅ Activity Log → `@can('view-activity-log')`
+- ✅ Master Data → `@can('view-master-data')`
+- ✅ User Management → `@can('manage-users')`
+- ✅ Pengajian Regional Report → `@can('view-reports')`
+- ✅ Pengajian Peserta & Operasional Desa → `@can('manage-pengajian')`
+- ✅ EventSwitcher tetap dapat diakses semua role (navigation UX)
+- ✅ Kelola Event tidak digate (server-side protection dengan `manage-events`)
+- ✅ Parent group gating dengan `@canany` + child items dengan `@can`
+- ✅ Konteks CAI dan Pengajian konsisten
+
+### Yang tidak berubah:
+- Server-side route dan Livewire protection tetap menjadi security layer utama
+- Sidebar visibility adalah UX layer, bukan authorization gate
+- Menu yang tersembunyi tetap tidak bisa diakses langsung (HTTP 403)

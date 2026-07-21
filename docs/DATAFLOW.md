@@ -19,7 +19,37 @@ Person CRUD (Master Data)
             ├── participant_number → event-scoped
             └── attendance_code    → event-scoped
 
-Reverse direction (peserta → Person) via RegistrationService::updateParticipant():
+## Authorization (RBAC Chain)
+
+```
+User (authenticated account)
+  │
+  ├── role (App\Enums\Role)
+  │     └── determines WHAT the account may do (SuperAdmin, Admin, KetuaEvent, etc.)
+  │
+  ├── person_id → Person (optional)
+  │     └── links account to canonical Person identity
+  │
+  ├── Person → EventCommitteeAssignment
+  │     ├── event_id → Event (assigned event)
+  │     └── event_role_id → EventRole (operational position, NOT RBAC)
+  │     └── determines WHICH Event the User may access (KetuaEvent only)
+  │
+  └── Gate abilities (15 defined)
+        ├── SuperAdmin → bypass via Gate::before()
+        ├── Admin/Sekretariat/other roles → global access
+        └── KetuaEvent → event-scoped (role + person + assignment = access)
+```
+
+## Activity Log
+
+All user mutations are logged via `ActivityLogService`:
+- User created/updated/deleted → `module: user`
+- Role changed → `action: role_changed`
+- Person link changed → `action: person_link_changed`
+- Committee assignment created → via EventCommitteeService
+
+## Identity Sync (Person → Legacy Peserta)
   ├── nama          → sync to Person.nama
   ├── jenis_kelamin → sync to Person.jenis_kelamin (konversi)
   ├── desa_id       → sync to Person.desa_id

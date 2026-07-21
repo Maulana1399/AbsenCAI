@@ -8,6 +8,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class TambahPeserta extends Component
@@ -49,6 +50,8 @@ class TambahPeserta extends Component
 
     public function simpan()
     {
+        Gate::authorize('manage-participants');
+
         if ($this->processing) {
             return;
         }

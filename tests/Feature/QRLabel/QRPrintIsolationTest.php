@@ -4,6 +4,7 @@ use App\Models\Event;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Enums\Role;
 use App\Models\peserta;
 use App\Models\User;
 use App\Support\ActiveEventContext;
@@ -58,7 +59,7 @@ function qrIsolation_createMappedPeserta(Event $event, string $name, int $nip, s
 // ---------------------------------------------------------------------------
 
 test('selected print returns 404 when no active event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
     $event = qrIsolation_makeEvent('A');
@@ -69,7 +70,7 @@ test('selected print returns 404 when no active event context', function () {
 });
 
 test('filtered print returns 404 when no active event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
     $event = qrIsolation_makeEvent('A');
@@ -80,7 +81,7 @@ test('filtered print returns 404 when no active event context', function () {
 });
 
 test('a4 print returns 404 when no active event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
     $event = qrIsolation_makeEvent('A');
@@ -95,7 +96,7 @@ test('a4 print returns 404 when no active event context', function () {
 // ---------------------------------------------------------------------------
 
 test('selected print rejects participant from another event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
     $eventA = qrIsolation_makeEvent('A');
@@ -120,7 +121,7 @@ test('selected print rejects participant from another event', function () {
 // ---------------------------------------------------------------------------
 
 test('filtered print only includes participants from active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
     $eventA = qrIsolation_makeEvent('A');
@@ -145,7 +146,7 @@ test('filtered print only includes participants from active event', function () 
 // ---------------------------------------------------------------------------
 
 test('a4 print only includes participants from active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
     $eventA = qrIsolation_makeEvent('A');

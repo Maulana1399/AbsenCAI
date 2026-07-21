@@ -1,5 +1,39 @@
 # Backlog
 
+## Phase 4 — RBAC (Security & Permission)
+
+### S1 RBAC Foundation ✅
+- [x] Role enum (super_admin, admin, ketua_event, sekretariat, pj_divisi, operator_registrasi, operator_scan, juri, viewer)
+- [x] Migration add_role_to_users_table
+- [x] User model: role cast, hasRole(), hasAnyRole()
+- [x] Gate definitions (15 abilities) in AppServiceProvider
+- [x] Super Admin bypass via Gate::before()
+- [x] Artisan command: php artisan user:set-role {email} {role}
+- [x] Tests: 35 tests for Role enum, User, Gates, null-role, Artisan, regression
+
+### S2 Master Data Protection ✅
+- [x] Route protection: /master-data, /person, /desa, /kelompok via can:view-master-data
+- [x] Import protection: /import/desa, /import/kelompok via can:manage-master-data
+- [x] Livewire mutation authorization: Person, Desa, Kelompok CRUD + Import
+- [x] Sidebar visibility: @can('view-master-data') on Master Data menu
+- [x] Regu explicitly excluded from Master Data protection
+- [x] Tests: 36 tests for route access, sidebar, mutations, regression
+
+### S3 Event Management & CAI Operational Protection ✅
+- [x] Route protection: manage-events, manage-registration, manage-participants, manage-attendance, manage-sessions, manage-qr-labels, manage-secretariat, view-reports, view-activity-log, view-dashboard
+- [x] Livewire mutation authorization: 16 components across Event, Peserta, Sesi, Scan, QR, Report, Surat Izin, Registrasi, Dashboard
+- [x] Access matrix verified per role
+
+### S4–S7 Route/Module Protection ✅ COMPLETE
+- [x] Pengajian Admin protection (S4)
+- [x] CAI Module Permissions (S5)
+- [x] Sidebar visibility for all modules (S6)
+- [x] KetuaEvent event-scoped authorization (S7.1—User↔Person Foundation)
+- [x] Event-scoped Gates + EventSwitcher (S7.2)
+- [x] Assignment Management UI + EventRole UI (S7.3)
+
+---
+
 ## Master Data Module
 
 ### Implemented
@@ -757,3 +791,62 @@ Status: PGM.12–PGM.16 COMPLETE. Pilot end-to-end functional. PGM.17 PENDING.
 - [ ] SaaS
 - [ ] White Label
 - [ ] Offline Mode
+
+---
+
+### S4 Pengajian Admin Protection ✅ COMPLETE (2026-07-21)
+
+- [x] Route protection: `/koreksi-data`, `/pengajian/admin/access`, `/pengajian/admin/manual-entry`, `/pengajian/admin/import-massal` via `can:manage-pengajian`
+- [x] Livewire mutation authorization: AccessIndex (create, revoke, delete), ManualEntry (submit, confirmMatch, createNewPerson), ImportMassal (preview, executeImport), IdentityCorrectionReview (approve, reject)
+- [x] Access matrix verified per role (super_admin, admin, sekretariat)
+- [x] Public token flow unchanged
+- [x] Pre-S4 audit: routes previously accessible by all authenticated users
+
+---
+
+## User Management ✅ COMPLETE (2026-07-21)
+
+- [x] `/users` route with `can:manage-users` middleware
+- [x] User Index Livewire component (list all users)
+- [x] User Create Livewire component (new user form)
+- [x] User Edit Livewire component (edit user profile + role)
+- [x] User ResetPassword Livewire component (admin reset password)
+- [x] User Delete Livewire component (delete with safety rules)
+- [x] Delete safety: cannot delete self
+- [x] Delete safety: cannot delete last Super Admin
+- [x] Super Admin only access (no other role can manage users)
+- [x] `UserManagementService` for centralized user business logic
+- [x] Activity Log integration (created, updated, role_changed, password_reset, deleted)
+- [x] Password hashing compliance (always hashed, never exposed)
+- [x] Sidebar visibility: `@can('manage-users')` on User Management menu
+
+---
+
+### S5 — CAI Module Permissions ✅ COMPLETE (2026-07-21)
+
+- [x] `manage-import` ability applied to `/import/peserta` and `/import/regu` routes
+- [x] Livewire ImportPeserta and ImportRegu mutations gated with `manage-import`
+- [x] Full CAI permission matrix verified (all 15 abilities)
+- [x] `manage-import` access matrix: super_admin, admin, sekretariat
+
+---
+
+### S6 — Sidebar Visibility ✅ COMPLETE (2026-07-21)
+
+- [x] `@can('view-dashboard')` on Dashboard menu
+- [x] `@can('manage-attendance')` and `@can('manage-sessions')` on Absensi group (Absensi group with `@canany`)
+- [x] `@can('manage-registration')` on Registrasi group
+- [x] `@can('manage-participants')` on Peserta CAI menu
+- [x] `@can('view-reports')` on Laporan group and Regional Report
+- [x] `@can('manage-qr-labels')` on QR & Label menu
+- [x] `@canany(['manage-secretariat', 'view-activity-log'])` on Sekretariat group
+- [x] `@can('manage-secretariat')` on Surat Izin
+- [x] `@can('view-activity-log')` on Activity Log
+- [x] `@can('view-master-data')` on Master Data menu
+- [x] `@can('manage-pengajian')` on Pengajian Peserta and Operasional Desa groups
+- [x] `@can('manage-users')` on User Management menu
+- [x] EventSwitcher remains accessible to all (intentional — navigation UX, not permission gate)
+- [x] Kelola Event menu not gated (intentional — server-side `manage-events` protection)
+- [x] Parent/child group gating with `@canany`/`@can` chain
+- [x] Contextual sidebar (CAI/Pengajian) both gated consistently
+- [x] Sidebar visibility matrix verified against PERMISSION.md access matrix

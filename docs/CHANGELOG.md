@@ -8,6 +8,102 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (S7 — Event-Scoped Authorization)
+
+### S7.1 — User↔Person Foundation ✅
+- Added `person_id` (nullable, UNIQUE, FK→people) to `users` table
+- `User::person()` BelongsTo, `Person::user()` HasOne, `User::hasPerson()` helper
+- Cross-event IDOR fixes: HapusSesi, DataSesi, EditSesi, SuratIzinService (session query scoped)
+
+### S7.2 — Event-Scoped Gates + EventSwitcher ✅
+- `EventAccessService` with `isUserAssignedToEvent()` and `getAssignedEventIds()`
+- 7 Gate abilities event-scoped for KetuaEvent: view-dashboard, manage-registration, manage-participants, manage-attendance, manage-sessions, manage-secretariat, view-reports
+- EventSwitcher: filtered dropdown for KetuaEvent + server-side `switchTo()` enforcement throws AuthorizationException for unassigned events
+- All other roles preserve global behavior
+
+### S7.3 — Assignment Management UI ✅
+- User Create/Edit: searchable Person selection with uniqueness enforcement
+- EventRole Manager: create EventRole records per Event (name, code, description, sort_order)
+- Committee Management: list/create/delete EventCommitteeAssignment with Person search + EventRole select
+- All mutations gated with `manage-events`
+- Event Role and Panitia buttons added to Event Management table
+
+### Files Changed
+- `app/Services/Event/EventAccessService.php` — NEW
+- `app/Services/User/UserManagementService.php` — person_id create/update support
+- `app/Livewire/MasterData/User/CreateUser.php` — Person search/select
+- `app/Livewire/MasterData/User/EditUser.php` — Person search/select
+- `app/Providers/AppServiceProvider.php` — 7 gates refactored for KetuaEvent scoping
+- `app/Livewire/Event/EventSwitcher.php` — KetuaEvent filtering + enforcement
+- `app/Livewire/Event/EventRoleManager.php` — NEW
+- `app/Livewire/Event/CommitteeManagement.php` — NEW
+- `resources/views/livewire/event/index.blade.php` — Role/Panitia buttons
+- `resources/views/livewire/master-data/user/*.blade.php` — Person selection UI
+- `database/migrations/2026_08_04_000001_add_person_id_to_users_table.php` — NEW
+
+### Tests Added
+- 95 new tests across S7.1–S7.3 (22 + 45 + 28)
+- Full suite: 1324 tests passed, 3135 assertions
+
+## Added (S6 — Sidebar Visibility RBAC)
+
+### Sidebar @can Directives
+- All sidebar menu items now gated with `@can()` or `@canany()` directives matching backend Gate abilities:
+  - **CAI Navigation**: Dashboard (`view-dashboard`), Absensi group (`manage-attendance`, `manage-sessions`), Registrasi (`manage-registration`), Peserta CAI (`manage-participants`), Laporan (`view-reports`), QR & Label (`manage-qr-labels`), Sekretariat group (`manage-secretariat`, `view-activity-log`), Master Data (`view-master-data`), User Management (`manage-users`)
+  - **Pengajian Navigation**: Regional Report (`view-reports`), Peserta group + Operasional Desa (`manage-pengajian`)
+- **Parent group gating**: Absensi and Sekretariat groups use `@canany()` — shown if user has ANY sub-ability; child items independently gated with `@can()`
+- **EventSwitcher**: intentionally ungated — visible to all authenticated users (navigation UX, not permission gate)
+- **Kelola Event**: intentionally ungated — server-side `manage-events` protection
+- **Contextual consistency**: CAI and Pengajian event contexts both use the same gate mechanism
+
+### Files Changed
+- `resources/views/components/layouts/app/sidebar.blade.php` — added `@can()` / `@canany()` directives to all menu items
+
+### Documentation Updated
+- `docs/PERMISSION.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/HANDOFF.md`, `docs/ai/CURRENT_STATE.md`, `docs/CHANGELOG.md`, `README.md`
+
+---
+
+## Added (S3 — Event Management & CAI Operational Protection)
+
+### Route Protection
+- **11 routes** protected with `can:*` middleware:
+  - `view-dashboard` → `/dashboard`
+  - `manage-registration` → `/registrasi`, `/registrasi/ulang`
+  - `manage-participants` → `/database`
+  - `manage-sessions` → `/sesi-absensi`
+  - `view-reports` → `/rekap-peserta`, `/rekap-absensi`
+  - `manage-qr-labels` → `/qr-label`
+  - `manage-attendance` → `/absensi`
+  - `manage-secretariat` → `/surat-izin`
+  - `view-activity-log` → `/activity-log`
+
+### Livewire Mutation Protection
+- **16 components** gated with `Gate::authorize()`:
+  - `manage-events`: Event\Index (render, archive, activate), Event\EditStatus (update)
+  - `manage-participants`: Database\Peserta\TambahPeserta, EditPeserta, HapusPeserta, ImportPeserta; Registrasi\Ulang
+  - `manage-sessions`: Database\Sesi\TambahSesi, EditSesi, HapusSesi; Dashboard\Dashboard (setSesiAktif)
+  - `manage-attendance`: Dashboard\Scan (scanQR, manualHadir, manualIzin)
+  - `manage-qr-labels`: QRLabel\Index (downloadPng, printSelected, generateBatchExport, exportBatch)
+  - `view-reports`: Rekap\Peserta\RekapPeserta (exportExcel)
+  - `manage-secretariat`: SuratIzin\Index (submit, approve, reject, cancel, return); SuratIzin\Create (simpan, submit)
+
+### Access Matrix Verified
+- All 10 operational abilities verified per role against permission matrix
+- Unauthorized route access returns HTTP 403
+- Unauthorized Livewire mutation returns 403 without state mutation
+
+### Sidebar Visibility
+- NOT YET implemented for S3 modules (deferred to S6)
+
+### Files Changed
+- `routes/web.php` — added `can:*` middleware to 11 operational routes
+
+### Documentation Updated
+- `docs/PERMISSION.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/HANDOFF.md`, `docs/ai/CURRENT_STATE.md`, `docs/CHANGELOG.md`, `README.md`
+
+---
+
 ## Added (Security & Data Integrity — NIP Enforcement + Kelompok Sync)
 
 ### Server-side NIP Enforcement
@@ -57,6 +153,106 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
   - Standalone Person does not create peserta
   - NIP locked for mapped; NIP changeable for standalone
   - Delete guard still works
+
+---
+
+## Added (Sprint S2 — Master Data Protection)
+
+### Route Protection
+- Routes `/master-data`, `/person`, `/desa`, `/kelompok` protected with `can:view-master-data` middleware
+- Import routes `/import/desa`, `/import/kelompok` protected with `can:manage-master-data`
+- Authorized roles (super_admin, admin, sekretariat) → HTTP 200
+- Unauthorized roles → HTTP 403
+- Guest → redirect login
+- Null role → HTTP 403
+- `/regu` explicitly excluded from Master Data protection
+
+### Livewire Mutation Protection
+- `Gate::authorize('manage-master-data')` added to ALL mutation methods:
+
+**Person**: `CreatePerson::simpan()`, `EditPerson::update()`, `DeletePerson::destroy()`
+
+**Desa**: `TambahDesa::simpan()`, `EditDesa::update()`, `HapusDesa::destroy()`, `ImportDesa::import()`
+
+**Kelompok**: `TambahKelompok::simpan()`, `EditKelompok::update()`, `HapusKelompok::destroy()`, `ImportKelompok::import()`
+
+- Authorization occurs BEFORE any database write
+- Unauthorized Livewire invocation returns 403 without mutating state
+
+### Sidebar Visibility
+- Master Data menu wrapped in `@can('view-master-data')`
+- Hidden for: ketua_event, pj_divisi, operator_registrasi, operator_scan, juri, viewer, null role
+
+### Files Changed
+- `routes/web.php` — `can:view-master-data` middleware on 4 routes, `can:manage-master-data` on 2 import routes
+- `app/Livewire/MasterData/Person/CreatePerson.php` — +Gate::authorize()
+- `app/Livewire/MasterData/Person/EditPerson.php` — +Gate::authorize()
+- `app/Livewire/MasterData/Person/DeletePerson.php` — +Gate::authorize()
+- `app/Livewire/Database/Desa/TambahDesa.php` — +Gate::authorize()
+- `app/Livewire/Database/Desa/EditDesa.php` — +Gate::authorize()
+- `app/Livewire/Database/Desa/HapusDesa.php` — +Gate::authorize()
+- `app/Livewire/Database/Desa/ImportDesa.php` — +Gate::authorize()
+- `app/Livewire/Database/Kelompok/TambahKelompok.php` — +Gate::authorize()
+- `app/Livewire/Database/Kelompok/EditKelompok.php` — +Gate::authorize()
+- `app/Livewire/Database/Kelompok/HapusKelompok.php` — +Gate::authorize()
+- `app/Livewire/Database/Kelompok/ImportKelompok.php` — +Gate::authorize()
+- `resources/views/components/layouts/app/sidebar.blade.php` — `@can('view-master-data')`
+
+### Tests Added
+- `tests/Feature/Security/MasterDataProtectionTest.php` — 36 tests covering:
+  - Route access: guest, all 9 roles + null role × 4 routes
+  - Sidebar visibility: authorized see, unauthorized hidden, null role hidden
+  - Livewire mutations: Person create/edit/delete blocked; Desa create/edit/delete/import blocked; Kelompok create/edit/delete/import blocked
+  - Authorized mutations still work: admin create person, sekretariat edit desa, super_admin delete kelompok
+  - Regression: Regu not affected, Person-Legacy sync works, ActiveEventContext unchanged, Pengajian public flow, S1 Gates intact
+
+---
+
+## Added (Sprint S1 — RBAC Foundation)
+
+### Role Enum & Migration
+- **`app/Enums/Role.php`** — PHP backed string enum with 9 roles:
+  - `super_admin`, `admin`, `ketua_event`, `sekretariat`, `pj_divisi`, `operator_registrasi`, `operator_scan`, `juri`, `viewer`
+- **Migration** `2026_08_03_000001` — adds nullable `role` string column to `users` table
+- **Cast**: `User::role` casts to `Role` enum (null-safe)
+- **Helpers**: `hasRole()`, `hasAnyRole()` on User model
+
+### Gate Foundation (15 abilities)
+- Defined in `AppServiceProvider::boot()` via `Gate::define()`
+- **Super Admin bypass**: `Gate::before()` returns `true` for Super Admin (all abilities granted)
+- Abilities: `view-dashboard`, `view-master-data`, `manage-master-data`, `manage-events`, `manage-registration`, `manage-participants`, `manage-attendance`, `manage-sessions`, `manage-qr-labels`, `manage-secretariat`, `manage-import`, `view-reports`, `manage-pengajian`, `view-activity-log`, `manage-users`
+
+### Artisan Command
+- **`php artisan user:set-role {email} {role}`** — sets role for existing user
+- Validates role against enum, rejects invalid roles, preserves existing user data
+
+### Important — S1 Scope Only
+- Gates are DEFINED but NOT YET attached to routes, Livewire components, or sidebar
+- All existing routes remain accessible as baseline
+- Future sprints (S2–S7) will apply authorization checks
+
+### Files Created
+- `app/Enums/Role.php`
+- `app/Console/Commands/UserSetRole.php`
+- `database/migrations/2026_08_03_000001_add_role_to_users_table.php`
+- `tests/Feature/Security/RbacFoundationTest.php`
+
+### Files Changed
+- `app/Models/User.php` — `$fillable` + `role` cast + `hasRole()`/`hasAnyRole()` helpers
+- `app/Providers/AppServiceProvider.php` — 15 Gate definitions + Super Admin bypass
+
+### Tests Added
+- `tests/Feature/Security/RbacFoundationTest.php` — 35 tests covering:
+  - Role enum values, labels, invalid values
+  - User model: role cast, null role, hasRole, hasAnyRole
+  - Super Admin bypass (all 15 abilities)
+  - Admin, Sekretariat, Ketua Event, PJ Divisi, Operator Registrasi, Operator Scan, Viewer permissions
+  - Null role denied all privileged abilities
+  - Guest denied all privileged abilities
+  - Artisan command: valid, invalid role, unknown email, preserves data
+  - Regression: existing routes still work in S1
+  - Guest behavior unchanged
+  - Pengajian public flow unchanged
 
 ---
 
@@ -397,7 +593,121 @@ Semua rencana pengembangan dicatat pada:
 
 ---
 
+## Added (S4 — Pengajian Admin Protection)
+
+### Route Protection
+- **4 routes** protected with `can:manage-pengajian` middleware:
+  - `/koreksi-data` → `manage-pengajian` (Identity Correction Review)
+  - `/pengajian/admin/access` → `manage-pengajian` (Access Token Management)
+  - `/pengajian/admin/manual-entry` → `manage-pengajian` (Manual Participant Entry)
+  - `/pengajian/admin/import-massal` → `manage-pengajian` (Bulk Import)
+- Previously accessible by ALL authenticated users — now gated to super_admin, admin, sekretariat
+
+### Livewire Mutation Protection
+- **4 components** gated with `Gate::authorize('manage-pengajian')`:
+  - `Pengajian\Admin\AccessIndex` (create, revoke, delete)
+  - `Pengajian\Admin\ManualEntry` (submit, confirmMatch, createNewPerson)
+  - `Pengajian\Admin\ImportMassal` (preview, executeImport)
+  - `Pengajian\IdentityCorrectionReview` (approve, reject)
+
+### Pre-S4 Audit
+- Confirmed all 4 routes were previously unprotected (any authenticated user could access)
+- Public Pengajian flows (token entry, self-attendance) remain unchanged
+
+### Files Changed
+- `routes/web.php` — added `can:manage-pengajian` middleware to 4 routes
+
+### Documentation Updated
+- `docs/PERMISSION.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/HANDOFF.md`, `docs/ai/CURRENT_STATE.md`, `docs/CHANGELOG.md`, `README.md`
+
+---
+
+## Added (S5 — CAI Module Permissions)
+
+### Route Protection
+- **2 routes** protected with `can:manage-import` middleware:
+  - `/import/peserta` → `manage-import` (CAI Participant Import)
+  - `/import/regu` → `manage-import` (CAI Regu Import)
+
+### Livewire Mutation Protection
+- **2 components** gated with `Gate::authorize('manage-import')`:
+  - `Database\Peserta\ImportPeserta::import()`
+  - `Database\Regu\ImportRegu::import()`
+
+### Access Matrix Verified
+- `manage-import` ability verified per role: super_admin, admin, sekretariat
+- Unauthorized route access returns HTTP 403
+- Unauthorized Livewire mutation returns 403 without state mutation
+
+### Full CAI Permission Matrix Complete
+- All 15 Gate abilities now applied across routes and/or Livewire mutations
+- S1: 15 abilities defined ✅
+- S2: view-master-data, manage-master-data ✅
+- S3: 10 operational abilities ✅
+- S4: manage-pengajian ✅
+- S5: manage-import ✅
+- S0: manage-users ✅
+
+### Files Changed
+- `routes/web.php` — added `can:manage-import` middleware to 2 import routes
+
+### Documentation Updated
+- `docs/PERMISSION.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/HANDOFF.md`, `docs/ai/CURRENT_STATE.md`, `docs/CHANGELOG.md`
+
+---
+
 ## [Unreleased]
+
+### Added (S0 — User Management)
+
+#### Route Protection
+- `/users` protected with `can:manage-users` middleware — Super Admin only
+
+#### Livewire Components
+- `User\Index` — searchable user list with pagination
+- `User\Create` — new user form (name, email, password, role)
+- `User\Edit` — edit user profile and role
+- `User\ResetPassword` — admin-initiated password reset
+- `User\Delete` — delete user with safety guard
+
+#### Service Layer
+- `UserManagementService` — centralized CRUD business logic for users
+
+#### Safety Rules
+- Cannot delete self — user cannot delete their own account
+- Cannot delete last Super Admin — at least one Super Admin must remain
+
+#### Activity Log Integration
+- `created` — new user account
+- `updated` — user profile changes
+- `role_changed` — role assignment changes
+- `password_reset` — password reset by admin
+- `deleted` — user account deleted
+
+#### Security
+- Password always hashed via Laravel `Hash::make()`
+- Password never exposed in responses, views, or logs
+
+#### Files Changed
+- `routes/web.php` — added `/users` route with `can:manage-users` middleware
+- `resources/views/components/layouts/app/sidebar.blade.php` — added User Management menu with `@can('manage-users')`
+
+#### Files Created
+- `app/Livewire/User/Index.php`
+- `app/Livewire/User/Create.php`
+- `app/Livewire/User/Edit.php`
+- `app/Livewire/User/ResetPassword.php`
+- `app/Livewire/User/Delete.php`
+- `app/Services/User/UserManagementService.php`
+- `resources/views/livewire/user/index.blade.php`
+- `resources/views/livewire/user/create.blade.php`
+- `resources/views/livewire/user/edit.blade.php`
+- `resources/views/livewire/user/reset-password.blade.php`
+- `resources/views/livewire/user/delete.blade.php`
+- `resources/views/user/index.blade.php`
+
+#### Documentation Updated
+- `docs/PERMISSION.md`, `docs/SECURITY.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/HANDOFF.md`, `docs/FEATURE.md`, `docs/MODULES.md`, `docs/ai/CURRENT_STATE.md`, `docs/CHANGELOG.md`
 
 ### Added
 

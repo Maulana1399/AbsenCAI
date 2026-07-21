@@ -163,21 +163,71 @@ Completed foundation work:
 
 ---
 
+# RBAC (Phase 4)
+
+## Status
+
+🟢 S1–S7 RBAC COMPLETE (2026-08-04). Full RBAC implementation including event-scoped authorization for KetuaEvent.
+
+### S1 — RBAC Foundation ✅
+- Role enum (`app/Enums/Role.php`) — 9 roles
+- Migration `2026_08_03_000001` — nullable `role` column on users
+- User model: role cast, `hasRole()`, `hasAnyRole()`
+- 15 Gate abilities defined in `AppServiceProvider` with Super Admin bypass via `Gate::before()`
+- Artisan command: `php artisan user:set-role {email} {role}`
+- 35 tests covering Role enum, User model, all Gate permissions, null-role safety, Artisan command, regression
+
+### S2 — Master Data Protection ✅
+- Route protection: `/master-data`, `/person`, `/desa`, `/kelompok` via `middleware('can:view-master-data')`
+- Import protection: `/import/desa`, `/import/kelompok` via `middleware('can:manage-master-data')`
+- Livewire mutation protection: 12 mutation methods across Person/Desa/Kelompok components gated with `Gate::authorize('manage-master-data')`
+- Sidebar visibility: `@can('view-master-data')` on Master Data menu item
+- 36 dedicated tests for route access matrix, sidebar, mutations, regression
+- `/regu` explicitly excluded from Master Data protection
+
+### S3 — Event Management & CAI Operational Protection ✅
+- **Route protection**: 11 routes protected with `can:*` middleware:
+  - `view-dashboard` → `/dashboard`
+  - `manage-registration` → `/registrasi`, `/registrasi/ulang`
+  - `manage-participants` → `/database`
+  - `manage-sessions` → `/sesi-absensi`
+  - `view-reports` → `/rekap-peserta`, `/rekap-absensi`
+  - `manage-qr-labels` → `/qr-label`
+  - `manage-attendance` → `/absensi`
+  - `manage-secretariat` → `/surat-izin`
+  - `view-activity-log` → `/activity-log`
+- **Livewire mutation protection**: 16 components gated with `Gate::authorize()`:
+  - `manage-events`: Event\Index (render, archive, activate), Event\EditStatus (update)
+  - `manage-participants`: TambahPeserta, EditPeserta, HapusPeserta, ImportPeserta, Registrasi\Ulang
+  - `manage-sessions`: TambahSesi, EditSesi, HapusSesi, Dashboard\Dashboard (setSesiAktif)
+  - `manage-attendance`: Dashboard\Scan (scanQR, manualHadir, manualIzin)
+  - `manage-qr-labels`: QRLabel\Index (downloadPng, printSelected, generateBatchExport, exportBatch)
+  - `view-reports`: Rekap\Peserta\RekapPeserta (exportExcel)
+  - `manage-secretariat`: SuratIzin\Index (submit, approve, reject, cancel, return), SuratIzin\Create (simpan, submit)
+- **Sidebar visibility**: ✅ Implemented (S6)
+
+### S7 — Event-Scoped Authorization ✅
+- **S7.1** — User↔Person Foundation: `person_id` on users, model relationships, cross-event IDOR fixes (HapusSesi, DataSesi, EditSesi, SuratIzinService)
+- **S7.2** — Event-scoped gates for KetuaEvent (7 abilities), EventSwitcher filtering + server-side enforcement, EventAccessService
+- **S7.3** — Assignment management UI, EventRole creation UI, User↔Person linking in User Management
+- 95 new tests across S7.1–S7.3
+
+### Remaining Backlog (Non-Blocking)
+- Assignment role edit UI (delete+recreate workaround exists)
+- EventRole edit/delete UI
+- ActivityGroup/Activity/Venue assignment UI
+- Advanced Person search in User forms
+
+---
+
 # Current Priority
 
 Priority saat ini:
 
-1. **Master Data Landing Page** ✅ — `/master-data` navigation hub with Person, Desa, Kelompok cards.
-2. **Person-Legacy Sync + NIP Enforcement** ✅ — Person → peserta identity sync. Server-side NIP guard.
-3. **Person Master Data CRUD** ✅ — Full CRUD at `/person`.
-3. **UI Bug Fix Sprint — Batch 1** ✅ — Branding & Navigation — RESOLVED VERIFIED.
-3. **UI Bug Fix Sprint — Batch 2** 🔄 — Access Token UI & Security (#5, #7, #8) — IMPLEMENTED / SECURITY AUDIT COMPLETE, PENDING RUNTIME VERIFICATION. Cross-event isolation added.
-4. **UI Bug Fix Sprint — Batch 3** 🔄 — Functional/UI Logic (#3, #9) — IMPLEMENTED, PENDING RUNTIME VERIFICATION.
-5. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
-6. Event switcher redirect/reload fix ✅ (PGM.16.3)
-7. Pengajian bulk import ✅ (PGM.16)
-8. Contextual navigation ✅ (PGM.16)
-9. Remaining P2/P3 technical debt items.
+1. **RBAC S1–S7 COMPLETE** ✅ — Full RBAC implementation including event-scoped authorization.
+   - 1296+ RBAC/security tests (S1–S7)
+2. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
+3. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
 
 ---
 
@@ -201,7 +251,7 @@ Priority saat ini:
 
 ## Security
 
-🟢 Stable — contextual sidebar is navigation UX, NOT route-level authorization
+🟢 S1–S7 RBAC complete — Role enum, 15 Gate abilities, event-scoped KetuaEvent authorization, User↔Person↔Assignment chain, defense-in-depth
 
 ---
 
@@ -233,6 +283,15 @@ Database: SQLite
 
 ---
 
+# S1+S2 Known Technical Debt (RBAC)
+
+- **Master Data route/Livewire/sidebar protection**: ✅ COMPLETE
+- **Event, CAI, Pengajian Admin, Reports routes belum diproteksi**: Semua modul di luar Master Data masih accessible oleh semua authenticated user. S3+ akan menangani.
+- **Livewire actions di Event/CAI/Pengajian module belum diproteksi**: S3+ akan menambahkan `$this->authorize()`.
+- **Sidebar untuk modul non-Master-Data belum difilter berdasarkan role**: S3+ akan menambahkan `@can()` directives.
+- **Ketua Event global**: `manage-events` hanya diberikan ke Super Admin + Admin. Ketua Event belum memiliki event-scoped authorization (memerlukan EventRole/EventCommitteeAssignment integration).
+- **Viewer read-only**: Viewer memiliki `view-dashboard` dan `view-reports` tetapi belum ada enforcement read-only di level UI/action.
+
 # Current Technical Debt
 
 - Legacy `pesertas` table remains operational — intentional compatibility bridge
@@ -248,7 +307,7 @@ Database: SQLite
 - Login page still uses CAI branding — needs KJA Event Manager rebrand
 - No hard-delete for revoked DesaAccessGrants — only soft revocation
 - `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
-- Test suite count stale — last documented 459/1140 (S3.9E), actual needs `php artisan test`
+- Test suite: 1324 passed, 3135 assertions, 0 failures (post-S7.3)
 
 ---
 
@@ -301,3 +360,128 @@ PGM.17 dianggap selesai apabila:
 
 CURRENT_STATE.md adalah snapshot kondisi proyek.
 Dokumen ini akan diperbarui setiap kali sprint selesai.
+
+---
+
+# S4 — Pengajian Admin Protection ✅
+
+## Status
+
+✅ COMPLETE (2026-07-21).
+
+### What was done
+- **Route protection**: 4 Pengajian admin routes protected with `can:manage-pengajian` middleware:
+  - `/koreksi-data` — Identity Correction Review
+  - `/pengajian/admin/access` — Access Token Management
+  - `/pengajian/admin/manual-entry` — Manual Participant Entry
+  - `/pengajian/admin/import-massal` — Bulk Import
+- **Livewire mutation protection**: 4 components gated with `Gate::authorize('manage-pengajian')`:
+  - `AccessIndex` (create, revoke, delete)
+  - `ManualEntry` (submit, confirmMatch, createNewPerson)
+  - `ImportMassal` (preview, executeImport)
+  - `IdentityCorrectionReview` (approve, reject)
+- **Pre-S4 audit**: Routes previously accessible by ALL authenticated users — now restricted
+- **Public flow unchanged**: Token entry and self-attendance remain publicly accessible
+
+### Updated RBAC Status
+- 🟢 S1 RBAC Foundation: ✅ Complete
+- 🟢 S2 Master Data Protection: ✅ Complete
+- 🟢 S3 Operational Protection: ✅ Complete
+- 🟢 **S4 Pengajian Admin Protection: ✅ Complete**
+- 🟡 S5–S7: Not yet started
+
+### Remaining (S6–S7)
+- S6 — Sidebar Visibility (`@can()` directives for all menu items)
+- S7 — Full permission test matrix
+
+---
+
+# S5 — CAI Module Permissions ✅
+
+## Status
+
+✅ COMPLETE (2026-07-21).
+
+### What was done
+- **Route protection**: 2 CAI import routes protected with `can:manage-import` middleware:
+  - `/import/peserta` — CAI Participant Import
+  - `/import/regu` — CAI Regu Import
+- **Livewire mutation protection**: 2 components gated with `Gate::authorize('manage-import')`:
+  - `ImportPeserta::import()`
+  - `ImportRegu::import()`
+- **Full CAI permission matrix verification**: All 15 Gate abilities now applied across routes and/or Livewire mutations
+- **`manage-import` access matrix**: super_admin, admin, sekretariat
+
+### Updated RBAC Status
+- 🟢 S1 RBAC Foundation: ✅ Complete
+- 🟢 S2 Master Data Protection: ✅ Complete
+- 🟢 S3 Operational Protection: ✅ Complete
+- 🟢 S4 Pengajian Admin Protection: ✅ Complete
+- 🟢 **S5 CAI Module Permissions: ✅ Complete**
+- 🟢 **S6 Sidebar Visibility: ✅ Complete**
+- 🟡 S7: Not yet started
+
+### Remaining (S7)
+- S7 — Full permission test matrix
+
+---
+
+# S6 — Sidebar Visibility (RBAC) ✅
+
+## Status
+
+✅ COMPLETE (2026-07-21).
+
+### What was done
+- **Sidebar `@can()` directives** added to all menu items in `sidebar.blade.php`:
+  - CAI navigation: Dashboard, Absensi (Scan + Sesi), Registrasi, Peserta CAI, Laporan, QR & Label, Sekretariat (Surat Izin + Activity Log), Master Data, User Management
+  - Pengajian navigation: Regional Report, Peserta (Daftar + Import), Operasional Desa (Akses Desa)
+- **Parent group gating**: `@canany()` for Absensi and Sekretariat groups — group heading shown when user has ANY sub-ability
+- **EventSwitcher**: intentionally ungated — visible to all authenticated users
+- **Kelola Event**: intentionally ungated — server-side `manage-events` protection
+- **Contextual sidebar consistency**: CAI and Pengajian contexts both use same gate mechanism
+- **Visibility matrix verified**: All 9 roles checked against PERMISSION.md access matrix
+
+### Updated RBAC Status
+- 🟢 S1 RBAC Foundation: ✅ Complete
+- 🟢 S2 Master Data Protection: ✅ Complete
+- 🟢 S3 Operational Protection: ✅ Complete
+- 🟢 S4 Pengajian Admin Protection: ✅ Complete
+- 🟢 S5 CAI Module Permissions: ✅ Complete
+- 🟢 **S6 Sidebar Visibility: ✅ Complete**
+- 🟡 S7: Not yet started
+
+### Remaining (S7)
+- Full permission test matrix (role × module × allowed/denied)
+
+---
+
+# User Management
+
+## Status
+
+✅ COMPLETE (2026-07-21).
+
+### What was done
+- **Route `/users`** protected with `can:manage-users` middleware — Super Admin only
+- **5 Livewire components** for user management:
+  - `User\Index` — searchable user list with pagination
+  - `User\Create` — new user form (name, email, password, role)
+  - `User\Edit` — edit user profile and role
+  - `User\ResetPassword` — admin-initiated password reset
+  - `User\Delete` — delete user with safety guard
+- **`UserManagementService`** — centralized service for user CRUD business logic
+- **Delete safety rules**:
+  - Cannot delete own account (self-deletion blocked)
+  - Cannot delete last Super Admin (at least one must remain)
+- **Super Admin only** — `manage-users` ability granted exclusively to `super_admin` role
+- **Activity Log integration** — all user mutations logged:
+  - `created` — new user account created
+  - `updated` — user profile updated
+  - `role_changed` — user role changed
+  - `password_reset` — password reset by admin
+  - `deleted` — user account deleted
+- **Password security** — always hashed via Laravel `Hash::make()`, never exposed in responses/logs
+- **Sidebar visibility** — User Management menu gated with `@can('manage-users')`
+- **Route** — `/users` with `auth`, `verified`, and `can:manage-users` middleware
+- **Tests** — dedicated test coverage for CRUD, delete safety, authorization, and activity logging

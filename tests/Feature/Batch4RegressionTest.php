@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\Pengajian\EnterToken;
 use App\Livewire\Pengajian\Admin\AccessIndex;
 use App\Models\DesaAccessGrant;
@@ -37,7 +38,7 @@ test('EnterToken component has token input field', function () {
 // ---------------------------------------------------------------------------
 
 test('Access Desa page has proper dark mode classes', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     Livewire::actingAs($user)
         ->test(AccessIndex::class)
@@ -46,7 +47,7 @@ test('Access Desa page has proper dark mode classes', function () {
 });
 
 test('Event management page has proper dark mode classes', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     $this->actingAs($user)
         ->get(route('events.index'))
@@ -59,7 +60,7 @@ test('Event management page has proper dark mode classes', function () {
 // ---------------------------------------------------------------------------
 
 test('AccessIndex only shows grants for active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     // Create two events
     $eventA = Event::create([
@@ -114,7 +115,7 @@ test('AccessIndex only shows grants for active event', function () {
 });
 
 test('cross-event grant mutation is rejected', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     // Create two events
     $eventA = Event::create([
@@ -160,7 +161,7 @@ test('cross-event grant mutation is rejected', function () {
 });
 
 test('cross-event grant delete is rejected', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     // Create two events
     $eventA = Event::create([

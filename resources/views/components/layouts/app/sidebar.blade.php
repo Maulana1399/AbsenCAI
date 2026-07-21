@@ -7,6 +7,8 @@
         @php
             $activeEvent = app(\App\Support\ActiveEventContext::class)->current();
             $isPengajian = $activeEvent?->isPengajian();
+            $user = auth()->user();
+            $can = fn ($a) => $user?->can($a) ?? false;
         @endphp
         <flux:sidebar sticky stashable @class([
             'border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900',
@@ -23,22 +25,22 @@
             @if ($isPengajian)
                 {{-- Pengajian Navigation --}}
                 <flux:navlist variant="outline">
+                    @can('view-reports')
                     <flux:navlist.group :heading="__('Pengajian')" class="grid">
                         <flux:navlist.item icon="chart-bar" :href="route('pengajian.report')" :current="request()->routeIs('pengajian.report')" wire:navigate>{{ __('Regional Report') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
+                    @can('manage-pengajian')
                     <flux:navlist.group expandable heading="Peserta" class="grid">
                         <flux:navlist.item :href="route('pengajian.admin.manual-entry')" :current="request()->routeIs('pengajian.admin.manual-entry')" wire:navigate>{{ __('Daftar Peserta') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('pengajian.import-massal')" :current="request()->routeIs('pengajian.import-massal')" wire:navigate>{{ __('Import Massal') }}</flux:navlist.item>
                     </flux:navlist.group>
 
-                    <flux:navlist.group expandable heading="Kehadiran" class="grid">
-                        <flux:navlist.item icon="clipboard" :href="route('pengajian.report')" :current="request()->routeIs('pengajian.report')" wire:navigate>{{ __('Regional Report') }}</flux:navlist.item>
-                    </flux:navlist.group>
-
                     <flux:navlist.group expandable heading="Operasional Desa" class="grid">
                         <flux:navlist.item :href="route('pengajian.admin.access')" :current="request()->routeIs('pengajian.admin.access')" wire:navigate>{{ __('Akses Desa') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
                     <flux:navlist.group expandable heading="Event" class="grid">
                         <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
@@ -47,21 +49,32 @@
             @else
                 {{-- CAI / Default Navigation --}}
                 <flux:navlist variant="outline">
+                    @can('view-dashboard')
                     <flux:navlist.group :heading="__('Platform')" class="grid">
                         <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
+                    @canany(['manage-attendance', 'manage-sessions'])
                     <flux:navlist.group expandable heading="Absensi" class="grid">
+                        @can('manage-attendance')
                         <flux:navlist.item icon="home" :href="route('absensi')" :current="request()->routeIs('absensi')" wire:navigate>{{ __('Scan Absensi') }}</flux:navlist.item>
+                        @endcan
+                        @can('manage-sessions')
                         <flux:navlist.item icon="home" :href="route('sesi.absensi')" :current="request()->routeIs('sesi.absensi')" wire:navigate>{{ __('Sesi Absensi') }}</flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
+                    @endcanany
 
+                    @can('manage-registration')
                     <flux:navlist.group expandable heading="Registrasi" class="grid">
                         <flux:navlist.item :href="route('registrasi.peserta')" :current="request()->routeIs('registrasi.peserta')" wire:navigate>{{ __('Registrasi Peserta') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('registrasi.self')" :current="request()->routeIs('registrasi.self')" wire:navigate>{{ __('Self Register') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('registrasi.ulang')" :current="request()->routeIs('registrasi.ulang')" wire:navigate>{{ __('Registrasi Ulang') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
+                    @can('manage-participants')
                     <flux:navlist.group expandable heading="Peserta CAI" class="grid">
                         <flux:navlist.item
                             :href="route('database')"
@@ -71,28 +84,40 @@
                             {{ __('Daftar Peserta') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
+                    @can('view-reports')
                     <flux:navlist.group expandable heading="Laporan" class="grid">
                         <flux:navlist.item :href="route('rekap.peserta')" :current="request()->routeIs('rekap.peserta')" wire:navigate>{{ __('Rekap Peserta') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('rekap.absensi')" :current="request()->routeIs('rekap.absensi')" wire:navigate>{{ __('Rekap Absensi') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
+                    @can('manage-qr-labels')
                     <flux:navlist.group expandable heading="QR & Label" class="grid">
                         <flux:navlist.item :href="route('qr-label.index')" :current="request()->routeIs('qr-label.index')" wire:navigate>{{ __('QR & Label') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
                     <flux:navlist.group expandable heading="Event" class="grid">
                         <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
                     </flux:navlist.group>
 
+                    @canany(['manage-secretariat', 'view-activity-log'])
                     <flux:navlist.group expandable heading="Sekretariat" class="grid">
+                        @can('manage-secretariat')
                         <flux:navlist.item :href="route('surat-izin')" :current="request()->routeIs('surat-izin')" wire:navigate>{{ __('Surat Izin') }}</flux:navlist.item>
+                        @endcan
+                        @can('view-activity-log')
                         <flux:navlist.item :href="route('activity-log.index')" :current="request()->routeIs('activity-log.index')" wire:navigate>{{ __('Activity Log') }}</flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
+                    @endcanany
                 </flux:navlist>
             @endif
 
 
+            @can('view-master-data')
             <flux:navlist variant="outline">
                 <flux:navlist.item
                     icon="folder"
@@ -103,6 +128,7 @@
                     {{ __('Master Data') }}
                 </flux:navlist.item>
             </flux:navlist>
+            @endcan
 
             <flux:spacer />
 

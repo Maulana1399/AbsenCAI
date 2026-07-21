@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Sesi;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\SuratIzinService;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class TambahSesi extends Component
@@ -21,6 +22,8 @@ class TambahSesi extends Component
 
     public function simpan()
     {
+        Gate::authorize('manage-sessions');
+
         if ($this->processing) {
             return;
         }

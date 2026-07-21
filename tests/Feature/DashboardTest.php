@@ -11,6 +11,7 @@ use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Models\User;
+use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -113,7 +114,7 @@ test('guests are redirected to the login page', function () {
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $this->actingAs($user = User::factory()->create());
+    $this->actingAs($user = User::factory()->create(['role' => Role::Admin]));
 
     $this->get('/dashboard')->assertStatus(200);
 });
@@ -132,7 +133,7 @@ test('dashboard shows Alfa count when session is active and no one attended', fu
     $participation = ds_participation($event, $person);
     ds_legacyPeserta($person, $desa, $kel, $regu);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -163,7 +164,7 @@ test('dashboard Alfa count decreases when participant attends', function () {
         'sesi_id' => $sesi->id,
     ]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -190,7 +191,7 @@ test('dashboard Alfa shows 0 when all participants attended', function () {
         'sesi_id' => $sesi->id,
     ]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -209,7 +210,7 @@ test('dashboard Belum Absen table shows correct names', function () {
     $p = ds_participation($event, $person);
     ds_legacyPeserta($person, $desa, $kel, $regu);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -236,7 +237,7 @@ test('dashboard attendance from other session does not affect Alfa count', funct
         'sesi_id' => $sesiLain->id,
     ]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     // Person should still show as belum absen because they're not in the active session

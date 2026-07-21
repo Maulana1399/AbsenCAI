@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Sesi;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\SesiAbsensi;
+use App\Support\ActiveEventContext;
 
 class DataSesi extends Component
 {
@@ -12,7 +13,7 @@ class DataSesi extends Component
 
     public function mount()
     {
-        $this->daftarSesi = SesiAbsensi::orderBy('tanggal','desc')->get();
+        $this->loadSesi();
     }
 
     public function render()
@@ -35,6 +36,20 @@ class DataSesi extends Component
     #[On('refreshSesi')]
     public function refreshSesi()
     {
-        $this->daftarSesi = SesiAbsensi::orderBy('tanggal','desc')->get();
+        $this->loadSesi();
+    }
+
+    private function loadSesi(): void
+    {
+        $eventId = app(ActiveEventContext::class)->id();
+
+        if ($eventId === null) {
+            $this->daftarSesi = collect();
+            return;
+        }
+
+        $this->daftarSesi = SesiAbsensi::where('event_id', $eventId)
+            ->orderBy('tanggal', 'desc')
+            ->get();
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\Event;
@@ -52,14 +53,14 @@ test('guest cannot access person page', function () {
 // ---------------------------------------------------------------------------
 
 test('authenticated user can access person page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/person')->assertOk();
 });
 
 test('person page renders without active event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     expect(app(ActiveEventContext::class)->current())->toBeNull();
@@ -67,7 +68,7 @@ test('person page renders without active event', function () {
 });
 
 test('person page does not change ActiveEventContext', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = pm_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
@@ -84,7 +85,7 @@ test('person page does not change ActiveEventContext', function () {
 // ---------------------------------------------------------------------------
 
 test('master-data landing page shows Person card', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/master-data');
@@ -94,7 +95,7 @@ test('master-data landing page shows Person card', function () {
 });
 
 test('Person page renders via Master Data context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/person')->assertOk();
@@ -107,7 +108,7 @@ test('Person page renders via Master Data context', function () {
 // ---------------------------------------------------------------------------
 
 test('create person stores a new person without participation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\CreatePerson::class)
@@ -126,7 +127,7 @@ test('create person stores a new person without participation', function () {
 });
 
 test('create person with desa and kelompok', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $desa = \App\Models\desa::create(['desa_asal' => 'Desa Test']);
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Kelompok Test', 'desa_id' => $desa->id]);
     $this->actingAs($user);
@@ -147,7 +148,7 @@ test('create person with desa and kelompok', function () {
 });
 
 test('create person requires nama', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\CreatePerson::class)
@@ -158,7 +159,7 @@ test('create person requires nama', function () {
 });
 
 test('create person requires jenis_kelamin', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\CreatePerson::class)
@@ -173,7 +174,7 @@ test('create person requires jenis_kelamin', function () {
 // ---------------------------------------------------------------------------
 
 test('person index shows list of people', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     pm_person(['nama' => 'Person Alpha']);
     pm_person(['nama' => 'Person Beta']);
     $this->actingAs($user);
@@ -185,7 +186,7 @@ test('person index shows list of people', function () {
 });
 
 test('person index search filters by name', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     pm_person(['nama' => 'Unique Name']);
     pm_person(['nama' => 'Other Name']);
     $this->actingAs($user);
@@ -197,7 +198,7 @@ test('person index search filters by name', function () {
 });
 
 test('person index search filters by NIP', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     pm_person(['nama' => 'By Nip Person', 'nip' => 12345]);
     pm_person(['nama' => 'Another Person']);
     $this->actingAs($user);
@@ -209,7 +210,7 @@ test('person index search filters by NIP', function () {
 });
 
 test('person index shows empty state when no data', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $response = $this->get('/person');
@@ -222,7 +223,7 @@ test('person index shows empty state when no data', function () {
 // ---------------------------------------------------------------------------
 
 test('edit person updates the record', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $person = pm_person(['nama' => 'Old Name']);
     $this->actingAs($user);
 
@@ -243,7 +244,7 @@ test('edit person updates the record', function () {
 });
 
 test('edit person preserves relationships', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $desa = \App\Models\desa::create(['desa_asal' => 'Edit Desa']);
     $person = pm_person(['nama' => 'Edit Person', 'desa_id' => $desa->id]);
     $this->actingAs($user);
@@ -262,7 +263,7 @@ test('edit person preserves relationships', function () {
 // ---------------------------------------------------------------------------
 
 test('person without participations or mapping can be deleted', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $person = pm_person(['nama' => 'Deletable Person']);
     $this->actingAs($user);
 
@@ -278,7 +279,7 @@ test('person without participations or mapping can be deleted', function () {
 });
 
 test('person with participation cannot be deleted', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = pm_event();
     $person = pm_person(['nama' => 'Protected Person']);
     $this->actingAs($user);
@@ -365,7 +366,7 @@ function pm_mappedPerson(): array
 }
 
 test('edit mapped person syncs nama to legacy peserta', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $person = $setup['person'];
     $peserta = $setup['peserta'];
@@ -381,7 +382,7 @@ test('edit mapped person syncs nama to legacy peserta', function () {
 });
 
 test('edit mapped person syncs desa to legacy peserta', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $desa = \App\Models\desa::create(['desa_asal' => 'Sync Desa']);
     $this->actingAs($user);
@@ -397,7 +398,7 @@ test('edit mapped person syncs desa to legacy peserta', function () {
 });
 
 test('edit mapped person syncs kelompok to legacy peserta', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $desa = \App\Models\desa::create(['desa_asal' => 'Kel Sync Desa']);
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Sync Kelompok', 'desa_id' => $desa->id]);
@@ -415,7 +416,7 @@ test('edit mapped person syncs kelompok to legacy peserta', function () {
 });
 
 test('edit mapped person syncs jenis_kelamin L to Laki - Laki', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $setup['person']->update(['jenis_kelamin' => 'L']);
     $this->actingAs($user);
@@ -431,7 +432,7 @@ test('edit mapped person syncs jenis_kelamin L to Laki - Laki', function () {
 });
 
 test('edit mapped person syncs jenis_kelamin P to Perempuan', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $setup['person']->update(['jenis_kelamin' => 'P']);
     $this->actingAs($user);
@@ -447,7 +448,7 @@ test('edit mapped person syncs jenis_kelamin P to Perempuan', function () {
 });
 
 test('edit mapped person does NOT change participant_number', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $originalNumber = $setup['participation']->participant_number;
     $this->actingAs($user);
@@ -462,7 +463,7 @@ test('edit mapped person does NOT change participant_number', function () {
 });
 
 test('edit mapped person does NOT change attendance_code', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $originalCode = $setup['participation']->attendance_code;
     $this->actingAs($user);
@@ -477,7 +478,7 @@ test('edit mapped person does NOT change attendance_code', function () {
 });
 
 test('edit mapped person does NOT change regu_id on peserta', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $originalReguId = $setup['peserta']->regu_id;
     $this->actingAs($user);
@@ -492,7 +493,7 @@ test('edit mapped person does NOT change regu_id on peserta', function () {
 });
 
 test('edit mapped person does NOT create new Participation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $participationCount = Participation::count();
     $this->actingAs($user);
@@ -506,7 +507,7 @@ test('edit mapped person does NOT create new Participation', function () {
 });
 
 test('edit standalone person does NOT create legacy peserta', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $person = pm_person(['nama' => 'Standalone Person']);
     $pesertaCount = \App\Models\peserta::count();
     $this->actingAs($user);
@@ -520,7 +521,7 @@ test('edit standalone person does NOT create legacy peserta', function () {
 });
 
 test('nip is locked for mapped person', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $this->actingAs($user);
 
@@ -530,7 +531,7 @@ test('nip is locked for mapped person', function () {
 });
 
 test('nip can be changed for standalone person', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $person = pm_person(['nama' => 'NIP Test']);
     $this->actingAs($user);
 
@@ -540,7 +541,7 @@ test('nip can be changed for standalone person', function () {
 });
 
 test('delete guard still works after sync implementation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $this->actingAs($user);
 
@@ -560,7 +561,7 @@ test('delete guard still works after sync implementation', function () {
 // ---------------------------------------------------------------------------
 
 test('mapped Person NIP cannot be changed via manipulated state', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $originalNip = $setup['person']->nip;
     $this->actingAs($user);
@@ -576,7 +577,7 @@ test('mapped Person NIP cannot be changed via manipulated state', function () {
 });
 
 test('mapped Person peserta.nip remains unchanged after edit', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $originalPesertaNip = $setup['peserta']->nip;
     $this->actingAs($user);
@@ -592,7 +593,7 @@ test('mapped Person peserta.nip remains unchanged after edit', function () {
 });
 
 test('standalone Person NIP can still be changed', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $person = pm_person(['nama' => 'NIP Change Test', 'nip' => null]);
     $this->actingAs($user);
 
@@ -607,7 +608,7 @@ test('standalone Person NIP can still be changed', function () {
 });
 
 test('identity sync still works after NIP enforcement for mapped Person', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $this->actingAs($user);
 
@@ -624,7 +625,7 @@ test('identity sync still works after NIP enforcement for mapped Person', functi
 });
 
 test('no Participation created when editing mapped Person with NIP manipulation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
     $participationCount = Participation::count();
     $this->actingAs($user);
@@ -643,7 +644,7 @@ test('no Participation created when editing mapped Person with NIP manipulation'
 // ---------------------------------------------------------------------------
 
 test('RegistrationService createParticipant sets kelompok_id on Person', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = pm_event();
     $regu = pm_regu();
     $desa = \App\Models\desa::create(['desa_asal' => 'Reg Test Desa']);
@@ -670,7 +671,7 @@ test('RegistrationService createParticipant sets kelompok_id on Person', functio
 });
 
 test('RegistrationService updateParticipant syncs kelompok_id to Person', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = pm_event();
     $regu = pm_regu();
     $desa = \App\Models\desa::create(['desa_asal' => 'Update Test Desa']);
@@ -709,21 +710,21 @@ test('RegistrationService updateParticipant syncs kelompok_id to Person', functi
 // ---------------------------------------------------------------------------
 
 test('desa page still accessible after person implementation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/desa')->assertOk();
 });
 
 test('kelompok page still accessible after person implementation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/kelompok')->assertOk();
 });
 
 test('regu page still accessible after person implementation', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $this->get('/regu')->assertOk();

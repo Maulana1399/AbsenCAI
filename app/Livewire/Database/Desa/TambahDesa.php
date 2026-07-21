@@ -3,6 +3,7 @@
 namespace App\Livewire\Database\Desa;
 
 use App\Models\desa;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class TambahDesa extends Component
@@ -17,6 +18,8 @@ class TambahDesa extends Component
     }
 
     public function simpan(){
+        Gate::authorize('manage-master-data');
+
         if ($this->processing) {
             return;
         }

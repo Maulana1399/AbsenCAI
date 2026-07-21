@@ -3,6 +3,7 @@
 namespace App\Livewire\MasterData\Person;
 
 use App\Models\Person;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Flux\Flux;
@@ -57,6 +58,8 @@ class DeletePerson extends Component
 
     public function destroy(): void
     {
+        Gate::authorize('manage-master-data');
+
         $person = Person::withCount([
             'participations',
             'legacyPesertaMapping',

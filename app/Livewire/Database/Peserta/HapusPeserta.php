@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\peserta;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
 
 class HapusPeserta extends Component
 {
@@ -24,6 +25,8 @@ class HapusPeserta extends Component
     }
     public function destroy()
     {
+        Gate::authorize('manage-participants');
+
         $peserta = peserta::find($this->peserta_id);
         if ($peserta) {
             $peserta->delete();

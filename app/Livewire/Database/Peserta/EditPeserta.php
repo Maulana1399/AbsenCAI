@@ -10,6 +10,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Services\Registration\RegistrationService;
+use Illuminate\Support\Facades\Gate;
 
 class EditPeserta extends Component
 {
@@ -51,6 +52,8 @@ class EditPeserta extends Component
     }
     public function update()
     {
+        Gate::authorize('manage-participants');
+
         $this->validate([
             'nama' => 'required',
             'jenis_kelamin' => 'required',

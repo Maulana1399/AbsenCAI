@@ -4,6 +4,24 @@
 
 ---
 
+# S2 Implementation Status
+
+| Komponen | Status |
+|----------|--------|
+| Role enum | ✅ Implemented — `app/Enums/Role.php` |
+| Users role column | ✅ Migration `2026_08_03_000001` |
+| User model helpers | ✅ `hasRole()`, `hasAnyRole()` |
+| Gate definitions | ✅ 15 abilities in `AppServiceProvider` |
+| Super Admin bypass | ✅ `Gate::before()` |
+| Artisan role command | ✅ `php artisan user:set-role` |
+| Route protection (S2) | ✅ Master Data routes protected |
+| Livewire authorization (S2) | ✅ Master Data mutations protected |
+| Sidebar visibility (S2) | ✅ Master Data menu gated |
+| Route protection (S3+) | ✅ Implemented |
+| Livewire authorization (S3+) | ✅ Implemented |
+
+---
+
 # Purpose
 
 Dokumen ini mendefinisikan hak akses setiap Role pada KJA Event Manager.
@@ -22,48 +40,45 @@ Semua perubahan Role dan Permission wajib didokumentasikan di file ini.
 
 ---
 
-# Current Roles
+# S1 Current Roles
 
-| Role                | Description                                    |
-| ------------------- | ---------------------------------------------- |
-| Super Admin         | Mengelola seluruh sistem dan konfigurasi       |
-| Admin               | Mengelola seluruh Event                        |
-| Ketua Event         | Mengelola event yang menjadi tanggung jawabnya |
-| Sekretariat         | Mengelola data peserta dan administrasi        |
-| PJ Divisi           | Monitoring divisi masing-masing                |
-| Operator Registrasi | Registrasi peserta                             |
-| Operator Scan       | Scan QR dan absensi                            |
-| Juri                | Input nilai perlombaan                         |
-| Peserta             | Melihat data pribadi                           |
-| Viewer              | Dashboard tanpa hak edit                       |
+| Role                | Code                | Description                                    | Implemented |
+| ------------------- | ------------------- | ---------------------------------------------- | :---------: |
+| Super Admin         | `super_admin`       | Mengelola seluruh sistem dan konfigurasi       | ✅ |
+| Admin               | `admin`             | Mengelola seluruh Event                        | ✅ |
+| Ketua Event         | `ketua_event`       | Mengelola event yang menjadi tanggung jawabnya | ✅ |
+| Sekretariat         | `sekretariat`       | Mengelola data peserta dan administrasi        | ✅ |
+| PJ Divisi           | `pj_divisi`         | Monitoring divisi masing-masing                | ✅ |
+| Operator Registrasi | `operator_registrasi` | Registrasi peserta                           | ✅ |
+| Operator Scan       | `operator_scan`     | Scan QR dan absensi                            | ✅ |
+| Juri                | `juri`              | Input nilai perlombaan                         | ✅ |
+| Viewer              | `viewer`            | Dashboard tanpa hak edit                       | ✅ |
+
+Catatan: Role `Peserta` tidak memiliki akun login terpisah. Peserta menggunakan self-register flow publik.
 
 ---
 
-# Permission Matrix
+# S1 Gate Abilities
 
-| Feature            | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Peserta | Viewer |
-| ------------------ | :---------: | :---: | :---: | :---------: | :-------: | :--------: | :--: | :--: | :-----: | :----: |
-| Dashboard          |      ✅      |   ✅   |   ✅   |      ✅      |     ✅     |      ❌     |   ❌  |   ❌  |    ❌    |    ✅   |
-| Live Monitoring    |      ✅      |   ✅   |   ✅   |      ✅      |     ✅     |      ❌     |   ❌  |   ❌  |    ❌    |    ✅   |
-| Master Data        |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Import Excel       |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Person             |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    👁   |    ❌   |
-| Registration       |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |      ✅     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Attendance         |      ✅      |   ✅   |   ✅   |      ✅      |     ✅     |      ❌     |   ✅  |   ❌  |    👁   |    ❌   |
-| Attendance Manual  |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |      ❌     |   ✅  |   ❌  |    ❌    |    ❌   |
-| Attendance Session |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| QR Generator       |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Print QR           |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Print ID Card      |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Permission Letter  |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    👁   |    ❌   |
-| Export Excel       |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Export PDF         |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Scoring            |      ✅      |   ✅   |   ✅   |      ❌      |     ❌     |      ❌     |   ❌  |   ✅  |    👁   |   👁   |
-| Competition        |      ✅      |   ✅   |   ✅   |      ❌      |     ❌     |      ❌     |   ❌  |   ✅  |    👁   |   👁   |
-| Certificate        |      ✅      |   ✅   |   ✅   |      ❌      |     ❌     |      ❌     |   ❌  |   ❌  |    👁   |   👁   |
-| User Management    |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| Role Management    |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
-| System Settings    |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |      ❌     |   ❌  |   ❌  |    ❌    |    ❌   |
+Berikut Gate abilities yang telah didefinisikan di `AppServiceProvider`. **Belum dipasang ke route/sidebar/Livewire** — akan diimplementasikan di S2–S7.
+
+| Ability              | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
+| -------------------- | :---------: | :---: | :---: | :---------: | :-------: | :--------: | :--: | :--: | :----: |
+| `view-dashboard`     |      ✅      |   ✅   |   ✅   |      ✅      |     ✅     |     ❌      |  ❌   |  ❌   |   ✅    |
+| `view-master-data`   |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-master-data` |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-events`      |      ✅      |   ✅   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-registration`|      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ✅      |  ❌   |  ❌   |   ❌    |
+| `manage-participants`|      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-attendance`  |      ✅      |   ✅   |   ✅   |      ✅      |     ✅     |     ❌      |  ✅   |  ❌   |   ❌    |
+| `manage-sessions`    |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-qr-labels`   |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-secretariat` |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-import`      |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `view-reports`       |      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ✅    |
+| `manage-pengajian`   |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `view-activity-log`  |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-users`       |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
 
 ---
 
@@ -121,3 +136,357 @@ dashboard.live
 # Long Term Goal
 
 Role dan Permission harus sepenuhnya dinamis sehingga organisasi dapat membuat Role sendiri tanpa mengubah source code.
+
+---
+
+# S3 — Event Management & CAI Operational Protection ✅
+
+## Status
+
+✅ COMPLETE (2026-08-04). All operational routes and Livewire mutations protected.
+
+## Route-Level Protection
+
+Setiap operational route memiliki middleware `can:{ability}` sesuai permission matrix:
+
+| Route | Middleware | Ability |
+|-------|-----------|---------|
+| `/dashboard` | `can:view-dashboard` | `view-dashboard` |
+| `/registrasi` | `can:manage-registration` | `manage-registration` |
+| `/registrasi/ulang` | `can:manage-registration` | `manage-registration` |
+| `/database` | `can:manage-participants` | `manage-participants` |
+| `/sesi-absensi` | `can:manage-sessions` | `manage-sessions` |
+| `/rekap-peserta` | `can:view-reports` | `view-reports` |
+| `/rekap-absensi` | `can:view-reports` | `view-reports` |
+| `/qr-label` | `can:manage-qr-labels` | `manage-qr-labels` |
+| `/absensi` | `can:manage-attendance` | `manage-attendance` |
+| `/surat-izin` | `can:manage-secretariat` | `manage-secretariat` |
+| `/activity-log` | `can:view-activity-log` | `view-activity-log` |
+| `/events` | — (Livewire only) | `manage-events` |
+
+## Livewire Mutation Protection
+
+Semua CRUD mutation methods memiliki `Gate::authorize()` sebelum database write:
+
+| Livewire Component | Method(s) | Ability |
+|-------------------|-----------|---------|
+| `Event\Index` | `render()`, `archive()`, `activate()` | `manage-events` |
+| `Event\EditStatus` | `update()` | `manage-events` |
+| `Database\Peserta\TambahPeserta` | `simpan()` | `manage-participants` |
+| `Database\Peserta\EditPeserta` | `update()` | `manage-participants` |
+| `Database\Peserta\HapusPeserta` | `destroy()` | `manage-participants` |
+| `Database\Peserta\ImportPeserta` | `import()` | `manage-participants` |
+| `Database\Sesi\TambahSesi` | `simpan()` | `manage-sessions` |
+| `Database\Sesi\EditSesi` | `update()` | `manage-sessions` |
+| `Database\Sesi\HapusSesi` | `destroy()` | `manage-sessions` |
+| `Dashboard\Scan` | `scanQR()`, `manualHadir()`, `manualIzin()` | `manage-attendance` |
+| `QRLabel\Index` | `downloadPng()`, `printSelected()`, `generateBatchExport()`, `exportBatch()` | `manage-qr-labels` |
+| `Rekap\Peserta\RekapPeserta` | `exportExcel()` | `view-reports` |
+| `SuratIzin\Index` | `submit()`, `approve()`, `reject()`, `cancel()`, `return()` | `manage-secretariat` |
+| `SuratIzin\Create` | `simpan()`, `submit()` | `manage-secretariat` |
+| `Registrasi\Ulang` | `registrasiUlang()`, `updatePeserta()` | `manage-participants` |
+| `Dashboard\Dashboard` | `setSesiAktif()` | `manage-sessions` |
+
+## Access Matrix per Role (S3 Operational Routes)
+
+| Ability | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
+|---------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
+| `manage-events` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `manage-registration` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `manage-participants` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `manage-attendance` | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| `manage-sessions` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `manage-qr-labels` | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `manage-secretariat` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `view-reports` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `view-activity-log` | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `view-dashboard` | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+
+## Sidebar Visibility (S3)
+
+Sidebar visibility for S3 modules difilter dengan `@can()` directives — diimplementasikan di S6.
+
+---
+
+# S4 — Pengajian Admin Protection ✅
+
+## Status
+
+✅ COMPLETE (2026-07-21). All Pengajian admin routes and Livewire mutations protected.
+
+## Route-Level Protection
+
+Setiap Pengajian admin route memiliki middleware `can:{ability}` sesuai permission matrix:
+
+| Route | Middleware | Ability |
+|-------|-----------|---------|
+| `/koreksi-data` | `can:manage-pengajian` | `manage-pengajian` |
+| `/pengajian/admin/access` | `can:manage-pengajian` | `manage-pengajian` |
+| `/pengajian/admin/manual-entry` | `can:manage-pengajian` | `manage-pengajian` |
+| `/pengajian/admin/import-massal` | `can:manage-pengajian` | `manage-pengajian` |
+
+Catatan: `/pengajian/report` menggunakan `view-reports` (telah diproteksi di S3).
+
+## Livewire Mutation Protection
+
+Semua CRUD mutation methods memiliki `Gate::authorize()` sebelum database write:
+
+| Livewire Component | Method(s) | Ability |
+|-------------------|-----------|---------|
+| `Pengajian\Admin\AccessIndex` | `create()`, `revoke()`, `delete()` | `manage-pengajian` |
+| `Pengajian\Admin\ManualEntry` | `submit()`, `confirmMatch()`, `createNewPerson()` | `manage-pengajian` |
+| `Pengajian\Admin\ImportMassal` | `preview()`, `executeImport()` | `manage-pengajian` |
+| `Pengajian\IdentityCorrectionReview` | `approve()`, `reject()` | `manage-pengajian` |
+
+## Access Matrix per Role (S4 Pengajian Admin)
+
+| Ability | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
+|---------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
+| `manage-pengajian` | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+## Decision on Registration Ability
+
+The `manage-registration` ability is used for re-registration mutations (`Registrasi\Ulang` — `registrasiUlang()`, `updatePeserta()`). This is correct because:
+
+- Re-registration is a registration-domain operation, not participant management
+- `manage-registration` is granted to `operator_registrasi` who need this access
+- `manage-participants` is reserved for broader participant CRUD (database management)
+- This separation follows the Least Privilege principle
+
+## Pre-S4 Audit Result
+
+Before S4 implementation, the following Pengajian admin routes were accessible by ALL authenticated users (no role-based protection):
+
+- `/koreksi-data` — identity correction review
+- `/pengajian/admin/access` — access token management (CRUD, revoke, delete)
+- `/pengajian/admin/manual-entry` — manual participant entry
+- `/pengajian/admin/import-massal` — bulk participant import
+
+All these routes are now protected with `can:manage-pengajian` middleware. Only `super_admin`, `admin`, and `sekretariat` retain access.
+
+---
+
+# S0 — User Management
+
+## Status
+
+✅ COMPLETE (2026-07-21). Super Admin can manage user accounts via `/users`.
+
+## Route-Level Protection
+
+| Route | Middleware | Ability |
+|-------|-----------|---------|
+| `/users` | `can:manage-users` | `manage-users` |
+
+## Livewire Mutation Protection
+
+| Livewire Component | Method(s) | Ability |
+|-------------------|-----------|---------|
+| `User\Index` | `render()` | `manage-users` |
+| `User\Create` | `save()` | `manage-users` |
+| `User\Edit` | `update()` | `manage-users` |
+| `User\ResetPassword` | `resetPassword()` | `manage-users` |
+| `User\Delete` | `destroy()` | `manage-users` |
+
+## Delete Safety Rules
+
+- **Cannot delete self** — user cannot delete their own account
+- **Cannot delete last Super Admin** — at least one Super Admin must remain
+- Delete is blocked server-side before any database write
+
+## Access Matrix
+
+| Ability | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
+|---------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
+| `manage-users` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+## Implementation Notes
+
+- User Management is **Super Admin only** — no other role has `manage-users`
+- Password is always hashed before storage (Laravel Hash)
+- Password is never exposed in API responses or logs
+- All mutations are recorded in Activity Log:
+  - `created` — new user account
+  - `updated` — user profile changes
+  - `role_changed` — role assignment change
+  - `password_reset` — password reset by admin
+  - `deleted` — user account deleted
+
+---
+
+# S5 — CAI Module Permissions ✅
+
+## Status
+
+✅ COMPLETE (2026-07-21). All CAI module import routes protected with `manage-import` ability. Full CAI permission matrix verified.
+
+## Route-Level Protection
+
+| Route | Middleware | Ability |
+|-------|-----------|---------|
+| `/import/peserta` | `can:manage-import` | `manage-import` |
+| `/import/regu` | `can:manage-import` | `manage-import` |
+
+Catatan: `/import/desa` dan `/import/kelompok` telah diproteksi di S2 dengan `manage-master-data`.
+
+## Livewire Mutation Protection
+
+Import mutation methods gated with `manage-import`:
+
+| Livewire Component | Method(s) | Ability |
+|-------------------|-----------|---------|
+| `Database\Peserta\ImportPeserta` | `import()` | `manage-import` |
+| `Database\Regu\ImportRegu` | `import()` | `manage-import` |
+
+Catatan: Import Desa dan Import Kelompok telah diproteksi di S2 dengan `manage-master-data`.
+
+## Access Matrix per Role (S5 Import)
+
+| Ability | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
+|---------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
+| `manage-import` | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+## S2 Status Row Update
+
+| Route protection (S3+) | ❌ Not yet implemented |
+| Livewire authorization (S3+) | ❌ Not yet implemented |
+
+Kedua baris di atas (dari tabel S2) sudah obsolete — S3, S4, S5, dan S6 telah mengimplementasikan route protection, Livewire authorization, dan sidebar visibility untuk seluruh modul operasional dan import.
+
+## Complete S5 Deliverables
+
+- ✅ `manage-import` ability applied to `/import/peserta` and `/import/regu` routes
+- ✅ Livewire ImportPeserta and ImportRegu mutations gated with `manage-import`
+- ✅ Full CAI permission matrix verified (all 15 abilities)
+- ✅ `manage-import` access matrix: super_admin, admin, sekretariat
+
+---
+
+# S6 — Sidebar Visibility (RBAC) ✅
+
+## Status
+
+✅ COMPLETE (2026-07-21). All sidebar menu items gated with `@can()` directives.
+
+---
+
+# S7 — Event-Scoped Authorization ✅
+
+## Status
+
+✅ COMPLETE (2026-08-04). KetuaEvent abilities are now event-scoped via User→Person→EventCommitteeAssignment chain.
+
+## Architecture
+
+```
+User.role = ketua_event
+  + User.person_id → Person
+  + EventCommitteeAssignment → Event
+  = event-scoped access to 7 KetuaEvent abilities
+```
+
+### S7.1 — User↔Person Foundation ✅
+- Added `person_id` (nullable, UNIQUE) to `users` table
+- `User::person()` BelongsTo, `Person::user()` HasOne
+- Fixed F1–F4 cross-event IDOR vulnerabilities (HapusSesi, DataSesi, EditSesi, SuratIzinService)
+
+### S7.2 — Event-Scoped Gates + EventSwitcher ✅
+- Added `EventAccessService` — `isUserAssignedToEvent()`, `getAssignedEventIds()`
+- 7 Gate abilities event-scoped for KetuaEvent: `view-dashboard`, `manage-registration`, `manage-participants`, `manage-attendance`, `manage-sessions`, `manage-secretariat`, `view-reports`
+- EventSwitcher filtered to assigned events for KetuaEvent
+- Server-side enforcement in `EventSwitcher::switchTo()` — throws `AuthorizationException` for unassigned events
+- All other roles preserve global behavior
+
+### S7.3 — Assignment Management UI ✅
+- User Create/Edit UI: searchable Person selection with uniqueness enforcement
+- EventRole Manager UI: create EventRole records per Event (name, code, description, sort_order)
+- Committee Management UI: list/create/delete EventCommitteeAssignment per Event with Person search + EventRole select
+- All mutations gated with `manage-events` ability
+
+## KetuaEvent Access Matrix (Event-Scoped)
+
+| Ability | Without Assignment | With Assignment |
+|---------|:-----------------:|:---------------:|
+| `view-dashboard` | ❌ | ✅ |
+| `manage-registration` | ❌ | ✅ |
+| `manage-participants` | ❌ | ✅ |
+| `manage-attendance` | ❌ | ✅ |
+| `manage-sessions` | ❌ | ✅ |
+| `manage-secretariat` | ❌ | ✅ |
+| `view-reports` | ❌ | ✅ |
+
+## Authorization Rule
+
+**EventRole is NOT an RBAC authorization source.** Any EventCommitteeAssignment linking the User's Person to an Event is sufficient. EventRole is operational/domain metadata only.
+
+## Security Principles
+
+- SuperAdmin bypass via `Gate::before()` — preserved
+- Admin/Sekretariat/other roles — global access preserved
+- KetuaEvent: role + person + assignment = event-scoped access
+- No assignment, no Person, no active event → denied
+- EventSwitcher: filtered dropdown + server-side enforcement (defense-in-depth)
+
+## Sidebar @can Directives per Menu
+
+The sidebar (`resources/views/components/layouts/app/sidebar.blade.php`) uses `@can()` and `@canany()` directives to control menu visibility per role.
+
+### CAI Navigation
+
+| Menu Item | Directive | Ability |
+|-----------|-----------|---------|
+| Dashboard | `@can('view-dashboard')` | `view-dashboard` |
+| Scan Absensi | `@can('manage-attendance')` | `manage-attendance` |
+| Sesi Absensi | `@can('manage-sessions')` | `manage-sessions` |
+| Absensi group | `@canany(['manage-attendance', 'manage-sessions'])` | either ability |
+| Registrasi group | `@can('manage-registration')` | `manage-registration` |
+| Peserta CAI | `@can('manage-participants')` | `manage-participants` |
+| Laporan group | `@can('view-reports')` | `view-reports` |
+| QR & Label | `@can('manage-qr-labels')` | `manage-qr-labels` |
+| Sekretariat group | `@canany(['manage-secretariat', 'view-activity-log'])` | either ability |
+| Surat Izin | `@can('manage-secretariat')` | `manage-secretariat` |
+| Activity Log | `@can('view-activity-log')` | `view-activity-log` |
+| Kelola Event | — (no gate) | — |
+| Master Data | `@can('view-master-data')` | `view-master-data` |
+| User Management | `@can('manage-users')` | `manage-users` |
+
+### Pengajian Navigation
+
+| Menu Item | Directive | Ability |
+|-----------|-----------|---------|
+| Regional Report | `@can('view-reports')` | `view-reports` |
+| Peserta (Daftar + Import) | `@can('manage-pengajian')` | `manage-pengajian` |
+| Operasional Desa (Akses Desa) | `@can('manage-pengajian')` | `manage-pengajian` |
+| Kelola Event | — (no gate) | — |
+
+## Visibility Matrix per Role
+
+| Menu | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
+|------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
+| Dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Scan Absensi | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Sesi Absensi | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Registrasi | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Peserta CAI | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Laporan | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| QR & Label | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Surat Izin | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Activity Log | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Master Data | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| User Management | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+Notes:
+- **Kelola Event** is intentionally not gated — the `Event\Index` render method and CRUD mutations are server-side protected with `manage-events`. The menu item is visible to all so users can navigate, but only authorized roles can mutate.
+- **EventSwitcher** remains visible to all authenticated users regardless of role — event selection is navigation UX, not a permission gate.
+
+## Parent/Group Behavior
+
+Parent groups use `@canany()` to group visibility:
+
+- **Absensi group** (`@canany(['manage-attendance', 'manage-sessions'])`) — shown if user can scan OR manage sessions
+- **Sekretariat group** (`@canany(['manage-secretariat', 'view-activity-log'])`) — shown if user can manage surat izin OR view activity log
+- Child items within groups are independently gated with their specific `@can()`, so a user sees only permitted sub-items even when the group heading is visible.
+
+## Defense in Depth
+
+Sidebar visibility is a **UX convenience layer** — it does NOT replace server-side authorization. All routes and Livewire mutations remain independently protected (S3, S4, S5). Hidden menus are still server-side inaccessible. This follows the Defense in Depth principle.

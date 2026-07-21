@@ -4,6 +4,7 @@ namespace App\Livewire\Database\Kelompok;
 
 use Livewire\Component;
 use App\Models\kelompok;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Flux\Flux;
 use App\Models\desa;
@@ -32,6 +33,8 @@ class EditKelompok extends Component
     }
     public function update()
     {
+        Gate::authorize('manage-master-data');
+
         $this->validate([
             'kelompok' => 'required'
         ]);

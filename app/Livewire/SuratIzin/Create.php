@@ -4,6 +4,7 @@ namespace App\Livewire\SuratIzin;
 
 use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Create extends Component
@@ -43,6 +44,8 @@ class Create extends Component
 
     public function saveDraft()
     {
+        Gate::authorize('manage-secretariat');
+
         if ($this->processing) return;
         $this->processing = true;
         try {
@@ -67,6 +70,8 @@ class Create extends Component
 
     public function saveAndSubmit()
     {
+        Gate::authorize('manage-secretariat');
+
         if ($this->processing) return;
         $this->processing = true;
         try {

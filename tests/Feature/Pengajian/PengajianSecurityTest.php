@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
@@ -84,7 +85,7 @@ test('4. Authenticated unverified user can access admin routes (verified is not 
 
 test('5. Verified user can access admin routes', function () {
     $event = pgm9s_event();
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     app(ActiveEventContext::class)->set($event);
 
     $this->actingAs($user)

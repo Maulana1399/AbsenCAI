@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Desa;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\desa;
+use Illuminate\Support\Facades\Gate;
 use Flux\Flux;
 
 class HapusDesa extends Component
@@ -24,6 +25,8 @@ class HapusDesa extends Component
 
     public function destroy()
     {
+        Gate::authorize('manage-master-data');
+
         $desa = desa::find($this->desa_id);
         if ($desa) {
             $desa->delete();

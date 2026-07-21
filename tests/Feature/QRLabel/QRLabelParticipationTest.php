@@ -9,6 +9,7 @@ use App\Models\peserta;
 use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\Role;
 use Livewire\Livewire;
 
 function qrLabelTest_makeEvent(array $overrides = []): Event
@@ -55,6 +56,8 @@ test('qr label list only shows participations from active event', function () {
 });
 
 test('qr payload uses participation attendance code and participant number', function () {
+    $user = User::factory()->create(['role' => Role::Admin]);
+    $this->actingAs($user);
     $event = qrLabelTest_makeEvent();
     app(ActiveEventContext::class)->set($event);
     [$person, $participation] = qrLabelTest_makeParticipation([
@@ -69,6 +72,8 @@ test('qr payload uses participation attendance code and participant number', fun
 });
 
 test('batch export contains only active event participations', function () {
+    $user = User::factory()->create(['role' => Role::Admin]);
+    $this->actingAs($user);
     $eventA = qrLabelTest_makeEvent();
     $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
     app(ActiveEventContext::class)->set($eventA);
@@ -97,7 +102,7 @@ test('same person with participations in two events uses correct event specific 
 });
 
 test('direct print route rejects cross-event legacy participant access', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
     $eventA = qrLabelTest_makeEvent();

@@ -4,6 +4,7 @@ namespace App\Livewire\Database\Desa;
 
 use Livewire\Component;
 use App\Models\desa;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Flux\Flux;
 
@@ -23,6 +24,8 @@ class EditDesa extends Component
     }
     public function update()
     {
+        Gate::authorize('manage-master-data');
+
         $this->validate([
             'desa' => 'required'
         ]);

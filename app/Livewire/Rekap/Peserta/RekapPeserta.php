@@ -9,6 +9,7 @@ use App\Models\Participation;
 use App\Models\regu;
 use App\Services\Audit\ActivityLogService;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -102,6 +103,8 @@ class RekapPeserta extends Component
 
     public function exportExcel()
     {
+        Gate::authorize('view-reports');
+
         $eventId = app(ActiveEventContext::class)->current()?->id;
 
         if ($eventId === null) {

@@ -4,6 +4,7 @@ namespace App\Livewire\Event;
 
 use App\Models\Event;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -32,6 +33,8 @@ class EditStatus extends Component
 
     public function update(): void
     {
+        Gate::authorize('manage-events');
+
         if ($this->processing) {
             return;
         }

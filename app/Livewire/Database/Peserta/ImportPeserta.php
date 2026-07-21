@@ -5,6 +5,7 @@ namespace App\Livewire\Database\Peserta;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Imports\PesertaImport;
+use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportPeserta extends Component
@@ -15,6 +16,8 @@ class ImportPeserta extends Component
 
     public function import()
     {
+        Gate::authorize('manage-participants');
+
         $this->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls'
         ]);

@@ -737,3 +737,44 @@ Prioritas tertinggi saat ini:
 6. Menu "Pengajian" hanya muncul di event Pengajian
 
 Semua fitur di luar Sprint aktif masuk ke Backlog hingga Sprint berjalan selesai.
+
+---
+
+## User Management
+
+Status
+
+🟢 Stable
+
+Priority
+
+P1
+
+Sprint
+
+0
+
+Features
+
+* User Index — daftar user dengan pencarian
+* User Create — tambah user baru (nama, email, password, role)
+* User Edit — ubah profil dan role user
+* User Reset Password — reset password user oleh admin
+* User Delete — hapus user dengan safety rules
+
+Notes:
+
+* Hanya Super Admin yang dapat mengakses (`manage-users`)
+* Delete safety: tidak bisa hapus diri sendiri
+* Delete safety: tidak bisa hapus Super Admin terakhir
+* Password selalu di-hash menggunakan Laravel Hash
+* Password tidak pernah diekspos di response/view/log
+* Semua aksi tercatat di Activity Log (created, updated, role_changed, password_reset, deleted)
+* Service layer: `UserManagementService`
+* Route: `/users` (middleware `can:manage-users`)
+
+Future
+
+* Bulk user operations
+* User import/export
+* User activity history

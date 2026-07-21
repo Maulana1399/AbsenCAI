@@ -5,6 +5,7 @@ namespace App\Livewire\Pengajian\Admin;
 use App\Models\Event;
 use App\Services\Pengajian\PengajianImportService;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
@@ -86,6 +87,8 @@ class ImportMassal extends Component
 
     public function executeImport(): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing || empty($this->previewRows)) {
             return;
         }

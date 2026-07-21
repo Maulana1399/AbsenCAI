@@ -12,6 +12,7 @@ use App\Services\QR\QRIdentityResolver;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -100,6 +101,8 @@ class Index extends Component
 
     public function downloadPng()
     {
+        Gate::authorize('manage-qr-labels');
+
         $participant = $this->requireSelectedParticipant();
         $content = app(QRService::class)->generatePng((string) $participant->attendance_code);
         $filename = $participant->participant_number.'.png';
@@ -129,6 +132,8 @@ class Index extends Component
 
     public function generateBatchExport(): void
     {
+        Gate::authorize('manage-qr-labels');
+
         $participants = $this->filteredParticipations();
         $summary = app(BatchQRExportService::class)->export($participants, 'png', 'qr-exports');
 
@@ -266,12 +271,16 @@ class Index extends Component
 
     public function printSelectedLabel()
     {
+        Gate::authorize('manage-qr-labels');
+
         $participant = $this->requireSelectedParticipant();
         return response($this->printHtmlForParticipants(collect([$participant])))->header('Content-Type', 'text/html');
     }
 
     public function printAllFiltered()
     {
+        Gate::authorize('manage-qr-labels');
+
         $participants = $this->filteredParticipations()->map(fn (Participation $participation) => $participation->person)->filter();
 
         if ($participants->isEmpty()) {

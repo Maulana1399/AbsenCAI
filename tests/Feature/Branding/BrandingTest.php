@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Enums\Role;
 use App\Models\Event;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
@@ -68,7 +69,7 @@ test('welcome page title uses KJA Event Manager', function () {
 });
 
 test('authenticated user sees global KJA home on welcome page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
     $response = $this->actingAs($user)->get('/');
 
     $response->assertStatus(200);
@@ -100,7 +101,7 @@ test('login page uses KJA Event Manager branding', function () {
 // ---------------------------------------------------------------------------
 
 test('logo link in authenticated layout navigates to home', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     $this->actingAs($user);
 
@@ -109,7 +110,7 @@ test('logo link in authenticated layout navigates to home', function () {
 });
 
 test('home route does not auto-select CAI event', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     Event::create([
         'name' => 'CAI Event',
@@ -129,7 +130,7 @@ test('home route does not auto-select CAI event', function () {
 // ---------------------------------------------------------------------------
 
 test('Pengajian menu is NOT visible in CAI event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     $event = branding_event(['event_type' => 'cai']);
 
@@ -146,7 +147,7 @@ test('Pengajian menu is NOT visible in CAI event context', function () {
 });
 
 test('Pengajian menu is visible in Pengajian event context', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => Role::Admin]);
 
     $event = branding_event(['event_type' => 'pengajian']);
     $desa = branding_desa();

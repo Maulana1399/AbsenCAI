@@ -108,6 +108,8 @@
                         <td class="whitespace-nowrap px-4 py-3 text-sm">
                             <div class="flex items-center gap-1">
                                 <flux:button wire:click="edit({{ $event->id }})" size="sm" icon-trailing="pencil">Edit</flux:button>
+                                <flux:button wire:click="$dispatch('manageEventRoles', { id: {{ $event->id }} })" size="sm" icon-trailing="user-group">Role</flux:button>
+                                <flux:button wire:click="$dispatch('manageCommittee', { id: {{ $event->id }} })" size="sm" icon-trailing="briefcase">Panitia</flux:button>
                                 @if ($event->isActive())
                                     <flux:button wire:click="archive({{ $event->id }})" size="sm" icon-trailing="archive-box" variant="danger">Arsipkan</flux:button>
                                 @else
@@ -126,4 +128,6 @@
     </div>
 
     <livewire:event.edit-status />
+    <livewire:event.event-role-manager />
+    <livewire:event.committee-management />
 </div>

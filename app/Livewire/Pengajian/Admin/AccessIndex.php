@@ -8,6 +8,7 @@ use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Support\ActiveEventContext;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class AccessIndex extends Component
@@ -56,6 +57,8 @@ class AccessIndex extends Component
 
     public function create(): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->processing) {
             return;
         }
@@ -100,6 +103,8 @@ class AccessIndex extends Component
 
     public function revoke(int $grantId): void
     {
+        Gate::authorize('manage-pengajian');
+
         $grant = DesaAccessGrant::find($grantId);
 
         if (! $grant || $grant->isRevoked()) {
@@ -130,6 +135,8 @@ class AccessIndex extends Component
 
     public function delete(): void
     {
+        Gate::authorize('manage-pengajian');
+
         if ($this->deleteGrantId === null) {
             return;
         }

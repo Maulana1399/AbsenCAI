@@ -3,6 +3,7 @@
 use App\Livewire\Pengajian\Admin\AccessIndex;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
+use App\Enums\Role;
 use App\Models\User;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
@@ -32,7 +33,7 @@ function pgm13_desa(array $overrides = []): desa
 
 function pgm13_user(): User
 {
-    return User::factory()->create();
+    return User::factory()->create(['role' => Role::Admin]);
 }
 
 function pgm13_createGrant(Event $event, desa $desa, ?User $user = null): array

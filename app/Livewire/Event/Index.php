@@ -5,6 +5,7 @@ namespace App\Livewire\Event;
 use App\Models\Event;
 use App\Support\ActiveEventContext;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Index extends Component
@@ -35,6 +36,8 @@ class Index extends Component
 
     public function create(): void
     {
+        Gate::authorize('manage-events');
+
         if ($this->processing) {
             return;
         }
@@ -70,6 +73,8 @@ class Index extends Component
 
     public function archive(int $eventId): void
     {
+        Gate::authorize('manage-events');
+
         $event = Event::findOrFail($eventId);
 
         if ($event->slug === 'cai-operational') {
@@ -90,6 +95,8 @@ class Index extends Component
 
     public function activate(int $eventId): void
     {
+        Gate::authorize('manage-events');
+
         $event = Event::findOrFail($eventId);
         $event->update(['status' => 'active']);
 
