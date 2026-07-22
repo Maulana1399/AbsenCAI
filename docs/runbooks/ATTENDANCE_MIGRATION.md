@@ -1,4 +1,12 @@
-# Attendance Migration — Production Runbook
+# Attendance Migration — Production Runbook (OBSOLETE)
+
+> **⚠️ OBSOLETE NOTICE (PGM.18 Sprint 1)**
+>
+> Semua backfill commands (`attendance:backfill`, `backfill:legacy-peserta`, dll) telah dihapus pada PGM.18 Sprint 1 karena tidak memiliki production caller. Database saat ini sudah dalam kondisi canonical-first.
+>
+> Backfill hanya diperlukan untuk legacy database yang memiliki data Absensi/IzinAbsensi historis. Jika database saat ini adalah fresh install atau sudah menggunakan canonical EventAttendance, runbook ini tidak diperlukan.
+>
+> Documents retained for historical reference only.
 
 ## Overview
 
@@ -7,10 +15,10 @@ Migrate CAI attendance from legacy `Absensi`/`IzinAbsensi` (NIP-based) to canoni
 Current architecture:
 - **Writes**: Dual-write to both legacy + canonical (since Sprint 6.2B)
 - **Reads**: Canonical-first with legacy fallback (since Sprint 6.3)
-- **Backfill**: `attendance:backfill` — copy existing legacy records to EventAttendance
-- **Parity**: `attendance:parity` — compare legacy vs canonical
+- **Backfill**: `attendance:backfill` — **REMOVED** (PGM.18 Sprint 1)
+- **Parity**: `attendance:parity` — compare legacy vs canonical (still available)
 
-**Target state**: Legacy writes stopped, canonical-only. **Do not attempt until parity verified.**
+**Target state**: Legacy writes stopped, canonical-only.
 
 ---
 
@@ -30,54 +38,13 @@ Backup command:
 cp database/database.sqlite database/database.sqlite.backup.$(date +%Y%m%d_%H%M%S)
 ```
 
-**Always backup before running backfill with --force.**
-
 ---
 
-## B. Dry Run
+## B. Verify Parity (only remaining action)
 
 ```bash
-php artisan attendance:backfill
+php artisan attendance:parity
 ```
-
-Review output:
-- `total_scanned` — matched vs skipped
-- `skip_no_participation` — legacy records with no Participation mapping
-- `skip_ambiguous` — records matching multiple mappings (rare)
-- `skip_existing` — already backfilled (idempotent)
-- `mapped` — would be created
-
-**Dry-run makes zero database writes.**
-
----
-
-## C. Review Unmappable Records
-
-Unmappable records (no Participation) will remain legacy-only. This is acceptable — they continue working through legacy fallback reads.
-
-If unmappable count is significant:
-1. Check whether `LegacyPesertaMapping` backfill was executed (see `php artisan backfill:legacy-peserta --dry-run`)
-2. Execute mapping backfill before attendance backfill if needed
-
----
-
-## D. Execute Backfill
-
-```bash
-php artisan attendance:backfill --force
-```
-
-Or per-event:
-
-```bash
-php artisan attendance:backfill --force --event=1
-```
-
-Backfill is **idempotent** — safe to rerun. Already-existing canonical records are skipped.
-
----
-
-## E. Verify Parity
 
 ```bash
 php artisan attendance:parity
@@ -135,23 +102,20 @@ Rollback preserves all legacy data — no attendance records are lost.
 
 ---
 
-## I. Required Tools
+## I. Available Commands
 
 | Command | Purpose |
 |---------|---------|
-| `php artisan attendance:backfill` | Dry-run (default) |
-| `php artisan attendance:backfill --force` | Execute backfill |
 | `php artisan attendance:parity` | Audit all events |
 | `php artisan attendance:parity --event={id}` | Audit single event |
-| `php artisan backfill:legacy-peserta --dry-run` | Dry-run mapping backfill |
-| `php artisan backfill:legacy-peserta --execute` | Execute mapping backfill |
+| `php artisan diagnose:design-c` | Design C integrity diagnostic (READ-ONLY) |
+
+> Backfill commands (`attendance:backfill`, `backfill:legacy-peserta`) were removed in PGM.18 Sprint 1.
 
 ---
 
-## J. Current Sprint Status
+## J. Current Status (PGM.18)
 
-Sprint 6.4 = Verification readiness. Legacy writes still active. Canonical reads active with fallback.
+Legacy dual-write still active (`ATTENDANCE_LEGACY_WRITE=false` in `.env`). Canonical-first reads active with fallback.
 
-Target Sprint 6.5 decision:
-- **GO**: production parity verified → stop legacy writes, keep legacy tables read-only
-- **NO-GO**: continue dual-write until parity issues resolved
+Legacy backfill tooling removed. Fresh databases do not need backfill.

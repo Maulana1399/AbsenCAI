@@ -62,6 +62,7 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
   - Event switcher redirect/reload fix
   - Migration: kelompok_id to people table, event_type to events table
 - PGM.17 Pilot Release ✅ COMPLETE — UI interaction remediation (invisible controls, modal close, dark mode, mobile responsiveness). Full suite: 1570 passed / 3803 assertions / 0 failures. Design C diagnostic: problem_total = 0.
+- **PGM.18 Sprint 1 ✅ COMPLETE** — Legacy historical tooling removal (6 commands, 4 services, 4 test files, 2 partial test refactors). Design C diagnostic contract fixed (NULL participation_id no longer counted as broken reference). Full suite: 1494 passed / 3581 assertions / 0 failures. Design C diagnostic: problem_total = 0. Sprint 1 removed 76 tests (historical tooling coverage intentionally deleted) + added 1 regression test = net -75 tests from PGM.17 baseline. Not a regression.
 
 **UI Bug Fix Sprint** — All batches RESOLVED VERIFIED ✅.
 
@@ -220,8 +221,9 @@ Priority saat ini:
 
 1. **PGM.17 — Pilot Release** ✅ COMPLETE — UI interaction remediation. Full suite: 1570 passed / 3803 assertions / 0 failures. Design C: problem_total = 0.
 2. **Database V2 Part 5 CLOSED** ✅ — Documentation synchronized; semantic coverage audited.
-3. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
-4. **Next: PGM.18 — Database V2 Part 6 (Legacy Dependency Remediation + CAI Participant Architecture)** — Planning phase.
+3. **PGM.18 Sprint 1 ✅ COMPLETE** — Legacy historical tooling removed, Design C diagnostic contract fixed. Verified: 1494 passed / 3581 assertions / 0 failures, Design C: problem_total = 0.
+4. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
+5. **PGM.18 Sprint 2** — PLANNING / AUDIT REQUIRED. Database masih memiliki 143 peserta legacy sehingga strategi legacy dependency remediation perlu diaudit ulang.
 
 ## Database V2 Part 5 Closure
 
@@ -312,7 +314,7 @@ Database: SQLite
 - Login page still uses CAI branding — needs KJA Event Manager rebrand
 - No hard-delete for revoked DesaAccessGrants — only soft revocation
 - `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
-- Test suite: 1570 passed, 3803 assertions, 0 failures (post-S7.3 regression)
+- Test suite: 1494 passed, 3581 assertions, 0 failures (post-PGM.18 Sprint 1). Penurunan 76 test dari baseline 1570 adalah EXPECTED karena historical backfill tooling dan test terkait sengaja dihapus. Satu regression test baru (diagnostic contract) membuat delta final -75.
 
 ---
 
@@ -322,15 +324,53 @@ Database: SQLite
 
 Priority: **HIGH**
 
-Goal: Reduce legacy `peserta` table dependencies, complete the Person→Participation canonical path, and remediate known Design C technical debt.
+Status: **IN PROGRESS**
 
-Key areas:
-1. **legacy_peserta_mappings.participation_id** — Investigate making nullable to allow soft-delete without participation constraint
-2. **status_registrasi event-scoping** — Currently global on peserta, should be per-event via Participation
-3. **regu_id event-scoping** — Currently global on peserta, should be per-event via Participation
-4. **Legacy absensi/izin_absensi event ambiguity** — Some records lack event context
-5. **Participant removal safety** — Review Design C deletion guard behavior
-6. **Legacy RegistrationService** — Audit remaining `peserta` creation paths not routed through Person→Participation
+## Sprint 1 ✅ COMPLETE
+
+Scope: Legacy Historical Tooling Removal + Design C Diagnostic Contract Fix
+
+Delivered:
+- Removed 6 historical backfill/migration commands (zero production callers)
+- Removed 4 historical service classes (zero production callers)
+- Removed 4 pure-historical-tooling test files (1954 lines)
+- Refactored 2 mixed test files (removed 4 backfill-specific tests)
+- Fixed Design C diagnostic contract — NULL participation_id no longer counted as broken reference
+- Added regression test for diagnostic contract
+- No production runtime behavior changed
+- No database migration
+- No database mutation
+
+Verified:
+- Full suite: 1494 passed / 3581 assertions / 0 failures
+- Design C: problem_total = 0
+- Design C details: all 8 metrics 0
+
+Database snapshot during Sprint 1 audit (2026-07-22):
+- 143 pesertas (real legacy import data, July 7-9, 2026)
+- 144 people
+- 2 participations
+- 143 legacy_peserta_mappings (all with participation_id = NULL — valid forward-reference state)
+- 2 legacy_participation_mappings
+- 1 event (CAI 27)
+
+The 143 LegacyPesertaMapping records with NULL participation_id are NOT Design C violations. This state is valid according to current schema (nullable FK with nullOnDelete). Database tidak benar-benar kosong saat Sprint 1 dieksekusi.
+
+## Sprint 2 — PLANNING / AUDIT REQUIRED
+
+Database ternyata masih memiliki 143 data peserta legacy sehingga strategi penghapusan legacy berikutnya harus mempertimbangkan data tersebut.
+
+Audit items needed before Sprint 2:
+1. Apakah 143 peserta legacy masih perlu dipertahankan
+2. Apakah data tersebut akan digunakan untuk event berikutnya
+3. Apakah Person canonical sudah cukup untuk menggantikan peserta
+4. Apakah LegacyPesertaMapping masih dibutuhkan
+5. Apakah LegacyParticipationMapping masih dibutuhkan
+6. Apakah ATTENDANCE_LEGACY_WRITE default bisa diubah ke false
+7. Apakah legacy attendance read fallback masih diperlukan
+8. Apakah status_registrasi harus dipindah ke Participation
+9. Apakah regu_id harus dipindah ke Participation
+10. Urutan aman penghapusan dependency legacy berikutnya
 
 Architecture source: `docs/DATABASE_V2.md`, `docs/DATABASE.md`, `docs/DECISION.md`.
 

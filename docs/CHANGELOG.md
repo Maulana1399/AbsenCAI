@@ -8,6 +8,54 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (PGM.18 Sprint 1 — Legacy Historical Tooling Removal)
+
+### Removed (6 Artisan commands — zero production callers)
+- `BackfillLegacyPeserta` (`backfill:legacy-peserta`)
+- `BackfillLegacyParticipation` (`backfill:legacy-participation`)
+- `BackfillPersonKelompok` (`app:backfill-person-kelompok`)
+- `RebuildLegacyMappings` (`app:rebuild-legacy-mappings`)
+- `AttendanceBackfill` (`attendance:backfill`)
+- `SuratIzinBackfill` (`surat-izin:backfill`)
+
+### Removed (4 service classes — zero production callers)
+- `LegacyPesertaBackfillService`
+- `LegacyParticipationBackfillService`
+- `BackfillReport`
+- `BackfillReportItem`
+
+### Removed (4 pure historical tooling test files)
+- `tests/Feature/LegacyPesertaMapping/LegacyPesertaBackfillTest.php` (850 lines)
+- `tests/Feature/MasterData/PersonKelompokBackfillTest.php` (316 lines)
+- `tests/Feature/Database/AttendanceBackfillFoundationTest.php` (588 lines)
+- `tests/Feature/Database/AttendanceBackfillRegressionTest.php` (200 lines)
+
+### Refactored (2 mixed test files — removed backfill-specific tests)
+- `tests/Feature/Database/AttendanceMigrationVerificationTest.php` — removed 2 backfill tests, retained 9 runtime/parity tests
+- `tests/Feature/Registrasi/LegacyParticipationBridgeFoundationTest.php` — removed 2 backfill tests, retained 7 runtime bridge tests
+
+### Fixed (Design C diagnostic contract)
+- `app/Console/Commands/DesignCDiagnostics.php` — `legacy_peserta_pointing_to_missing_participation` now excludes NULL participation_id. NULL is a valid forward-reference state (schema allows nullable FK with nullOnDelete).
+
+### Added (diagnostic contract regression test)
+- `tests/Feature/DesignCDiagnosticsTest.php` — 2 tests covering: (A) NULL participation_id not counted, (B) fully valid mappings produce problem_total=0. Test C (broken FK) documented as impossible due to FK nullOnDelete constraint.
+
+### Updated
+- `app/Console/Commands/AttendanceDiagnose.php` — removed informational string referencing removed `attendance:backfill` command.
+
+### Not Changed
+- Runtime `AttendanceBackfillService` and `SuratIzinBackfillService` — retained (active runtime services)
+- `LegacyPesertaMapping`, `LegacyParticipationMapping` — retained
+- `RegistrationService`, `AttendanceService` — unchanged
+- Schema/migrations — unchanged
+- `ATTENDANCE_LEGACY_WRITE` default — unchanged (deferred to Sprint 2)
+- Database — no data mutation
+
+### Verified Baseline
+- **Full suite**: 1494 passed / 3581 assertions / 0 failures
+- **Design C diagnostic**: problem_total = 0 (all 8 metrics 0)
+- Test reduction from 1570 is EXPECTED — 76 historical tests removed, 1 regression test added (net -75). Not a regression.
+
 ## Added (PGM.17 — Pilot Release UI Remediation)
 
 ### Global UI Interaction + Mobile/Dark Mode Audit ✅

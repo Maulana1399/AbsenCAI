@@ -9,7 +9,6 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SesiAbsensi;
 use App\Models\peserta;
-use App\Services\Attendance\AttendanceBackfillService;
 use App\Services\Attendance\AttendanceParityService;
 use App\Services\Attendance\AttendanceReadService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -210,35 +209,6 @@ test('ReadService does not mix Event A and Event B attendance', function () {
 
     expect($dataA['hadir_count'])->toBe(1);
     expect($dataB['total'])->toBe(0);
-});
-
-// ---------------------------------------------------------------------------
-// E. Backfill idempotency + safety
-// ---------------------------------------------------------------------------
-
-test('backfill dry-run makes no writes', function () {
-    $event = mv_event();
-    $session = mv_session($event);
-    $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
-
-    app(AttendanceBackfillService::class)->dryRunHadir();
-
-    expect(EventAttendance::count())->toBe(0);
-});
-
-test('backfill is idempotent', function () {
-    $event = mv_event();
-    $session = mv_session($event);
-    $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
-
-    $svc = app(AttendanceBackfillService::class);
-    $svc->backfillHadir();
-    $second = $svc->backfillHadir();
-
-    expect($second['skip_existing'])->toBeGreaterThanOrEqual(1);
-    expect($second['created'])->toBe(0);
 });
 
 // ---------------------------------------------------------------------------

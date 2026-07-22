@@ -141,7 +141,7 @@ Last verified test suite (archived):
 
 70 tests passed, 198 assertions, 0 failures.
 
-Latest verified regression: **1570 passed, 3803 assertions** (full suite, 2026-07-22).
+Latest verified regression: **1494 passed, 3581 assertions** (full suite, 2026-07-22, post-PGM.18 Sprint 1). Penurunan dari 1570 adalah EXPECTED — 76 historical tooling tests dihapus, 1 regression test ditambahkan.
 
 ### Deferred Backlog
 
@@ -749,8 +749,8 @@ Status: PGM.12–PGM.17 COMPLETE. Pilot end-to-end functional, UI remediated.
 
 ### PGM.17 Pilot Release ✅ COMPLETE
 - [x] UI interaction remediation (invisible controls, modal close, dark mode, mobile responsiveness)
-- [x] Full suite: 1570 passed / 3803 assertions / 0 failures
-- [x] Design C diagnostic: problem_total = 0
+- [x] Full suite: 1570 passed / 3803 assertions / 0 failures (pre-PGM.18 baseline) → 1494 passed / 3581 assertions / 0 failures (post-PGM.18 Sprint 1)
+- [x] Design C diagnostic: problem_total = 0 (pre and post Sprint 1)
 - [x] RBAC preserved, event isolation preserved
 - [x] Pilot functional results: all flows PASS
 

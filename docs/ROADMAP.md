@@ -617,7 +617,8 @@ Deliverables:
 Next checkpoint:
 - PGM.16 completed (Pengajian UX, Contextual Navigation, Bulk Import)
 - PGM.17 Pilot Release — UI interaction remediation COMPLETE
-- PGM.18 — Database V2 Part 6 (Legacy Dependency Remediation + CAI Participant Architecture) — NEXT
+- PGM.18 Sprint 1 ✅ COMPLETE — Legacy historical tooling removed, Design C diagnostic contract fixed
+- PGM.18 Sprint 2 — PLANNING / AUDIT REQUIRED (database masih memiliki 143 peserta legacy, strategi perlu diaudit ulang)
 
 ---
 

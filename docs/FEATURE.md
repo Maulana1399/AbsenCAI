@@ -378,7 +378,7 @@ Features
 * [x] Print Log — Surat Izin print, QR label print views (single/batch/A4) logged via ActivityLogService
 * [x] Export Log — participant data Excel export logged via ActivityLogService
 * [x] QR Log — single QR download and batch QR export logged via ActivityLogService
-* [x] Auditable commands — CreateDesaGrant, BackfillLegacyPeserta
+* [x] Auditable commands — CreateDesaGrant (BackfillLegacyPeserta dihapus di PGM.18 Sprint 1 karena command sudah tidak memiliki production caller)
 
 Notes:
 

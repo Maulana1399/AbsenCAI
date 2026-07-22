@@ -71,7 +71,6 @@ class AttendanceDiagnose extends Command
         $this->newLine();
 
         $this->warn("This command is READ-ONLY. No data was modified.");
-        $this->line("To backfill resolved records: php artisan attendance:backfill --force --event={$eventId}");
 
         return 0;
     }

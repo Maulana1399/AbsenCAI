@@ -10,7 +10,6 @@ use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Services\Attendance\LegacyParticipationResolver;
-use App\Services\Migration\LegacyParticipationBackfillService;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -81,35 +80,6 @@ test('resolver uses new bridge first and falls back to legacy bridge', function 
         ->and($resolver->resolveByPesertaAndEvent($pesertaModel->id, $this->eventA->id)?->id)->toBe($partA->id)
         ->and($resolver->resolvePesertaByParticipation($partB->id, $this->eventB->id)?->id)->toBe($pesertaModel->id)
         ->and($resolver->resolvePersonByPesertaId($pesertaModel->id)?->id)->toBe($person->id);
-});
-
-test('backfill dry-run does not mutate and force creates new bridge rows idempotently', function () {
-    $person = Person::create(['nama' => 'Backfill Person', 'nip' => 30301, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $pesertaModel = peserta::create(['nama' => 'Backfill Person', 'nip' => 30301, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
-    $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL020', 'attendance_code' => 'KJA-BACK001', 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
-
-    $service = app(LegacyParticipationBackfillService::class);
-    $dry = $service->execute($this->eventA, true, 'batch-dry');
-    expect(LegacyParticipationMapping::count())->toBe(0)->and($dry['created'])->toBe(1);
-
-    $force = $service->execute($this->eventA, false, 'batch-force');
-    expect(LegacyParticipationMapping::count())->toBe(1)->and($force['created'])->toBe(1);
-
-    $again = $service->execute($this->eventA, false, 'batch-force2');
-    expect(LegacyParticipationMapping::count())->toBe(1)->and($again['skipped'])->toBeGreaterThanOrEqual(1);
-});
-
-test('backfill reports conflict for mismatch and missing dependency safely', function () {
-    $person = Person::create(['nama' => 'Conflict Person', 'nip' => 40401, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $pesertaModel = peserta::create(['nama' => 'Conflict Person', 'nip' => 40401, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
-    $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL030', 'attendance_code' => 'KJA-CONFLICT', 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventB->id]);
-
-    $service = app(LegacyParticipationBackfillService::class);
-    $report = $service->execute($this->eventB, true, 'batch-conflict');
-
-    expect($report['conflicts'])->toBeGreaterThanOrEqual(1);
 });
 
 test('registration case A and case B create legacy participation bridge rows', function () {
