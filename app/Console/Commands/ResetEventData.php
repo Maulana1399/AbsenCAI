@@ -10,9 +10,9 @@ class ResetEventData extends Command
     protected $signature = 'app:reset-event-data
         {--dry-run : Preview what would be deleted without modifying the database}';
 
-    protected $description = 'Reset all event operational data while preserving master data (pesertas, desas, kelompoks, regus, people, users)';
+    protected $description = 'Reset all event operational data while preserving master data including legacy_peserta_mappings';
 
-    private array $masterTables = ['pesertas', 'desas', 'kelompoks', 'regus', 'people', 'users'];
+    private array $masterTables = ['pesertas', 'desas', 'kelompoks', 'regus', 'people', 'users', 'legacy_peserta_mappings'];
 
     private array $systemTables = [
         'migrations', 'cache', 'cache_locks', 'failed_jobs',
@@ -29,7 +29,6 @@ class ResetEventData extends Command
         'cai_participant_replacements',
         'identity_correction_requests',
         'activity_logs',
-        'legacy_peserta_mappings',
         'legacy_participation_mappings',
         'participations',
         'activities',
@@ -178,7 +177,7 @@ class ResetEventData extends Command
             }
         }
 
-        $verifyMaster = ['pesertas', 'desas', 'kelompoks', 'regus', 'people', 'users'];
+        $verifyMaster = ['pesertas', 'desas', 'kelompoks', 'regus', 'people', 'users', 'legacy_peserta_mappings'];
         $this->line('  Verify master tables never deleted:');
         foreach ($verifyMaster as $table) {
             $this->line("    ✅ {$table} — NOT in delete list");
@@ -338,7 +337,7 @@ class ResetEventData extends Command
                 'absensis', 'event_attendances', 'sesi_absensis', 'izin_absensis',
                 'surat_izins', 'desa_access_grants', 'cai_participant_replacements',
                 'identity_correction_requests', 'activity_logs',
-                'legacy_peserta_mappings', 'legacy_participation_mappings',
+                'legacy_participation_mappings',
                 'participations', 'events',
             ];
             foreach ($mustBeZero as $table) {

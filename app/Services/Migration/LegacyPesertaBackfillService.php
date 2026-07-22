@@ -186,6 +186,7 @@ class LegacyPesertaBackfillService
                     'nama' => $peserta->nama,
                     'jenis_kelamin' => $canonicalGender,
                     'desa_id' => $peserta->desa_id,
+                    'kelompok_id' => $peserta->kelompok_id,
                     'nip' => $peserta->nip,
                 ],
             ];

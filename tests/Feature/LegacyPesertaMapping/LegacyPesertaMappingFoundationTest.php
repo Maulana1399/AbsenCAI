@@ -327,21 +327,24 @@ test('deleting mapped person is prevented', function () {
     expect(LegacyPesertaMapping::count())->toBe(1);
 });
 
-test('deleting mapped participation is prevented', function () {
+test('deleting mapped participation nullifies FK (SET NULL)', function () {
     $mapping = LPesertaMappingFactory_makeMapping();
 
-    expect(fn () => $mapping->participation->delete())
-        ->toThrow(\Illuminate\Database\QueryException::class);
+    $participationId = $mapping->participation->id;
+    $mapping->participation->delete();
 
+    expect($mapping->fresh()->participation_id)->toBeNull();
     expect(LegacyPesertaMapping::count())->toBe(1);
 });
 
-test('deleting mapped event is prevented', function () {
+test('deleting mapped event nullifies FK (SET NULL)', function () {
     $mapping = LPesertaMappingFactory_makeMapping();
 
-    expect(fn () => $mapping->event->delete())
-        ->toThrow(\Illuminate\Database\QueryException::class);
+    // participations FK blocks event deletion; delete participation first
+    $mapping->participation->delete();
+    $mapping->event->delete();
 
+    expect($mapping->fresh()->event_id)->toBeNull();
     expect(LegacyPesertaMapping::count())->toBe(1);
 });
 
