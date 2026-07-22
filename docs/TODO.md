@@ -141,7 +141,7 @@ Last verified test suite (archived):
 
 70 tests passed, 198 assertions, 0 failures.
 
-Latest verified regression: **908 passed, 2192 assertions** (UI Bug Fix Sprint Batch 1, 2026-07-21).
+Latest verified regression: **1570 passed, 3803 assertions** (full suite, 2026-07-22).
 
 ### Deferred Backlog
 
@@ -311,7 +311,7 @@ Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 ## UI Bug Fix Sprint
 
-Status: 🟡 Backlog — NOT STARTED
+Status: ✅ COMPLETE
 
 Priority: Critical/High
 
@@ -660,19 +660,19 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 ### S3.6 Attendance Event Scoping
 
-- [ ] Migrate sessions to event-scoped
-- [ ] Migrate attendance to participation-based
-- [ ] Migrate permits to participation-based
+- [x] Migrate sessions to event-scoped
+- [x] Migrate attendance to participation-based
+- [x] Migrate permits to participation-based
 
 ### S3.7 Participant/QR Migration
 
-- [ ] QR lookup event-scoped
-- [ ] Participant numbering per-event
+- [x] QR lookup event-scoped
+- [x] Participant numbering per-event
 
 ### S3.8 Dashboard & Report Scoping
 
-- [ ] Dashboard counts filtered by active event
-- [ ] Reports filtered by active event
+- [x] Dashboard counts filtered by active event
+- [x] Reports filtered by active event
 
 ### S3.9 Multi Role/Venue/Category
 
@@ -680,7 +680,7 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 ### S3.10 Regression & Production Readiness
 
-- [ ] Full test suite verification
+- [x] Full test suite verification
 - [ ] Manual QA on critical flows
 - [ ] Performance testing
 - [ ] Deployment checklist

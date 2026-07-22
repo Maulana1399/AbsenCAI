@@ -291,9 +291,9 @@ Database: SQLite
 # S1+S2 Known Technical Debt (RBAC)
 
 - **Master Data route/Livewire/sidebar protection**: ✅ COMPLETE
-- **Event, CAI, Pengajian Admin, Reports routes belum diproteksi**: Semua modul di luar Master Data masih accessible oleh semua authenticated user. S3+ akan menangani.
-- **Livewire actions di Event/CAI/Pengajian module belum diproteksi**: S3+ akan menambahkan `$this->authorize()`.
-- **Sidebar untuk modul non-Master-Data belum difilter berdasarkan role**: S3+ akan menambahkan `@can()` directives.
+- **Event, CAI, Pengajian Admin, Reports route protection**: ✅ COMPLETE (S3 Operational Protection).
+- **Livewire actions di Event/CAI/Pengajian module**: ✅ COMPLETE (S3 Operational Protection).
+- **Sidebar untuk modul non-Master-Data**: ✅ COMPLETE (S6 Sidebar Visibility).
 - **Ketua Event global**: `manage-events` hanya diberikan ke Super Admin + Admin. Ketua Event belum memiliki event-scoped authorization (memerlukan EventRole/EventCommitteeAssignment integration).
 - **Viewer read-only**: Viewer memiliki `view-dashboard` dan `view-reports` tetapi belum ada enforcement read-only di level UI/action.
 
@@ -304,7 +304,7 @@ Database: SQLite
 - `PlacementService` has mixed responsibilities (legacy NIP + participant_number generation)
 - Two parallel identity correction paths (PengajianIdentityService vs IdentityCorrectionService)
 - Sidebar is static Blade — doesn't live-render on event switch (page navigation resolves)
-- No RBAC system for admin UI modules
+- RBAC implemented S1–S7 — no known gaps in CAI Operational routes
 - Pengajian import template XLSX not yet downloadable from UI
 - Event edit form does not allow changing event_type after creation
 - No dedicated Pengajian admin dashboard (Regional Report serves as landing)
@@ -312,7 +312,7 @@ Database: SQLite
 - Login page still uses CAI branding — needs KJA Event Manager rebrand
 - No hard-delete for revoked DesaAccessGrants — only soft revocation
 - `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
-- Test suite: 1324 passed, 3135 assertions, 0 failures (post-S7.3)
+- Test suite: 1570 passed, 3803 assertions, 0 failures (post-S7.3 regression)
 
 ---
 

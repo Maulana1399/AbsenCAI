@@ -218,7 +218,7 @@ On approval, if `LegacyPesertaMapping` exists for this Person, sync `nama` to le
 ### Known Security Limitations
 
 1. **Verified middleware is no-op** — User model does not implement `MustVerifyEmail`. Routes with `verified` middleware are effectively `auth` only.
-2. **No RBAC** — all authenticated users have equivalent access to event management, regional reports, and correction review. Acceptable only for limited pilot with trusted operators.
+2. **RBAC** ✅ — S4 Pengajian Admin Protection implemented. `manage-pengajian` ability gates admin routes. All authenticated users have equivalent access to base features (acceptable for limited pilot).
 3. **Password-only auth** — no MFA, no SSO.
 4. **QR is not bound per participant** — one QR can be used by all participants during its validity window.
 
@@ -314,7 +314,7 @@ Verify your actual `DB_DATABASE` path from `.env` if not using the default SQLit
 ## 15. Known Pilot Limitations
 
 - **Token rotation**: Login token rotation not yet implemented. Use revoke + recreate instead.
-- **RBAC**: Not implemented. All authenticated users have equivalent access.
+- **RBAC**: ✅ Implemented (S4 Pengajian Admin Protection). Some granular permission refinement deferred.
 - **Email verification**: `verified` middleware is no-op (User does not implement `MustVerifyEmail`).
 - **No permanent Person QR**: QR is session-bound, not person-bound.
 - **No NFC / RFID**: QR-only attendance.

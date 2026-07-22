@@ -51,8 +51,8 @@ Semua hak akses dikelola melalui:
 
 * Role (`app/Enums/Role.php`) ✅ S1
 * Permission (Gate abilities in `AppServiceProvider`) ✅ S1
-* Gate ✅ S1 (defined, not yet attached to routes)
-* Policy 🔄 S2+
+* Gate ✅ S1 (defined and attached to routes S1–S7)
+* Policy (not used — Gates used instead S1–S7)
 
 > Lihat **PERMISSION.md** untuk detail Role & Permission Matrix.
 

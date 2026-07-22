@@ -346,13 +346,6 @@ Catatan: Import Desa dan Import Kelompok telah diproteksi di S2 dengan `manage-m
 |---------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
 | `manage-import` | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
-## S2 Status Row Update
-
-| Route protection (S3+) | ❌ Not yet implemented |
-| Livewire authorization (S3+) | ❌ Not yet implemented |
-
-Kedua baris di atas (dari tabel S2) sudah obsolete — S3, S4, S5, dan S6 telah mengimplementasikan route protection, Livewire authorization, dan sidebar visibility untuk seluruh modul operasional dan import.
-
 ## Complete S5 Deliverables
 
 - ✅ `manage-import` ability applied to `/import/peserta` and `/import/regu` routes

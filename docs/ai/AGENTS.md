@@ -22,7 +22,7 @@ KJA Event Manager adalah platform Event Management berbasis web yang dikembangka
 
 Current MVP:
 
-CAI Operational.
+CAI Operational & Pengajian Desa MVP.
 
 Long Term Goal:
 
@@ -267,6 +267,10 @@ melalui Participation.
 Current
 
 Person
+
+↓
+
+Participation
 
 ↓
 

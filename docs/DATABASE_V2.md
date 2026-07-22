@@ -8,7 +8,7 @@ KJA Event Manager
 
 Status
 
-Architecture Design
+Part 5 CLOSED — Design C implemented
 
 ---
 
