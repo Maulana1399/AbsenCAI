@@ -13,7 +13,6 @@ use App\Models\regu;
 use App\Services\Cai\CaiParticipantReplacementService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use RuntimeException;
 
 uses(RefreshDatabase::class);
 

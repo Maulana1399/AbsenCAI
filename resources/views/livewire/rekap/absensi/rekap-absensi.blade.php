@@ -66,15 +66,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($sudahAbsen as $absen)
+                            @foreach($sudahAbsen as $entry)
+                                @php $lp = $entry->legacyPeserta; @endphp
                                 <tr class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
                                     <td class="px-4 py-2">{{ $loop->iteration }}</td>
-                                    <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $absen->peserta->nama ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $absen->nip }}</td>
-                                    <td class="px-4 py-2">{{ $absen->peserta->regu->regu ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $absen->peserta->kelompok->kelompok_asal ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $absen->peserta->desa->desa_asal ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $absen->jam_scan }}</td>
+                                    <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $entry->person?->nama ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->person?->nip ?? ($lp->nip ?? '-') }}</td>
+                                    <td class="px-4 py-2">{{ $lp->regu->regu ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $lp->kelompok->kelompok_asal ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->person?->desa?->desa_asal ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->jam_scan ? \Illuminate\Support\Carbon::parse($entry->jam_scan)->format('H:i:s') : '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -101,15 +102,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($pesertaIzin as $izin)
+                            @forelse($pesertaIzin as $entry)
+                                @php $lp = $entry->legacyPeserta; @endphp
                                 <tr class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
                                     <td class="px-4 py-2">{{ $loop->iteration }}</td>
-                                    <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $izin->peserta->nama ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $izin->peserta->nip ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $izin->peserta->regu->regu ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $izin->peserta->kelompok->kelompok_asal ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $izin->peserta->desa->desa_asal ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $izin->created_at ?? '-' }}</td>
+                                    <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $entry->person?->nama ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->person?->nip ?? ($lp->nip ?? '-') }}</td>
+                                    <td class="px-4 py-2">{{ $lp->regu->regu ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $lp->kelompok->kelompok_asal ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->person?->desa?->desa_asal ?? '-' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->jam_scan ? \Illuminate\Support\Carbon::parse($entry->jam_scan)->format('H:i:s') : '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>

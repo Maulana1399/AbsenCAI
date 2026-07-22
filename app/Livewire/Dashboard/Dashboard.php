@@ -2,13 +2,12 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\Absensi;
-use App\Models\IzinAbsensi;
 use App\Models\Participation;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Models\SesiAbsensi;
+use App\Services\Attendance\AttendanceReadService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -36,63 +35,36 @@ class Dashboard extends Component
         $sesiAktif = $event
             ? SesiAbsensi::where('event_id', $event->id)->where('aktif', true)->first()
             : null;
-        $participationQuery = Participation::with([
-            'person.desa',
-            'person.legacyPesertaMapping.peserta.regu',
-            'person.legacyPesertaMapping.peserta.kelompok',
-            'event',
-        ]);
 
-        if ($event !== null) {
-            $participationQuery->where('event_id', $event->id);
-        } else {
-            $participationQuery->whereRaw('0 = 1');
+        $sudahAbsenCount = 0;
+        $izinCount = 0;
+        $belumAbsenCount = 0;
+        $totalPesertaFiltered = 0;
+        $persentaseKehadiran = 0;
+        $attendance = collect();
+        $pesertaBelumAbsen = collect();
+
+        if ($event !== null && $sesiAktif !== null) {
+            $readService = app(AttendanceReadService::class);
+            $reguId = $this->regu_id ? (int) $this->regu_id : null;
+            $sessionData = $readService->getSessionAttendance($event->id, $sesiAktif->id, $reguId);
+
+            $attendance = $sessionData['attendance'];
+            $sudahAbsenCount = $sessionData['hadir_count'];
+            $izinCount = $sessionData['izin_count'];
+            $belumAbsenCount = $sessionData['belum_count'];
+            $totalPesertaFiltered = $sessionData['total'];
+            $persentaseKehadiran = $sessionData['persentase'];
+            $this->totalPeserta = $totalPesertaFiltered;
+
+            $pesertaBelumAbsen = $attendance->filter(fn ($entry) => $entry->status === 'belum')
+                ->map(fn ($entry) => $entry->participation)
+                ->values();
         }
-
-        if ($this->regu_id) {
-            $participationQuery->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('regu_id', $this->regu_id));
-        }
-
-        $participations = $participationQuery->get();
-        $participationPersonIds = $participations->pluck('person_id');
-        $participantNips = $participations->map(fn (Participation $participation) => $participation->person?->nip)->filter();
-
-        $absensiQuery = Absensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa']);
-        $izinQuery = IzinAbsensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa']);
-
-        if ($sesiAktif) {
-            $absensiQuery->where('sesi_id', $sesiAktif->id)->whereIn('nip', $participantNips);
-            $izinQuery->where('sesi_id', $sesiAktif->id)->whereIn('peserta_id', $participationPersonIds);
-        } else {
-            $absensiQuery->whereRaw('0 = 1');
-            $izinQuery->whereRaw('0 = 1');
-        }
-
-        $absensis = $absensiQuery->orderBy('jam_scan', 'asc')->get();
-        $izinAbsensis = $izinQuery->orderBy('created_at', 'asc')->get();
-
-        $absenNips = $absensis->pluck('nip')->unique();
-        $izinPesertaIds = $izinAbsensis->pluck('peserta_id')->unique();
-
-        $pesertaBelumAbsen = $sesiAktif
-            ? $participations->reject(function ($participation) use ($absenNips, $izinPesertaIds) {
-                return $absenNips->contains($participation->person?->nip) || $izinPesertaIds->contains($participation->person_id);
-            })->values()
-            : $participations;
-
-        $sudahAbsenCount = $absensis->count();
-        $izinCount = $izinAbsensis->count();
-        $belumAbsenCount = $pesertaBelumAbsen->count();
-        $totalPesertaFiltered = $participations->count();
-        $this->totalPeserta = $totalPesertaFiltered;
-        $persentaseKehadiran = $totalPesertaFiltered > 0
-            ? round(($sudahAbsenCount / $totalPesertaFiltered) * 100, 2)
-            : 0;
 
         return view('livewire.dashboard.dashboard', [
             'sesiAktif' => $sesiAktif,
-            'absensis' => $absensis,
-            'izinAbsensis' => $izinAbsensis,
+            'attendance' => $attendance,
             'pesertaBelumAbsen' => $pesertaBelumAbsen,
             'sudahAbsenCount' => $sudahAbsenCount,
             'izinCount' => $izinCount,

@@ -53,9 +53,8 @@ it('rekap absensi shows event a data only', function () {
         ->set('sesi_id', $this->sessionA->id)
         ->assertSee('Total Peserta')
         ->assertSee('2')
-        ->assertSee('Peserta Legacy A')
-        ->assertSee('Peserta Legacy B')
-        ->assertDontSee('Other Person');
+        ->assertSee('Shared Person')
+        ->assertSee('Other Person');
 });
 
 it('switching active event changes rekap dataset', function () {
@@ -63,8 +62,8 @@ it('switching active event changes rekap dataset', function () {
 
     Livewire::test(RekapAbsensi::class)
         ->set('sesi_id', $this->sessionA->id)
-        ->assertSee('Peserta Legacy A')
-        ->assertDontSee('Other Person');
+        ->assertSee('Shared Person')
+        ->assertSee('Other Person');
 
     app(ActiveEventContext::class)->set($this->eventB);
 
@@ -73,7 +72,7 @@ it('switching active event changes rekap dataset', function () {
         ->assertSee('Total Peserta')
         ->assertSee('1')
         ->assertSee('Shared Person')
-        ->assertDontSee('Peserta Legacy B');
+        ->assertDontSee('Other Person');
 });
 
 it('same person across events remains isolated', function () {
@@ -81,7 +80,7 @@ it('same person across events remains isolated', function () {
 
     Livewire::test(RekapAbsensi::class)
         ->set('sesi_id', $this->sessionA->id)
-        ->assertSee('Peserta Legacy A')
+        ->assertSee('Shared Person')
         ->assertDontSee('KJA-B602');
 });
 
@@ -94,13 +93,13 @@ it('sesi from other events do not leak attendance', function () {
         ->assertSee('Pilih sesi absensi untuk melihat rekap.');
 });
 
-it('legacy compatibility still works for mapped peserta', function () {
+it('canonical-first still shows all mapped participants', function () {
     app(ActiveEventContext::class)->set($this->eventA);
 
     Livewire::test(RekapAbsensi::class)
         ->set('sesi_id', $this->sessionA->id)
-        ->assertSee('Peserta Legacy A')
-        ->assertSee('Peserta Legacy B');
+        ->assertSee('Shared Person')
+        ->assertSee('Other Person');
 });
 
 it('dashboard counts active event participants', function () {

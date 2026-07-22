@@ -22,14 +22,27 @@ class SuratIzinService
 
     public function create(array $data, int $createdBy): SuratIzin
     {
+        $eventId = app(ActiveEventContext::class)->id();
+        $peserta = \App\Models\peserta::find($data['peserta_id']);
+        $participationId = null;
+
+        if ($peserta && $eventId) {
+            $participation = app(ParticipationResolver::class)->resolveByPeserta($peserta, $eventId);
+            if ($participation) {
+                $participationId = $participation->id;
+            }
+        }
+
         $surat = SuratIzin::create([
-            'peserta_id'      => $data['peserta_id'],
-            'alasan'          => $data['alasan'],
-            'jenis_izin'      => $data['jenis_izin'] ?? 'pulang',
-            'tanggal_mulai'   => $data['tanggal_mulai'],
-            'tanggal_selesai' => $data['tanggal_selesai'],
-            'status'          => 'draft',
-            'created_by'      => $createdBy,
+            'peserta_id'        => $data['peserta_id'],
+            'participation_id'  => $participationId,
+            'event_id'          => $eventId,
+            'alasan'            => $data['alasan'],
+            'jenis_izin'        => $data['jenis_izin'] ?? 'pulang',
+            'tanggal_mulai'     => $data['tanggal_mulai'],
+            'tanggal_selesai'   => $data['tanggal_selesai'],
+            'status'            => 'draft',
+            'created_by'        => $createdBy,
         ]);
 
         $this->activityLogService->log(
@@ -103,7 +116,7 @@ class SuratIzinService
             $skippedIzin  = [];
 
             foreach ($sesis as $sesi) {
-                if (Absensi::where('nip', $surat->peserta->nip)
+                if ($surat->peserta && Absensi::where('nip', $surat->peserta->nip)
                     ->where('sesi_id', $sesi->id)
                     ->exists()
                 ) {
@@ -111,7 +124,7 @@ class SuratIzinService
                     continue;
                 }
 
-                if (IzinAbsensi::where('peserta_id', $surat->peserta_id)
+                if ($surat->peserta_id && IzinAbsensi::where('peserta_id', $surat->peserta_id)
                     ->where('sesi_id', $sesi->id)
                     ->exists()
                 ) {
@@ -119,13 +132,38 @@ class SuratIzinService
                     continue;
                 }
 
-                $izin = $this->exceptionService->recordIzin(
-                    pesertaId:   $surat->peserta_id,
-                    sesiId:      $sesi->id,
-                    source:      'surat_izin',
-                    suratIzinId: $surat->id,
-                );
-                $created[] = $izin;
+                if ($surat->participation_id && \App\Models\EventAttendance::where('participation_id', $surat->participation_id)
+                    ->where('sesi_absensi_id', $sesi->id)
+                    ->exists()
+                ) {
+                    $skippedHadir[] = $sesi;
+                    continue;
+                }
+
+                if ($surat->participation_id && $surat->event_id === $sesi->event_id) {
+                    $canonical = \App\Models\EventAttendance::create([
+                        'participation_id' => $surat->participation_id,
+                        'sesi_absensi_id'  => $sesi->id,
+                        'event_id'         => $sesi->event_id,
+                        'status'           => \App\Models\EventAttendance::STATUS_IZIN,
+                        'attended_at'      => now(),
+                        'method'           => 'surat_izin',
+                        'recorded_by'      => auth()->id(),
+                    ]);
+                    $created[] = $canonical;
+                } elseif ($surat->peserta_id) {
+                    try {
+                        $izin = $this->exceptionService->recordIzin(
+                            pesertaId:   $surat->peserta_id,
+                            sesiId:      $sesi->id,
+                            source:      'surat_izin',
+                            suratIzinId: $surat->id,
+                        );
+                        $created[] = $izin;
+                    } catch (\Illuminate\Validation\ValidationException $e) {
+                        $skippedIzin[] = $sesi;
+                    }
+                }
             }
 
             $nomorSurat = $this->generateNomorSurat($surat->id);
@@ -263,26 +301,48 @@ class SuratIzinService
             ->get();
 
         foreach ($surats as $surat) {
-            if (Absensi::where('nip', $surat->peserta->nip)
+            if ($surat->peserta && Absensi::where('nip', $surat->peserta->nip)
                 ->where('sesi_id', $sesi->id)
                 ->exists()
             ) {
                 continue;
             }
 
-            if (IzinAbsensi::where('peserta_id', $surat->peserta_id)
+            if ($surat->peserta_id && IzinAbsensi::where('peserta_id', $surat->peserta_id)
                 ->where('sesi_id', $sesi->id)
                 ->exists()
             ) {
                 continue;
             }
 
-            $this->exceptionService->recordIzin(
-                pesertaId:  $surat->peserta_id,
-                sesiId:     $sesi->id,
-                source:     'surat_izin',
-                suratIzinId: $surat->id,
-            );
+            if ($surat->participation_id && \App\Models\EventAttendance::where('participation_id', $surat->participation_id)
+                ->where('sesi_absensi_id', $sesi->id)
+                ->exists()
+            ) {
+                continue;
+            }
+
+            if ($surat->participation_id && $surat->event_id === $sesi->event_id) {
+                \App\Models\EventAttendance::create([
+                    'participation_id' => $surat->participation_id,
+                    'sesi_absensi_id'  => $sesi->id,
+                    'event_id'         => $sesi->event_id,
+                    'status'           => \App\Models\EventAttendance::STATUS_IZIN,
+                    'attended_at'      => now(),
+                    'method'           => 'surat_izin',
+                ]);
+            } elseif ($surat->peserta_id) {
+                try {
+                    $this->exceptionService->recordIzin(
+                        pesertaId:  $surat->peserta_id,
+                        sesiId:     $sesi->id,
+                        source:     'surat_izin',
+                        suratIzinId: $surat->id,
+                    );
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    // Skip this surat jika peserta tidak valid untuk session ini
+                }
+            }
         }
     }
 

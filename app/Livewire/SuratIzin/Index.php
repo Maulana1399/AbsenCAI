@@ -23,12 +23,15 @@ class Index extends Component
 
     public function render()
     {
-        $query = SuratIzin::with('peserta');
+        $query = SuratIzin::with(['peserta', 'participation.person']);
 
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('nomor_surat', 'like', '%' . $this->search . '%')
                   ->orWhereHas('peserta', function ($pq) {
+                      $pq->where('nama', 'like', '%' . $this->search . '%');
+                  })
+                  ->orWhereHas('participation.person', function ($pq) {
                       $pq->where('nama', 'like', '%' . $this->search . '%');
                   });
             });

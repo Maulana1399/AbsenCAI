@@ -18,9 +18,13 @@
                 @if(strlen($searchPeserta) >= 2 && count($results) > 0)
                     <div class="mt-2 max-h-40 overflow-y-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
                         @foreach($results as $p)
-                            <button type="button" wire:click="selectPeserta({{ $p->id }})"
+                            <button type="button" wire:click="selectPeserta({{ $p->id }}, '{{ $p->source }}')"
                                 class="w-full px-3 py-2 text-left text-sm text-zinc-700 transition hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800">
-                                {{ $p->nama }} — {{ $p->nip }}
+                                <span>{{ $p->nama }}</span>
+                                @if($p->source === 'canonical')
+                                    <span class="ml-1 text-xs text-blue-500">Person</span>
+                                @endif
+                                <span class="ml-1 text-xs text-zinc-400">{{ $p->nip ?? '-' }}</span>
                             </button>
                         @endforeach
                     </div>

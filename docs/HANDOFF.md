@@ -1401,3 +1401,18 @@ S6 RBAC telah selesai (2026-07-21). Seluruh menu sidebar sekarang difilter berda
 - Server-side route dan Livewire protection tetap menjadi security layer utama
 - Sidebar visibility adalah UX layer, bukan authorization gate
 - Menu yang tersembunyi tetap tidak bisa diakses langsung (HTTP 403)
+
+---
+
+## Database V2 — Part 5 Closure
+
+Status: CLOSED
+
+- 5A EditPeserta + Ulang: COMPLETE
+- 5B PesertaImport: COMPLETE
+- 5C CaiParticipantReplacement: COMPLETE
+- 5D HapusPeserta: COMPLETE
+- Final Design C: Person = global canonical identity; Participation = event-scoped membership; peserta = global legacy mirror; LegacyPesertaMapping = single global compatibility mapping; LegacyParticipationMapping = event-aware compatibility bridge
+- Deletion limitation: last-membership hard deletion remains intentionally blocked because `legacy_peserta_mappings.participation_id` is NOT NULL + `restrictOnDelete`
+- Verified baseline: 1533 passed / 3677 assertions / 0 failures
+- Test delta note: exact historical -2 tests / +16 assertions cannot be reconstructed because relevant Part 5 tests were untracked during development; current semantic coverage audited and no known critical Design C coverage is missing

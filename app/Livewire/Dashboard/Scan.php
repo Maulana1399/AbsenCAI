@@ -2,15 +2,18 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\Absensi;
-use App\Models\peserta;
+use App\Models\EventAttendance;
+use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\SesiAbsensi;
+use App\Services\Attendance\AttendanceExceptionService;
 use App\Services\Attendance\AttendanceService;
+use App\Services\Attendance\LegacyParticipationResolver;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
-use App\Services\Attendance\AttendanceExceptionService;
 use Illuminate\Validation\ValidationException;
+use Livewire\Component;
 
 class Scan extends Component
 {
@@ -22,6 +25,7 @@ class Scan extends Component
     public $manualSearch = '';
     public $manualResults = [];
     public $selectedManualParticipantId = null;
+    public $selectedSource = null;
 
     public $sesi_id = '';
     public $daftarSesi;
@@ -31,9 +35,9 @@ class Scan extends Component
 
     public function mount()
     {
-        $this->daftarSesi = SesiAbsensi::orderBy('tanggal', 'asc')->get();
-
         $event = app(ActiveEventContext::class)->current();
+        $this->loadSesiForEvent($event);
+
         $sesiAktif = $event
             ? SesiAbsensi::where('event_id', $event->id)->where('aktif', true)->first()
             : null;
@@ -43,37 +47,158 @@ class Scan extends Component
         }
     }
 
+    private function loadSesiForEvent($event): void
+    {
+        if ($event) {
+            $this->daftarSesi = SesiAbsensi::where('event_id', $event->id)
+                ->orderBy('tanggal', 'asc')
+                ->get();
+        } else {
+            $this->daftarSesi = collect();
+        }
+    }
+
 
     public function updatedManualSearch(): void
     {
-        $this->manualResults = peserta::query()
-            ->where('nama', 'like', '%'.trim($this->manualSearch).'%')
-            ->orWhere('participant_number', 'like', '%'.trim($this->manualSearch).'%')
-            ->orderBy('nama')
+        $event = app(ActiveEventContext::class)->current();
+        if (! $event) {
+            $this->manualResults = [];
+            return;
+        }
+
+        $search = '%' . trim($this->manualSearch) . '%';
+
+        // 1. Canonical: Participation + Person scoped to active event
+        $participations = Participation::with(['person', 'legacyPesertaMapping.peserta'])
+            ->where('event_id', $event->id)
+            ->where(function ($q) use ($search) {
+                $q->whereHas('person', fn ($pq) => $pq->where('nama', 'like', $search))
+                  ->orWhereHas('person', fn ($pq) => $pq->where('nip', 'like', $search))
+                  ->orWhere('participant_number', 'like', $search);
+            })
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(fn ($part) => [
+                'id' => $part->id,
+                'person_id' => $part->person_id,
+                'peserta_id' => $part->person?->legacyPesertaMapping?->peserta_id,
+                'nama' => $part->person?->nama,
+                'nip' => $part->person?->nip,
+                'participant_number' => $part->participant_number,
+                'attendance_code' => $part->attendance_code,
+                'source' => 'canonical',
+            ]);
+
+        // 2. Legacy fallback: event-aware bridge-first resolution
+        $resolver = app(LegacyParticipationResolver::class);
+        $searchPeserta = \App\Models\peserta::where(function ($q) use ($search) {
+                $q->where('nama', 'like', $search)
+                  ->orWhere('participant_number', 'like', $search)
+                  ->orWhere('nip', 'like', $search);
+            })
+            ->limit(20)
+            ->get()
+            ->map(function ($p) use ($event, $resolver) {
+                $participation = $resolver->resolveByPesertaAndEvent($p->id, $event->id);
+                if (! $participation) {
+                    return null;
+                }
+
+                return [
+                    'id' => $participation->id,
+                    'person_id' => $participation->person_id,
+                    'peserta_id' => $resolver->resolvePesertaByParticipation($participation->id, $event->id)?->id ?? $p->id,
+                    'nama' => $participation->person?->nama ?? $p->nama,
+                    'nip' => $participation->person?->nip ?? $p->nip,
+                    'participant_number' => $participation->participant_number,
+                    'attendance_code' => $participation->attendance_code,
+                    'source' => 'legacy',
+                ];
+            })->filter()->values();
+
+        $this->manualResults = $participations->concat($searchPeserta)->take(10);
     }
 
-    public function selectManualParticipant(int $participantId): void
+    public function selectManualParticipant(int $id, ?string $source = null): void
     {
-        $participant = peserta::findOrFail($participantId);
+        $event = app(ActiveEventContext::class)->current();
+        if (! $event) return;
 
-        $this->selectedManualParticipantId = $participant->id;
-        $this->manualSearch = $participant->nama.' · '.($participant->participant_number ?? $participant->nip);
-        $this->nama = $participant->nama;
-        $this->nip = $participant->nip;
-        $this->message = null;
+        $resolver = app(LegacyParticipationResolver::class);
+
+        if ($source === 'canonical') {
+            $part = Participation::with('person')->find($id);
+            if (! $part || (int) $part->event_id !== (int) $event->id) return;
+            $legacyPeserta = $resolver->resolvePesertaByParticipation($part->id, $event->id);
+
+            $this->selectedManualParticipantId = $legacyPeserta?->id ?? $part->id;
+            $this->selectedSource = 'canonical';
+            $this->nama = $part->person?->nama;
+            $this->nip = $part->person?->nip;
+            $this->manualSearch = ($part->person?->nama ?? '') . ' · ' . ($part->participant_number ?? '-');
+            $this->message = null;
+            return;
+        }
+
+        $peserta = \App\Models\peserta::find($id);
+        if ($peserta) {
+            $participation = $resolver->resolveByPesertaAndEvent($peserta->id, $event->id);
+            if ($participation) {
+                $this->selectedManualParticipantId = $peserta->id;
+                $this->selectedSource = 'legacy';
+                $this->nama = $participation->person?->nama ?? $peserta->nama;
+                $this->nip = $participation->person?->nip ?? $peserta->nip;
+                $this->manualSearch = ($participation->person?->nama ?? $peserta->nama) . ' · ' . ($participation->participant_number ?? $peserta->nip);
+                $this->message = null;
+                return;
+            }
+        }
     }
 
     public function manualAttend(): void
     {
         Gate::authorize('manage-attendance');
 
-        $participant = $this->selectedManualParticipantId
-            ? peserta::find($this->selectedManualParticipantId)
-            : null;
+        $event = app(ActiveEventContext::class)->current();
+        if (! $event) {
+            $this->message = 'Tidak ada event aktif';
+            return;
+        }
 
-        if (! $participant) {
+        if (! $this->validateSessionForEvent($event->id)) {
+            $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
+            $this->nama = null;
+            $this->nip = null;
+            $this->jam_scan = null;
+            return;
+        }
+
+        $pesertaId = null;
+        $attendanceCode = null;
+
+        if ($this->selectedSource === 'canonical' && is_int($this->selectedManualParticipantId)) {
+            $part = Participation::with('person.legacyPesertaMapping.peserta')
+                ->find($this->selectedManualParticipantId);
+            if ($part) {
+                $legacyPeserta = $part->person?->legacyPesertaMapping?->peserta;
+                if ($legacyPeserta) {
+                    $pesertaId = $legacyPeserta->id;
+                    $attendanceCode = $legacyPeserta->attendance_code;
+                } elseif ($part->attendance_code) {
+                    $pesertaId = $part->id;
+                    $attendanceCode = $part->attendance_code;
+                }
+            }
+        } else {
+            $p = \App\Models\peserta::find($this->selectedManualParticipantId);
+            if ($p) {
+                $pesertaId = $p->id;
+                $attendanceCode = $p->attendance_code;
+            }
+        }
+
+        if (! $attendanceCode) {
             $this->message = 'Pilih peserta terlebih dahulu';
             $this->nama = null;
             $this->nip = null;
@@ -82,8 +207,9 @@ class Scan extends Component
         }
 
         $result = app(AttendanceService::class)->processScan(
-            (string) $participant->attendance_code,
-            $this->sesi_id ? (int) $this->sesi_id : null
+            $attendanceCode,
+            $this->sesi_id ? (int) $this->sesi_id : null,
+            'manual'
         );
 
         $this->message = $result['message'];
@@ -95,8 +221,8 @@ class Scan extends Component
             return;
         }
 
-        $this->nip = $result['peserta']->nip;
-        $this->nama = $result['peserta']->nama;
+        $this->nip = $result['identity']->nip;
+        $this->nama = $result['identity']->nama;
         $this->jam_scan = $result['jam_scan'] ?? null;
     }
 
@@ -104,12 +230,11 @@ class Scan extends Component
     {
         Gate::authorize('manage-attendance');
 
-        $participant = $this->selectedManualParticipantId
-            ? peserta::find($this->selectedManualParticipantId)
-            : null;
+        $event = app(ActiveEventContext::class)->current();
+        if (! $event) return;
 
-        if (! $participant) {
-            $this->message = 'Pilih peserta terlebih dahulu';
+        if (! $this->validateSessionForEvent($event->id)) {
+            $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
             return;
         }
 
@@ -118,15 +243,39 @@ class Scan extends Component
             return;
         }
 
+        $pesertaId = null;
+        $participationId = null;
+
+        if ($this->selectedSource === 'canonical' && is_int($this->selectedManualParticipantId)) {
+            $part = Participation::with('person.legacyPesertaMapping.peserta')
+                ->find($this->selectedManualParticipantId);
+            if ($part) {
+                $legacyPeserta = $part->person?->legacyPesertaMapping?->peserta;
+                if ($legacyPeserta) {
+                    $pesertaId = $legacyPeserta->id;
+                }
+                $participationId = $part->id;
+            }
+        } else {
+            $p = \App\Models\peserta::find($this->selectedManualParticipantId);
+            if ($p) $pesertaId = $p->id;
+        }
+
+        if (! $pesertaId && ! $participationId) {
+            $this->message = 'Pilih peserta terlebih dahulu';
+            return;
+        }
+
         try {
             app(AttendanceExceptionService::class)->recordIzin(
-                $participant->id,
-                (int) $this->sesi_id,
-                'manual'
+                pesertaId: $pesertaId,
+                sesiId: (int) $this->sesi_id,
+                source: 'manual',
+                participationId: $participationId,
             );
 
-            $this->nama = $participant->nama;
-            $this->nip = $participant->nip;
+            $this->nama = \App\Models\peserta::find($pesertaId)?->nama ?? '-';
+            $this->nip = \App\Models\peserta::find($pesertaId)?->nip;
             $this->jam_scan = null;
             $this->message = 'Peserta berhasil dicatat sebagai izin';
         } catch (ValidationException $exception) {
@@ -137,6 +286,12 @@ class Scan extends Component
     public function scanPeserta($data)
     {
         Gate::authorize('manage-attendance');
+
+        $event = app(ActiveEventContext::class)->current();
+        if ($event && $this->sesi_id && ! $this->validateSessionForEvent($event->id)) {
+            $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
+            return;
+        }
 
         $result = app(AttendanceService::class)->processScan((string) $data, $this->sesi_id ? (int) $this->sesi_id : null);
 
@@ -150,11 +305,21 @@ class Scan extends Component
             return;
         }
 
-        $this->nip = $result['peserta']->nip;
-        $this->nama = $result['peserta']->nama;
+        $this->nip = $result['identity']->nip;
+        $this->nama = $result['identity']->nama;
         $this->jam_scan = $result['jam_scan'] ?? null;
     }
 
+
+    private function validateSessionForEvent(?int $eventId): bool
+    {
+        if ($this->sesi_id === '' || $this->sesi_id === null) {
+            return false;
+        }
+        return SesiAbsensi::where('id', $this->sesi_id)
+            ->where('event_id', $eventId)
+            ->exists();
+    }
 
     public function restartScan()
     {
@@ -165,6 +330,7 @@ class Scan extends Component
         $this->manualSearch = '';
         $this->manualResults = [];
         $this->selectedManualParticipantId = null;
+        $this->selectedSource = null;
 
         $this->dispatch('restartScanner');
     }

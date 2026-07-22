@@ -8,6 +8,13 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (Database V2 — Part 5 Closure)
+- Closed Database V2 Part 5 documentation with semantic coverage audit
+- Recorded final Design C boundary: Person, Participation, peserta, LegacyPesertaMapping, LegacyParticipationMapping
+- Documented deletion limitation from `legacy_peserta_mappings.participation_id` NOT NULL + `restrictOnDelete`
+- Verified baseline recorded as 1533 passed / 3677 assertions / 0 failures
+- Historical test delta note added: exact -2/+16 reconstruction not possible because relevant Part 5 tests were untracked during development
+
 ## Added (S7 — Event-Scoped Authorization)
 
 ### S7.1 — User↔Person Foundation ✅

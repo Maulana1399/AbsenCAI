@@ -3,13 +3,16 @@
 namespace App\Livewire\Database\Peserta;
 
 use Livewire\Component;
+use App\Models\Participation;
 use App\Models\peserta;
 use Livewire\Attributes\On;
 use Flux\Flux;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
-use App\Services\Registration\RegistrationService;
+use App\Services\Attendance\LegacyParticipationResolver;
+use App\Services\Person\PersonLegacySyncService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 
 class EditPeserta extends Component
@@ -24,6 +27,8 @@ class EditPeserta extends Component
     public $kelompok_id;
     public $regu_id;
     public $peserta_id;
+    public $participation_id;
+    public $person_id;
     public $daftarDesa = [];
     public $daftarKelompok = [];
     public $daftarRegu = [];
@@ -39,15 +44,34 @@ class EditPeserta extends Component
     #[On("editPeserta")]
     public function editPeserta($id)
     {
-        $data = peserta::find($id);
-        $this->peserta_id = $data->id;
-        $this->nama = $data->nama;
-        $this->nip = $data->nip;
-        $this->jenis_kelamin = $data->jenis_kelamin;
-        $this->jenis_peserta = $data->jenis_peserta;
-        $this->desa_id = $data->desa_id;
-        $this->kelompok_id = $data->kelompok_id;
-        $this->regu_id = $data->regu_id;
+        $event = app(ActiveEventContext::class)->current();
+        if ($event === null) {
+            return;
+        }
+
+        $resolver = app(LegacyParticipationResolver::class);
+        $participation = Participation::with('person')->find($id);
+
+        if ($participation === null || (int) $participation->event_id !== (int) $event->id) {
+            $participation = $resolver->resolveByPesertaAndEvent((int) $id, $event->id);
+        }
+
+        if ($participation === null) {
+            return;
+        }
+
+        $legacyPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
+
+        $this->participation_id = $participation->id;
+        $this->person_id = $participation->person_id;
+        $this->peserta_id = $legacyPeserta?->id;
+        $this->nama = $participation->person?->nama;
+        $this->nip = $participation->person?->nip;
+        $this->jenis_kelamin = $participation->person?->jenis_kelamin;
+        $this->jenis_peserta = $participation->jenis_peserta;
+        $this->desa_id = $participation->person?->desa_id;
+        $this->kelompok_id = $participation->person?->kelompok_id;
+        $this->regu_id = $legacyPeserta?->regu_id;
         Flux::modal("edit-peserta")->show();
     }
     public function update()
@@ -63,14 +87,29 @@ class EditPeserta extends Component
             'regu_id' => 'required'
         ]);
 
-        app(RegistrationService::class)->updateParticipant($this->peserta_id, [
-            'nama' => $this->nama,
-            'jenis_kelamin' => $this->jenis_kelamin,
+        $event = app(ActiveEventContext::class)->current();
+        if ($event === null || ! $this->participation_id) {
+            return redirect()->to('/database');
+        }
+
+        $participation = Participation::with('person')->findOrFail($this->participation_id);
+        if ((int) $participation->event_id !== (int) $event->id) {
+            return redirect()->to('/database');
+        }
+
+        $participation->update([
             'jenis_peserta' => $this->jenis_peserta,
+        ]);
+
+        $participation->person?->update([
+            'nama' => $this->nama,
+            'jenis_kelamin' => $this->jenis_kelamin === 'Perempuan' ? 'P' : 'L',
             'desa_id' => $this->desa_id,
             'kelompok_id' => $this->kelompok_id,
-            'regu_id' => $this->regu_id,
         ]);
+
+        app(PersonLegacySyncService::class)->syncToPeserta($participation->person);
+        $this->peserta_id = app(LegacyParticipationResolver::class)->resolvePesertaByParticipation($participation->id, $event->id)?->id;
 
         return redirect()->to('/database');
     }

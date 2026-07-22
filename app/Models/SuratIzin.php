@@ -8,6 +8,8 @@ class SuratIzin extends Model
 {
     protected $fillable = [
         'peserta_id',
+        'participation_id',
+        'event_id',
         'nomor_surat',
         'alasan',
         'jenis_izin',
@@ -30,6 +32,16 @@ class SuratIzin extends Model
     public function peserta()
     {
         return $this->belongsTo(peserta::class);
+    }
+
+    public function participation()
+    {
+        return $this->belongsTo(Participation::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 
     public function createdBy()

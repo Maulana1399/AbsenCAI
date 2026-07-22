@@ -557,6 +557,18 @@ Status: ✅ COMPLETE / VERIFIED
 
 Status: COMPLETE / VERIFIED
 
+---
+
+## Database V2 — Part 5 Closure
+
+- [x] 5A EditPeserta + Ulang — COMPLETE
+- [x] 5B PesertaImport — COMPLETE
+- [x] 5C CaiParticipantReplacement — COMPLETE
+- [x] 5D HapusPeserta — COMPLETE
+- [x] Semantic coverage audited for Design C invariants
+- [x] Latest verified suite recorded: 1533 passed / 3677 assertions / 0 failures
+- [x] Historical numerical delta documented as unreconstructable from untracked Part 5 tests
+
 ### S3.0 Architecture & Database Audit
 
 - [x] Current database map

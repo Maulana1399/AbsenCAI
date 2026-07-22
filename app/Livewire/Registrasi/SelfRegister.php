@@ -4,11 +4,15 @@ namespace App\Livewire\Registrasi;
 
 use App\Models\desa;
 use App\Models\kelompok;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\peserta;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -71,38 +75,74 @@ class SelfRegister extends Component
             $this->fillAutoPlacement();
 
             $validated = $this->validate([
-                'nama' => [
-                    'required',
-                    'string',
-                    'max:255',
-                    Rule::unique('pesertas', 'nama')
-                        ->where('desa_id', $this->desa_id)
-                        ->where('kelompok_id', $this->kelompok_id),
-                ],
-                'nip' => ['required', 'integer', Rule::unique('pesertas', 'nip')],
+                'nama'          => ['required', 'string', 'max:255'],
                 'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
                 'jenis_peserta' => ['required', Rule::in(peserta::jenisPesertaOptions())],
-                'desa_id' => ['required', Rule::exists('desas', 'id')],
-                'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],
-                'regu_id' => ['required', Rule::exists('regus', 'id')],
+                'desa_id'       => ['required', Rule::exists('desas', 'id')],
+                'kelompok_id'   => ['required', Rule::exists('kelompoks', 'id')],
+                'regu_id'       => ['required', Rule::exists('regus', 'id')],
+                'nip'           => ['required', 'integer'],
             ]);
 
+            $existingPerson = Person::where('nama', $validated['nama'])
+                ->where('desa_id', $validated['desa_id'])
+                ->where('kelompok_id', $validated['kelompok_id'])
+                ->first();
+
+            if ($existingPerson) {
+                // CASE B or C — Person exists. Check if same-event (Case C).
+                $activeEvent = app(ActiveEventContext::class)->current();
+
+                if ($activeEvent) {
+                    $alreadyRegistered = Participation::where('person_id', $existingPerson->id)
+                        ->where('event_id', $activeEvent->id)
+                        ->exists();
+
+                    if ($alreadyRegistered) {
+                        throw ValidationException::withMessages([
+                            'nama' => 'Peserta ini sudah terdaftar pada event aktif.',
+                        ]);
+                    }
+                }
+
+                // Case B: existing Person, new event — NIP dari Person, bukan dari form
+                $nip = $existingPerson->nip ?? (int) $validated['nip'];
+            } else {
+                // Case A: new Person — validate NIP uniqueness against both tables
+                $nipValidator = validator(['nip' => $validated['nip']], [
+                    'nip' => [
+                        'required',
+                        'integer',
+                        Rule::unique('people', 'nip'),
+                        Rule::unique('pesertas', 'nip'),
+                    ],
+                ]);
+
+                if ($nipValidator->fails()) {
+                    throw ValidationException::withMessages([
+                        'nip' => $nipValidator->errors()->first('nip'),
+                    ]);
+                }
+
+                $nip = (int) $validated['nip'];
+            }
+
             app(RegistrationService::class)->createParticipant([
-                'nama' => $validated['nama'],
-                'nip' => $validated['nip'],
-                'jenis_kelamin' => $validated['jenis_kelamin'],
-                'jenis_peserta' => $validated['jenis_peserta'],
-                'desa_id' => $validated['desa_id'],
-                'kelompok_id' => $validated['kelompok_id'],
-                'regu_id' => $this->regu_id,
+                'nama'             => $validated['nama'],
+                'nip'              => $nip,
+                'jenis_kelamin'    => $validated['jenis_kelamin'],
+                'jenis_peserta'    => $validated['jenis_peserta'],
+                'desa_id'          => $validated['desa_id'],
+                'kelompok_id'      => $validated['kelompok_id'],
+                'regu_id'          => $this->regu_id,
                 'status_registrasi' => peserta::STATUS_SELF_REGISTER,
             ]);
 
             session()->flash('self_register', [
-                'nama' => $validated['nama'],
-                'nip' => $validated['nip'],
-                'desa' => desa::find($validated['desa_id'])?->desa_asal,
-                'kelompok' => kelompok::find($validated['kelompok_id'])?->kelompok_asal,
+                'nama'     => $this->nama,
+                'nip'      => $nip,
+                'desa'     => desa::find($this->desa_id)?->desa_asal,
+                'kelompok' => kelompok::find($this->kelompok_id)?->kelompok_asal,
             ]);
 
             $this->redirect(route('register.success', absolute: false), navigate: true);

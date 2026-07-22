@@ -111,14 +111,21 @@
                 </div>
 
                 <div class="space-y-2">
-                    @forelse($manualResults as $participant)
+                    @forelse($manualResults as $p)
                         <button
                             type="button"
-                            wire:click="selectManualParticipant({{ $participant->id }})"
+                            wire:click="selectManualParticipant({{ $p['id'] }}, '{{ $p['source'] }}')"
                             class="w-full rounded-xl border border-zinc-200 px-3 py-2 text-left text-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
                         >
-                            <div class="font-semibold text-zinc-900 dark:text-white">{{ $participant->nama }}</div>
-                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $participant->participant_number }} · {{ $participant->nip }}</div>
+                            <div class="font-semibold text-zinc-900 dark:text-white">
+                                {{ $p['nama'] }}
+                                @if($p['source'] === 'canonical')
+                                    <span class="ml-1 text-xs text-blue-500">Person</span>
+                                @else
+                                    <span class="ml-1 text-xs text-zinc-400">legacy</span>
+                                @endif
+                            </div>
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $p['participant_number'] ?? '-' }} · {{ $p['nip'] ?? '-' }}</div>
                         </button>
                     @empty
                         <div class="rounded-xl border border-dashed border-zinc-200 px-3 py-2 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">Cari peserta untuk absen manual.</div>

@@ -741,6 +741,41 @@ Separate from CAI Operational; no legacy peserta/LegacyPesertaMapping dependency
 
 ---
 
+# Database V2 — Part 5 Closure
+
+## Status
+
+✅ CLOSED
+
+## Scope
+
+- 5A EditPeserta + Ulang: COMPLETE
+- 5B PesertaImport: COMPLETE
+- 5C CaiParticipantReplacement: COMPLETE
+- 5D HapusPeserta: COMPLETE
+
+## Final Design C
+
+- Person = global canonical identity
+- Participation = event-scoped membership
+- peserta = global legacy mirror
+- LegacyPesertaMapping = single global compatibility mapping
+- LegacyParticipationMapping = event-aware compatibility bridge
+
+## Deletion Limitation
+
+Last-membership hard deletion remains intentionally blocked because `legacy_peserta_mappings.participation_id` is NOT NULL + `restrictOnDelete`.
+
+## Verified Baseline
+
+1533 passed / 3677 assertions / 0 failures (user/server verified)
+
+## Test Delta Note
+
+Historical numerical delta cannot be reconstructed exactly because relevant Part 5 test files were untracked during the development sequence. Current semantic coverage has been audited; no known critical Design C coverage is missing.
+
+---
+
 # Sprint 4
 
 ## Status

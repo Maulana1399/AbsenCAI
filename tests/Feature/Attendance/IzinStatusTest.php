@@ -14,6 +14,10 @@ use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 
+beforeEach(function () {
+    config(['features.attendance_legacy_write' => true]);
+});
+
 it('records izin attendance exception', function () {
     $event = Event::where('slug', 'cai-operational')->first() ?? Event::create([
         'name' => 'CAI Operational',

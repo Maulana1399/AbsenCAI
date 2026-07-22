@@ -224,10 +224,21 @@ Completed foundation work:
 
 Priority saat ini:
 
-1. **RBAC S1–S7 COMPLETE** ✅ — Full RBAC implementation including event-scoped authorization.
-   - 1296+ RBAC/security tests (S1–S7)
+1. **Database V2 Part 5 CLOSED** ✅ — Documentation synchronized; semantic coverage audited.
+   - Verified baseline: 1533 passed / 3677 assertions / 0 failures
 2. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
 3. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
+
+## Database V2 Part 5 Closure
+
+- 5A EditPeserta + Ulang: COMPLETE
+- 5B PesertaImport: COMPLETE
+- 5C CaiParticipantReplacement: COMPLETE
+- 5D HapusPeserta: COMPLETE
+- Final Design C: Person = global canonical identity; Participation = event-scoped membership; peserta = global legacy mirror; LegacyPesertaMapping = single global compatibility mapping; LegacyParticipationMapping = event-aware compatibility bridge
+- Deletion limitation remains intentional because `legacy_peserta_mappings.participation_id` is NOT NULL + `restrictOnDelete`
+- Technical debt remains: legacy participation pointer redesign/nullability, status_registrasi event-scoping, regu_id event-scoping, legacy Absensi/IzinAbsensi event ambiguity, legacy participant_number mirror dependency
+- Test delta note: exact historical -2 tests / +16 assertions cannot be reconstructed because relevant Part 5 tests were untracked during development; current semantic coverage audited and no known critical Design C coverage is missing
 
 ---
 

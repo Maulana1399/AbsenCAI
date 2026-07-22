@@ -3,9 +3,9 @@
 namespace App\Services\QR;
 
 use App\Models\Event;
-use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Services\Attendance\LegacyParticipationResolver;
 
 class QRIdentityResolver
 {
@@ -17,35 +17,27 @@ class QRIdentityResolver
             return null;
         }
 
+        $resolver = app(LegacyParticipationResolver::class);
+
         $participation = Participation::with('person', 'event')
             ->whereRaw('LOWER(attendance_code) = ?', [strtolower($identifier)])
+            ->when($event, fn ($q) => $q->where('event_id', $event->id))
             ->first();
 
         if ($participation !== null) {
             return $this->matchesEvent($participation, $event) ? $participation : null;
         }
 
-        $mapping = LegacyPesertaMapping::with(['participation.person', 'participation.event', 'person'])
-            ->whereRaw('LOWER(legacy_attendance_code) = ?', [strtolower($identifier)])
-            ->first();
+        if ($event !== null) {
+            $participation = $resolver->resolveByLegacyAttendanceCode($identifier, $event->id)
+                ?? $resolver->resolveByLegacyNip($identifier, $event->id);
 
-        if ($mapping === null || $mapping->participation === null) {
-            return null;
+            if ($participation !== null) {
+                return $participation;
+            }
         }
 
-        if ((int) $mapping->event_id !== (int) $mapping->participation->event_id) {
-            return null;
-        }
-
-        if ($event !== null && (int) $mapping->participation->event_id !== (int) $event->id) {
-            return null;
-        }
-
-        if ($mapping->person_id !== null && (int) $mapping->person_id !== (int) $mapping->participation->person_id) {
-            return null;
-        }
-
-        return $mapping->participation;
+        return null;
     }
 
     public function resolvePerson(string $identifier, ?Event $event = null): ?Person

@@ -15,6 +15,7 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     app()->forgetInstance(ActiveEventContext::class);
+    config(['features.attendance_legacy_write' => true]);
 });
 
 function attendanceTest_makeEvent(): Event

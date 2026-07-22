@@ -24,4 +24,9 @@ class SesiAbsensi extends Model
     {
         return $this->hasMany(Absensi::class, 'sesi_id');
     }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class, 'sesi_absensi_id');
+    }
 }

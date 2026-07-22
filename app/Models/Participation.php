@@ -38,4 +38,9 @@ class Participation extends Model
     {
         return $this->hasMany(EventCommitteeAssignment::class);
     }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class);
+    }
 }

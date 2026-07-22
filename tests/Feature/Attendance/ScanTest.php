@@ -13,6 +13,10 @@ use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
 use Livewire\Livewire;
 
+beforeEach(function () {
+    config(['features.attendance_legacy_write' => true]);
+});
+
 function scanTest_makeEvent(): Event
 {
     return Event::where('slug', 'cai-operational')->first() ?? Event::create([
@@ -125,7 +129,7 @@ it('manual attendance flow handles missing session', function () {
     $event = scanTest_makeEvent(); app(ActiveEventContext::class)->set($event);
     [$participant] = scanTest_makeMappedLegacyPeserta(['nama' => 'Peserta Manual No Session', 'nip' => 4003, 'participant_number' => 'PN-4003', 'attendance_code' => 'KJA-MANUAL3'], $event);
     $response = Livewire::test(Scan::class)->set('sesi_id', null)->set('manualSearch', 'Peserta Manual No Session')->call('selectManualParticipant', $participant->id)->call('manualAttend');
-    $response->assertSet('message', 'Pilih sesi absensi terlebih dahulu');
+    $response->assertSet('message', 'Sesi absensi tidak valid atau bukan milik event ini.');
     $response->assertSet('nama', null);
     $response->assertSet('nip', null);
     $response->assertSet('jam_scan', null);

@@ -2,8 +2,12 @@
 
 namespace App\Livewire\SuratIzin;
 
+use App\Models\Person;
+use App\Models\Participation;
 use App\Models\peserta;
+use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Attendance\SuratIzinService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -22,18 +26,85 @@ class Create extends Component
     {
         $results = [];
         if (strlen($this->searchPeserta) >= 2) {
-            $results = peserta::where(function ($q) {
-                $q->where('nama', 'like', '%' . $this->searchPeserta . '%')
-                  ->orWhere('nip', 'like', '%' . $this->searchPeserta . '%')
-                  ->orWhere('attendance_code', 'like', '%' . $this->searchPeserta . '%');
-            })->limit(10)->get();
+            $search = '%' . $this->searchPeserta . '%';
+
+            $event = app(ActiveEventContext::class)->current();
+            $resolver = app(LegacyParticipationResolver::class);
+
+            $persons = Person::where('nama', 'like', $search)
+                ->orWhere('nip', 'like', $search)
+                ->limit(10)
+                ->get()
+                ->map(function ($person) use ($event, $resolver) {
+                $participation = $event ? $resolver->resolveByPersonAndEvent($person->id, $event->id) : null;
+
+                return (object) [
+                    'id' => $person->id,
+                    'nama' => $person->nama,
+                    'nip' => $person->nip,
+                    'source' => 'canonical',
+                    'peserta_id' => $participation ? $resolver->resolvePesertaByParticipation($participation->id, $event?->id)?->id : null,
+                ];
+                });
+
+            $personNames = $persons->pluck('nama');
+
+            $legacyPesertas = peserta::where(function ($q) use ($search) {
+                    $q->where('nama', 'like', $search)
+                      ->orWhere('nip', 'like', $search)
+                      ->orWhere('attendance_code', 'like', $search);
+                })
+                ->whereNotIn('nama', $personNames)
+                ->limit(10)
+                ->get()
+                ->map(fn ($p) => (object) [
+                    'id' => $p->id,
+                    'nama' => $p->nama,
+                    'nip' => $p->nip,
+                    'source' => 'legacy',
+                    'peserta_id' => $p->id,
+                ]);
+
+            $results = $persons->merge($legacyPesertas)->take(10);
         }
 
         return view('livewire.surat-izin.create', ['results' => $results]);
     }
 
-    public function selectPeserta(int $id)
+    public function selectPeserta(int $id, ?string $source = null)
     {
+        $event = app(\App\Support\ActiveEventContext::class)->current();
+
+        $resolver = app(LegacyParticipationResolver::class);
+
+        if ($source === 'canonical') {
+            $person = Person::find($id);
+            if ($person && $event) {
+                $participation = $resolver->resolveByPersonAndEvent($person->id, $event->id);
+
+                $selectedPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
+                if ($selectedPeserta) {
+                    $this->selectedPesertaId = $selectedPeserta->id;
+                    $this->selectedPesertaNama = $person->nama . ' (' . ($person->nip ?? '-') . ')';
+                    $this->searchPeserta = '';
+                    return;
+                }
+            }
+        }
+
+        if ($event) {
+            $participation = $resolver->resolveByPesertaAndEvent($id, $event->id);
+            if ($participation) {
+                $selectedPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
+                if ($selectedPeserta) {
+                    $this->selectedPesertaId = $selectedPeserta->id;
+                    $this->selectedPesertaNama = $participation->person->nama . ' (' . ($participation->person->nip ?? '-') . ')';
+                    $this->searchPeserta = '';
+                    return;
+                }
+            }
+        }
+
         $p = peserta::find($id);
         if ($p) {
             $this->selectedPesertaId = $p->id;
@@ -115,11 +186,8 @@ class Create extends Component
         ];
     }
 
-    public function messages()
-    {
-        return [
-            'selectedPesertaId.required' => 'Pilih peserta terlebih dahulu.',
-            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
-        ];
-    }
+    protected $messages = [
+        'selectedPesertaId.required' => 'Pilih peserta terlebih dahulu.',
+        'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
+    ];
 }

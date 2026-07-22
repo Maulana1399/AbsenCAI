@@ -2,12 +2,10 @@
 
 namespace App\Livewire\Rekap\Absensi;
 
-use App\Models\Absensi;
-use App\Models\IzinAbsensi;
-use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\regu;
 use App\Models\SesiAbsensi;
+use App\Services\Attendance\AttendanceReadService;
 use App\Support\ActiveEventContext;
 use Livewire\Component;
 
@@ -42,59 +40,31 @@ class RekapAbsensi extends Component
             $sesi = $this->availableSessionsQuery()->find($this->sesi_id);
 
             if ($sesi !== null) {
-                $participationQuery = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event'])
-                    ->where('event_id', $event->id);
+                $reguId = $this->regu_id ? (int) $this->regu_id : null;
+                $sessionData = app(AttendanceReadService::class)->getSessionAttendance($event->id, $sesi->id, $reguId);
 
-                if ($this->regu_id) {
-                    $participationQuery->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('regu_id', $this->regu_id));
-                }
+                $totalPeserta = $sessionData['total'];
+                $sudahAbsenCount = $sessionData['hadir_count'];
+                $izinCount = $sessionData['izin_count'];
+                $persentase = $sessionData['persentase'];
 
-                $participations = $participationQuery->orderBy('id')->get();
-                $participationIds = $participations->pluck('id');
-                $personIds = $participations->pluck('person_id');
-                $legacyPesertaIds = $participations->map(fn (Participation $participation) => $participation->person?->legacyPesertaMapping?->peserta?->id)->filter()->values();
-                $legacyNips = $participations->map(fn (Participation $participation) => $participation->person?->legacyPesertaMapping?->peserta?->nip ?? $participation->person?->nip)->filter()->values();
-
-                $sudahAbsen = Absensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa'])
-                    ->where('sesi_id', $sesi->id)
-                    ->whereIn('nip', $legacyNips)
-                    ->get()
-                    ->filter(function (Absensi $absensi) use ($participations) {
-                        return $participations->contains(function (Participation $participation) use ($absensi) {
-                            $legacyPeserta = $participation->person?->legacyPesertaMapping?->peserta;
-
-                            return $participation->person?->nip == $absensi->nip
-                                || ($legacyPeserta !== null && $legacyPeserta->nip == $absensi->nip);
-                        });
-                    })
-                    ->values();
-
-                $pesertaIzin = IzinAbsensi::with(['peserta.regu', 'peserta.kelompok', 'peserta.desa'])
-                    ->where('sesi_id', $sesi->id)
-                    ->whereIn('peserta_id', $legacyPesertaIds)
-                    ->get()
-                    ->filter(fn (IzinAbsensi $izin) => $participationIds->contains($this->resolveParticipationIdFromIzin($izin, $participations)))
-                    ->values();
-
-                $absenNips = $sudahAbsen->pluck('nip')->unique();
-                $izinPesertaIds = $pesertaIzin->pluck('peserta_id')->unique();
-
-                $totalPeserta = $participations->count();
-                $sudahAbsenCount = $sudahAbsen->count();
-                $izinCount = $pesertaIzin->count();
-                $pesertaBelumAbsen = $participations->reject(function (Participation $participation) use ($absenNips, $izinPesertaIds) {
-                    $legacyPeserta = $participation->person?->legacyPesertaMapping?->peserta;
-
-                    return $absenNips->contains($participation->person?->nip)
-                        || ($legacyPeserta !== null && $absenNips->contains($legacyPeserta->nip))
-                        || ($legacyPeserta !== null && $izinPesertaIds->contains($legacyPeserta->id));
-                })->map(function (Participation $participation) {
-                    return $this->presentParticipation($participation);
-                })->values();
+                $sudahAbsen = $sessionData['attendance']->filter(fn ($e) => $e->status === 'hadir');
+                $pesertaIzin = $sessionData['attendance']->filter(fn ($e) => $e->status === 'izin');
+                $pesertaBelumAbsen = $sessionData['attendance']->filter(fn ($e) => $e->status === 'belum')
+                    ->map(function ($entry) {
+                        $lp = $entry->legacyPeserta;
+                        return (object) [
+                            'id' => $entry->participation->id,
+                            'peserta' => $lp,
+                            'person' => $entry->person,
+                            'nama' => $entry->person?->nama,
+                            'nip' => $lp?->nip ?? $entry->person?->nip,
+                            'regu' => $lp?->regu,
+                            'kelompok' => $lp?->kelompok,
+                            'desa' => $entry->person?->desa,
+                        ];
+                    });
                 $belumAbsenCount = $pesertaBelumAbsen->count();
-                $persentase = $totalPeserta > 0
-                    ? round(($sudahAbsenCount / $totalPeserta) * 100, 2)
-                    : 0;
             }
         }
 
@@ -121,42 +91,5 @@ class RekapAbsensi extends Component
         }
 
         return SesiAbsensi::query()->where('event_id', $event->id);
-    }
-
-    private function presentParticipation(Participation $participation): object
-    {
-        $legacyPeserta = $participation->person?->legacyPesertaMapping?->peserta;
-
-        return (object) [
-            'id' => $participation->id,
-            'peserta' => $legacyPeserta,
-            'person' => $participation->person,
-            'nama' => $participation->person?->nama,
-            'nip' => $legacyPeserta?->nip ?? $participation->person?->nip,
-            'regu' => $legacyPeserta?->regu,
-            'kelompok' => $legacyPeserta?->kelompok,
-            'desa' => $participation->person?->desa,
-        ];
-    }
-
-    private function resolveParticipationIdFromIzin(IzinAbsensi $izin, $participations): ?int
-    {
-        $peserta = $izin->peserta;
-
-        if ($peserta === null) {
-            return null;
-        }
-
-        $mapping = LegacyPesertaMapping::where('peserta_id', $peserta->id)
-            ->where('event_id', app(ActiveEventContext::class)->current()?->id)
-            ->first();
-
-        if ($mapping === null) {
-            return null;
-        }
-
-        return $participations->contains(fn (Participation $participation) => (int) $participation->id === (int) $mapping->participation_id)
-            ? $mapping->participation_id
-            : null;
     }
 }
