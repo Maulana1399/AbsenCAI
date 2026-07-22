@@ -83,6 +83,9 @@
             </div>
 
             <div class="flex gap-2">
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Batal') }}</flux:button>
+                </flux:modal.close>
                 <flux:spacer />
                 <flux:button wire:click="saveDraft" wire:loading.attr="disabled" variant="ghost">
                     {{ __('Simpan Draft') }}

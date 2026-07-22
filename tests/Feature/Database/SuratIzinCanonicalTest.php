@@ -133,7 +133,7 @@ test('new unmapped SuratIzin stores legacy peserta_id and null participation_id'
 // C. Backfill tests
 // ---------------------------------------------------------------------------
 
-test('backfill dry-run does not mutate', function () {
+test('backfill dry-run returns complete stats without mutating', function () {
     $event = si_event();
     $m = si_participant($event);
 
@@ -149,11 +149,18 @@ test('backfill dry-run does not mutate', function () {
 
     $stats = app(SuratIzinBackfillService::class)->dryRun();
 
-    expect($stats['mapped'])->toBe(1)
-        ->and($surat->fresh()->participation_id)->toBeNull();
+    expect($stats)->toMatchArray([
+        'total' => 1,
+        'mapped' => 1,
+        'updated' => 0,
+        'skip_existing' => 0,
+        'no_peserta' => 0,
+        'no_mapping' => 0,
+        'no_participation' => 0,
+    ])->and($surat->fresh()->participation_id)->toBeNull();
 });
 
-test('backfill --force populates participation_id', function () {
+test('backfill --force populates participation_id and updates stats', function () {
     $event = si_event();
     $m = si_participant($event);
 
@@ -167,9 +174,11 @@ test('backfill --force populates participation_id', function () {
         'created_by' => User::factory()->create(['role' => 'super_admin'])->id,
     ]);
 
-    app(SuratIzinBackfillService::class)->backfill();
+    $stats = app(SuratIzinBackfillService::class)->backfill();
 
-    expect($surat->fresh()->participation_id)->toBe($m->participation->id);
+    expect($stats['updated'])->toBe(1)
+        ->and($stats['mapped'])->toBe(1)
+        ->and($surat->fresh()->participation_id)->toBe($m->participation->id);
 });
 
 test('backfill is idempotent', function () {
@@ -191,7 +200,9 @@ test('backfill is idempotent', function () {
     $second = $svc->backfill();
 
     expect($first['updated'])->toBe(1)
-        ->and($second['updated'])->toBe(0);
+        ->and($first['mapped'])->toBe(1)
+        ->and($second['updated'])->toBe(0)
+        ->and($second['mapped'])->toBe(0);
 });
 
 test('backfill skips no participation', function () {

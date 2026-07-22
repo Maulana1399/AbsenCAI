@@ -73,7 +73,7 @@ test('last participation removal is blocked under current schema', function () {
     app(ActiveEventContext::class)->set($fixture['eventA']);
 
     Livewire::test(HapusPeserta::class)
-        ->dispatch('HapusPeserta', id: $fixture['legacy']->id)
+        ->dispatch('HapusPeserta', id: $fixture['partA']->id)
         ->assertSet('canDelete', false)
         ->assertSet('blockReason', fn ($value) => str_contains($value, 'legacy'));
 

@@ -106,10 +106,10 @@
                         <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">{{ $event->start_date?->format('d/m/Y') ?? '-' }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">{{ $event->end_date?->format('d/m/Y') ?? '-' }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm">
-                            <div class="flex items-center gap-1">
-                                <flux:button wire:click="edit({{ $event->id }})" size="sm" icon-trailing="pencil">Edit</flux:button>
-                                <flux:button wire:click="$dispatch('manageEventRoles', { id: {{ $event->id }} })" size="sm" icon-trailing="user-group">Role</flux:button>
-                                <flux:button wire:click="$dispatch('manageCommittee', { id: {{ $event->id }} })" size="sm" icon-trailing="briefcase">Panitia</flux:button>
+                            <div class="flex flex-wrap items-center gap-1">
+                                <flux:button wire:click="edit({{ $event->id }})" size="sm" icon-trailing="pencil" class="whitespace-nowrap">Edit</flux:button>
+                                <flux:button wire:click="$dispatch('manageEventRoles', { id: {{ $event->id }} })" size="sm" icon-trailing="user-group" class="whitespace-nowrap">Role</flux:button>
+                                <flux:button wire:click="$dispatch('manageCommittee', { id: {{ $event->id }} })" size="sm" icon-trailing="briefcase" class="whitespace-nowrap">Panitia</flux:button>
                                 @if ($event->isActive())
                                     <flux:button wire:click="archive({{ $event->id }})" size="sm" icon-trailing="archive-box" variant="danger">Arsipkan</flux:button>
                                 @else

@@ -53,11 +53,13 @@
             </div>
 
             <div class="flex">
-                <flux:button variant="primary" wire:click="create" :loading="$processing" class="bg-emerald-600 hover:bg-emerald-700">
+                <flux:button variant="primary" wire:click="create" :loading="$processing">
                     Tambah Role
                 </flux:button>
                 <flux:spacer />
-                <flux:button variant="ghost" x-on:click="$modal('manage-event-roles').close()">Tutup</flux:button>
+                <flux:modal.close>
+                    <flux:button variant="ghost">Tutup</flux:button>
+                </flux:modal.close>
             </div>
         </div>
     </flux:modal>

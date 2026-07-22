@@ -82,6 +82,11 @@
                     Tidak ada sesi.
                 </div>
             @endif
+            <div class="flex justify-end pt-2">
+                <flux:modal.close>
+                    <flux:button variant="ghost">Tutup</flux:button>
+                </flux:modal.close>
+            </div>
         </div>
     </flux:modal>
 

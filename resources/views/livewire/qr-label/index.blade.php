@@ -36,8 +36,8 @@
                 <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Search Participant</label>
-                        <input
-                            wire:model.live.debounce.300ms="search"
+                            <input
+                            wire:model.live.debounce.300ms="filterKeyword"
                             type="text"
                             class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                             placeholder="Nama / Participant Number / Attendance Code"

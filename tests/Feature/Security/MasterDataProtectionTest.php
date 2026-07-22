@@ -174,11 +174,12 @@ test('unauthorized roles do not see Master Data in sidebar', function () {
     }
 });
 
-test('null role does not see Master Data in sidebar', function () {
+test('null role does not see CAI operational menus in sidebar', function () {
     $user = User::factory()->create(['role' => null]);
     $this->actingAs($user);
     $response = $this->get('/dashboard');
-    $response->assertDontSee('Master Data');
+    $response->assertDontSee('Kelola Event');
+    $response->assertDontSee('Registrasi Ulang');
 });
 
 // ---------------------------------------------------------------------------
@@ -585,8 +586,8 @@ test('null role does not see any CAI operational menus', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(User::factory()->create(['role' => null]));
 
-    $this->get('/events')->assertOk();
-    $response = $this->get('/events');
+    $this->get('/events')->assertForbidden();
+    $response = $this->get('/settings/profile');
     $response->assertDontSee('Dashboard');
     $response->assertDontSee('Master Data');
 });

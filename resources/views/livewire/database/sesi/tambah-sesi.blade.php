@@ -13,6 +13,9 @@
         </div>
 
         <div class="mt-4 flex justify-end gap-2">
+            <flux:modal.close>
+                <flux:button variant="ghost">Batal</flux:button>
+            </flux:modal.close>
             <flux:button type="submit" variant="primary" wire:click.prevent="simpan" wire:loading.attr="disabled" wire:target="simpan">Simpan</flux:button>
         </div>
     </flux:modal>

@@ -73,14 +73,16 @@ test('3. Guest cannot access regional report', function () {
     $this->get(route('pengajian.report'))->assertRedirect(route('login'));
 });
 
-test('4. Authenticated unverified user can access admin routes (verified is not an authorization boundary)', function () {
-    $event = pgm9s_event();
+test('4. Authenticated unverified user can access auth-only routes (verified is not an authorization boundary)', function () {
     $user = User::factory()->unverified()->create();
-    app(ActiveEventContext::class)->set($event);
+
+    $this->actingAs($user)
+        ->get('/settings/profile')
+        ->assertOk();
 
     $this->actingAs($user)
         ->get(route('events.index'))
-        ->assertOk();
+        ->assertForbidden();
 });
 
 test('5. Verified user can access admin routes', function () {

@@ -122,8 +122,10 @@ test('canonical-only participation can manual attend', function () {
 
     Livewire::test(Scan::class)
         ->call('selectManualParticipant', $part->id, 'canonical')
+        ->assertSet('selectedManualParticipantId', $part->id)
         ->set('sesi_id', $session->id)
-        ->call('manualAttend');
+        ->call('manualAttend')
+        ->assertSet('message', 'Absensi berhasil!');
 
     expect(\App\Models\EventAttendance::where('participation_id', $part->id)->count())->toBe(1);
 });

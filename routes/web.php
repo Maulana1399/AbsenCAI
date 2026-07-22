@@ -646,6 +646,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('users.index');
 
     Route::get('events', EventIndex::class)
+        ->middleware(['auth', 'verified', 'can:manage-events'])
         ->name('events.index');
 
     Route::get(

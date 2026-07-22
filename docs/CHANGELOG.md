@@ -8,6 +8,50 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (PGM.17 — Pilot Release UI Remediation)
+
+### Global UI Interaction + Mobile/Dark Mode Audit ✅
+- **Finding 1 — Invisible clickable controls**: Fixed `app-logo-icon.blade.php` (SVG was fully commented out). Fixed User Management action buttons — replaced `variant="ghost"` (invisible) with `variant="outline"`/`variant="danger"` and always-visible text labels.
+- **Finding 2 — Batal/Tutup close controls**: Added `flux:modal.close` buttons to all 30 modals. Standardized close mechanism across all modal implementations. Previously 16 modals had no close button whatsoever.
+- **Finding 3 — Dark mode button contrast**: Removed custom `bg-emerald-600` overrides from `variant="primary"` buttons in Event Role and Committee Management modals that broke dark mode contrast.
+- **Finding 4 — Mobile User Management**: Responsive action column with desktop (3 visible buttons) and mobile (single "Aksi" dropdown with Flux menu items) layouts. Email and "Dibuat" columns hidden on `<lg` viewports.
+- **Flux native icons**: Replaced all 6 inline SVG instances in User Management actions (3 desktop + 3 mobile dropdown) with Flux `icon` attribute (`pencil`, `lock-closed`, `trash`), fixing oversized SVG rendering in flex layouts.
+- **Dark mode row hover**: Fixed `dark:hover:bg-zinc-800/50` → `dark:hover:bg-zinc-900/50` matching project convention, preventing white row background on hover in dark mode.
+- **Data-testid selectors**: Added `data-testid="user-row-{{ $id }}"` and `data-testid="delete-user-{{ $id }}"` for precise row-scoped test assertions.
+- **RBAC preserved**: `manage-users` gate unchanged (SuperAdmin only). Self-delete protection preserved. Unauthorized roles correctly rejected.
+- **Tests**: 22 UI regression tests (GlobalInteractionTest) covering modal close controls, action visibility, dispatch-to-modal triggers, RBAC enforcement, dark mode hover, responsive layout, and logo rendering.
+
+### Files Changed (PGM.17)
+- `resources/views/components/app-logo-icon.blade.php`
+- `resources/views/livewire/master-data/user/index-user.blade.php`
+- `resources/views/livewire/event/event-role-manager.blade.php`
+- `resources/views/livewire/event/committee-management.blade.php`
+- `resources/views/livewire/master-data/user/delete-user.blade.php`
+- `resources/views/livewire/surat-izin/create.blade.php`
+- `resources/views/livewire/database/peserta/ganti-peserta.blade.php`
+- `resources/views/livewire/database/sesi/edit-sesi.blade.php`
+- `resources/views/livewire/database/sesi/hapus-sesi.blade.php`
+- `resources/views/livewire/database/sesi/tambah-sesi.blade.php`
+- `resources/views/livewire/database/regu/edit-regu.blade.php`
+- `resources/views/livewire/database/regu/tambah-regu.blade.php`
+- `resources/views/livewire/database/kelompok/edit-kelompok.blade.php`
+- `resources/views/livewire/database/kelompok/tambah-kelompok.blade.php`
+- `resources/views/livewire/database/desa/edit-desa.blade.php`
+- `resources/views/livewire/database/desa/tambah-desa.blade.php`
+- `resources/views/livewire/database/peserta/tambah-peserta.blade.php`
+- `resources/views/livewire/database/peserta/edit-peserta.blade.php`
+- `resources/views/livewire/master-data/user/create-user.blade.php`
+- `resources/views/livewire/master-data/user/edit-user.blade.php`
+- `resources/views/livewire/master-data/user/reset-password-user.blade.php`
+- `resources/views/livewire/master-data/person/create-person.blade.php`
+- `resources/views/livewire/master-data/person/edit-person.blade.php`
+- `resources/views/livewire/dashboard/dashboard.blade.php`
+- `tests/Feature/Ui/GlobalInteractionTest.php` — NEW (22 tests)
+
+### Verified Baseline
+- Full suite: 1570 passed / 3803 assertions / 0 failures
+- Design C diagnostic: problem_total = 0
+
 ## Added (Database V2 — Part 5 Closure)
 - Closed Database V2 Part 5 documentation with semantic coverage audit
 - Recorded final Design C boundary: Person, Participation, peserta, LegacyPesertaMapping, LegacyParticipationMapping

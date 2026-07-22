@@ -123,21 +123,25 @@ class Scan extends Component
     public function selectManualParticipant(int $id, ?string $source = null): void
     {
         $event = app(ActiveEventContext::class)->current();
-        if (! $event) return;
+        if (! $event) {
+            return;
+        }
 
         $resolver = app(LegacyParticipationResolver::class);
 
         if ($source === 'canonical') {
             $part = Participation::with('person')->find($id);
-            if (! $part || (int) $part->event_id !== (int) $event->id) return;
-            $legacyPeserta = $resolver->resolvePesertaByParticipation($part->id, $event->id);
+            if (! $part || (int) $part->event_id !== (int) $event->id) {
+                return;
+            }
 
-            $this->selectedManualParticipantId = $legacyPeserta?->id ?? $part->id;
+            $this->selectedManualParticipantId = $part->id;
             $this->selectedSource = 'canonical';
             $this->nama = $part->person?->nama;
             $this->nip = $part->person?->nip;
             $this->manualSearch = ($part->person?->nama ?? '') . ' · ' . ($part->participant_number ?? '-');
             $this->message = null;
+
             return;
         }
 
@@ -145,12 +149,13 @@ class Scan extends Component
         if ($peserta) {
             $participation = $resolver->resolveByPesertaAndEvent($peserta->id, $event->id);
             if ($participation) {
-                $this->selectedManualParticipantId = $peserta->id;
-                $this->selectedSource = 'legacy';
+                $this->selectedManualParticipantId = $participation->id;
+                $this->selectedSource = 'canonical';
                 $this->nama = $participation->person?->nama ?? $peserta->nama;
                 $this->nip = $participation->person?->nip ?? $peserta->nip;
                 $this->manualSearch = ($participation->person?->nama ?? $peserta->nama) . ' · ' . ($participation->participant_number ?? $peserta->nip);
                 $this->message = null;
+
                 return;
             }
         }

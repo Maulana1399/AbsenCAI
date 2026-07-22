@@ -55,6 +55,12 @@ test('admin can access events page', function () {
     $this->get('/events')->assertOk();
 });
 
+test('unauthorized role cannot access events page', function () {
+    $this->actingAs(s3_user('operator_scan'));
+
+    $this->get(route('events.index'))->assertForbidden();
+});
+
 test('unauthorized role cannot access events page mutation', function () {
     $event = s3_event();
     $user = s3_user('operator_scan');

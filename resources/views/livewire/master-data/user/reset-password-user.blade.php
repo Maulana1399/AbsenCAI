@@ -13,6 +13,9 @@
             <flux:input wire:model="newPasswordConfirmation" type="password" label="{{ __('Konfirmasi Password') }}" placeholder="{{ __('Ulangi password') }}" />
 
             <div class="flex">
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Batal') }}</flux:button>
+                </flux:modal.close>
                 <flux:spacer />
                 <flux:button type="submit" variant="primary" wire:click="resetPassword" wire:loading.attr="disabled" wire:target="resetPassword">
                     {{ __('Reset Password') }}

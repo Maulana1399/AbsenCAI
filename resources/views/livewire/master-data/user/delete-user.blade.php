@@ -16,7 +16,9 @@
 
             <div class="flex gap-2">
                 <flux:spacer />
-                <flux:button variant="ghost" x-on:click="$modal('hapus-user').close()">{{ __('Batal') }}</flux:button>
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Batal') }}</flux:button>
+                </flux:modal.close>
                 @if ($canDelete)
                     <flux:button variant="danger" wire:click="destroy" wire:loading.attr="disabled" wire:target="destroy">
                         {{ __('Hapus') }}

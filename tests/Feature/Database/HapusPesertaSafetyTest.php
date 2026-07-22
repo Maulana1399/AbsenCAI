@@ -92,7 +92,7 @@ test('event A removal succeeds when event B survives and legacy pointer repoints
     app(ActiveEventContext::class)->set($fixture['eventA']);
 
     Livewire::test(HapusPeserta::class)
-        ->dispatch('HapusPeserta', id: $fixture['peserta']->id)
+        ->dispatch('HapusPeserta', id: $fixture['partA']->id)
         ->assertSet('canDelete', true)
         ->call('destroy');
 

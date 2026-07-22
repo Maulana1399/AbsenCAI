@@ -14,27 +14,27 @@
             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm dark:border-zinc-700 dark:bg-zinc-900">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <div class="text-zinc-500">Peserta Lama</div>
+                        <div class="text-zinc-500 dark:text-zinc-400">Peserta Lama</div>
                         <div class="font-medium">{{ $nama_lama }}</div>
                     </div>
 
                     <div>
-                        <div class="text-zinc-500">NIP</div>
+                        <div class="text-zinc-500 dark:text-zinc-400">NIP</div>
                         <div class="font-medium">{{ $nip }}</div>
                     </div>
 
                     <div>
-                        <div class="text-zinc-500">Desa</div>
+                        <div class="text-zinc-500 dark:text-zinc-400">Desa</div>
                         <div class="font-medium">{{ $desa }}</div>
                     </div>
 
                     <div>
-                        <div class="text-zinc-500">Kelompok</div>
+                        <div class="text-zinc-500 dark:text-zinc-400">Kelompok</div>
                         <div class="font-medium">{{ $kelompok }}</div>
                     </div>
 
                     <div>
-                        <div class="text-zinc-500">Regu</div>
+                        <div class="text-zinc-500 dark:text-zinc-400">Regu</div>
                         <div class="font-medium">{{ $regu }}</div>
                     </div>
                 </div>
@@ -97,6 +97,9 @@
             </div>
 
             <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button variant="ghost">Batal</flux:button>
+                </flux:modal.close>
                 <flux:button
                     variant="primary"
                     wire:click="replace"

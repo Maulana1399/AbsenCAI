@@ -4,6 +4,7 @@ namespace App\Livewire\Database\Peserta;
 
 use App\Models\desa;
 use App\Models\kelompok;
+use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
@@ -19,6 +20,8 @@ class TambahPeserta extends Component
 {
     public bool $processing = false;
 
+    public string $mode = 'baru';
+
     public $nama = '';
     public $nip = '';
     public $daftarDesa = [];
@@ -30,6 +33,13 @@ class TambahPeserta extends Component
     public $jenis_kelamin;
     public $daftarJenisKelamin = ['Laki - Laki', 'Perempuan'];
     public $jenis_peserta = 'Wajib';
+
+    public $searchPerson = '';
+    public $searchResults = [];
+    public $selectedPersonId = null;
+    public $selectedPerson = null;
+    public $existingJenisPeserta = 'Wajib';
+    public $errorMessage = '';
 
     public function mount()
     {
@@ -80,7 +90,6 @@ class TambahPeserta extends Component
                 ->first();
 
             if ($existingPerson) {
-                // CASE B or C — Person exists. Check if same-event (Case C).
                 $activeEvent = app(ActiveEventContext::class)->current();
 
                 if ($activeEvent) {
@@ -95,10 +104,8 @@ class TambahPeserta extends Component
                     }
                 }
 
-                // Case B: existing Person, new event — NIP dari Person, bukan dari form
                 $nip = $existingPerson->nip ?? (int) $this->nip;
             } else {
-                // Case A: new Person — validate NIP uniqueness against both tables
                 $nipValidator = validator(['nip' => $this->nip], [
                     'nip' => [
                         'required',
@@ -125,6 +132,143 @@ class TambahPeserta extends Component
                 'kelompok_id'      => $this->kelompok_id,
                 'regu_id'          => $this->regu_id,
                 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
+            ]);
+
+            return redirect()->to('/database');
+        } finally {
+            $this->processing = false;
+        }
+    }
+
+    public function switchMode(string $mode): void
+    {
+        $this->mode = $mode;
+        $this->searchPerson = '';
+        $this->searchResults = [];
+        $this->selectedPersonId = null;
+        $this->selectedPerson = null;
+        $this->errorMessage = '';
+        $this->existingJenisPeserta = 'Wajib';
+
+        if ($mode === 'baru') {
+            $this->generateAutoFields();
+        }
+    }
+
+    public function updatedSearchPerson(): void
+    {
+        $query = trim($this->searchPerson);
+
+        if (strlen($query) < 2) {
+            $this->searchResults = [];
+            return;
+        }
+
+        $results = Person::where(function ($q) use ($query) {
+            $q->where('nama', 'like', "%{$query}%")
+              ->orWhere('nip', 'like', "%{$query}%");
+        })
+        ->with(['desa', 'kelompok', 'legacyPesertaMapping.peserta.regu'])
+        ->limit(10)
+        ->get();
+
+        $this->searchResults = $results->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'nama' => $p->nama,
+                'nip' => $p->nip,
+                'desa' => $p->desa?->desa_asal,
+                'kelompok' => $p->kelompok?->kelompok_asal,
+                'jenis_kelamin' => $p->jenis_kelamin_label,
+                'regu' => $p->legacyPesertaMapping?->peserta?->regu?->regu,
+            ];
+        })->toArray();
+    }
+
+    public function selectPerson(int $id): void
+    {
+        $person = Person::with(['desa', 'kelompok', 'legacyPesertaMapping.peserta.regu'])->findOrFail($id);
+
+        $this->selectedPersonId = $person->id;
+        $this->selectedPerson = [
+            'nama' => $person->nama,
+            'nip' => $person->nip,
+            'desa' => $person->desa?->desa_asal,
+            'kelompok' => $person->kelompok?->kelompok_asal,
+            'jenis_kelamin' => $person->jenis_kelamin_label,
+            'regu' => $person->legacyPesertaMapping?->peserta?->regu?->regu,
+        ];
+        $this->searchPerson = '';
+        $this->searchResults = [];
+    }
+
+    public function tambahkanKeEvent()
+    {
+        Gate::authorize('manage-participants');
+
+        if ($this->processing) {
+            return;
+        }
+        $this->errorMessage = '';
+        $this->processing = true;
+
+        try {
+            $activeEvent = app(ActiveEventContext::class)->current();
+
+            if (! $activeEvent) {
+                $this->errorMessage = 'Tidak ada event aktif.';
+                return;
+            }
+
+            if (! $this->selectedPersonId) {
+                $this->errorMessage = 'Pilih peserta terlebih dahulu.';
+                return;
+            }
+
+            $person = Person::with('legacyPesertaMapping')->find($this->selectedPersonId);
+
+            if (! $person) {
+                $this->errorMessage = 'Peserta tidak ditemukan.';
+                return;
+            }
+
+            $alreadyRegistered = Participation::where('person_id', $person->id)
+                ->where('event_id', $activeEvent->id)
+                ->exists();
+
+            if ($alreadyRegistered) {
+                $this->errorMessage = 'Peserta ini sudah terdaftar pada event aktif.';
+                return;
+            }
+
+            $legacyPeserta = $person->legacyPesertaMapping?->peserta;
+
+            if (! $legacyPeserta) {
+                $this->errorMessage = 'Data legacy peserta tidak ditemukan.';
+                return;
+            }
+
+            $participantNumber = PlacementService::generateParticipantNumber(
+                $activeEvent->id,
+                $person->jenis_kelamin_label,
+            );
+
+            $attendanceCode = app(RegistrationService::class)->generateAttendanceCode();
+
+            $participation = Participation::create([
+                'person_id' => $person->id,
+                'event_id' => $activeEvent->id,
+                'participant_number' => $participantNumber,
+                'attendance_code' => $attendanceCode,
+                'jenis_peserta' => $this->existingJenisPeserta,
+            ]);
+
+            LegacyParticipationMapping::create([
+                'peserta_id' => $legacyPeserta->id,
+                'person_id' => $person->id,
+                'participation_id' => $participation->id,
+                'event_id' => $activeEvent->id,
+                'migrated_at' => now(),
             ]);
 
             return redirect()->to('/database');

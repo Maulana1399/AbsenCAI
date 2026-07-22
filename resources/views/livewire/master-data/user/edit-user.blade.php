@@ -41,6 +41,9 @@
             </div>
 
             <div class="flex">
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Batal') }}</flux:button>
+                </flux:modal.close>
                 <flux:spacer />
                 <flux:button type="submit" variant="primary" wire:click="update" wire:loading.attr="disabled" wire:target="update">
                     {{ __('Simpan') }}

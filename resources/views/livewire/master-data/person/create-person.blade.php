@@ -33,6 +33,9 @@
         <flux:input wire:model="nip" type="number" label="NIP" placeholder="Opsional" />
 
         <div class="flex">
+            <flux:modal.close>
+                <flux:button variant="ghost">Batal</flux:button>
+            </flux:modal.close>
             <flux:spacer />
             <flux:button type="submit" variant="primary" wire:click='simpan' wire:loading.attr="disabled" wire:target="simpan">Simpan</flux:button>
         </div>

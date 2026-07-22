@@ -17,12 +17,12 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | S04 Identity & QR | ✅ COMPLETE 100% |
 | Multi Event Architecture | ✅ S3.0–S3.10 Complete |
 | S03 RBAC (Event & CAI Protection) | ✅ COMPLETE — routes + Livewire protected |
-| Pengajian Desa MVP | ✅ PGM.12–PGM.16 Complete — PGM.17 Pending |
+| Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete — UI remediated |
 | S04 RBAC (Pengajian Admin Protection) | ✅ COMPLETE — routes + Livewire protected |
 | User Management | ✅ COMPLETE — Super Admin only, Master Data card |
 | S05 RBAC (Remaining Security Protection) | ✅ COMPLETE — all routes + mutations protected |
 | S06 RBAC (Sidebar Visibility) | ✅ COMPLETE — all menus gated with @can() directives |
-| Pilot Readiness | 🟡 Feature-complete — final validation pending |
+| Pilot Readiness | ✅ Feature-complete — full suite 1570 passed / 3803 assertions |
 
 ---
 

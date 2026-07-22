@@ -82,6 +82,7 @@ class SuratIzinBackfillService
         $stats = [
             'total' => 0,
             'mapped' => 0,
+            'updated' => 0,
             'skip_existing' => 0,
             'no_peserta' => 0,
             'no_mapping' => 0,

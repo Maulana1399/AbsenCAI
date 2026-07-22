@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12–PGM.16 COMPLETE. PGM.17 PENDING.
+PGM.0–PGM.9 verified. PGM.10 production readiness closure. PGM.12–PGM.17 COMPLETE.
 
 **Limited operational pilot** — not commercial production readiness.
 

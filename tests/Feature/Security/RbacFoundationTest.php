@@ -232,12 +232,12 @@ test('user with null role cannot access privileged gates', function () {
     }
 });
 
-test('null role user can still authenticate', function () {
+test('null role user can still authenticate and access allowed routes', function () {
     $user = rbac_user(['role' => null, 'email' => 'null@test.com']);
 
     $this->actingAs($user);
-    $this->get('/events')->assertOk();
     $this->get('/regu')->assertOk();
+    $this->get('/events')->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -245,10 +245,6 @@ test('null role user can still authenticate', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access any privileged gates', function () {
-    $user = User::factory()->make(['role' => null]);
-    // Simulate guest by not actingAs
-    // Gates for guests are not defined — they are handled by auth middleware at route level
-    // This test verifies that guest cannot pass any gate check
     $privilegedAbilities = [
         'view-dashboard', 'view-master-data', 'manage-master-data',
         'manage-events', 'manage-registration', 'manage-participants',
@@ -371,12 +367,12 @@ test('null role cannot access S3 operational routes', function () {
     }
 });
 
-test('unprotected routes still accessible for null role after S3', function () {
+test('allowed routes remain accessible for null role after S3', function () {
     $user = rbac_user(['role' => null]);
     $this->actingAs($user);
 
     $this->get('/regu')->assertOk();
-    $this->get('/events')->assertOk();
+    $this->get('/events')->assertForbidden();
 });
 
 test('master data routes return 403 for null role after S2', function () {

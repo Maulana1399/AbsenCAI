@@ -34,10 +34,10 @@ Sprint 3 — Multi Event Architecture + Pengajian Desa MVP (COMPLETE)
 
 Status:
 
-✅ PGM.12–PGM.16 COMPLETE — PGM.17 PENDING
+✅ PGM.12–PGM.17 COMPLETE
 ✅ S01–S04 Foundation COMPLETE 100%
 ✅ S3.0–S3.10 all COMPLETE/VERIFIED
-🟡 UI Bug Fix Sprint — Backlog (11 items identified)
+✅ UI Bug Fix Sprint — COMPLETE
 
 Target: August 2026 pilot release.
 
@@ -61,15 +61,9 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
   - Responsive Regional Report and Desa Dashboard
   - Event switcher redirect/reload fix
   - Migration: kelompok_id to people table, event_type to events table
-- PGM.17 Pilot Release — PENDING
+- PGM.17 Pilot Release ✅ COMPLETE — UI interaction remediation (invisible controls, modal close, dark mode, mobile responsiveness). Full suite: 1570 passed / 3803 assertions / 0 failures. Design C diagnostic: problem_total = 0.
 
-**UI Bug Fix Sprint — Batch 1 (Branding & Navigation)** — Bug #1, #2, #4, #6: **RESOLVED — VERIFIED** ✅ (908 tests passed / 2192 assertions).
-**UI Bug Fix Sprint — Batch 2 (Access Token UI & Security)** — Bug #5, #7, #8: **IMPLEMENTED / SECURITY AUDIT COMPLETE — PENDING RUNTIME VERIFICATION** ⏳.
-Authorization follow-up: cross-event isolation + authorization tests added. Menunggu runtime verification sebelum RESOLVED.
-**UI Bug Fix Sprint — Batch 4 (Final UI Polish)** — Bug #10, #11, #12: **RE-OPENED — FIX IN PROGRESS** ⏳.
-- #11 Responsive: Layout baru `pengajian.blade.php` dibuat dengan `max-w-4xl` untuk Dashboard Desa dan semua halaman operasional Pengajian. Butuh runtime verification.
-- #10 Dark Mode: `dark:text-zinc-100` → `dark:text-white` di select, textarea, heading. Butuh runtime verification ulang.
-- #12 Event Isolation: Query `render()` di AccessIndex tidak filter berdasarkan active event. Fixed: tambah `where('event_id', $activeEventId)`. Butuh runtime verification.
+**UI Bug Fix Sprint** — All batches RESOLVED VERIFIED ✅.
 
 **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
 Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
@@ -78,7 +72,7 @@ Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
 
 # Current Goal
 
-Pengajian Desa MVP pilot is feature-complete. Next step: PGM.17 Pilot Release.
+Pengajian Desa MVP pilot is feature-complete and UI-remediated. PGM.17 CLOSED.
 
 Completed foundation work:
 
@@ -98,7 +92,7 @@ Completed foundation work:
 * S3.8 Dashboard & Report Scoping COMPLETE.
 * S3.9A–S3.9E Multi Role/Venue/Category COMPLETE.
 * S3.10 Regression & Production Readiness COMPLETE.
-* PGM.12–PGM.16 Pengajian Desa MVP COMPLETE.
+* PGM.12–PGM.17 Pengajian Desa MVP COMPLETE.
 
 ---
 
@@ -224,10 +218,10 @@ Completed foundation work:
 
 Priority saat ini:
 
-1. **Database V2 Part 5 CLOSED** ✅ — Documentation synchronized; semantic coverage audited.
-   - Verified baseline: 1533 passed / 3677 assertions / 0 failures
-2. **PGM.17 — Pilot Release** — Final validation, deployment, operator training.
+1. **PGM.17 — Pilot Release** ✅ COMPLETE — UI interaction remediation. Full suite: 1570 passed / 3803 assertions / 0 failures. Design C: problem_total = 0.
+2. **Database V2 Part 5 CLOSED** ✅ — Documentation synchronized; semantic coverage audited.
 3. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
+4. **Next: PGM.18 — Database V2 Part 6 (Legacy Dependency Remediation + CAI Participant Architecture)** — Planning phase.
 
 ## Database V2 Part 5 Closure
 
@@ -324,24 +318,21 @@ Database: SQLite
 
 # Next Work
 
-**1. UI Bug Fix Sprint — Batch 1 (DONE — PENDING RUNTIME VERIFICATION)**
-- Branding: Landing page ✅ Implemented (welcome.blade.php → KJA Event Manager)
-- Branding: Login page ✅ Implemented (login.blade.php → KJA Event Manager)  
-- Navigation: KJA logo → home ✅ route('home'), no auto-select CAI
-- Navigation: Pengajian menu hidden in CAI ✅ sidebar.blade.php conditional
+**PGM.18 — Database V2 Part 6: Legacy Dependency Remediation + CAI Participant Architecture**
 
-**4. Bug #11** — Responsive layout /pengajian — masih OPEN.
+Priority: **HIGH**
 
-**2. PGM.17 — Pilot Release.** Final checks before deployment:
-- Pilot data verification and end-to-end simulation
-- Data quality documentation
-- Final go/no-go decision
-- Production deployment
-- Operator training documentation
+Goal: Reduce legacy `peserta` table dependencies, complete the Person→Participation canonical path, and remediate known Design C technical debt.
 
-After bug sprint: Penetration testing, performance optimization, CAI 2027 feature cycle.
+Key areas:
+1. **legacy_peserta_mappings.participation_id** — Investigate making nullable to allow soft-delete without participation constraint
+2. **status_registrasi event-scoping** — Currently global on peserta, should be per-event via Participation
+3. **regu_id event-scoping** — Currently global on peserta, should be per-event via Participation
+4. **Legacy absensi/izin_absensi event ambiguity** — Some records lack event context
+5. **Participant removal safety** — Review Design C deletion guard behavior
+6. **Legacy RegistrationService** — Audit remaining `peserta` creation paths not routed through Person→Participation
 
-Architecture source: `docs/ROADMAP.md`, `docs/SPRINT3_MULTI_EVENT_AUDIT.md`.
+Architecture source: `docs/DATABASE_V2.md`, `docs/DATABASE.md`, `docs/DECISION.md`.
 
 ---
 

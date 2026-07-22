@@ -10,11 +10,18 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Enums\Role;
+use App\Models\User;
 use App\Services\Cai\CaiParticipantReplacementService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+function caiUser(string $role): User
+{
+    return User::factory()->create(['role' => $role]);
+}
 
 function caiReplacementFixture(): array
 {
@@ -98,8 +105,6 @@ test('peserta without operational history is replaceable', function () {
         ->assertReplaceable($fixture['peserta']);
 
     expect($mapping->id)->toBe($fixture['mapping']->id);
-
-    
 });
 
 test('peserta with legacy attendance cannot be replaced', function () {
@@ -118,6 +123,19 @@ test('peserta with legacy attendance cannot be replaced', function () {
             RuntimeException::class,
             'Peserta sudah memiliki riwayat absensi dan tidak dapat diganti.'
         );
+});
+
+test('unauthorized role cannot execute replacement via livewire request', function () {
+    $fixture = caiReplacementFixture();
+    $this->actingAs(caiUser(Role::OperatorScan->value));
+
+    Livewire\Livewire::test(\App\Livewire\Database\Peserta\GantiPeserta::class)
+        ->set('peserta_id', $fixture['peserta']->id)
+        ->set('nama', 'Hacked Replacement')
+        ->set('jenis_kelamin', 'Laki - Laki')
+        ->set('reason', 'Unauthorized attempt')
+        ->call('replace')
+        ->assertForbidden();
 });
 
 test('replacement preserves cai slot and moves mapping to new identity', function () {

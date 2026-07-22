@@ -616,7 +616,8 @@ Deliverables:
 
 Next checkpoint:
 - PGM.16 completed (Pengajian UX, Contextual Navigation, Bulk Import)
-- PGM.17 Pilot Release
+- PGM.17 Pilot Release — UI interaction remediation COMPLETE
+- PGM.18 — Database V2 Part 6 (Legacy Dependency Remediation + CAI Participant Architecture) — NEXT
 
 ---
 
@@ -624,8 +625,7 @@ Next checkpoint:
 
 ## Status
 
-✅ PGM.12–PGM.16 COMPLETE. Pilot end-to-end functional, UI/UX refined, bulk import ready.
-PGM.17 PENDING.
+✅ PGM.12–PGM.17 COMPLETE. Pilot end-to-end functional, UI/UX refined, bulk import ready, UI interaction fully remediated.
 
 ## Goal
 
@@ -1094,12 +1094,9 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 1. **UI Bug Fix Sprint — Batch 1** ✅✅ Branding & Navigation (bugs #1, #2, #4, #6) — RESOLVED VERIFIED (908 tests/2192 assertions)
 2. **UI Bug Fix Sprint — Batch 2** ✅✅ Access Token UI & Security (bugs #5, #7, #8) — RESOLVED VERIFIED
 3. **UI Bug Fix Sprint — Batch 3** ✅✅ Functional/UI Logic (bugs #3, #9) — RESOLVED VERIFIED
-4. **UI Bug Fix Sprint — Batch 4** 🔄 Final UI Polish (bugs #10, #11, #12) — RE-OPENED, FIX IN PROGRESS
-   - #10 Dark Mode: RE-OPENED — RUNTIME VERIFICATION FAILED
-   - #11 Responsive: IMPLEMENTED — PENDING RUNTIME VERIFICATION (layout `pengajian.blade.php` baru)
-   - #12 Event Isolation: OPEN — LOGIC GAP FOUND
-5. **PGM.17 — Pilot Release** — PENDING
-6. **Pengajian Desa MVP** — PGM.12–PGM.16 ✅ Complete. PGM.17 pending.
+4. **UI Bug Fix Sprint — Batch 4** ✅ Final UI Polish (bugs #10, #11, #12) — RESOLVED VERIFIED
+5. **PGM.17 — Pilot Release** ✅ COMPLETE — UI interaction remediation, mobile/dark mode audit, modal close controls standardized
+6. **Pengajian Desa MVP** — PGM.12–PGM.17 ✅ Complete.
 7. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
 8. **S01–S04 Foundation** ✅ Complete
 9. **Competition** (future sprint)

@@ -1,4 +1,4 @@
-<flux:modal name="edit-event" class="min-w-[500px]">
+<flux:modal name="edit-event" class="w-full max-w-2xl md:max-w-3xl">
     <div class="space-y-4">
         <div>
             <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Edit Event</h2>

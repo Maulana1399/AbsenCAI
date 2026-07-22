@@ -4,6 +4,7 @@ namespace App\Livewire\Database\Peserta;
 
 use App\Models\peserta;
 use App\Services\Cai\CaiParticipantReplacementService;
+use Illuminate\Support\Facades\Gate;
 use Flux\Flux;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -60,6 +61,8 @@ class GantiPeserta extends Component
 
     public function replace(): void
     {
+        Gate::authorize('manage-participants');
+
         $validated = $this->validate([
             'peserta_id' => ['required', 'integer'],
             'nama' => ['required', 'string', 'max:255'],
