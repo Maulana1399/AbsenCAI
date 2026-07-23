@@ -66,13 +66,13 @@ test('same peserta can map to Event A and Event B while duplicate same event and
     expect(fn () => LegacyParticipationMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partB->id, 'event_id' => $this->eventA->id]))->toThrow(QueryException::class);
 });
 
-test('resolver uses new bridge first and falls back to legacy bridge', function () {
+test('resolver uses legacy participation mapping for per-event resolution', function () {
     $person = Person::create(['nama' => 'Resolve Person', 'nip' => 20201, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
     $pesertaModel = peserta::create(['nama' => 'Resolve Person', 'nip' => 20201, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL010', 'attendance_code' => 'KJA-RESOLVE1', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL011', 'attendance_code' => 'KJA-RESOLVE2', 'jenis_peserta' => 'Wajib']);
 
-    LegacyPesertaMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
     LegacyParticipationMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partB->id, 'event_id' => $this->eventB->id]);
 
     $resolver = app(LegacyParticipationResolver::class);
@@ -150,7 +150,8 @@ test('populated database safety keeps existing rows and only adds the new bridge
     $person = Person::create(['nama' => 'Safety Person', 'nip' => 80801, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
     $pesertaModel = peserta::create(['nama' => 'Safety Person', 'nip' => 80801, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL080', 'attendance_code' => 'KJA-SAFETY', 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
 
     $before = [
         'events' => Event::count(),

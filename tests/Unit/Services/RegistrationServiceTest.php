@@ -3,6 +3,7 @@
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -65,13 +66,16 @@ test('create participant stores normalized participation identifiers', function 
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
-    $mapping = LegacyPesertaMapping::with('participation.person')->where('peserta_id', $participant->id)->first();
+    $pesertaMapping = LegacyPesertaMapping::with('person')->where('peserta_id', $participant->id)->first();
+    $participationMapping = LegacyParticipationMapping::with('participation.person')
+        ->where('peserta_id', $participant->id)
+        ->first();
 
     expect($participant->participant_number)->toBe('KP001')
         ->and($participant->attendance_code)->toBe('KJA-REG12345')
-        ->and($mapping?->participation?->participant_number)->toBe('KP001')
-        ->and($mapping?->participation?->attendance_code)->toBe('KJA-REG12345')
-        ->and($mapping?->person?->nama)->toBe('Peserta Registration');
+        ->and($participationMapping?->participation?->participant_number)->toBe('KP001')
+        ->and($participationMapping?->participation?->attendance_code)->toBe('KJA-REG12345')
+        ->and($pesertaMapping?->person?->nama)->toBe('Peserta Registration');
 });
 
 test('update participant does not regenerate participant number or attendance code', function () {
@@ -87,7 +91,8 @@ test('update participant does not regenerate participant number or attendance co
     ]);
     $person = Person::create(['nama' => 'Peserta Lama', 'nip' => 1001, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-OLD0001', 'jenis_peserta' => peserta::JENIS_WAJIB]);
-    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'legacy_nip' => $participant->nip, 'legacy_participant_number' => $participant->participant_number, 'legacy_attendance_code' => $participant->attendance_code, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
     app(RegistrationService::class)->updateParticipant($participant->id, [
         'nama' => 'Peserta Baru',
@@ -115,7 +120,8 @@ test('update participant persists changed identity fields to mapped participatio
     ]);
     $person = Person::create(['nama' => 'Peserta Lama', 'nip' => 1001, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-OLD0001', 'jenis_peserta' => peserta::JENIS_WAJIB]);
-    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'legacy_nip' => $participant->nip, 'legacy_participant_number' => $participant->participant_number, 'legacy_attendance_code' => $participant->attendance_code, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
     $updated = app(RegistrationService::class)->updateParticipant($participant->id, [
         'nama' => 'Peserta Baru',

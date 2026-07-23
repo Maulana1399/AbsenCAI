@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -420,6 +421,9 @@ test('person legacy sync still works for authorized user', function () {
         'person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib',
     ]);
     \App\Models\LegacyPesertaMapping::create([
+        'peserta_id' => $peserta->id, 'person_id' => $person->id, 'migrated_at' => now(),
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $peserta->id, 'person_id' => $person->id,
         'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now(),
     ]);

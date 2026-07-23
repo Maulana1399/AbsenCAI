@@ -2,6 +2,7 @@
 
 use App\Models\ActivityLog;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -43,6 +44,10 @@ function printLog_createMappedPeserta(Event $event, array $overrides = []): pese
     LegacyPesertaMapping::create([
         'peserta_id' => $peserta->id,
         'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $peserta->id,
+        'person_id' => $person->id,
         'participation_id' => $participation->id,
         'event_id' => $event->id,
     ]);
@@ -78,6 +83,10 @@ beforeEach(function () {
         'jenis_peserta' => 'Wajib',
     ]);
     LegacyPesertaMapping::create([
+        'peserta_id' => $this->peserta->id,
+        'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $this->peserta->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,

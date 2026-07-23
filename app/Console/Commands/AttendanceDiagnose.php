@@ -106,12 +106,12 @@ class AttendanceDiagnose extends Command
             ];
         }
 
-        $mapping = \App\Models\LegacyPesertaMapping::where('peserta_id', $peserta->id)
+        $mapping = \App\Models\LegacyParticipationMapping::where('peserta_id', $peserta->id)
             ->where('event_id', $eventId)
             ->first();
 
         if ($mapping === null) {
-            $otherMappings = \App\Models\LegacyPesertaMapping::where('peserta_id', $peserta->id)->count();
+            $otherMappings = \App\Models\LegacyParticipationMapping::where('peserta_id', $peserta->id)->count();
             return [
                 'absensi_id' => $absensi->id,
                 'nip' => $absensi->nip,

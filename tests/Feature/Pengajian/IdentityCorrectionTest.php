@@ -5,6 +5,7 @@ use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IdentityCorrectionRequest;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -500,9 +501,13 @@ test('Legacy mapped peserta nama sync setelah approval', function () {
     LegacyPesertaMapping::create([
         'peserta_id' => $legacyPeserta->id,
         'person_id' => $person->id,
+        'legacy_nip' => $legacyPeserta->nip,
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $legacyPeserta->id,
+        'person_id' => $person->id,
         'participation_id' => $participation->id,
         'event_id' => $event->id,
-        'legacy_nip' => $legacyPeserta->nip,
     ]);
 
     $request = app(IdentityCorrectionService::class)->submitFromPublicContext(

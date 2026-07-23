@@ -141,7 +141,7 @@ Last verified test suite (archived):
 
 70 tests passed, 198 assertions, 0 failures.
 
-Latest verified regression: **1494 passed, 3581 assertions** (full suite, 2026-07-22, post-PGM.18 Sprint 1). Penurunan dari 1570 adalah EXPECTED — 76 historical tooling tests dihapus, 1 regression test ditambahkan.
+Latest verified regression: **1499 passed, 3592 assertions** (full suite, 2026-07-23, post-PGM.18 Sprint 2). Peningkatan dari Sprint 1: +5 tests, +11 assertions dari refactored LegacyPesertaMapping test coverage.
 
 ### Deferred Backlog
 
@@ -156,7 +156,8 @@ These features are not currently required for CAI operational use and do not blo
 
 ### Current Next Task
 
-- [ ] Start Sprint 2 according to `docs/ROADMAP.md`
+- [x] Start Sprint 2 according to `docs/ROADMAP.md`
+- [ ] **Proposed**: PGM.18 Sprint 3 — Drop legacy columns, remove deprecated relationships (see `docs/ai/CURRENT_STATE.md` for full scope)
 ---
 
 ## Sprint 2.5.1 (QR & Label UI)
@@ -776,13 +777,13 @@ Status: PGM.12–PGM.17 COMPLETE. Pilot end-to-end functional, UI remediated.
 
 ---
 
-## Sprint 3
+## Sprint 3 (COMPLETE — implemented as S3.0–S3.10)
 
-- [ ] Multi Event
-- [ ] Multi Venue
-- [ ] Multi Category
-- [ ] Multi Role
-- [ ] Universal Person
+- [x] Multi Event
+- [x] Multi Venue
+- [x] Multi Category
+- [x] Multi Role
+- [x] Universal Person
 
 ---
 

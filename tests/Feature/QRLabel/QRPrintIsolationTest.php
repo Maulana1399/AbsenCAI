@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -45,6 +46,10 @@ function qrIsolation_createMappedPeserta(Event $event, string $name, int $nip, s
     ]);
 
     LegacyPesertaMapping::create([
+        'peserta_id' => $peserta->id,
+        'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $peserta->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,

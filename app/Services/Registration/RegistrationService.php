@@ -111,8 +111,6 @@ class RegistrationService
                 LegacyPesertaMapping::create([
                     'peserta_id' => $peserta->id,
                     'person_id' => $person->id,
-                    'participation_id' => $participation->id,
-                    'event_id' => $event->id,
                     'legacy_nip' => $peserta->nip,
                     'legacy_participant_number' => $legacyParticipantNumber,
                     'legacy_attendance_code' => $attendanceCode,
@@ -169,7 +167,10 @@ class RegistrationService
     {
         return DB::transaction(function () use ($id, $data) {
             $peserta = peserta::findOrFail($id);
-            $mapping = $peserta->legacyPesertaMapping()->with('participation')->first();
+            $pesertaMapping = $peserta->legacyPesertaMapping;
+            $participationMapping = LegacyParticipationMapping::with('participation')
+                ->where('peserta_id', $peserta->id)
+                ->first();
 
             $peserta->update([
                 'nama' => $data['nama'],
@@ -180,12 +181,14 @@ class RegistrationService
                 'regu_id' => $data['regu_id'],
             ]);
 
-            if ($mapping?->participation !== null) {
-                $mapping->participation->update([
+            if ($participationMapping?->participation !== null) {
+                $participationMapping->participation->update([
                     'jenis_peserta' => $data['jenis_peserta'],
                 ]);
+            }
 
-                $mapping->person?->update([
+            if ($pesertaMapping?->person !== null) {
+                $pesertaMapping->person->update([
                     'nama' => $data['nama'],
                     'jenis_kelamin' => $data['jenis_kelamin'] === 'Perempuan' ? 'P' : 'L',
                     'desa_id' => $data['desa_id'],

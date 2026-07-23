@@ -1,11 +1,12 @@
 # LAPORAN AUDIT LEGACY CODE & CANONICAL ARCHITECTURE
 
 **Proyek:** KJA Event Manager / AbsenCAI
-**Tanggal:** 22 Juli 2026
+**Tanggal:** 23 Juli 2026
 **Mode:** READ ONLY — Tidak ada perubahan kode
 **Baseline (pre-Sprint 1):** 1570 passed, 3803 assertions, 0 failures
 **Baseline (post-Sprint 1):** 1494 passed, 3581 assertions, 0 failures
-**Diagnostic Design C (post-Sprint 1):** problem_total = 0
+**Baseline (post-Sprint 2):** 1499 passed, 3592 assertions, 0 failures
+**Diagnostic Design C (post-Sprint 2):** problem_total = 0
 
 ---
 
@@ -26,6 +27,80 @@ Full verification: 1494 passed / 3581 assertions / 0 failures
 Design C diagnostic: problem_total = 0 (all 8 metrics 0)
 
 > 76 tests removed vs baseline 1570 adalah EXPECTED (historical tooling tests). Satu regression test baru (diagnostic contract) membuat delta final -75. Bukan regression.
+
+---
+
+## PGM.18 Sprint 2 Status
+
+**Status: ✅ COMPLETE**
+
+**Tanggal:** 23 Juli 2026
+**Tujuan:** Narrowing `LegacyPesertaMapping` contract — peserta↔Person only. `LegacyParticipationMapping` = sole event-specific bridge.
+
+### Deliverables
+
+1. **Foundation test refactored**: `LegacyPesertaMappingFoundationTest` — 22 → 14 tests (10 kept, 4 refactored, 8 removed). Factory default now creates peserta_id + person_id only.
+2. **6 regression failures at Sprint 2 inception**: All fixed:
+   - 4 Activity Foundation tests (`CategoryFoundationTest`, `DomainFoundationTest`, `ReportingIntegrationTest`, `VenueRundownFoundationTest`) — replaced `$mapping->participation`/`->event` assertions with `LegacyParticipationMapping`
+   - `CaiParticipantReplacementTest` — replaced `$mapping->participation_id` assertion with `LegacyParticipationMapping`
+   - `PrintLogTest:246` — genuine production regression: QR label single print route used `$participant->legacyPesertaMapping()` which returned NULL (depended on `participation_id` no longer set). Fixed by resolving via `LegacyParticipationMapping`.
+3. **1 parse error fixed**: `CaiParticipantReplacementTest:272` — missing semicolon
+4. **3 stale test contract references fixed**: `PersonReuseTest:96`, `MultiEventValidationRoutingTest:152`, `DesignCDiagnosticsTest:66` — all updated to use `LegacyParticipationMapping`
+5. **Model audit**: `participation()` and `event()` relationships on `LegacyPesertaMapping` confirmed DEPRECATED — zero production runtime access to both. `participation_id`, `event_id`, `backfill_batch_id` in `$fillable` also deprecated.
+6. **Production zero-reference audit**:
+   - `LegacyPesertaMapping->participation`: 0 ✅
+   - `LegacyPesertaMapping->event`: 0 ✅
+   - `LegacyPesertaMapping.participation_id` (direct column read): 0 ✅
+   - `LegacyPesertaMapping.event_id`: 0 ✅
+   - `LegacyPesertaMapping.backfill_batch_id`: 0 ✅
+   - `Participation::legacyPesertaMapping()` (hasOne via participation_id): 6 implicit references documented as Sprint 3 blockers
+7. **Deprecated elements retained** (no migration):
+   - `legacy_peserta_mappings.participation_id` — column NOT dropped
+   - `legacy_peserta_mappings.event_id` — column NOT dropped
+   - `legacy_peserta_mappings.backfill_batch_id` — column NOT dropped
+   - `LegacyPesertaMapping::participation()` relationship — NOT removed
+   - `LegacyPesertaMapping::event()` relationship — NOT removed
+   - All Sprint 3 target
+
+### Verification
+- Full suite: **1499 passed / 3592 assertions / 0 failures**
+- Design C diagnostic: **problem_total = 0**
+- Increase from Sprint 1: +5 tests, +11 assertions (refactored coverage added back)
+
+### Sprint 2 Contract Changes — Canonical Architecture Impact
+
+**Before Sprint 2:**
+```
+LegacyPesertaMapping:
+  peserta_id → peserta
+  person_id → Person
+  participation_id → Participation (deprecated but active in model)
+  event_id → Event (deprecated but active in model)
+```
+
+**After Sprint 2:**
+```
+LegacyPesertaMapping:                ← Global bridge ONLY
+  peserta_id → peserta
+  person_id → Person
+  (participation_id, event_id — inert, scheduled for Sprint 3 drop)
+
+LegacyParticipationMapping:          ← Event-aware bridge (sole)
+  peserta_id → peserta
+  participation_id → Participation
+  event_id → Event
+```
+
+### Sprint 2 Audit — Metrik Arsitektur
+
+| Komponen | Sprint 1 Status | Sprint 2 Status | Sprint 3 Target |
+|---|---|---|---|
+| `LegacyPesertaMapping` → `Partisipasi` | B. ACTIVE (deprecated) | B. ACTIVE (inert — 0 prod refs) | DROP relationship + column |
+| `LegacyPesertaMapping` → `Event` | B. ACTIVE (deprecated) | B. ACTIVE (inert — 0 prod refs) | DROP relationship + column |
+| `LegacyPesertaMapping.participation_id` | B. ACTIVE (column) | B. ACTIVE (inert — 0 direct reads) | DROP column |
+| `Participation::legacyPesertaMapping()` | B. ACTIVE | B. ACTIVE (6 implicit refs documented) | MIGRATE → `LegacyParticipationMapping` |
+| `LegacyParticipationMapping` | B. ACTIVE | B. ACTIVE (confirmed sole bridge) | RETAIN |
+| `LegacyPesertaMapping` (peserta↔Person) | B. ACTIVE | B. ACTIVE (contract narrowed) | RETAIN |
 
 ---
 

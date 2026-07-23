@@ -6,7 +6,7 @@ use App\Models\Absensi;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
-use App\Models\LegacyPesertaMapping;
+use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\SuratIzin;
 use Illuminate\Support\Facades\DB;
@@ -99,13 +99,12 @@ class AttendanceBackfillService
         $query = SuratIzin::whereNull('event_id');
 
         if ($eventId !== null) {
-            $query->whereHas('peserta.legacyPesertaMapping', fn ($q) => $q->where('event_id', $eventId));
+            $query->whereHas('peserta.legacyParticipationMappings', fn ($q) => $q->where('event_id', $eventId));
         }
 
         $query->chunk(200, function ($surats) use (&$stats) {
             foreach ($surats as $surat) {
                 $stats['total']++;
-
                 $eventId = $this->resolveSuratIzinEvent($surat);
 
                 if ($eventId === null) {
@@ -188,7 +187,7 @@ class AttendanceBackfillService
         $query = SuratIzin::whereNull('event_id');
 
         if ($eventId !== null) {
-            $query->whereHas('peserta.legacyPesertaMapping', fn ($q) => $q->where('event_id', $eventId));
+            $query->whereHas('peserta.legacyParticipationMappings', fn ($q) => $q->where('event_id', $eventId));
         }
 
         $query->chunk(200, function ($surats) use (&$stats) {
@@ -364,7 +363,7 @@ class AttendanceBackfillService
 
     private function resolveParticipationByNip(int $nip, int $eventId): Participation|null|false
     {
-        $mappings = LegacyPesertaMapping::whereHas('peserta', fn ($q) => $q->where('nip', $nip))
+        $mappings = LegacyParticipationMapping::whereHas('peserta', fn ($q) => $q->where('nip', $nip))
             ->where('event_id', $eventId)
             ->get();
 
@@ -381,7 +380,7 @@ class AttendanceBackfillService
 
     private function resolveParticipationForPeserta(int $pesertaId, int $eventId): Participation|null|false
     {
-        $mappings = LegacyPesertaMapping::where('peserta_id', $pesertaId)
+        $mappings = LegacyParticipationMapping::where('peserta_id', $pesertaId)
             ->where('event_id', $eventId)
             ->get();
 
@@ -408,7 +407,7 @@ class AttendanceBackfillService
             ->toArray();
 
         if (count($eventIds) === 0) {
-            $mapping = LegacyPesertaMapping::where('peserta_id', $surat->peserta_id)->first();
+            $mapping = LegacyParticipationMapping::where('peserta_id', $surat->peserta_id)->first();
 
             return $mapping !== null ? (int) $mapping->event_id : null;
         }

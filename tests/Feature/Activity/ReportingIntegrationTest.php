@@ -18,6 +18,7 @@ use App\Models\Rundown;
 use App\Models\RundownItem;
 use App\Models\Venue;
 use App\Models\peserta;
+use App\Models\LegacyParticipationMapping;
 use App\Services\Activity\EventCommitteeService;
 use App\Services\Activity\ActivityRegistrationService;
 use App\Services\Activity\ActivityScheduleService;
@@ -91,13 +92,19 @@ function S3_9E_makeLegacyMapping(array $overrides = []): LegacyPesertaMapping
     $person = $overrides['person_id'] ?? S3_9E_makePerson()->id;
     $participation = $overrides['participation_id'] ?? S3_9E_makeParticipation(['event_id' => $event, 'person_id' => $person])->id;
 
-    return LegacyPesertaMapping::create(array_merge([
+    $mapping = LegacyPesertaMapping::create(array_merge([
         'peserta_id' => $overrides['peserta_id'] ?? peserta::create(['nama' => 'Legacy Peserta', 'nip' => random_int(1000, 9999), 'status_registrasi' => 'Belum Registrasi'])->id,
+        'person_id' => $person,
+        'migrated_at' => now(),
+    ], $overrides));
+    LegacyParticipationMapping::create(array_merge([
+        'peserta_id' => $mapping->peserta_id,
         'person_id' => $person,
         'participation_id' => $participation,
         'event_id' => $event,
         'migrated_at' => now(),
     ], $overrides));
+    return $mapping;
 }
 
 test('participants export remains event scoped', function () {
@@ -171,6 +178,9 @@ test('legacy peserta mapping remains intact with reporting integration', functio
     $mapping = S3_9E_makeLegacyMapping();
 
     expect($mapping->exists)->toBeTrue()
-        ->and($mapping->person)->not->toBeNull()
-        ->and($mapping->participation)->not->toBeNull();
+        ->and($mapping->person)->not->toBeNull();
+
+    $participationMapping = LegacyParticipationMapping::where('peserta_id', $mapping->peserta_id)->first();
+    expect($participationMapping)->not->toBeNull()
+        ->and($participationMapping->participation)->not->toBeNull();
 });

@@ -2,6 +2,7 @@
 
 use App\Livewire\QRLabel\Index;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -112,7 +113,8 @@ test('direct print route rejects cross-event legacy participant access', functio
     $person = Person::create(['nama' => 'Print Person', 'nip' => 5007, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'attendance_code' => 'KJA-PRINT-B', 'participant_number' => 'KL401', 'jenis_peserta' => 'Wajib']);
     $legacy = peserta::create(['nama' => 'Print Person', 'nip' => 5007, 'participant_number' => 'KL401', 'attendance_code' => 'KJA-PRINT-B', 'jenis_kelamin' => 'Laki - Laki']);
-    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $eventB->id, 'legacy_nip' => 5007, 'legacy_participant_number' => 'KL401', 'legacy_attendance_code' => 'KJA-PRINT-B', 'migrated_at' => now()]);
+    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => 5007, 'legacy_participant_number' => 'KL401', 'legacy_attendance_code' => 'KJA-PRINT-B', 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $eventB->id, 'migrated_at' => now()]);
 
     $this->get('/qr-label/print/selected/'.$legacy->id)->assertNotFound();
 });

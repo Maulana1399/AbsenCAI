@@ -14,6 +14,7 @@ use App\Models\Rundown;
 use App\Models\RundownItem;
 use App\Models\Venue;
 use App\Models\peserta;
+use App\Models\LegacyParticipationMapping;
 use App\Services\Activity\EventCommitteeService;
 use App\Services\Activity\ActivityRegistrationService;
 use App\Services\Activity\ActivityScheduleService;
@@ -346,7 +347,8 @@ test('legacy peserta mapping remains intact with committee domain', function () 
     $person = S3_9D_makePerson();
     $event = S3_9D_makeEvent();
     $participation = S3_9D_makeParticipation(['event_id' => $event->id, 'person_id' => $person->id]);
-    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
+    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
     expect(LegacyPesertaMapping::count())->toBe(1);
 });

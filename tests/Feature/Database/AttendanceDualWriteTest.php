@@ -4,6 +4,7 @@ use App\Models\Absensi;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -61,11 +62,20 @@ function dw_peserta(array $overrides = []): peserta
 
 function dw_mapping(peserta $p, Person $person, Participation $participation, Event $event): LegacyPesertaMapping
 {
-    return LegacyPesertaMapping::create([
+    LegacyParticipationMapping::create([
         'peserta_id' => $p->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,
         'event_id' => $event->id,
+        'migrated_at' => now(),
+    ]);
+
+    return LegacyPesertaMapping::create([
+        'peserta_id' => $p->id,
+        'person_id' => $person->id,
+        'legacy_nip' => $p->nip,
+        'legacy_participant_number' => $p->participant_number,
+        'legacy_attendance_code' => $p->attendance_code,
         'migrated_at' => now(),
     ]);
 }

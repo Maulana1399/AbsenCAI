@@ -2,6 +2,7 @@
 
 use App\Models\Absensi;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\peserta;
@@ -49,8 +50,18 @@ function attendanceTest_makeMappedLegacyPeserta(array $overrides, Event $event):
     LegacyPesertaMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
+        'legacy_nip' => $participant->nip,
+        'legacy_participant_number' => $participant->participant_number,
+        'legacy_attendance_code' => $participant->attendance_code,
+        'migrated_at' => now(),
+    ]);
+
+    LegacyParticipationMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
         'participation_id' => $participation->id,
         'event_id' => $event->id,
+        'migrated_at' => now(),
     ]);
 
     return [$participant, $person, $participation];
@@ -139,10 +150,12 @@ test('process scan rejects wrong-event legacy mapping', function () {
 
 test('process scan rejects broken legacy mapping', function () {
     $event = attendanceTest_makeEvent(); app(ActiveEventContext::class)->set($event);
+    $otherEvent = Event::create(['name' => 'Other Event 2', 'slug' => 'other-event-2-' . str()->random(6), 'status' => 'active']);
     $participant = peserta::create(['nama' => 'Peserta Broken Mapping', 'nip' => 2003, 'attendance_code' => 'KJA-BROKEN1', 'jenis_kelamin' => 'Laki - Laki']);
     $person = Person::create(['nama' => $participant->nama, 'nip' => $participant->nip, 'jenis_kelamin' => 'L']);
-    $participation = Participation::create(['person_id' => $person->id, 'event_id' => Event::create(['name' => 'Other Event 2', 'slug' => 'other-event-2-' . str()->random(6), 'status' => 'active'])->id, 'attendance_code' => $participant->attendance_code, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    $participation = Participation::create(['person_id' => $person->id, 'event_id' => $otherEvent->id, 'attendance_code' => $participant->attendance_code, 'jenis_peserta' => 'Wajib']);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'legacy_nip' => $participant->nip, 'legacy_attendance_code' => $participant->attendance_code, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $otherEvent->id, 'migrated_at' => now()]);
     SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Broken', 'tanggal' => '2026-07-15', 'aktif' => true]);
     expect(app(AttendanceService::class)->processScan('2003')['status'])->toBe('not_found');
     expect(Absensi::count())->toBe(0);

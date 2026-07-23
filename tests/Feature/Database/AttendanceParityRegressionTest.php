@@ -7,6 +7,7 @@ use App\Models\Person;
 use App\Models\SesiAbsensi;
 use App\Models\Absensi;
 use App\Models\EventAttendance;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\peserta;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,7 +24,8 @@ test('attendance:parity --event works', function () {
     $person = Person::create(['nama' => 'Test', 'nip' => 9001]);
     $peserta = peserta::create(['nama' => 'Legacy', 'nip' => 9001, 'attendance_code' => 'KJA-PARITY', 'status_registrasi' => 'Belum Registrasi']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
     Absensi::create(['nip' => 9001, 'nama' => 'Test', 'jam_scan' => now(), 'sesi_id' => $session->id]);
     EventAttendance::create([
         'participation_id' => $participation->id, 'sesi_absensi_id' => $session->id,

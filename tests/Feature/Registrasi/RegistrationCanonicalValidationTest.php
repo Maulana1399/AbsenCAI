@@ -120,8 +120,9 @@ test('RegistrationService creates all 4 records', function () {
     expect($participation)->not->toBeNull()
         ->and($participation->event_id)->toBe($this->event->id);
 
-    $mapping = \App\Models\LegacyPesertaMapping::where('participation_id', $participation->id)->first();
-    expect($mapping)->not->toBeNull();
+    $participationMapping = \App\Models\LegacyParticipationMapping::where('participation_id', $participation->id)->first();
+    expect($participationMapping)->not->toBeNull()
+        ->and($participationMapping->event_id)->toBe($this->event->id);
 });
 
 // ---------------------------------------------------------------------------

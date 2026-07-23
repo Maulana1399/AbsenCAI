@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -42,10 +43,14 @@ function qrIdentityTest_makeMappedLegacyPeserta(array $overrides, Event $event):
     LegacyPesertaMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
-        'participation_id' => $participation->id,
-        'event_id' => $event->id,
         'legacy_nip' => $participant->nip,
         'legacy_attendance_code' => $participant->attendance_code,
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
     ]);
 
     return [$participant, $person, $participation];
@@ -116,7 +121,8 @@ test('broken mapping is rejected', function () {
     $participant = peserta::create(['nama' => 'Broken', 'nip' => 3006, 'attendance_code' => 'KJA-BROKEN', 'jenis_kelamin' => 'Laki - Laki']);
     $person = Person::create(['nama' => 'Broken', 'nip' => 3006, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $other->id, 'attendance_code' => 'KJA-BROKEN', 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
 
     expect(app(QRIdentityResolver::class)->resolve('KJA-BROKEN', $event))->toBeNull();
 });

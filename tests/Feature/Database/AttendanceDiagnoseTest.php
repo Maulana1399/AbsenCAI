@@ -4,6 +4,7 @@ use App\Models\Absensi;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -63,7 +64,8 @@ test('valid mapped attendance not reported as unmappable', function () {
     $person = Person::create(['nama' => 'Valid', 'nip' => 66666]);
     $p = peserta::create(['nama' => 'Valid Peserta', 'nip' => 66666, 'attendance_code' => 'KJA-VALID', 'status_registrasi' => 'Belum Registrasi']);
     $part = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $p->id, 'person_id' => $person->id, 'participation_id' => $part->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $p->id, 'person_id' => $person->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $p->id, 'person_id' => $person->id, 'participation_id' => $part->id, 'event_id' => $event->id]);
     Absensi::create(['nip' => 66666, 'nama' => 'Valid', 'jam_scan' => now(), 'sesi_id' => $session->id]);
 
     $this->artisan('attendance:diagnose', ['--event' => $event->id])

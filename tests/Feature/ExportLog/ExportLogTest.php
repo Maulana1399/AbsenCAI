@@ -3,6 +3,7 @@
 use App\Livewire\Rekap\Peserta\RekapPeserta;
 use App\Models\ActivityLog;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -68,7 +69,8 @@ function exportLog_makeMappedParticipation(Event $event, string $name, string $n
     $peserta = peserta::create(['nama' => $name, 'nip' => (int) $nip, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'Laki - Laki' : 'Perempuan', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => $status]);
     $person = Person::create(['nama' => $name, 'nip' => (int) $nip, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'L' : 'P', 'desa_id' => $desa->id]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_peserta' => peserta::JENIS_WAJIB]);
-    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
 }
 
 test('export peserta creates activity log entry', function () {

@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -348,6 +349,11 @@ function pm_mappedPerson(): array
     ]);
 
     $mapping = \App\Models\LegacyPesertaMapping::create([
+        'peserta_id' => $peserta->id,
+        'person_id' => $person->id,
+        'migrated_at' => now(),
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $peserta->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,

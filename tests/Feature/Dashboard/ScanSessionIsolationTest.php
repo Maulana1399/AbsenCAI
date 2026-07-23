@@ -2,6 +2,7 @@
 
 use App\Livewire\Dashboard\Scan;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -160,7 +161,8 @@ test('manipulated session ID from Event B rejected when active is Event A', func
     $personA = Person::create(['nama' => 'Alice', 'nip' => 40001]);
     $pesertaA = peserta::create(['nama' => 'Alice Peserta', 'nip' => 40001, 'attendance_code' => 'KJA-SS-'.str()->random(6), 'status_registrasi' => 'Belum Registrasi']);
     $partA = Participation::create(['person_id' => $personA->id, 'event_id' => $eventA->id, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $pesertaA->id, 'person_id' => $personA->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $pesertaA->id, 'person_id' => $personA->id, 'legacy_nip' => $pesertaA->nip, 'legacy_attendance_code' => $pesertaA->attendance_code, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $pesertaA->id, 'person_id' => $personA->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'migrated_at' => now()]);
 
     app(ActiveEventContext::class)->set($eventA);
     $this->actingAs(ss_admin());
@@ -182,7 +184,8 @@ test('manual attend with correct session succeeds', function () {
     $person = Person::create(['nama' => 'Valid Attend', 'nip' => 50001]);
     $peserta = peserta::create(['nama' => 'Valid Peserta', 'nip' => 50001, 'attendance_code' => 'KJA-SS-VALID', 'status_registrasi' => 'Belum Registrasi']);
     $part = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $part->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'legacy_nip' => $peserta->nip, 'legacy_attendance_code' => $peserta->attendance_code, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $part->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(ss_admin());

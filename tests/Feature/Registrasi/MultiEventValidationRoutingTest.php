@@ -149,7 +149,7 @@ test('Case B: existing Person joining new Event passes validation layer and reac
 
         // Verify NO partial records were created in Event B
         expect(Participation::where('event_id', $eventB->id)->count())->toBe(0);
-        expect(LegacyPesertaMapping::where('event_id', $eventB->id)->count())->toBe(0);
+        expect(LegacyParticipationMapping::where('event_id', $eventB->id)->count())->toBe(0);
     }
 });
 

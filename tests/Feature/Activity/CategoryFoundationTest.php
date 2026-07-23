@@ -6,6 +6,7 @@ use App\Models\ActivityGroup;
 use App\Models\ActivityRegistration;
 use App\Models\CategoryDefinition;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -107,17 +108,23 @@ function S3_9B_makeLegacyMapping(array $overrides = []): LegacyPesertaMapping
         'person_id' => $person,
     ])->id;
 
-    return LegacyPesertaMapping::create(array_merge([
+    $mapping = LegacyPesertaMapping::create(array_merge([
         'peserta_id' => $overrides['peserta_id'] ?? peserta::create([
             'nama' => 'Legacy Peserta',
             'nip' => random_int(1000, 9999),
             'status_registrasi' => 'Belum Registrasi',
         ])->id,
         'person_id' => $person,
+        'migrated_at' => now(),
+    ], $overrides));
+    LegacyParticipationMapping::create(array_merge([
+        'peserta_id' => $mapping->peserta_id,
+        'person_id' => $person,
         'participation_id' => $participation,
         'event_id' => $event,
         'migrated_at' => now(),
     ], $overrides));
+    return $mapping;
 }
 
 test('event a only sees category definitions event a', function () {
@@ -321,7 +328,10 @@ test('legacy peserta mapping remains intact with category domain', function () {
     $mapping = S3_9B_makeLegacyMapping();
 
     expect($mapping->exists)->toBeTrue()
-        ->and($mapping->person)->not->toBeNull()
-        ->and($mapping->participation)->not->toBeNull()
-        ->and($mapping->event)->not->toBeNull();
+        ->and($mapping->person)->not->toBeNull();
+
+    $participationMapping = LegacyParticipationMapping::where('peserta_id', $mapping->peserta_id)->first();
+    expect($participationMapping)->not->toBeNull()
+        ->and($participationMapping->participation)->not->toBeNull()
+        ->and($participationMapping->event)->not->toBeNull();
 });

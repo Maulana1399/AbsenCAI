@@ -60,8 +60,8 @@ class AttendanceExceptionService
 
             // Reject cross-event: peserta has mappings but none for this event's session
             if ($resolvedParticipation === null && $eventId !== null) {
-                $anyMapping = \App\Models\LegacyPesertaMapping::where('peserta_id', $peserta->id)->exists();
-                $eventMapping = \App\Models\LegacyPesertaMapping::where('peserta_id', $peserta->id)
+                $anyMapping = \App\Models\LegacyParticipationMapping::where('peserta_id', $peserta->id)->exists();
+                $eventMapping = \App\Models\LegacyParticipationMapping::where('peserta_id', $peserta->id)
                     ->where('event_id', $eventId)
                     ->exists();
                 if ($anyMapping && !$eventMapping) {

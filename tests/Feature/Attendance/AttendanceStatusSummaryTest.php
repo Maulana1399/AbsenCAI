@@ -5,6 +5,7 @@ use App\Livewire\Rekap\Absensi\RekapAbsensi;
 use App\Models\Absensi;
 use App\Models\Event;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -34,8 +35,10 @@ beforeEach(function () {
     $this->participationB = Participation::create(['person_id' => $this->personA->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL602', 'attendance_code' => 'KJA-B602', 'jenis_peserta' => 'Wajib']);
     $this->participationC = Participation::create(['person_id' => $this->personB->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL603', 'attendance_code' => 'KJA-A603', 'jenis_peserta' => 'Wajib']);
 
-    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaA->id, 'person_id' => $this->personA->id, 'participation_id' => $this->participationA->id, 'event_id' => $this->eventA->id]);
-    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaB->id, 'person_id' => $this->personB->id, 'participation_id' => $this->participationC->id, 'event_id' => $this->eventA->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaA->id, 'person_id' => $this->personA->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $this->pesertaA->id, 'person_id' => $this->personA->id, 'participation_id' => $this->participationA->id, 'event_id' => $this->eventA->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaB->id, 'person_id' => $this->personB->id]);
+    LegacyParticipationMapping::create(['peserta_id' => $this->pesertaB->id, 'person_id' => $this->personB->id, 'participation_id' => $this->participationC->id, 'event_id' => $this->eventA->id]);
 
     $this->sessionA = SesiAbsensi::create(['event_id' => $this->eventA->id, 'nama_sesi' => 'Sesi A', 'tanggal' => '2026-07-16', 'aktif' => true]);
     $this->sessionB = SesiAbsensi::create(['event_id' => $this->eventB->id, 'nama_sesi' => 'Sesi B', 'tanggal' => '2026-07-16', 'aktif' => true]);

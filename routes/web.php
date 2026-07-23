@@ -9,7 +9,7 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Livewire\Registrasi\SelfRegister;
 use App\Http\Controllers\ImportDataController;
-use App\Models\LegacyPesertaMapping;
+use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\peserta;
 use App\Models\SuratIzin;
@@ -88,7 +88,7 @@ Route::get('qr-label/print/selected/{participant}', function (Participation $par
 
     abort_if($participant->person === null, 404);
 
-    $mapping = $participant->legacyPesertaMapping()->first();
+    $mapping = LegacyParticipationMapping::where('participation_id', $participant->id)->first();
 
     app(ActivityLogService::class)->log(
         action: 'print_viewed',

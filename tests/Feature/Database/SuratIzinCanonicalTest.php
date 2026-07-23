@@ -3,6 +3,7 @@
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -39,7 +40,15 @@ function si_participant(Event $event): object
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
     LegacyPesertaMapping::create([
         'peserta_id' => $peserta->id, 'person_id' => $person->id,
+        'legacy_nip' => $peserta->nip,
+        'legacy_participant_number' => $peserta->participant_number,
+        'legacy_attendance_code' => $peserta->attendance_code,
+        'migrated_at' => now(),
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $peserta->id, 'person_id' => $person->id,
         'participation_id' => $participation->id, 'event_id' => $event->id,
+        'migrated_at' => now(),
     ]);
     return (object) compact('person', 'peserta', 'participation');
 }

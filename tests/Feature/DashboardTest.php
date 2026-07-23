@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\Absensi;
 use App\Models\desa;
 use App\Models\kelompok;
+use App\Models\LegacyParticipationMapping;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Models\User;
@@ -77,9 +78,13 @@ function ds_legacyPeserta(Person $person, desa $desa, kelompok $kelompok, regu $
     \App\Models\LegacyPesertaMapping::create([
         'peserta_id' => $p->id,
         'person_id' => $person->id,
+        'legacy_nip' => $p->nip,
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $p->id,
+        'person_id' => $person->id,
         'participation_id' => $person->participations()->first()?->id,
         'event_id' => $person->participations()->first()?->event_id,
-        'legacy_nip' => $p->nip,
     ]);
 
     return $p;

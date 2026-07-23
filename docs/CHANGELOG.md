@@ -8,6 +8,50 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (PGM.18 Sprint 2 — Legacy Mapping Contract Refactoring)
+
+### Refactored (LegacyPesertaMapping contract — peserta↔Person ONLY)
+- `LegacyPesertaMapping` foundation test: 22 → 14 tests (10 kept, 8 removed, 4 refactored)
+- Factory/fixture `LPesertaMappingFactory_makeMapping()`: default hanya membuat peserta_id + person_id
+- Removed: `participation_id`, `event_id`, `backfill_batch_id` from fixture defaults
+- Removed stale test coverage: `belongsTo participation/event`, `hasOne participation`, `hasMany event`, `participation_id` unique, `participation_id`/`event_id` FK SET NULL, `backfill_batch_id` nullable
+- Schema test converted to explicit transitional documentation (inert columns until Sprint 3)
+
+### Fixed (6 regression failures from Sprint 2 fixture refactor)
+- **4 Activity Foundation tests** (`CategoryFoundationTest:332`, `DomainFoundationTest:210`, `ReportingIntegrationTest:182`, `VenueRundownFoundationTest:254`): replaced `$mapping->participation`/`$mapping->event` assertions with `LegacyParticipationMapping`-based assertions
+- **CaiParticipantReplacementTest:272**: replaced `$mapping->participation_id` with `LegacyParticipationMapping` assertion
+- **PrintLogTest:246**: genuine production regression — route handler `$participant->legacyPesertaMapping()` returned null (depended on `participation_id` no longer written). Fix: route now resolves via `LegacyParticipationMapping`
+
+### Fixed (ParseError)
+- `CaiParticipantReplacementTest.php:272`: syntax error — expect chain not closed before assignment
+
+### Fixed (Stale contract references in other tests)
+- `PersonReuseTest:96` and `MultiEventValidationRoutingTest:152`: `LegacyPesertaMapping::where('event_id',…)` → `LegacyParticipationMapping`
+- `DesignCDiagnosticsTest:66`: removed stale `participation_id => null, event_id => null` from `LegacyPesertaMapping::create()`
+
+### Model Audit (LegacyPesertaMapping.php)
+- `participation()`, `event()` relationships: **DEPRECATED** — zero production runtime access
+- `participation_id`, `event_id`, `backfill_batch_id` in `$fillable`: **DEPRECATED** — dijadwalkan removal Sprint 3
+- `Participation::legacyPesertaMapping()` (hasOne via `participation_id`): **DEPRECATED** — 6 implicit runtime references via eager loads, perlu migrasi ke `LegacyParticipationMapping` di Sprint 3
+
+### Production Zero-Reference Audit
+- `LegacyPesertaMapping->participation`: 0 production references ✅
+- `LegacyPesertaMapping->event`: 0 production references ✅
+- `LegacyPesertaMapping.participation_id` (direct): 0 production references ✅
+- `LegacyPesertaMapping.event_id`: 0 production references ✅
+- `LegacyPesertaMapping.backfill_batch_id`: 0 production references ✅
+
+### Not Changed
+- `LegacyPesertaMapping` model — deprecated relationships/fillable retained (Sprint 3 target)
+- `LegacyParticipationMapping` — remains sole event-specific bridge
+- No database migration
+- No column dropped
+
+### Verified Baseline
+- **Full suite**: 1499 passed / 3592 assertions / 0 failures
+- **Design C diagnostic**: problem_total = 0 (all 8 metrics 0)
+- Increase from Sprint 1: +5 tests, +11 assertions (refactored test coverage added back)
+
 ## Added (PGM.18 Sprint 1 — Legacy Historical Tooling Removal)
 
 ### Removed (6 Artisan commands — zero production callers)

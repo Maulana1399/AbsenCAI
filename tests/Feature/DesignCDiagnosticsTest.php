@@ -44,7 +44,7 @@ test('design c diagnostics reports zero problems for fully valid data', function
     $person = dc_person(70001);
     $legacy = dc_peserta(70001);
     $participation = dc_participation($person, $event, '001');
-    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
+    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
     $this->artisan('diagnose:design-c')
@@ -63,10 +63,10 @@ test('legacy peserta mapping with null participation id is not counted as proble
     $event = dc_event('b');
     $person = dc_person(70002);
     $legacy = dc_peserta(70002);
-    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => null, 'event_id' => null, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
+    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
 
     $this->artisan('diagnose:design-c')
-        ->expectsOutput(str_pad('legacy_peserta_pointing_to_missing_participation', 56) . ': 0')
+        ->expectsOutput(str_pad('legacy_participation_missing_participation', 56) . ': 0')
         ->assertExitCode(0);
 });
 

@@ -14,7 +14,6 @@ use App\Models\regu;
 use App\Models\SuratIzin;
 use App\Services\Cai\CaiParticipantReplacementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use RuntimeException;
 
 uses(RefreshDatabase::class);
 
@@ -84,8 +83,6 @@ function cdr_fixture(): array
     $mapping = LegacyPesertaMapping::create([
         'peserta_id' => $peserta->id,
         'person_id' => $oldPerson->id,
-        'participation_id' => $participationA->id,
-        'event_id' => $eventA->id,
         'legacy_nip' => 91001,
         'legacy_participant_number' => 'KL001',
         'legacy_attendance_code' => 'KJA-OLD0001',
@@ -127,7 +124,7 @@ test('replacement changes only Event A membership and leaves Event B unchanged',
     expect($fixture['participationB']->fresh()->person_id)->toBe($fixture['personB']->id)
         ->and($fixture['participationB']->fresh()->participant_number)->toBe('KL002')
         ->and($fixture['participationB']->fresh()->attendance_code)->toBe('KJA-OLD0002')
-        ->and($fixture['mapping']->fresh()->participation_id)->toBe($result['participation']->id)
+        ->and($fixture['mapping']->fresh()->person_id)->toBe($result['person']->id)
         ->and($fixture['peserta']->fresh()->nama)->toBe('Peserta Pengganti')
         ->and($fixture['oldPerson']->fresh()->nip)->toBeNull();
 });

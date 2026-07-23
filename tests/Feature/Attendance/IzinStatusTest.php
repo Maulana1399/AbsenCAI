@@ -3,6 +3,7 @@
 use App\Models\Absensi;
 use App\Models\Event;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -48,6 +49,10 @@ it('records izin attendance exception', function () {
     ]);
 
     LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,
@@ -107,6 +112,10 @@ it('rejects duplicate izin for same participant and session', function () {
     LegacyPesertaMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
         'participation_id' => $participation->id,
         'event_id' => $event->id,
     ]);
@@ -154,6 +163,10 @@ it('prevents hadir participant from becoming izin', function () {
     ]);
 
     LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,
@@ -208,6 +221,10 @@ it('prevents hadir recording when participant is already izin', function () {
     ]);
 
     LegacyPesertaMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
         'participation_id' => $participation->id,

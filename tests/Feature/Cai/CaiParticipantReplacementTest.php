@@ -5,6 +5,7 @@ use App\Models\CaiParticipantReplacement;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -75,11 +76,17 @@ function caiReplacementFixture(): array
         'jenis_peserta' => peserta::JENIS_WAJIB,
     ]);
 
-    $mapping = LegacyPesertaMapping::create([
+    LegacyParticipationMapping::create([
         'peserta_id' => $peserta->id,
         'person_id' => $oldPerson->id,
         'participation_id' => $oldParticipation->id,
         'event_id' => $event->id,
+        'migrated_at' => now(),
+    ]);
+
+    $mapping = LegacyPesertaMapping::create([
+        'peserta_id' => $peserta->id,
+        'person_id' => $oldPerson->id,
         'legacy_nip' => 1001,
         'legacy_participant_number' => 'KL001',
         'legacy_attendance_code' => 'KJA-OLD0001',
@@ -179,9 +186,8 @@ test('replacement preserves cai slot and moves mapping to new identity', functio
         ->and($oldParticipation->participant_number)->toBeNull()
         ->and($oldParticipation->attendance_code)->toBeNull()
 
-        // Mapping sekarang menunjuk identitas baru.
+        // Mapping peserta↔Person menunjuk person baru.
         ->and($mapping->person_id)->toBe($result['person']->id)
-        ->and($mapping->participation_id)->toBe($result['participation']->id)
 
         // Participation baru mengambil identifier slot.
         ->and($result['participation']->participant_number)->toBe('KL001')
@@ -262,9 +268,12 @@ test('replacement transaction rolls back when new person creation fails', functi
         ->and($oldParticipation->attendance_code)->toBe('KJA-OLD0001')
 
         // Mapping tidak boleh berubah.
-        ->and($mapping->person_id)->toBe($fixture['oldPerson']->id)
-        ->and($mapping->participation_id)->toBe($fixture['oldParticipation']->id)
+        ->and($mapping->person_id)->toBe($fixture['oldPerson']->id);
 
-        // Tidak boleh ada audit replacement.
-        ->and(CaiParticipantReplacement::count())->toBe(0);
+    $participationMapping = LegacyParticipationMapping::where('peserta_id', $mapping->peserta_id)->first();
+    expect($participationMapping)->not->toBeNull()
+        ->and($participationMapping->participation_id)->toBe($fixture['oldParticipation']->id);
+
+    // Tidak boleh ada audit replacement.
+    expect(CaiParticipantReplacement::count())->toBe(0);
 });

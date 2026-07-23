@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -52,11 +53,16 @@ function s41_seedParticipant(array $participantOverrides = [], array $personOver
     LegacyPesertaMapping::create([
         'peserta_id' => $participant->id,
         'person_id' => $person->id,
-        'participation_id' => $participation->id,
-        'event_id' => $event->id,
         'legacy_nip' => $participant->nip,
         'legacy_participant_number' => $participant->participant_number,
         'legacy_attendance_code' => $participant->attendance_code,
+        'migrated_at' => now(),
+    ]);
+    LegacyParticipationMapping::create([
+        'peserta_id' => $participant->id,
+        'person_id' => $person->id,
+        'participation_id' => $participation->id,
+        'event_id' => $event->id,
         'migrated_at' => now(),
     ]);
 
@@ -96,7 +102,8 @@ test('same person across multiple events keeps each participation stable on lega
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KL101', 'attendance_code' => 'KJA-S41A01', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KL102', 'attendance_code' => 'KJA-S41B01', 'jenis_peserta' => 'Wajib']);
     $legacyA = peserta::create(['nama' => 'Legacy A', 'nip' => 5001, 'participant_number' => 'KL101', 'attendance_code' => 'KJA-S41A01', 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'status_registrasi' => 'Belum Registrasi']);
-    LegacyPesertaMapping::create(['peserta_id' => $legacyA->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'legacy_nip' => 5001, 'legacy_participant_number' => 'KL101', 'legacy_attendance_code' => 'KJA-S41A01', 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $legacyA->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'migrated_at' => now()]);
+    LegacyPesertaMapping::create(['peserta_id' => $legacyA->id, 'person_id' => $person->id, 'legacy_nip' => 5001, 'legacy_participant_number' => 'KL101', 'legacy_attendance_code' => 'KJA-S41A01', 'migrated_at' => now()]);
     app(ActiveEventContext::class)->set($eventA);
 
     app(RegistrationService::class)->updateParticipant($legacyA->id, [
@@ -134,11 +141,12 @@ test('registration service still creates normalized participant bundle', functio
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
-    $mapping = LegacyPesertaMapping::with('participation.person')->where('peserta_id', $participant->id)->first();
+    $bridge = LegacyParticipationMapping::with('participation.person')->where('peserta_id', $participant->id)->first();
+    $mapping = LegacyPesertaMapping::with('person')->where('peserta_id', $participant->id)->first();
 
     expect($participant->participant_number)->toBe('KP001')
         ->and($participant->attendance_code)->toBe('KJA-S41AAAA1')
-        ->and($mapping?->participation?->participant_number)->toBe('KP001')
-        ->and($mapping?->participation?->attendance_code)->toBe('KJA-S41AAAA1')
+        ->and($bridge?->participation?->participant_number)->toBe('KP001')
+        ->and($bridge?->participation?->attendance_code)->toBe('KJA-S41AAAA1')
         ->and($mapping?->person?->nama)->toBe('Fresh Registrant');
 });

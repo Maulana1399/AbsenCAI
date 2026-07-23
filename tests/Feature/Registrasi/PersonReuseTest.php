@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -92,7 +93,7 @@ test('Case B routing reaches RegistrationService but legacy UNIQUE constraint ma
 
         // No partial records from Event B
         expect(Participation::where('event_id', $eventB->id)->count())->toBe(0);
-        expect(LegacyPesertaMapping::where('event_id', $eventB->id)->count())->toBe(0);
+        expect(LegacyParticipationMapping::where('event_id', $eventB->id)->count())->toBe(0);
         expect(peserta::count())->toBe(1); // Only the Event A peserta
     }
 });
@@ -190,5 +191,7 @@ test('legacy mapping points to correct Participation and Event', function () {
     $person = Person::where('nama', 'Mapping Check')->first();
     $mapping = LegacyPesertaMapping::where('person_id', $person->id)->first();
     expect($mapping)->not->toBeNull();
-    expect((int)$mapping->participation->event_id)->toBe((int)$this->eventA->id);
+    $bridge = LegacyParticipationMapping::where('person_id', $person->id)->first();
+    expect($bridge)->not->toBeNull();
+    expect((int)$bridge->participation->event_id)->toBe((int)$this->eventA->id);
 });

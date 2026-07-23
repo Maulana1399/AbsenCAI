@@ -7,6 +7,7 @@ use App\Models\ActivityRegistration;
 use App\Models\EventAttendance;
 use App\Models\EventCommitteeAssignment;
 use App\Models\IzinAbsensi;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\peserta;
 use App\Models\SuratIzin;
@@ -20,13 +21,23 @@ class CaiParticipantReplacementService
 {
     public function assertReplaceable(peserta $peserta): LegacyPesertaMapping
     {
-        $mapping = LegacyPesertaMapping::query()
+        $pesertaMapping = LegacyPesertaMapping::query()
             ->where('peserta_id', $peserta->id)
             ->first();
 
-        if (! $mapping) {
+        if (! $pesertaMapping) {
             throw new RuntimeException(
                 'Peserta belum memiliki mapping identitas V2 dan tidak dapat diganti.'
+            );
+        }
+
+        $participationMapping = LegacyParticipationMapping::query()
+            ->where('peserta_id', $peserta->id)
+            ->first();
+
+        if (! $participationMapping) {
+            throw new RuntimeException(
+                'Peserta belum memiliki mapping partisipasi dan tidak dapat diganti.'
             );
         }
 
@@ -50,7 +61,7 @@ class CaiParticipantReplacementService
 
         if (
             ActivityRegistration::query()
-                ->where('participation_id', $mapping->participation_id)
+                ->where('participation_id', $participationMapping->participation_id)
                 ->exists()
         ) {
             throw new RuntimeException(
@@ -60,7 +71,7 @@ class CaiParticipantReplacementService
 
         if (
             EventAttendance::query()
-                ->where('participation_id', $mapping->participation_id)
+                ->where('participation_id', $participationMapping->participation_id)
                 ->exists()
         ) {
             throw new RuntimeException(
@@ -70,10 +81,10 @@ class CaiParticipantReplacementService
 
         if (
             EventCommitteeAssignment::query()
-                ->where(function ($query) use ($mapping) {
+                ->where(function ($query) use ($participationMapping, $pesertaMapping) {
                     $query
-                        ->where('participation_id', $mapping->participation_id)
-                        ->orWhere('person_id', $mapping->person_id);
+                        ->where('participation_id', $participationMapping->participation_id)
+                        ->orWhere('person_id', $pesertaMapping->person_id);
                 })
                 ->exists()
         ) {
@@ -82,7 +93,7 @@ class CaiParticipantReplacementService
             );
         }
 
-        return $mapping;
+        return $pesertaMapping;
     }
     public function replace(
     peserta $peserta,
@@ -103,8 +114,14 @@ class CaiParticipantReplacementService
                 ->findOrFail($peserta->id);
 
             // Validasi ulang DI DALAM transaction.
-            $mapping = $this->assertReplaceable($peserta);
-            $event = \App\Models\Event::findOrFail($mapping->event_id);
+            $pesertaMapping = $this->assertReplaceable($peserta);
+
+            $participationMapping = LegacyParticipationMapping::query()
+                ->where('peserta_id', $peserta->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $event = \App\Models\Event::findOrFail($participationMapping->event_id);
 
             if (! $event->isCai()) {
                 throw new RuntimeException(
@@ -114,11 +131,11 @@ class CaiParticipantReplacementService
 
             $oldPerson = Person::query()
                 ->lockForUpdate()
-                ->findOrFail($mapping->person_id);
+                ->findOrFail($pesertaMapping->person_id);
 
             $oldParticipation = Participation::query()
                 ->lockForUpdate()
-                ->findOrFail($mapping->participation_id);
+                ->findOrFail($participationMapping->participation_id);
 
             /*
             * Simpan identitas slot CAI.
@@ -170,7 +187,7 @@ class CaiParticipantReplacementService
             */
             $newParticipation = Participation::create([
                 'person_id' => $newPerson->id,
-                'event_id' => $mapping->event_id,
+                'event_id' => $participationMapping->event_id,
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
                 'jenis_peserta' => $peserta->jenis_peserta,
@@ -189,18 +206,33 @@ class CaiParticipantReplacementService
             ]);
 
             /*
-            * Mapping legacy sekarang menunjuk Person + Participation baru.
+            * Mapping legacy peserta↔Person menunjuk Person baru.
             */
-            $mapping->update([
+            $pesertaMapping->update([
+                'person_id' => $newPerson->id,
+            ]);
+
+            /*
+            * Hapus mapping partisipasi lama.
+            */
+            $participationMapping->delete();
+
+            /*
+            * Mapping partisipasi baru untuk Participation baru.
+            */
+            LegacyParticipationMapping::create([
+                'peserta_id' => $peserta->id,
                 'person_id' => $newPerson->id,
                 'participation_id' => $newParticipation->id,
+                'event_id' => $participationMapping->event_id,
+                'migrated_at' => now(),
             ]);
 
             /*
             * Catat audit trail replacement.
             */
             $replacement = CaiParticipantReplacement::create([
-                'event_id' => $mapping->event_id,
+                'event_id' => $participationMapping->event_id,
                 'peserta_id' => $peserta->id,
 
                 'old_person_id' => $oldPerson->id,
@@ -226,7 +258,7 @@ class CaiParticipantReplacementService
                 'peserta' => $peserta->fresh(),
                 'person' => $newPerson->fresh(),
                 'participation' => $newParticipation->fresh(),
-                'mapping' => $mapping->fresh(),
+                'mapping' => $pesertaMapping->fresh(),
                 'replacement' => $replacement,
             ];
         });

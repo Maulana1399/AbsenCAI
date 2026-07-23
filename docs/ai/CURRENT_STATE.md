@@ -63,11 +63,12 @@ Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIE
   - Migration: kelompok_id to people table, event_type to events table
 - PGM.17 Pilot Release ✅ COMPLETE — UI interaction remediation (invisible controls, modal close, dark mode, mobile responsiveness). Full suite: 1570 passed / 3803 assertions / 0 failures. Design C diagnostic: problem_total = 0.
 - **PGM.18 Sprint 1 ✅ COMPLETE** — Legacy historical tooling removal (6 commands, 4 services, 4 test files, 2 partial test refactors). Design C diagnostic contract fixed (NULL participation_id no longer counted as broken reference). Full suite: 1494 passed / 3581 assertions / 0 failures. Design C diagnostic: problem_total = 0. Sprint 1 removed 76 tests (historical tooling coverage intentionally deleted) + added 1 regression test = net -75 tests from PGM.17 baseline. Not a regression.
-
-**UI Bug Fix Sprint** — All batches RESOLVED VERIFIED ✅.
-
-**Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
-Sprint 2 remaining scope (Riwayat Izin, Scoring, Storage) **DEFERRED to 2027**.
+- **PGM.18 Sprint 2 ✅ COMPLETE** — Legacy mapping contract refactoring. LegacyPesertaMapping contract narrowed to peserta↔Person only. LegacyParticipationMapping confirmed as sole event-specific bridge. Full suite: 1499 passed / 3592 assertions / 0 failures. Design C: problem_total = 0. Fixed 6 regression failures, 1 parse error, 3 stale contract references. Genuine production regression found and fixed (QR label single print route).
+ 
+ **UI Bug Fix Sprint** — All batches RESOLVED VERIFIED ✅.
+ 
+ **Runtime architecture unchanged for legacy compatibility** — `pesertas` and `LegacyPesertaMapping` remain intentional compatibility bridges.
+ Sprint 3 proposed scope: Drop legacy columns, remove deprecated relationships, finalize PGM.18 completion.
 
 ---
 
@@ -223,7 +224,8 @@ Priority saat ini:
 2. **Database V2 Part 5 CLOSED** ✅ — Documentation synchronized; semantic coverage audited.
 3. **PGM.18 Sprint 1 ✅ COMPLETE** — Legacy historical tooling removed, Design C diagnostic contract fixed. Verified: 1494 passed / 3581 assertions / 0 failures, Design C: problem_total = 0.
 4. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
-5. **PGM.18 Sprint 2** — PLANNING / AUDIT REQUIRED. Database masih memiliki 143 peserta legacy sehingga strategi legacy dependency remediation perlu diaudit ulang.
+5. **PGM.18 Sprint 2 ✅ COMPLETE** — Mapping contract refactored, fully verified (1499/3592/0).
+6. **PGM.18 Sprint 3 📋 PROPOSED** — Drop legacy columns, remove deprecated relationships, finalize PGM.18 completion.
 
 ## Database V2 Part 5 Closure
 
@@ -232,7 +234,7 @@ Priority saat ini:
 - 5C CaiParticipantReplacement: COMPLETE
 - 5D HapusPeserta: COMPLETE
 - Final Design C: Person = global canonical identity; Participation = event-scoped membership; peserta = global legacy mirror; LegacyPesertaMapping = single global compatibility mapping; LegacyParticipationMapping = event-aware compatibility bridge
-- Deletion limitation remains intentional because `legacy_peserta_mappings.participation_id` is NOT NULL + `restrictOnDelete`
+- Deletion limitation remains intentional because `legacy_peserta_mappings.participation_id` is NOT NULL + `restrictOnDelete` (NOTE: Sprint 2 refactored contract — `LegacyPesertaMapping` no longer depends on `participation_id`, but model and DB column are retained; drop requires Sprint 3)
 - Technical debt remains: legacy participation pointer redesign/nullability, status_registrasi event-scoping, regu_id event-scoping, legacy Absensi/IzinAbsensi event ambiguity, legacy participant_number mirror dependency
 - Test delta note: exact historical -2 tests / +16 assertions cannot be reconstructed because relevant Part 5 tests were untracked during development; current semantic coverage audited and no known critical Design C coverage is missing
 
@@ -314,7 +316,7 @@ Database: SQLite
 - Login page still uses CAI branding — needs KJA Event Manager rebrand
 - No hard-delete for revoked DesaAccessGrants — only soft revocation
 - `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
-- Test suite: 1494 passed, 3581 assertions, 0 failures (post-PGM.18 Sprint 1). Penurunan 76 test dari baseline 1570 adalah EXPECTED karena historical backfill tooling dan test terkait sengaja dihapus. Satu regression test baru (diagnostic contract) membuat delta final -75.
+- Test suite: 1499 passed, 3592 assertions, 0 failures (post-PGM.18 Sprint 2). Increase from Sprint 1: +5 tests, +11 assertions (refactored LegacyPesertaMapping test coverage added back). Baseline Sprint 1: 1494/3581/0. Baseline PGM.17: 1570/3803/0 (difference expected — Sprint 1 intentionally removed 75 tests).
 
 ---
 
@@ -324,7 +326,7 @@ Database: SQLite
 
 Priority: **HIGH**
 
-Status: **IN PROGRESS**
+Status: **✅ COMPLETE (Sprint 1 + Sprint 2)**
 
 ## Sprint 1 ✅ COMPLETE
 
@@ -356,21 +358,40 @@ Database snapshot during Sprint 1 audit (2026-07-22):
 
 The 143 LegacyPesertaMapping records with NULL participation_id are NOT Design C violations. This state is valid according to current schema (nullable FK with nullOnDelete). Database tidak benar-benar kosong saat Sprint 1 dieksekusi.
 
-## Sprint 2 — PLANNING / AUDIT REQUIRED
+## Sprint 2 ✅ COMPLETE
 
-Database ternyata masih memiliki 143 data peserta legacy sehingga strategi penghapusan legacy berikutnya harus mempertimbangkan data tersebut.
+Scope: Legacy Mapping Contract Refactoring — narrowing LegacyPesertaMapping to peserta↔Person only.
 
-Audit items needed before Sprint 2:
-1. Apakah 143 peserta legacy masih perlu dipertahankan
-2. Apakah data tersebut akan digunakan untuk event berikutnya
-3. Apakah Person canonical sudah cukup untuk menggantikan peserta
-4. Apakah LegacyPesertaMapping masih dibutuhkan
-5. Apakah LegacyParticipationMapping masih dibutuhkan
-6. Apakah ATTENDANCE_LEGACY_WRITE default bisa diubah ke false
-7. Apakah legacy attendance read fallback masih diperlukan
-8. Apakah status_registrasi harus dipindah ke Participation
-9. Apakah regu_id harus dipindah ke Participation
-10. Urutan aman penghapusan dependency legacy berikutnya
+Delivered:
+- **Contract refactored**: LegacyPesertaMapping = global bridge peserta↔Person only
+- **LegacyParticipationMapping confirmed**: sole event-specific bridge (event_id + peserta_id ↔ participation)
+- **Foundation test refactored**: 22 → 14 tests (10 kept, 8 removed, 4 refactored). Factory/fixture now defaults to peserta_id + person_id only.
+- **6 regression failures fixed** (4 Activity Foundation tests, CaiParticipantReplacementTest, PrintLogTest)
+- **1 parse error fixed** in CaiParticipantReplacementTest (missing semicolon)
+- **3 stale contract references fixed** (PersonReuseTest, MultiEventValidationRoutingTest, DesignCDiagnosticsTest)
+- **1 genuine production regression found and fixed**: QR label single print route — handler depended on `participation_id` via `$participant->legacyPesertaMapping()`, which returned NULL after Sprint 2 fixture refactor. Fixed by resolving via `LegacyParticipationMapping`.
+- **Model audit completed**: `participation()`, `event()` relationships and `participation_id`, `event_id`, `backfill_batch_id` in `$fillable` are DEPRECATED but retained (Sprint 3 target)
+- **Production zero-reference audit**: All LegacyPesertaMapping deprecated columns — 0 explicit production references ✅
+- **6 implicit references via `Participation::legacyPesertaMapping()`** documented as Sprint 3 blockers (4 Livewire files)
+
+Verified externally:
+- Full suite: 1499 passed / 3592 assertions / 0 failures (increase from Sprint 1: +5 tests, +11 assertions)
+- Design C: problem_total = 0
+
+## Sprint 3 📋 PROPOSED SCOPE
+
+Scope: Drop legacy columns, remove deprecated relationships, finalize PGM.18 completion.
+
+Proposed deliverables:
+1. **Column drop**: `participation_id`, `event_id`, `backfill_batch_id` from `legacy_peserta_mappings` table
+2. **Model cleanup**: Remove deprecated `participation()`, `event()` relationships and `$fillable` entries from LegacyPesertaMapping model
+3. **Production cleanup**: Migrate 6 implicit references via `Participation::legacyPesertaMapping()` to `LegacyParticipationMapping` (4 Livewire files: CaiParticipantReplacement, HapusPeserta, PesertaImport, EditPeserta)
+4. **Database migration**: One migration to drop 3 columns + update any code referencing them
+5. **Repeat full suite verification**: Expect same baseline (1499/3592/0) — no test removal this sprint
+
+Blockers before Sprint 3 can begin:
+- Must wait for user to accept proposed scope
+- Must be executed on machine with PHP runtime (not available here)
 
 Architecture source: `docs/DATABASE_V2.md`, `docs/DATABASE.md`, `docs/DECISION.md`.
 

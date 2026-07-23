@@ -5,6 +5,7 @@ use App\Livewire\Dashboard\Scan;
 use App\Models\Absensi;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\peserta;
@@ -33,7 +34,8 @@ function scanTest_makeMappedLegacyPeserta(array $overrides, Event $event): array
     ], $overrides));
     $person = Person::create(['nama' => $participant->nama, 'nip' => $participant->nip, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'attendance_code' => $participant->attendance_code, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'legacy_nip' => $participant->nip, 'legacy_participant_number' => $participant->participant_number, 'legacy_attendance_code' => $participant->attendance_code, 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $participant->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
     return [$participant, $person, $participation];
 }
 

@@ -86,4 +86,9 @@ class peserta extends Model
     {
         return $this->hasOne(LegacyPesertaMapping::class, 'peserta_id');
     }
+
+    public function legacyParticipationMappings()
+    {
+        return $this->hasMany(LegacyParticipationMapping::class, 'peserta_id');
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Services\Attendance;
 
-use App\Models\LegacyPesertaMapping;
+use App\Models\LegacyParticipationMapping;
 use App\Models\SuratIzin;
 use App\Models\peserta;
 
@@ -47,7 +47,7 @@ class SuratIzinBackfillService
                 $eventId = $surat->event_id;
 
                 if ($eventId === null) {
-                    $mapping = LegacyPesertaMapping::where('peserta_id', $peserta->id)->first();
+                    $mapping = LegacyParticipationMapping::where('peserta_id', $peserta->id)->first();
                     $eventId = $mapping?->event_id;
                 }
 
@@ -116,7 +116,7 @@ class SuratIzinBackfillService
                 $eventId = $surat->event_id;
 
                 if ($eventId === null) {
-                    $mapping = LegacyPesertaMapping::where('peserta_id', $peserta->id)->first();
+                    $mapping = LegacyParticipationMapping::where('peserta_id', $peserta->id)->first();
                     $eventId = $mapping?->event_id;
                 }
 

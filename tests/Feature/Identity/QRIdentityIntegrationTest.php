@@ -2,6 +2,7 @@
 
 use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -56,6 +57,10 @@ it('QR label print route encodes attendance code and keeps participant number as
         'jenis_kelamin' => 'Laki - Laki',
     ]);
     LegacyPesertaMapping::create([
+        'peserta_id' => $legacy->id,
+        'person_id' => $person->id,
+    ]);
+    LegacyParticipationMapping::create([
         'peserta_id' => $legacy->id,
         'person_id' => $person->id,
         'participation_id' => $participant->id,

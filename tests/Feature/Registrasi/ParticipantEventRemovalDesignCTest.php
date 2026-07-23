@@ -40,7 +40,7 @@ function per_fixture(): array
     $legacy = peserta::create(['nama' => 'Remove Person', 'nip' => 99001, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KA001', 'attendance_code' => 'KJA-PERA001', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KB001', 'attendance_code' => 'KJA-PERB001', 'jenis_peserta' => 'Wajib']);
-    $mapping = LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'legacy_nip' => 99001, 'legacy_participant_number' => 'KL001', 'legacy_attendance_code' => 'KJA-PERLEG1', 'migrated_at' => now()]);
+    $mapping = LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => 99001, 'legacy_participant_number' => 'KL001', 'legacy_attendance_code' => 'KJA-PERLEG1', 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partB->id, 'event_id' => $eventB->id, 'migrated_at' => now()]);
 
@@ -56,7 +56,7 @@ function per_single_fixture(): array
     $person = Person::create(['nama' => 'Remove Single', 'nip' => 99011, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
     $legacy = peserta::create(['nama' => 'Remove Single', 'nip' => 99011, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KA101', 'attendance_code' => 'KJA-SINGLEA01', 'jenis_peserta' => 'Wajib']);
-    $mapping = LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'legacy_nip' => 99011, 'legacy_participant_number' => 'KL101', 'legacy_attendance_code' => 'KJA-SINGLELEG1', 'migrated_at' => now()]);
+    $mapping = LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => 99011, 'legacy_participant_number' => 'KL101', 'legacy_attendance_code' => 'KJA-SINGLELEG1', 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'migrated_at' => now()]);
 
     return compact('desa', 'kelompok', 'regu', 'eventA', 'person', 'legacy', 'partA', 'mapping');
@@ -68,19 +68,19 @@ beforeEach(function () {
 
 // ... existing tests unchanged ...
 
-test('last participation removal is blocked under current schema', function () {
+test('single last participation can be removed', function () {
     $fixture = per_single_fixture();
     app(ActiveEventContext::class)->set($fixture['eventA']);
 
     Livewire::test(HapusPeserta::class)
         ->dispatch('HapusPeserta', id: $fixture['partA']->id)
-        ->assertSet('canDelete', false)
-        ->assertSet('blockReason', fn ($value) => str_contains($value, 'legacy'));
+        ->assertSet('canDelete', true)
+        ->call('destroy');
 
-    expect(Person::find($fixture['person']->id))->not->toBeNull()
+    expect(Participation::find($fixture['partA']->id))->toBeNull()
+        ->and(Person::find($fixture['person']->id))->not->toBeNull()
         ->and(peserta::find($fixture['legacy']->id))->not->toBeNull()
-        ->and(Participation::find($fixture['partA']->id))->not->toBeNull()
-        ->and(LegacyParticipationMapping::find($fixture['mapping']->id))->not->toBeNull()
+        ->and(LegacyParticipationMapping::where('peserta_id', $fixture['legacy']->id)->count())->toBe(0)
         ->and(LegacyPesertaMapping::find($fixture['mapping']->id))->not->toBeNull();
 });
 

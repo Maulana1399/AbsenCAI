@@ -2,6 +2,7 @@
 
 use App\Livewire\Database\Peserta\Database;
 use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -30,7 +31,8 @@ test('daftar peserta shows only active event participations', function () {
     $legacy = peserta::create(['nama' => 'Legacy Only', 'nip' => 91003, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'regu_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $partA = Participation::create(['person_id' => $personA->id, 'event_id' => $eventA->id, 'participant_number' => 'PA001', 'attendance_code' => 'KJA-PD-A001', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $personB->id, 'event_id' => $eventB->id, 'participant_number' => 'PB001', 'attendance_code' => 'KJA-PD-B001', 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $personB->id, 'participation_id' => $partB->id, 'event_id' => $eventB->id, 'legacy_nip' => 91003, 'legacy_participant_number' => 'PL001', 'legacy_attendance_code' => 'KJA-PD-L001', 'migrated_at' => now()]);
+    LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $personB->id, 'legacy_nip' => 91003, 'legacy_participant_number' => 'PL001', 'legacy_attendance_code' => 'KJA-PD-L001', 'migrated_at' => now()]);
+    LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $personB->id, 'participation_id' => $partB->id, 'event_id' => $eventB->id, 'migrated_at' => now()]);
 
     app(ActiveEventContext::class)->set($eventA);
 

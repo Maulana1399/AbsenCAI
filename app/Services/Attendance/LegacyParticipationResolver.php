@@ -17,17 +17,8 @@ class LegacyParticipationResolver
             ->where('event_id', $eventId)
             ->first();
 
-        if ($mapping?->participation && (int) $mapping->participation->event_id === (int) $eventId) {
-            return $mapping->participation;
-        }
-
-        $legacy = LegacyPesertaMapping::with(['participation.person', 'peserta', 'event'])
-            ->where('peserta_id', $pesertaId)
-            ->where('event_id', $eventId)
-            ->first();
-
-        return ($legacy?->participation && (int) $legacy->participation->event_id === (int) $eventId)
-            ? $legacy->participation
+        return ($mapping?->participation && (int) $mapping->participation->event_id === (int) $eventId)
+            ? $mapping->participation
             : null;
     }
 
@@ -38,17 +29,8 @@ class LegacyParticipationResolver
             ->where('event_id', $eventId)
             ->first();
 
-        if ($mapping?->participation && (int) $mapping->participation->event_id === (int) $eventId) {
-            return $mapping->participation;
-        }
-
-        $legacy = LegacyPesertaMapping::with(['participation.person', 'peserta', 'event'])
-            ->where('person_id', $personId)
-            ->where('event_id', $eventId)
-            ->first();
-
-        return ($legacy?->participation && (int) $legacy->participation->event_id === (int) $eventId)
-            ? $legacy->participation
+        return ($mapping?->participation && (int) $mapping->participation->event_id === (int) $eventId)
+            ? $mapping->participation
             : null;
     }
 
@@ -62,13 +44,7 @@ class LegacyParticipationResolver
             return $mapping->participation;
         }
 
-        $legacy = LegacyPesertaMapping::with(['participation', 'person', 'peserta', 'event'])
-            ->where('participation_id', $participationId)
-            ->first();
-
-        return ($legacy?->participation && ($eventId === null || (int) $legacy->event_id === (int) $eventId))
-            ? $legacy->participation
-            : null;
+        return null;
     }
 
     public function resolveByLegacyAttendanceCode(string $identifier, int $eventId): ?Participation
@@ -84,14 +60,7 @@ class LegacyParticipationResolver
             return $mapping->participation;
         }
 
-        $legacy = LegacyPesertaMapping::with(['participation.person', 'peserta', 'event'])
-            ->where('event_id', $eventId)
-            ->whereRaw('LOWER(legacy_attendance_code) = ?', [$code])
-            ->first();
-
-        return ($legacy?->participation && (int) $legacy->participation->event_id === (int) $eventId)
-            ? $legacy->participation
-            : null;
+        return null;
     }
 
     public function resolveByLegacyNip(string|int $nip, int $eventId): ?Participation
@@ -111,13 +80,7 @@ class LegacyParticipationResolver
             return $mapping->peserta;
         }
 
-        $legacy = LegacyPesertaMapping::with(['peserta', 'participation', 'person', 'event'])
-            ->where('participation_id', $participationId)
-            ->first();
-
-        return ($legacy?->participation && ($eventId === null || (int) $legacy->event_id === (int) $eventId))
-            ? $legacy->peserta
-            : null;
+        return null;
     }
 
     public function resolvePersonByPesertaId(int $pesertaId): ?Person

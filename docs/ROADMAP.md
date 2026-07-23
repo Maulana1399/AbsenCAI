@@ -618,7 +618,7 @@ Next checkpoint:
 - PGM.16 completed (Pengajian UX, Contextual Navigation, Bulk Import)
 - PGM.17 Pilot Release — UI interaction remediation COMPLETE
 - PGM.18 Sprint 1 ✅ COMPLETE — Legacy historical tooling removed, Design C diagnostic contract fixed
-- PGM.18 Sprint 2 — PLANNING / AUDIT REQUIRED (database masih memiliki 143 peserta legacy, strategi perlu diaudit ulang)
+- PGM.18 Sprint 2 ✅ COMPLETE — Mapping contract refactored, 1499 passed / 3592 assertions / 0 failures
 
 ---
 
@@ -1100,8 +1100,10 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 6. **Pengajian Desa MVP** — PGM.12–PGM.17 ✅ Complete.
 7. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
 8. **S01–S04 Foundation** ✅ Complete
-9. **Competition** (future sprint)
-10. **Commercial** (future sprint)
+9. **PGM.18 Sprint 2** ✅ COMPLETE — Mapping contract refactored, fully verified (1499/3592/0)
+10. **PGM.18 Sprint 3** 📋 PROPOSED — Drop legacy columns, remove deprecated relationships, finalize PGM.18 completion
+11. **Competition** (future sprint)
+12. **Commercial** (future sprint)
 ```
 
 ---

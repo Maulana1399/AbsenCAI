@@ -68,8 +68,6 @@ function epj_fixtures(): array
     LegacyPesertaMapping::create([
         'peserta_id' => $legacyPeserta->id,
         'person_id' => $person->id,
-        'participation_id' => $participationA->id,
-        'event_id' => $eventA->id,
         'legacy_nip' => 95001,
         'legacy_participant_number' => 'KL950',
         'legacy_attendance_code' => 'KJA-EPJ001',
@@ -359,8 +357,6 @@ test('duplicate names can be disambiguated without automatic merge', function ()
     LegacyPesertaMapping::create([
         'peserta_id' => $legacyPesertaA->id,
         'person_id' => $personA->id,
-        'participation_id' => $participationA->id,
-        'event_id' => $sourceEventA->id,
         'legacy_nip' => 96001,
         'legacy_participant_number' => 'KL960',
         'legacy_attendance_code' => 'KJA-DIS-A01',
@@ -370,8 +366,6 @@ test('duplicate names can be disambiguated without automatic merge', function ()
     LegacyPesertaMapping::create([
         'peserta_id' => $legacyPesertaB->id,
         'person_id' => $personB->id,
-        'participation_id' => $participationB->id,
-        'event_id' => $sourceEventB->id,
         'legacy_nip' => 96002,
         'legacy_participant_number' => 'KL961',
         'legacy_attendance_code' => 'KJA-DIS-B01',

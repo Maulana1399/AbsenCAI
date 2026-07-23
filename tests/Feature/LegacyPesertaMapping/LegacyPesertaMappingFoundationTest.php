@@ -1,8 +1,6 @@
 <?php
 
-use App\Models\Event;
 use App\Models\LegacyPesertaMapping;
-use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,50 +24,14 @@ function LPesertaMappingFactory_makePerson(array $overrides = []): Person
     ], $overrides));
 }
 
-function LPesertaMappingFactory_makeEvent(array $overrides = []): Event
-{
-    return Event::create(array_merge([
-        'name' => 'Test Event',
-        'slug' => 'test-event-' . str()->random(6),
-        'status' => 'active',
-    ], $overrides));
-}
-
-function LPesertaMappingFactory_makeParticipation(array $overrides = []): Participation
-{
-    static $personCounter = 0;
-    static $eventCounter = 0;
-    $personCounter++;
-    $eventCounter++;
-
-    if (! array_key_exists('person_id', $overrides)) {
-        $overrides['person_id'] = LPesertaMappingFactory_makePerson(['nama' => 'Person '.$personCounter])->id;
-    }
-
-    if (! array_key_exists('event_id', $overrides)) {
-        $overrides['event_id'] = LPesertaMappingFactory_makeEvent(['name' => 'Event '.$eventCounter])->id;
-    }
-
-    return Participation::create(array_merge([
-        'jenis_peserta' => 'Wajib',
-    ], $overrides));
-}
-
 function LPesertaMappingFactory_makeMapping(array $overrides = []): LegacyPesertaMapping
 {
     $pesertaId = $overrides['peserta_id'] ?? LPesertaMappingFactory_makePeserta()->id;
     $personId = $overrides['person_id'] ?? LPesertaMappingFactory_makePerson()->id;
-    $eventId = $overrides['event_id'] ?? LPesertaMappingFactory_makeEvent()->id;
-    $participationId = $overrides['participation_id'] ?? LPesertaMappingFactory_makeParticipation([
-        'person_id' => $personId,
-        'event_id' => $eventId,
-    ])->id;
 
     return LegacyPesertaMapping::create(array_merge([
         'peserta_id' => $pesertaId,
         'person_id' => $personId,
-        'participation_id' => $participationId,
-        'event_id' => $eventId,
         'legacy_nip' => 5001,
         'legacy_participant_number' => 'LEGACY-001',
         'legacy_attendance_code' => 'LEGACY-ATT-001',
@@ -78,39 +40,43 @@ function LPesertaMappingFactory_makeMapping(array $overrides = []): LegacyPesert
 }
 
 // ---------------------------------------------------------------------------
-// Schema
+// Schema — transitional (inert columns still physically present)
 // ---------------------------------------------------------------------------
 
 test('legacy_peserta_mappings table has expected columns', function () {
     $columns = Schema::getColumnListing('legacy_peserta_mappings');
-    $expected = [
-        'id', 'peserta_id', 'person_id', 'participation_id', 'event_id',
-        'backfill_batch_id', 'legacy_nip', 'legacy_participant_number',
-        'legacy_attendance_code', 'migrated_at', 'created_at', 'updated_at',
-    ];
 
-    expect($columns)->toMatchArray($expected);
+    // Active contract columns
+    expect(in_array('id', $columns))->toBeTrue();
+    expect(in_array('peserta_id', $columns))->toBeTrue();
+    expect(in_array('person_id', $columns))->toBeTrue();
+
+    // Sprint 2 transitional: inert columns berikut masih ada secara fisik
+    // tetapi BUKAN runtime contract — dijadwalkan removal Sprint 3.
+    expect(in_array('participation_id', $columns))->toBeTrue();
+    expect(in_array('event_id', $columns))->toBeTrue();
+    expect(in_array('backfill_batch_id', $columns))->toBeTrue();
+
+    // Snapshot / metadata columns
+    expect(in_array('legacy_nip', $columns))->toBeTrue();
+    expect(in_array('legacy_participant_number', $columns))->toBeTrue();
+    expect(in_array('legacy_attendance_code', $columns))->toBeTrue();
+    expect(in_array('migrated_at', $columns))->toBeTrue();
+    expect(in_array('created_at', $columns))->toBeTrue();
+    expect(in_array('updated_at', $columns))->toBeTrue();
 });
 
 // ---------------------------------------------------------------------------
 // Model creation
 // ---------------------------------------------------------------------------
 
-test('can create a mapping with all fields', function () {
+test('can create a mapping with active contract fields', function () {
     $peserta = LPesertaMappingFactory_makePeserta();
     $person = LPesertaMappingFactory_makePerson();
-    $event = LPesertaMappingFactory_makeEvent();
-    $participation = LPesertaMappingFactory_makeParticipation([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-    ]);
 
     $mapping = LegacyPesertaMapping::create([
         'peserta_id' => $peserta->id,
         'person_id' => $person->id,
-        'participation_id' => $participation->id,
-        'event_id' => $event->id,
-        'backfill_batch_id' => 'batch-001',
         'legacy_nip' => 1234,
         'legacy_participant_number' => 'LEG-001',
         'legacy_attendance_code' => 'LEG-ATT-001',
@@ -118,17 +84,10 @@ test('can create a mapping with all fields', function () {
     ]);
 
     expect($mapping->exists)->toBeTrue()
-        ->and($mapping->backfill_batch_id)->toBe('batch-001')
         ->and($mapping->legacy_nip)->toBe(1234)
         ->and($mapping->legacy_participant_number)->toBe('LEG-001')
         ->and($mapping->legacy_attendance_code)->toBe('LEG-ATT-001')
         ->and($mapping->migrated_at)->not->toBeNull();
-});
-
-test('backfill_batch_id is nullable', function () {
-    $mapping = LPesertaMappingFactory_makeMapping(['backfill_batch_id' => null]);
-
-    expect($mapping->backfill_batch_id)->toBeNull();
 });
 
 test('snapshot fields are nullable', function () {
@@ -169,23 +128,8 @@ test('mapping belongs to person', function () {
         ->and($mapping->person->nama)->toBe('Test Person');
 });
 
-test('mapping belongs to participation', function () {
-    $mapping = LPesertaMappingFactory_makeMapping();
-
-    expect($mapping->participation)->not->toBeNull()
-        ->and($mapping->participation->exists)->toBeTrue();
-});
-
-test('mapping belongs to event', function () {
-    $mapping = LPesertaMappingFactory_makeMapping();
-
-    expect($mapping->event)->not->toBeNull()
-        ->and($mapping->event->exists)->toBeTrue()
-        ->and($mapping->event->name)->toBe('Test Event');
-});
-
 // ---------------------------------------------------------------------------
-// Inverse hasOne/hasMany relationships
+// Inverse hasOne / hasMany relationships
 // ---------------------------------------------------------------------------
 
 test('peserta has one mapping', function () {
@@ -208,48 +152,6 @@ test('person has one mapping', function () {
         ->and($person->legacyPesertaMapping->person_id)->toBe($person->id);
 });
 
-test('participation has one mapping', function () {
-    $person = LPesertaMappingFactory_makePerson();
-    $event = LPesertaMappingFactory_makeEvent();
-    $participation = LPesertaMappingFactory_makeParticipation([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-    ]);
-    LPesertaMappingFactory_makeMapping([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-        'participation_id' => $participation->id,
-    ]);
-
-    $participation->load('legacyPesertaMapping');
-
-    expect($participation->legacyPesertaMapping)->not->toBeNull()
-        ->and($participation->legacyPesertaMapping->participation_id)->toBe($participation->id);
-});
-
-test('event has many mappings', function () {
-    $event = LPesertaMappingFactory_makeEvent();
-    $pesertaA = LPesertaMappingFactory_makePeserta(['nama' => 'Peserta A']);
-    $pesertaB = LPesertaMappingFactory_makePeserta(['nama' => 'Peserta B']);
-    $personA = LPesertaMappingFactory_makePerson(['nama' => 'Person A']);
-    $personB = LPesertaMappingFactory_makePerson(['nama' => 'Person B']);
-
-    LPesertaMappingFactory_makeMapping([
-        'peserta_id' => $pesertaA->id,
-        'person_id' => $personA->id,
-        'event_id' => $event->id,
-    ]);
-    LPesertaMappingFactory_makeMapping([
-        'peserta_id' => $pesertaB->id,
-        'person_id' => $personB->id,
-        'event_id' => $event->id,
-    ]);
-
-    $event->load('legacyPesertaMappings');
-
-    expect($event->legacyPesertaMappings->count())->toBe(2);
-});
-
 // ---------------------------------------------------------------------------
 // UNIQUE constraints
 // ---------------------------------------------------------------------------
@@ -262,42 +164,23 @@ test('peserta_id must be unique', function () {
         ->toThrow(\Illuminate\Database\QueryException::class);
 });
 
-test('participation_id must be unique', function () {
-    $person = LPesertaMappingFactory_makePerson();
-    $event = LPesertaMappingFactory_makeEvent();
-    $participation = LPesertaMappingFactory_makeParticipation([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-    ]);
-    LPesertaMappingFactory_makeMapping([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-        'participation_id' => $participation->id,
-    ]);
+// ---------------------------------------------------------------------------
+// Mapping integrity
+// ---------------------------------------------------------------------------
 
-    expect(fn () => LPesertaMappingFactory_makeMapping([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-        'participation_id' => $participation->id,
-    ]))->toThrow(\Illuminate\Database\QueryException::class);
-});
-
-test('different peserta can map to different participations', function () {
+test('different peserta can have separate mappings', function () {
     $pesertaA = LPesertaMappingFactory_makePeserta(['nama' => 'Peserta A']);
     $pesertaB = LPesertaMappingFactory_makePeserta(['nama' => 'Peserta B']);
     $personA = LPesertaMappingFactory_makePerson(['nama' => 'Person A']);
     $personB = LPesertaMappingFactory_makePerson(['nama' => 'Person B']);
-    $event = LPesertaMappingFactory_makeEvent();
 
     $mappingA = LPesertaMappingFactory_makeMapping([
         'peserta_id' => $pesertaA->id,
         'person_id' => $personA->id,
-        'event_id' => $event->id,
     ]);
     $mappingB = LPesertaMappingFactory_makeMapping([
         'peserta_id' => $pesertaB->id,
         'person_id' => $personB->id,
-        'event_id' => $event->id,
     ]);
 
     expect($mappingA->exists)->toBeTrue()
@@ -306,7 +189,7 @@ test('different peserta can map to different participations', function () {
 });
 
 // ---------------------------------------------------------------------------
-// RestrictOnDelete — all four FK parents
+// RestrictOnDelete — FK peserta_id and person_id only
 // ---------------------------------------------------------------------------
 
 test('deleting mapped peserta is prevented', function () {
@@ -327,27 +210,6 @@ test('deleting mapped person is prevented', function () {
     expect(LegacyPesertaMapping::count())->toBe(1);
 });
 
-test('deleting mapped participation nullifies FK (SET NULL)', function () {
-    $mapping = LPesertaMappingFactory_makeMapping();
-
-    $participationId = $mapping->participation->id;
-    $mapping->participation->delete();
-
-    expect($mapping->fresh()->participation_id)->toBeNull();
-    expect(LegacyPesertaMapping::count())->toBe(1);
-});
-
-test('deleting mapped event nullifies FK (SET NULL)', function () {
-    $mapping = LPesertaMappingFactory_makeMapping();
-
-    // participations FK blocks event deletion; delete participation first
-    $mapping->participation->delete();
-    $mapping->event->delete();
-
-    expect($mapping->fresh()->event_id)->toBeNull();
-    expect(LegacyPesertaMapping::count())->toBe(1);
-});
-
 // ---------------------------------------------------------------------------
 // Cascade-free guarantee
 // ---------------------------------------------------------------------------
@@ -355,16 +217,9 @@ test('deleting mapped event nullifies FK (SET NULL)', function () {
 test('deleting unmapped entity is unaffected', function () {
     $peserta = LPesertaMappingFactory_makePeserta();
     $person = LPesertaMappingFactory_makePerson();
-    $event = LPesertaMappingFactory_makeEvent();
-    $participation = LPesertaMappingFactory_makeParticipation([
-        'person_id' => $person->id,
-        'event_id' => $event->id,
-    ]);
 
     expect($peserta->delete())->toBeTrue();
-    expect($participation->delete())->toBeTrue();
     expect($person->delete())->toBeTrue();
-    expect($event->delete())->toBeTrue();
 });
 
 // ---------------------------------------------------------------------------
