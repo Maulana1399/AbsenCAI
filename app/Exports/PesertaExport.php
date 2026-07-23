@@ -71,7 +71,6 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
             return [
                 'No' => $index + 1,
                 'Nama' => $person?->nama,
-                'NIP' => $person?->nip,
                 'Jenis Kelamin' => $this->displayGender($person?->jenis_kelamin),
                 'Jenis Peserta' => $participation->jenis_peserta,
                 'Desa' => $person?->desa?->desa_asal ?? '-',
@@ -87,7 +86,6 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
         return [
             'No',
             'Nama',
-            'NIP',
             'Jenis Kelamin',
             'Jenis Peserta',
             'Desa',

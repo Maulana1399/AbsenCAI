@@ -29,8 +29,7 @@ class QRIdentityResolver
         }
 
         if ($event !== null) {
-            $participation = $resolver->resolveByLegacyAttendanceCode($identifier, $event->id)
-                ?? $resolver->resolveByLegacyNip($identifier, $event->id);
+            $participation = $resolver->resolveByLegacyAttendanceCode($identifier, $event->id);
 
             if ($participation !== null) {
                 return $participation;

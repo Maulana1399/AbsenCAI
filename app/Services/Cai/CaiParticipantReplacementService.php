@@ -137,15 +137,14 @@ class CaiParticipantReplacementService
                 ->lockForUpdate()
                 ->findOrFail($participationMapping->participation_id);
 
-            /*
-            * Simpan identitas slot CAI.
-            *
-            * Identifier ini milik SLOT peserta pada event,
-            * bukan identitas personal orang lama.
-            */
-            $legacyNip = $peserta->nip;
-            $participantNumber = $peserta->participant_number;
-            $attendanceCode = $peserta->attendance_code;
+    /*
+    * Simpan identitas slot CAI.
+    *
+    * Identifier ini milik SLOT peserta pada event,
+    * bukan identitas personal orang lama.
+    */
+    $participantNumber = $peserta->participant_number;
+    $attendanceCode = $peserta->attendance_code;
 
             /*
             * Lepaskan identifier unik dari Participation lama terlebih dahulu
@@ -158,18 +157,11 @@ class CaiParticipantReplacementService
                 'attendance_code' => null,
             ]);
 
-            // Lepaskan NIP dari identitas lama agar dapat dipindahkan
-            // ke Person pengganti. Person lama tetap disimpan sebagai histori.
-
-            $oldPerson->update([
-                'nip' => null,
-            ]);
-
             /*
             * Person baru mewakili orang pengganti.
             *
             * Desa dan kelompok tetap mengikuti slot CAI lama.
-            * NIP juga tetap mengikuti kontrak legacy.
+            * NIP is retired per PGM.20 — not transferred to Person.
             */
             $newPerson = Person::create([
                 'nama' => $nama,
@@ -179,7 +171,6 @@ class CaiParticipantReplacementService
                 'tanggal_lahir' => $replacementData['tanggal_lahir'] ?? null,
                 'desa_id' => $peserta->desa_id,
                 'kelompok_id' => $peserta->kelompok_id,
-                'nip' => $legacyNip,
             ]);
 
             /*
@@ -244,7 +235,7 @@ class CaiParticipantReplacementService
                 'new_person_id' => $newPerson->id,
                 'new_participation_id' => $newParticipation->id,
 
-                'legacy_nip' => $legacyNip,
+                'legacy_nip' => $peserta->nip,
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
 
