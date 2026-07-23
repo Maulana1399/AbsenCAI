@@ -17,12 +17,12 @@ class AttendanceReadService
 
         $participationQuery = Participation::with([
             'person.desa',
-            'person.legacyPesertaMapping.peserta.regu',
+            'regu',
             'person.legacyPesertaMapping.peserta.kelompok',
         ])->where('event_id', $eventId);
 
         if ($reguId) {
-            $participationQuery->whereHas('person.legacyPesertaMapping.peserta', fn ($q) => $q->where('regu_id', $reguId));
+            $participationQuery->where('regu_id', $reguId);
         }
 
         $participations = $participationQuery->get();

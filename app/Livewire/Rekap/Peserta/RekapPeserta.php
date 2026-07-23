@@ -35,7 +35,7 @@ class RekapPeserta extends Component
     public function render()
     {
         $event = app(ActiveEventContext::class)->current();
-        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event']);
+        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event', 'regu']);
 
         if ($event !== null) {
             $query->where('event_id', $event->id);
@@ -44,7 +44,7 @@ class RekapPeserta extends Component
         }
 
         if ($this->regu_id) {
-            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('regu_id', $this->regu_id));
+            $query->where('regu_id', $this->regu_id);
         }
 
         if ($this->kelompok_id) {
@@ -79,7 +79,7 @@ class RekapPeserta extends Component
                 'attendance_code' => $participation->attendance_code,
                 'desa' => $person?->desa,
                 'kelompok' => $peserta?->kelompok,
-                'regu' => $peserta?->regu,
+                'regu' => $participation->regu ?? $peserta?->regu,
                 'status_registrasi' => $peserta?->status_registrasi,
                 'status_registrasi_label' => $peserta?->status_registrasi_label ?? 'Belum Registrasi',
             ];

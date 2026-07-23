@@ -36,7 +36,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
 
     public function collection()
     {
-        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event']);
+        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event', 'regu']);
 
         if ($this->event_id !== null) {
             $query->where('event_id', $this->event_id);
@@ -45,7 +45,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
         }
 
         if ($this->regu_id) {
-            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('regu_id', $this->regu_id));
+            $query->where('regu_id', $this->regu_id);
         }
 
         if ($this->kelompok_id) {
@@ -76,7 +76,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'Jenis Peserta' => $participation->jenis_peserta,
                 'Desa' => $person?->desa?->desa_asal ?? '-',
                 'Kelompok' => $peserta?->kelompok?->kelompok_asal ?? '-',
-                'Regu' => $peserta?->regu?->regu ?? '-',
+                'Regu' => $participation->regu?->regu ?? $peserta?->regu?->regu ?? '-',
                 'Status Registrasi' => $peserta?->status_registrasi_label ?? '-',
             ];
         });

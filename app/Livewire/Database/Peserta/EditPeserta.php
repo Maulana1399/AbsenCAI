@@ -71,7 +71,7 @@ class EditPeserta extends Component
         $this->jenis_peserta = $participation->jenis_peserta;
         $this->desa_id = $participation->person?->desa_id;
         $this->kelompok_id = $participation->person?->kelompok_id;
-        $this->regu_id = $legacyPeserta?->regu_id;
+        $this->regu_id = $participation->regu_id ?? $legacyPeserta?->regu_id;
         Flux::modal("edit-peserta")->show();
     }
     public function update()

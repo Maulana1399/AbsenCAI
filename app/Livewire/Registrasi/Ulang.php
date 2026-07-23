@@ -88,7 +88,7 @@ class Ulang extends Component
         $this->editJenisPeserta = $participation->jenis_peserta;
         $this->editDesa = $participation->person?->desa_id;
         $this->editKelompok = $participation->person?->kelompok_id;
-        $this->editRegu = $legacyPeserta?->regu_id;
+        $this->editRegu = $participation->regu_id ?? $legacyPeserta?->regu_id;
 
         $this->showEditModal = true;
     }

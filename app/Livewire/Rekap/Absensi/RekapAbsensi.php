@@ -53,13 +53,15 @@ class RekapAbsensi extends Component
                 $pesertaBelumAbsen = $sessionData['attendance']->filter(fn ($e) => $e->status === 'belum')
                     ->map(function ($entry) {
                         $lp = $entry->legacyPeserta;
+                        $participation = $entry->participation;
                         return (object) [
-                            'id' => $entry->participation->id,
+                            'id' => $participation->id,
                             'peserta' => $lp,
                             'person' => $entry->person,
+                            'participation' => $participation,
                             'nama' => $entry->person?->nama,
                             'nip' => $lp?->nip ?? $entry->person?->nip,
-                            'regu' => $lp?->regu,
+                            'regu' => $participation->regu ?? $lp?->regu,
                             'kelompok' => $lp?->kelompok,
                             'desa' => $entry->person?->desa,
                         ];

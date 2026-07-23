@@ -244,11 +244,11 @@ class Index extends Component
                 if ($this->filterKelompok !== '') {
                     $legacyQuery->where('kelompok_id', $this->filterKelompok);
                 }
-
-                if ($this->filterRegu !== '') {
-                    $legacyQuery->where('regu_id', $this->filterRegu);
-                }
             });
+
+            if ($this->filterRegu !== '') {
+                $query->where('regu_id', $this->filterRegu);
+            }
         }
 
         if ($this->filterGender !== '') {

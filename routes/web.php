@@ -143,16 +143,14 @@ Route::get('qr-label/print/filtered', function () {
         );
     }
 
-    if (request()->filled('kelompok') || request()->filled('regu')) {
+    if (request()->filled('kelompok')) {
         $query->whereHas('legacyParticipationMapping.peserta', function ($q) {
-            if (request()->filled('kelompok')) {
-                $q->where('kelompok_id', request('kelompok'));
-            }
-
-            if (request()->filled('regu')) {
-                $q->where('regu_id', request('regu'));
-            }
+            $q->where('kelompok_id', request('kelompok'));
         });
+    }
+
+    if (request()->filled('regu')) {
+        $query->where('regu_id', request('regu'));
     }
 
     if (request()->filled('gender')) {
@@ -329,20 +327,18 @@ Route::get('qr-label/print/a4', function () {
     |--------------------------------------------------------------------------
     | Filter Kelompok / Regu
     |--------------------------------------------------------------------------
-    | Kelompok and Regu are still legacy data.
-    | Only participants with a matching legacy mapping will match these filters.
+    | Regu is read from participation.regu_id (canonical, event-scoped).
+    | Kelompok is still legacy data on peserta.
     */
 
-    if (request()->filled('kelompok') || request()->filled('regu')) {
+    if (request()->filled('kelompok')) {
         $query->whereHas('legacyParticipationMapping.peserta', function ($q) {
-            if (request()->filled('kelompok')) {
-                $q->where('kelompok_id', request('kelompok'));
-            }
-
-            if (request()->filled('regu')) {
-                $q->where('regu_id', request('regu'));
-            }
+            $q->where('kelompok_id', request('kelompok'));
         });
+    }
+
+    if (request()->filled('regu')) {
+        $query->where('regu_id', request('regu'));
     }
 
     /*
