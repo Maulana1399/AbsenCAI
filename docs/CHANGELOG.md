@@ -8,6 +8,43 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
+## Added (PGM.18 Sprint 3 — Physical Legacy Mapping Contract Cleanup)
+
+### Refactored (LegacyPesertaMapping — peserta↔Person ONLY, columns dropped)
+- **Migration executed**: `participation_id`, `event_id`, `backfill_batch_id` dropped from `legacy_peserta_mappings` table
+- **Model cleanup**: Removed `participation()`, `event()` relationships; removed deprecated columns from `$fillable`
+- **New inverse relationship**: `Participation::legacyParticipationMapping()` — canonical replacement for `Participation::legacyPesertaMapping()`
+- **Event cleanup**: Removed `Event::legacyPesertaMappings()` relationship
+
+### Refactored (10 Participation-rooted callers → LegacyParticipationMapping)
+- `routes/web.php` (4 call sites): QR label filtered/A4 prints
+- `app/Livewire/QRLabel/Index.php` (3 call sites): eager load + filter
+- `app/Livewire/Database/Peserta/Database.php` (2 call sites): display data
+- `app/Livewire/Dashboard/Scan.php` (1 call site): eager load Participation
+
+### Removed stale imports
+- `LegacyPesertaMapping` from `AttendanceService.php`
+- `LegacyPesertaMapping` from `Scan.php`
+
+### Refactored test fixtures
+- `LegacyPesertaMappingFoundationTest.php` — removed column existence assertions for dropped columns
+- `Sprint2MappingContractTest.php` — removed `participation_id`/`event_id` assertions (columns no longer exist)
+
+### Added regression test
+- `tests/Feature/LegacyPesertaMapping/Sprint3MappingFinalContractTest.php` — 9 tests covering:
+  - Fillable only includes active contract columns
+  - No `participation()`, `event()` relationships
+  - Still has `peserta()`, `person()` relationships
+  - `Participation` has `legacyParticipationMapping()`, not `legacyPesertaMapping()`
+  - Schema has no deprecated columns; active contract columns present
+  - Creation without deprecated fields succeeds
+  - Full bridge chain via LegacyParticipationMapping
+
+### Verified Baseline
+- **Full suite**: 1508 passed / 3624 assertions / 0 failures
+- **Design C diagnostic**: problem_total = 0
+- Baseline increase from Sprint 2 (+9 tests, +32 assertions) from Sprint 3 regression test addition
+
 ## Added (PGM.18 Sprint 2 — Legacy Mapping Contract Refactoring)
 
 ### Refactored (LegacyPesertaMapping contract — peserta↔Person ONLY)

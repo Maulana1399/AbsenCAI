@@ -50,7 +50,8 @@ class SelfRegister extends Component
 
     public function fillAutoPlacement(): void
     {
-        $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null);
+        $eventId = app(ActiveEventContext::class)->id();
+        $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null, $eventId);
 
         $this->nip = $autoPlacement['nip'];
         $this->regu_id = $autoPlacement['regu_id'];

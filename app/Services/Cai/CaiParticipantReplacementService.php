@@ -191,6 +191,7 @@ class CaiParticipantReplacementService
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
                 'jenis_peserta' => $peserta->jenis_peserta,
+                'regu_id' => $peserta->regu_id,
             ]);
 
             /*

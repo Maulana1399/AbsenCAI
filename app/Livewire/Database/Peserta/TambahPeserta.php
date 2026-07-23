@@ -50,7 +50,8 @@ class TambahPeserta extends Component
 
     public function generateAutoFields(): void
     {
-        $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null);
+        $eventId = app(ActiveEventContext::class)->id();
+        $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null, $eventId);
 
         $this->nip = $autoPlacement['nip'];
         $this->regu_id = $autoPlacement['regu_id'];
@@ -248,6 +249,11 @@ class TambahPeserta extends Component
                 return;
             }
 
+            $placement = PlacementService::autoPlacement(
+                $person->jenis_kelamin_label,
+                $activeEvent->id,
+            );
+
             $participantNumber = PlacementService::generateParticipantNumber(
                 $activeEvent->id,
                 $person->jenis_kelamin_label,
@@ -261,6 +267,11 @@ class TambahPeserta extends Component
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
                 'jenis_peserta' => $this->existingJenisPeserta,
+                'regu_id' => $placement['regu_id'],
+            ]);
+
+            $legacyPeserta->update([
+                'regu_id' => $placement['regu_id'],
             ]);
 
             LegacyParticipationMapping::create([

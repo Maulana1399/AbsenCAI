@@ -99,6 +99,7 @@ class EditPeserta extends Component
 
         $participation->update([
             'jenis_peserta' => $this->jenis_peserta,
+            'regu_id' => $this->regu_id,
         ]);
 
         $participation->person?->update([
@@ -109,7 +110,15 @@ class EditPeserta extends Component
         ]);
 
         app(PersonLegacySyncService::class)->syncToPeserta($participation->person);
-        $this->peserta_id = app(LegacyParticipationResolver::class)->resolvePesertaByParticipation($participation->id, $event->id)?->id;
+
+        $legacyPeserta = app(LegacyParticipationResolver::class)->resolvePesertaByParticipation($participation->id, $event->id);
+        if ($legacyPeserta) {
+            $legacyPeserta->update([
+                'regu_id' => $this->regu_id,
+            ]);
+        }
+
+        $this->peserta_id = $legacyPeserta?->id;
 
         return redirect()->to('/database');
     }

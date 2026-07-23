@@ -110,6 +110,7 @@ class Ulang extends Component
 
         $participation->update([
             'jenis_peserta' => $this->editJenisPeserta,
+            'regu_id' => $this->editRegu,
         ]);
 
         $participation->person?->update([

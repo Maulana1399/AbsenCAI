@@ -13,4 +13,8 @@ class regu extends Model
     public function peserta() {
         return $this->hasMany(peserta::class);
     }
+
+    public function participations() {
+        return $this->hasMany(Participation::class);
+    }
 }

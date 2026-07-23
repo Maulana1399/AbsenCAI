@@ -53,30 +53,36 @@ class PlacementService
         return ((int) (peserta::max('nip') ?? 0)) + 1;
     }
 
-    public static function leastFilledRegu(?string $jenisKelamin = null): ?regu
+    public static function leastFilledRegu(?string $jenisKelamin = null, ?int $eventId = null): ?regu
     {
         $jenisKelaminFix = self::normalizeGender($jenisKelamin);
 
-        return regu::where('jenis_kelamin', $jenisKelaminFix)
-            ->withCount('peserta')
-            ->orderBy('peserta_count')
-            ->orderBy('id')
-            ->first();
+        $query = regu::where('jenis_kelamin', $jenisKelaminFix);
+
+        if ($eventId !== null) {
+            $query->withCount(['participations' => fn ($q) => $q->where('event_id', $eventId)])
+                ->orderBy('participations_count');
+        } else {
+            $query->withCount('peserta')
+                ->orderBy('peserta_count');
+        }
+
+        return $query->orderBy('id')->first();
     }
 
-    public static function leastFilledReguId(?string $jenisKelamin = null): ?int
+    public static function leastFilledReguId(?string $jenisKelamin = null, ?int $eventId = null): ?int
     {
-        return self::leastFilledRegu($jenisKelamin)?->id;
+        return self::leastFilledRegu($jenisKelamin, $eventId)?->id;
     }
 
-    public static function leastFilledReguName(?string $jenisKelamin = null): string
+    public static function leastFilledReguName(?string $jenisKelamin = null, ?int $eventId = null): string
     {
-        return self::leastFilledRegu($jenisKelamin)?->regu ?? '-';
+        return self::leastFilledRegu($jenisKelamin, $eventId)?->regu ?? '-';
     }
 
-    public static function autoPlacement(?string $jenisKelamin = null): array
+    public static function autoPlacement(?string $jenisKelamin = null, ?int $eventId = null): array
     {
-        $regu = self::leastFilledRegu($jenisKelamin);
+        $regu = self::leastFilledRegu($jenisKelamin, $eventId);
 
         return [
             'nip' => (string) self::legacyNextNip($jenisKelamin),

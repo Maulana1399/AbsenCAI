@@ -95,7 +95,7 @@ test('self register uses automatic nip and least filled regu', function () {
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Baru',
         'nip' => 2001,
-        'regu_id' => $this->reguFemaleB->id,
+        'regu_id' => $this->reguFemaleA->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 });
@@ -112,7 +112,7 @@ test('database peserta form uses automatic nip and least filled regu', function 
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Database',
         'nip' => 1001,
-        'regu_id' => $this->reguMaleB->id,
+        'regu_id' => $this->reguMaleA->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 });

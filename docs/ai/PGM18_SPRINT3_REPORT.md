@@ -2,7 +2,12 @@
 
 ## 1. Status
 
-✅ **COMPLETE** — Siap diverifikasi user.
+✅ **COMPLETE** — Terverifikasi.
+
+Commit: `097f22d refactor: finalize legacy peserta mapping sprint 3`
+
+Baseline final: **1508 passed / 3624 assertions / 0 failures**
+Design C: **problem_total = 0**
 
 ## 2. Runtime Callers yang Direfactor
 
@@ -201,9 +206,10 @@ php -d memory_limit=-1 vendor/bin/pest
 php artisan diagnose:design-c
 ```
 
-**Target:**
-- Full suite: ~1499 passed / ~3592+ assertions / 0 failures
-- Design C: problem_total = 0
+**Verifikasi (Terpenuhi):**
+- Full suite: **1508 passed / 3624 assertions / 0 failures** ✅
+- Design C: problem_total = 0 ✅
+- Baseline increase: +9 tests, +32 assertions from Sprint 3 regression test
 
 **Command untuk git:**
 
@@ -240,4 +246,4 @@ git add -A && git commit -m "feat: PGM.18 Sprint 3 — physical legacy mapping c
 | Apa dependency legacy terbesar setelah Sprint 3? | Tabel `pesertas` — masih active runtime untuk attendance legacy dual-write |
 | Apa scope paling logis untuk Sprint 4? | **Riwayat Izin + Scoring + Storage** (deferred from 2027), atau `ATTENDANCE_LEGACY_WRITE` default flip ke `false` |
 
-**PGM.18 = ✅ COMPLETE** (setelah verifikasi user)
+**PGM.18 = ✅ FULLY COMPLETE**

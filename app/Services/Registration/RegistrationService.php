@@ -59,13 +59,18 @@ class RegistrationService
 
                     $nip = $legacyPeserta->nip ?? $person->nip;
 
+                    $reguId = $data['regu_id'] ?? $legacyPeserta?->regu_id;
+
                     $participation = Participation::create([
                     'person_id' => $person->id,
                     'event_id' => $event->id,
                     'participant_number' => $participantNumber,
                     'attendance_code' => $attendanceCode,
                     'jenis_peserta' => $data['jenis_peserta'],
+                    'regu_id' => $reguId,
                 ]);
+
+                    $legacyPeserta->update(['regu_id' => $reguId]);
 
                     LegacyParticipationMapping::create([
                         'peserta_id' => $legacyPeserta->id,
@@ -106,6 +111,7 @@ class RegistrationService
                     'participant_number' => $participantNumber,
                     'attendance_code' => $attendanceCode,
                     'jenis_peserta' => $data['jenis_peserta'],
+                    'regu_id' => $data['regu_id'],
                 ]);
 
                 LegacyPesertaMapping::create([
@@ -184,6 +190,7 @@ class RegistrationService
             if ($participationMapping?->participation !== null) {
                 $participationMapping->participation->update([
                     'jenis_peserta' => $data['jenis_peserta'],
+                    'regu_id' => $data['regu_id'],
                 ]);
             }
 

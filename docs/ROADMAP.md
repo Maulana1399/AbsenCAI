@@ -312,9 +312,12 @@ Notes:
 
 ## Status
 
-🟢 ACTIVE — HIGHEST PRIORITY
+✅ COMPLETE / VERIFIED
 
-Target: August 2026 operational use for Multi Event.
+All Multi Event phases S3.0–S3.10 implemented and verified.
+PGM.18 Sprint 3 (physical mapping cleanup) also COMPLETE.
+
+Target: August 2026 operational use for Multi Event — on track.
 
 ## Goal
 
@@ -619,6 +622,17 @@ Next checkpoint:
 - PGM.17 Pilot Release — UI interaction remediation COMPLETE
 - PGM.18 Sprint 1 ✅ COMPLETE — Legacy historical tooling removed, Design C diagnostic contract fixed
 - PGM.18 Sprint 2 ✅ COMPLETE — Mapping contract refactored, 1499 passed / 3592 assertions / 0 failures
+- **PGM.18 Sprint 3 ✅ COMPLETE** — Physical mapping cleanup: columns dropped, model cleaned, 1508 passed / 3624 assertions / 0 failures
+
+### PGM.18 Closure
+
+PGM.18 **fully complete**:
+- Sprint 1: Legacy historical tooling removed ✅
+- Sprint 2: Mapping contract refactored ✅
+- Sprint 3: Physical column drop + model cleanup ✅
+
+Final baseline: **1508 passed / 3624 assertions / 0 failures**
+Design C: **problem_total = 0**
 
 ---
 
@@ -1101,7 +1115,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 7. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
 8. **S01–S04 Foundation** ✅ Complete
 9. **PGM.18 Sprint 2** ✅ COMPLETE — Mapping contract refactored, fully verified (1499/3592/0)
-10. **PGM.18 Sprint 3** 📋 PROPOSED — Drop legacy columns, remove deprecated relationships, finalize PGM.18 completion
+10. **PGM.18 Sprint 3** ✅ COMPLETE — Physical mapping cleanup: columns dropped, relationships removed, tested (1508/3624/0)
 11. **Competition** (future sprint)
 12. **Commercial** (future sprint)
 ```

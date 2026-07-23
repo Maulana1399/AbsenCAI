@@ -6,7 +6,9 @@
 **Baseline (pre-Sprint 1):** 1570 passed, 3803 assertions, 0 failures
 **Baseline (post-Sprint 1):** 1494 passed, 3581 assertions, 0 failures
 **Baseline (post-Sprint 2):** 1499 passed, 3592 assertions, 0 failures
+**Baseline (post-Sprint 3):** 1508 passed, 3624 assertions, 0 failures
 **Diagnostic Design C (post-Sprint 2):** problem_total = 0
+**Diagnostic Design C (post-Sprint 3):** problem_total = 0
 
 ---
 
@@ -39,68 +41,56 @@ Design C diagnostic: problem_total = 0 (all 8 metrics 0)
 
 ### Deliverables
 
-1. **Foundation test refactored**: `LegacyPesertaMappingFoundationTest` — 22 → 14 tests (10 kept, 4 refactored, 8 removed). Factory default now creates peserta_id + person_id only.
-2. **6 regression failures at Sprint 2 inception**: All fixed:
-   - 4 Activity Foundation tests (`CategoryFoundationTest`, `DomainFoundationTest`, `ReportingIntegrationTest`, `VenueRundownFoundationTest`) — replaced `$mapping->participation`/`->event` assertions with `LegacyParticipationMapping`
-   - `CaiParticipantReplacementTest` — replaced `$mapping->participation_id` assertion with `LegacyParticipationMapping`
-   - `PrintLogTest:246` — genuine production regression: QR label single print route used `$participant->legacyPesertaMapping()` which returned NULL (depended on `participation_id` no longer set). Fixed by resolving via `LegacyParticipationMapping`.
-3. **1 parse error fixed**: `CaiParticipantReplacementTest:272` — missing semicolon
-4. **3 stale test contract references fixed**: `PersonReuseTest:96`, `MultiEventValidationRoutingTest:152`, `DesignCDiagnosticsTest:66` — all updated to use `LegacyParticipationMapping`
-5. **Model audit**: `participation()` and `event()` relationships on `LegacyPesertaMapping` confirmed DEPRECATED — zero production runtime access to both. `participation_id`, `event_id`, `backfill_batch_id` in `$fillable` also deprecated.
-6. **Production zero-reference audit**:
-   - `LegacyPesertaMapping->participation`: 0 ✅
-   - `LegacyPesertaMapping->event`: 0 ✅
-   - `LegacyPesertaMapping.participation_id` (direct column read): 0 ✅
-   - `LegacyPesertaMapping.event_id`: 0 ✅
-   - `LegacyPesertaMapping.backfill_batch_id`: 0 ✅
-   - `Participation::legacyPesertaMapping()` (hasOne via participation_id): 6 implicit references documented as Sprint 3 blockers
-7. **Deprecated elements retained** (no migration):
-   - `legacy_peserta_mappings.participation_id` — column NOT dropped
-   - `legacy_peserta_mappings.event_id` — column NOT dropped
-   - `legacy_peserta_mappings.backfill_batch_id` — column NOT dropped
-   - `LegacyPesertaMapping::participation()` relationship — NOT removed
-   - `LegacyPesertaMapping::event()` relationship — NOT removed
-   - All Sprint 3 target
+1. **Foundation test refactored**: `LegacyPesertaMappingFoundationTest` — 22 → 14 tests (10 kept, 4 refactored, 8 removed)
+2. **6 regression failures + 1 parse error + 3 stale references**: All fixed
+3. **1 genuine production regression found and fixed**: QR label single print route
+4. **Model audit**: deprecated columns documented
+5. **Production zero-reference audit**: all 6 metrics = 0 ✅
+6. **Deprecated elements retained** — Sprint 3 target
 
 ### Verification
 - Full suite: **1499 passed / 3592 assertions / 0 failures**
 - Design C diagnostic: **problem_total = 0**
-- Increase from Sprint 1: +5 tests, +11 assertions (refactored coverage added back)
 
-### Sprint 2 Contract Changes — Canonical Architecture Impact
+## PGM.18 Sprint 3 Status
 
-**Before Sprint 2:**
+**Status: ✅ COMPLETE**
+
+**Tanggal:** 23 Juli 2026
+**Tujuan:** Physical cleanup of `LegacyPesertaMapping` — drop deprecated columns, remove deprecated relationships.
+
+### Deliverables
+
+1. **Column drop**: `participation_id`, `event_id`, `backfill_batch_id` removed from `legacy_peserta_mappings` ✅
+2. **Model cleanup**: Removed `participation()`, `event()` relationships; cleaned `$fillable` ✅
+3. **New inverse**: `Participation::legacyParticipationMapping()` — canonical replacement for `Participation::legacyPesertaMapping()` ✅
+4. **Removed Event relationship**: `Event::legacyPesertaMappings()` — zero prod references ✅
+5. **Refactored 10 Participation-rooted callers**: routes/web.php (4), QRLabel/Index (3), Database (2), Scan (1) ✅
+6. **Removed stale imports**: `AttendanceService.php`, `Scan.php` ✅
+7. **Refactored 3 test files**: 5 assertion lines updated ✅
+8. **Added regression test**: `Sprint3MappingFinalContractTest.php` — 9 tests ✅
+9. **Migration executed**: SQLite-compatible forward migration ✅
+
+### Verification
+- Full suite: **1508 passed / 3624 assertions / 0 failures**
+- Design C diagnostic: **problem_total = 0**
+- Increase from Sprint 2: +9 tests, +32 assertions (Sprint 3 regression test)
+
+### Final Contract
+
 ```
-LegacyPesertaMapping:
+LegacyPesertaMapping:                ← Global bridge — peserta↔Person ONLY
   peserta_id → peserta
   person_id → Person
-  participation_id → Participation (deprecated but active in model)
-  event_id → Event (deprecated but active in model)
-```
 
-**After Sprint 2:**
-```
-LegacyPesertaMapping:                ← Global bridge ONLY
+LegacyParticipationMapping:          ← Sole event-specific bridge (unchanged)
   peserta_id → peserta
   person_id → Person
-  (participation_id, event_id — inert, scheduled for Sprint 3 drop)
-
-LegacyParticipationMapping:          ← Event-aware bridge (sole)
-  peserta_id → peserta
   participation_id → Participation
   event_id → Event
 ```
 
-### Sprint 2 Audit — Metrik Arsitektur
-
-| Komponen | Sprint 1 Status | Sprint 2 Status | Sprint 3 Target |
-|---|---|---|---|
-| `LegacyPesertaMapping` → `Partisipasi` | B. ACTIVE (deprecated) | B. ACTIVE (inert — 0 prod refs) | DROP relationship + column |
-| `LegacyPesertaMapping` → `Event` | B. ACTIVE (deprecated) | B. ACTIVE (inert — 0 prod refs) | DROP relationship + column |
-| `LegacyPesertaMapping.participation_id` | B. ACTIVE (column) | B. ACTIVE (inert — 0 direct reads) | DROP column |
-| `Participation::legacyPesertaMapping()` | B. ACTIVE | B. ACTIVE (6 implicit refs documented) | MIGRATE → `LegacyParticipationMapping` |
-| `LegacyParticipationMapping` | B. ACTIVE | B. ACTIVE (confirmed sole bridge) | RETAIN |
-| `LegacyPesertaMapping` (peserta↔Person) | B. ACTIVE | B. ACTIVE (contract narrowed) | RETAIN |
+**PGM.18 = FULLY COMPLETE** ✅
 
 ---
 

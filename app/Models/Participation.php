@@ -12,6 +12,7 @@ class Participation extends Model
         'participant_number',
         'attendance_code',
         'jenis_peserta',
+        'regu_id',
     ];
 
     public function person()
@@ -22,6 +23,11 @@ class Participation extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function regu()
+    {
+        return $this->belongsTo(regu::class);
     }
 
     public function legacyParticipationMapping()
