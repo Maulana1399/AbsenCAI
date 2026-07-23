@@ -79,7 +79,7 @@ class RekapPeserta extends Component
                 'attendance_code' => $participation->attendance_code,
                 'desa' => $person?->desa,
                 'kelompok' => $peserta?->kelompok,
-                'regu' => $participation->regu ?? $peserta?->regu,
+                'regu' => $participation->regu,
                 'status_registrasi' => $peserta?->status_registrasi,
                 'status_registrasi_label' => $peserta?->status_registrasi_label ?? 'Belum Registrasi',
             ];

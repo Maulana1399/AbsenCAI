@@ -76,7 +76,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'Jenis Peserta' => $participation->jenis_peserta,
                 'Desa' => $person?->desa?->desa_asal ?? '-',
                 'Kelompok' => $peserta?->kelompok?->kelompok_asal ?? '-',
-                'Regu' => $participation->regu?->regu ?? $peserta?->regu?->regu ?? '-',
+                'Regu' => $participation->regu?->regu ?? '-',
                 'Status Registrasi' => $peserta?->status_registrasi_label ?? '-',
             ];
         });

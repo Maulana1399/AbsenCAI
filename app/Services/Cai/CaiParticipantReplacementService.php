@@ -184,6 +184,8 @@ class CaiParticipantReplacementService
 
             /*
             * Participation baru mengambil slot event milik peserta lama.
+            * Regu diambil dari canonical oldParticipation.regu_id dengan
+            * fallback ke legacy peserta.regu_id untuk safety.
             */
             $newParticipation = Participation::create([
                 'person_id' => $newPerson->id,
@@ -191,7 +193,7 @@ class CaiParticipantReplacementService
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
                 'jenis_peserta' => $peserta->jenis_peserta,
-                'regu_id' => $peserta->regu_id,
+                'regu_id' => $oldParticipation->regu_id ?? $peserta->regu_id,
             ]);
 
             /*

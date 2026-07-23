@@ -169,11 +169,12 @@ class TambahPeserta extends Component
             $q->where('nama', 'like', "%{$query}%")
               ->orWhere('nip', 'like', "%{$query}%");
         })
-        ->with(['desa', 'kelompok', 'legacyPesertaMapping.peserta.regu'])
+        ->with(['desa', 'kelompok', 'participations' => fn ($q) => $q->with('regu')->latest()->limit(1)])
         ->limit(10)
         ->get();
 
         $this->searchResults = $results->map(function ($p) {
+            $latestRegu = $p->participations->first()?->regu?->regu;
             return [
                 'id' => $p->id,
                 'nama' => $p->nama,
@@ -181,14 +182,14 @@ class TambahPeserta extends Component
                 'desa' => $p->desa?->desa_asal,
                 'kelompok' => $p->kelompok?->kelompok_asal,
                 'jenis_kelamin' => $p->jenis_kelamin_label,
-                'regu' => $p->legacyPesertaMapping?->peserta?->regu?->regu,
+                'regu' => $latestRegu,
             ];
         })->toArray();
     }
 
     public function selectPerson(int $id): void
     {
-        $person = Person::with(['desa', 'kelompok', 'legacyPesertaMapping.peserta.regu'])->findOrFail($id);
+        $person = Person::with(['desa', 'kelompok', 'participations' => fn ($q) => $q->with('regu')->latest()->limit(1)])->findOrFail($id);
 
         $this->selectedPersonId = $person->id;
         $this->selectedPerson = [
@@ -197,7 +198,7 @@ class TambahPeserta extends Component
             'desa' => $person->desa?->desa_asal,
             'kelompok' => $person->kelompok?->kelompok_asal,
             'jenis_kelamin' => $person->jenis_kelamin_label,
-            'regu' => $person->legacyPesertaMapping?->peserta?->regu?->regu,
+            'regu' => $person->participations->first()?->regu?->regu,
         ];
         $this->searchPerson = '';
         $this->searchResults = [];
@@ -267,10 +268,6 @@ class TambahPeserta extends Component
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
                 'jenis_peserta' => $this->existingJenisPeserta,
-                'regu_id' => $placement['regu_id'],
-            ]);
-
-            $legacyPeserta->update([
                 'regu_id' => $placement['regu_id'],
             ]);
 

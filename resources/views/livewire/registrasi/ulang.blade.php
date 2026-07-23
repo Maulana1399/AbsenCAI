@@ -30,9 +30,9 @@
                 </div>
 
                 <div class="mt-4 grid gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-                    <div><span class="font-medium">Desa:</span> {{ $peserta->desa->desa_asal ?? '-' }}</div>
-                    <div><span class="font-medium">Kelompok:</span> {{ $peserta->kelompok->kelompok_asal ?? '-' }}</div>
-                    <div><span class="font-medium">Regu:</span> {{ $peserta->regu->regu ?? '-' }}</div>
+                    <div><span class="font-medium">Desa:</span> {{ $peserta->desa?->desa_asal ?? '-' }}</div>
+                    <div><span class="font-medium">Kelompok:</span> {{ $peserta->kelompok?->kelompok_asal ?? '-' }}</div>
+                    <div><span class="font-medium">Regu:</span> {{ $peserta->regu?->regu ?? '-' }}</div>
                     <div><span class="font-medium">Status Registrasi:</span> {{ $peserta->status_registrasi_label }}</div>
                 </div>
 

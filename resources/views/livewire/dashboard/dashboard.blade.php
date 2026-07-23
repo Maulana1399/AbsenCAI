@@ -113,7 +113,7 @@
                             <td class="px-4 py-2">{{ $loop->iteration }}</td>
                             <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $entry->person->nama ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $entry->person->nip ?? ($lp->nip ?? '-') }}</td>
-                            <td class="px-4 py-2">{{ $entry->participation->regu->regu ?? $lp->regu->regu ?? '-' }}</td>
+                            <td class="px-4 py-2">{{ $entry->participation->regu->regu ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $lp->kelompok->kelompok_asal ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $entry->person->desa->desa_asal ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $entry->jam_scan ? \Illuminate\Support\Carbon::parse($entry->jam_scan)->format('H:i:s') : '-' }}</td>
@@ -153,7 +153,7 @@
                                 <td class="px-4 py-2">{{ $loop->iteration }}</td>
                                 <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $participation->person?->nama ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $participation->person?->nip ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ $participation->regu->regu ?? $legacy->regu->regu ?? '-' }}</td>
+                                <td class="px-4 py-2">{{ $participation->regu->regu ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $legacy->kelompok->kelompok_asal ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $participation->person?->desa?->desa_asal ?? '-' }}</td>
                             </tr>

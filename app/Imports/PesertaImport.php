@@ -7,6 +7,7 @@ use App\Models\kelompok;
 use App\Models\peserta;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
+use App\Support\ActiveEventContext;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -39,7 +40,8 @@ class PesertaImport implements ToModel, WithHeadingRow
 
 
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
-        $autoPlacement = PlacementService::autoPlacement($jenisKelamin);
+        $eventId = app(ActiveEventContext::class)->id();
+        $autoPlacement = PlacementService::autoPlacement($jenisKelamin, $eventId);
 
         return app(RegistrationService::class)->createParticipant([
             'nama' => trim($row['nama']),

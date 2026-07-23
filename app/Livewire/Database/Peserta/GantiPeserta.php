@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Database\Peserta;
 
+use App\Models\Participation;
 use App\Models\peserta;
 use App\Services\Cai\CaiParticipantReplacementService;
 use Illuminate\Support\Facades\Gate;
@@ -33,7 +34,16 @@ class GantiPeserta extends Component
     {
         $this->resetForm();
 
-        $peserta = peserta::with(['desa', 'kelompok', 'regu'])->findOrFail($id);
+        $participation = Participation::with(['person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])->findOrFail($id);
+
+        $peserta = $participation->person?->legacyPesertaMapping?->peserta
+            ?? peserta::with(['desa', 'kelompok', 'regu'])->find($id);
+
+        if ($peserta === null) {
+            $this->errorMessage = 'Data legacy peserta tidak ditemukan.';
+            Flux::modal('ganti-peserta-error')->show();
+            return;
+        }
 
         try {
             app(CaiParticipantReplacementService::class)
@@ -52,7 +62,7 @@ class GantiPeserta extends Component
 
         $this->desa = $peserta->desa?->desa_asal ?? '-';
         $this->kelompok = $peserta->kelompok?->kelompok_asal ?? '-';
-        $this->regu = $peserta->regu?->regu ?? '-';
+        $this->regu = $participation->regu?->regu ?? $peserta->regu?->regu ?? '-';
 
         $this->jenis_kelamin = $peserta->jenis_kelamin ?? '';
 

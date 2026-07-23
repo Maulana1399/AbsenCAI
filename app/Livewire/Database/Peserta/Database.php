@@ -58,7 +58,7 @@ class Database extends Component
                 'status_registrasi_label' => $legacyPeserta?->status_registrasi_label ?? '-',
                 'desa' => $participation->person?->desa,
                 'kelompok' => $participation->person?->kelompok ?? $legacyPeserta?->kelompok,
-                'regu' => $participation->regu ?? $legacyPeserta?->regu,
+                'regu' => $participation->regu,
                 'participation' => $participation,
             ];
         });

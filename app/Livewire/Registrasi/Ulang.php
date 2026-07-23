@@ -36,14 +36,8 @@ class Ulang extends Component
             return;
         }
 
-        $resolver = app(LegacyParticipationResolver::class);
         $participation = Participation::with('person')->find($id);
-
         if ($participation === null || (int) $participation->event_id !== (int) $event->id) {
-            $participation = $resolver->resolveByPesertaAndEvent($id, $event->id);
-        }
-
-        if ($participation === null) {
             return;
         }
 
@@ -51,7 +45,7 @@ class Ulang extends Component
             'jenis_peserta' => $participation->jenis_peserta,
         ]);
 
-        $legacyPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
+        $legacyPeserta = $participation->person?->legacyPesertaMapping?->peserta;
         if ($legacyPeserta) {
             $legacyPeserta->update([
                 'status_registrasi' => peserta::STATUS_REGISTRASI_ULANG,
@@ -69,18 +63,10 @@ class Ulang extends Component
             return;
         }
 
-        $resolver = app(LegacyParticipationResolver::class);
         $participation = Participation::with('person')->find($id);
-
         if ($participation === null || (int) $participation->event_id !== (int) $event->id) {
-            $participation = $resolver->resolveByPesertaAndEvent((int) $id, $event->id);
-        }
-
-        if ($participation === null) {
             return;
         }
-
-        $legacyPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
 
         $this->editId = $participation->id;
         $this->editNama = $participation->person?->nama;
@@ -88,7 +74,7 @@ class Ulang extends Component
         $this->editJenisPeserta = $participation->jenis_peserta;
         $this->editDesa = $participation->person?->desa_id;
         $this->editKelompok = $participation->person?->kelompok_id;
-        $this->editRegu = $participation->regu_id ?? $legacyPeserta?->regu_id;
+        $this->editRegu = $participation->regu_id;
 
         $this->showEditModal = true;
     }
@@ -120,13 +106,6 @@ class Ulang extends Component
             'kelompok_id' => $this->editKelompok,
         ]);
 
-        $legacyPeserta = app(LegacyParticipationResolver::class)->resolvePesertaByParticipation($participation->id, $event->id);
-        if ($legacyPeserta) {
-            $legacyPeserta->update([
-                'regu_id' => $this->editRegu,
-            ]);
-        }
-
         $this->showEditModal = false;
 
         session()->flash('success','Data peserta berhasil diperbarui');
@@ -139,21 +118,35 @@ class Ulang extends Component
     {
         $search = trim($this->search);
 
-        $peserta = collect();
+        $daftarPeserta = collect();
 
         if ($search !== '') {
-            $peserta = peserta::with(['desa', 'kelompok', 'regu'])
+            $event = app(ActiveEventContext::class)->current();
+            $daftarPeserta = Participation::with(['person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])
+                ->when($event, fn ($q) => $q->where('event_id', $event->id), fn ($q) => $q->whereRaw('0 = 1'))
                 ->where(function ($query) use ($search) {
-                    $query->where('nama', 'like', '%' . $search . '%')
-                        ->orWhere('nip', 'like', '%' . $search . '%');
+                    $query->whereHas('person', fn ($q) => $q->where('nama', 'like', '%' . $search . '%'))
+                        ->orWhereHas('person', fn ($q) => $q->where('nip', 'like', '%' . $search . '%'));
                 })
-                ->orderBy('nama')
+                ->orderByDesc('id')
                 ->limit(10)
-                ->get();
+                ->get()
+                ->map(function (Participation $p) {
+                    $lp = $p->person?->legacyPesertaMapping?->peserta;
+                    return (object) [
+                        'id' => $p->id,
+                        'nama' => $p->person?->nama,
+                        'nip' => $p->person?->nip ?? $lp?->nip,
+                        'desa' => $p->person?->desa,
+                        'kelompok' => $p->person?->kelompok,
+                        'regu' => $p->regu,
+                        'status_registrasi_label' => $lp?->status_registrasi_label ?? '-',
+                    ];
+                });
         }
 
         return view('livewire.registrasi.ulang', [
-            'daftarPeserta' => $peserta,
+            'daftarPeserta' => $daftarPeserta,
             'daftarDesa' => desa::all(),
             'daftarKelompok' => kelompok::all(),
             'daftarRegu' => regu::all(),

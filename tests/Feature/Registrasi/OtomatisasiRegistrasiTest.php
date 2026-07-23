@@ -128,6 +128,6 @@ test('import peserta uses automatic nip and least filled regu', function () {
     expect($model->nip)->toBe(2001)
         ->and($model->participant_number)->toBe('KP001')
         ->and($model->attendance_code)->toStartWith('KJA-')
-        ->and($model->regu_id)->toBe($this->reguFemaleB->id)
+        ->and($model->regu_id)->toBe($this->reguFemaleA->id)
         ->and($model->status_registrasi)->toBe(peserta::STATUS_BELUM_REGISTRASI);
 });

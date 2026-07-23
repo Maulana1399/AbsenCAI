@@ -70,7 +70,7 @@ class RegistrationService
                     'regu_id' => $reguId,
                 ]);
 
-                    $legacyPeserta->update(['regu_id' => $reguId]);
+                    // Dual-write to legacy pesertas.regu_id stopped per Sprint 7
 
                     LegacyParticipationMapping::create([
                         'peserta_id' => $legacyPeserta->id,
@@ -184,7 +184,6 @@ class RegistrationService
                 'jenis_peserta' => $data['jenis_peserta'],
                 'desa_id' => $data['desa_id'],
                 'kelompok_id' => $data['kelompok_id'],
-                'regu_id' => $data['regu_id'],
             ]);
 
             if ($participationMapping?->participation !== null) {

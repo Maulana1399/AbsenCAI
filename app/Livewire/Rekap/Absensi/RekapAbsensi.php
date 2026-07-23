@@ -61,7 +61,7 @@ class RekapAbsensi extends Component
                             'participation' => $participation,
                             'nama' => $entry->person?->nama,
                             'nip' => $lp?->nip ?? $entry->person?->nip,
-                            'regu' => $participation->regu ?? $lp?->regu,
+                            'regu' => $participation->regu,
                             'kelompok' => $lp?->kelompok,
                             'desa' => $entry->person?->desa,
                         ];

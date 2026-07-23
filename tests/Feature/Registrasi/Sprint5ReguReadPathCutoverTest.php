@@ -111,31 +111,27 @@ test('different events show correct regu for same person', function () {
 });
 
 // ──────────────────────────────────────────────
-// 3. Legacy fallback works when canonical regu is null
+// 3. No legacy fallback when canonical regu is null (Sprint 7 contract)
 // ──────────────────────────────────────────────
-test('legacy fallback when participation regu is null', function () {
+test('no legacy fallback when participation regu is null sprint7', function () {
     $this->partA->update(['regu_id' => null]);
     $this->partA->refresh();
 
-    // Canonical null, should fallback to legacy peserta.regu
-    $legacyPeserta = $this->pesertaRecord;
-    $regu = $this->partA->regu ?? $legacyPeserta?->regu;
+    // Sprint 7 contract: no fallback to legacy peserta.regu
+    $regu = $this->partA->regu;
 
     expect($this->partA->regu)->toBeNull();
-    expect($regu)->not->toBeNull();
-    expect($regu->id)->toBe($this->reguGlobal->id);
+    expect($regu)->toBeNull();
 });
 
 // ──────────────────────────────────────────────
-// 4. Null canonical + null legacy does not crash
+// 4. Null canonical does not crash (Sprint 7 contract — no fallback)
 // ──────────────────────────────────────────────
-test('null canonical and null legacy does not crash', function () {
+test('null canonical does not crash sprint7', function () {
     $this->partA->update(['regu_id' => null]);
-    $this->pesertaRecord->update(['regu_id' => null]);
     $this->partA->refresh();
 
-    $legacyPeserta = $this->pesertaRecord;
-    $regu = $this->partA->regu ?? $legacyPeserta?->regu;
+    $regu = $this->partA->regu;
 
     expect($regu)->toBeNull();
 });
@@ -209,56 +205,54 @@ test('regu filter on participation query is event scoped', function () {
 });
 
 // ──────────────────────────────────────────────
-// 9. Database Peserta display shows event-correct regu
+// 9. Database Peserta display uses canonical regu only (Sprint 7)
 // ──────────────────────────────────────────────
-test('database peserta display resolves regu via canonical first', function () {
-    $part = Participation::with(['regu', 'legacyParticipationMapping.peserta'])
+test('database peserta display uses canonical regu only sprint7', function () {
+    $part = Participation::with('regu')
         ->where('event_id', $this->eventA->id)
         ->first();
 
-    $legacyPeserta = $part->legacyParticipationMapping?->peserta;
-    $regu = $part->regu ?? $legacyPeserta?->regu;
+    // Sprint 7: $part->regu only (no fallback)
+    $regu = $part->regu;
 
-    // Canonical first: should get event A regu, not global
     expect($regu)->not->toBeNull();
     expect($regu->id)->toBe($this->reguEventA->id);
     expect($regu->id)->not->toBe($this->reguGlobal->id);
 });
 
 // ──────────────────────────────────────────────
-// 10. EditPeserta form reads canonical regu_id first
+// 10. EditPeserta form reads regu_id from participation only (Sprint 7)
 // ──────────────────────────────────────────────
-test('edit peserta form reads regu_id from participation first', function () {
-    // Simulate EditPeserta::editPeserta() canonical-first read
-    $reguId = $this->partA->regu_id ?? $this->pesertaRecord->regu_id;
+test('edit peserta form reads regu_id from participation only sprint7', function () {
+    // Sprint 7: $participation->regu_id only (no fallback)
+    $reguId = $this->partA->regu_id;
 
     expect($reguId)->toBe($this->reguEventA->id);
     expect($reguId)->not->toBe($this->reguGlobal->id);
 });
 
 // ──────────────────────────────────────────────
-// 11. Ulang form reads canonical regu_id first
+// 11. Ulang form reads regu_id from participation only (Sprint 7)
 // ──────────────────────────────────────────────
-test('ulang form reads regu_id from participation first', function () {
-    // Simulate Ulang::editPeserta() canonical-first read
-    $editRegu = $this->partB->regu_id ?? $this->pesertaRecord->regu_id;
+test('ulang form reads regu_id from participation only sprint7', function () {
+    // Sprint 7: $participation->regu_id only (no fallback)
+    $editRegu = $this->partB->regu_id;
 
     expect($editRegu)->toBe($this->reguEventB->id);
     expect($editRegu)->not->toBe($this->reguGlobal->id);
 });
 
 // ──────────────────────────────────────────────
-// 12. Export shows event-correct regu
+// 12. Export shows canonical regu only (Sprint 7)
 // ──────────────────────────────────────────────
-test('export shows event correct regu via canonical first', function () {
-    $part = Participation::with(['regu', 'person.legacyPesertaMapping.peserta'])
+test('export shows canonical regu only sprint7', function () {
+    $part = Participation::with('regu')
         ->where('event_id', $this->eventA->id)
         ->first();
 
-    $peserta = $part->person?->legacyPesertaMapping?->peserta;
-    $reguName = $part->regu?->regu ?? $peserta?->regu?->regu ?? '-';
+    // Sprint 7: $part->regu?->regu ?? '-' (no $peserta?->regu?->regu)
+    $reguName = $part->regu?->regu ?? '-';
 
-    // Should show Event A's regu name, NOT global
     expect($reguName)->toBe('Regu A (Event A)');
     expect($reguName)->not->toBe('Regu Global Old');
 });
