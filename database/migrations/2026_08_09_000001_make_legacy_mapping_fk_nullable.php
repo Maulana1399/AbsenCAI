@@ -8,25 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('legacy_peserta_mappings', function (Blueprint $table) {
-            $table->dropForeign(['participation_id']);
-            $table->dropForeign(['event_id']);
-            $table->foreignId('participation_id')->nullable()->change();
-            $table->foreignId('event_id')->nullable()->change();
-            $table->foreign('participation_id')->references('id')->on('participations')->nullOnDelete();
-            $table->foreign('event_id')->references('id')->on('events')->nullOnDelete();
-        });
+        // NO-OP: Sprint 3 migration 2026_07_23_000001 already dropped
+        // participation_id, event_id, and backfill_batch_id from
+        // legacy_peserta_mappings entirely. This migration's purpose
+        // (making those columns nullable) is obsolete.
     }
 
     public function down(): void
     {
-        Schema::table('legacy_peserta_mappings', function (Blueprint $table) {
-            $table->dropForeign(['participation_id']);
-            $table->dropForeign(['event_id']);
-            $table->foreignId('participation_id')->nullable(false)->change();
-            $table->foreignId('event_id')->nullable(false)->change();
-            $table->foreign('participation_id')->references('id')->on('participations')->restrictOnDelete();
-            $table->foreign('event_id')->references('id')->on('events')->restrictOnDelete();
-        });
+        // NO-OP: matched to up(). Columns no longer exist.
     }
 };

@@ -219,7 +219,7 @@ class ResetEventData extends Command
             ['table' => 'identity_correction_requests', 'reason' => 'FK RESTRICT ke people (SET NULL ke events)'],
             ['table' => 'cai_participant_replacements', 'reason' => 'FK RESTRICT ke events, pesertas, people, participations'],
             ['table' => 'legacy_participation_mappings', 'reason' => 'FK RESTRICT ke participations, pesertas, people, events'],
-            ['table' => 'legacy_peserta_mappings', 'reason' => 'FK RESTRICT ke participations, pesertas, people, events'],
+            ['table' => 'legacy_peserta_mappings', 'reason' => 'FK RESTRICT ke pesertas, people'],
             ['table' => 'surat_izins', 'reason' => 'FK SET NULL participation_id — update dulu, lalu hapus'],
             ['table' => 'desa_access_grants', 'reason' => 'FK RESTRICT ke events & desas'],
             ['table' => 'event_committee_assignments', 'reason' => 'FK RESTRICT ke events, people, event_roles'],

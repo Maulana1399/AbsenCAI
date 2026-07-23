@@ -69,7 +69,7 @@ class Index extends Component
             return;
         }
 
-        $participant = Participation::with(['person', 'event', 'legacyPesertaMapping'])
+        $participant = Participation::with(['person', 'event', 'legacyParticipationMapping'])
             ->find($participantId);
 
         if (! $participant) {
@@ -174,7 +174,7 @@ class Index extends Component
     {
         $event = app(ActiveEventContext::class)->requireCurrent();
 
-        return Participation::with(['person', 'event', 'legacyPesertaMapping'])
+        return Participation::with(['person', 'event', 'legacyParticipationMapping'])
             ->whereKey($participantId)
             ->where('event_id', $event->id)
             ->firstOrFail();
@@ -240,7 +240,7 @@ class Index extends Component
         }
 
         if ($this->filterKelompok !== '' || $this->filterRegu !== '') {
-            $query->whereHas('legacyPesertaMapping.peserta', function ($legacyQuery) {
+            $query->whereHas('legacyParticipationMapping.peserta', function ($legacyQuery) {
                 if ($this->filterKelompok !== '') {
                     $legacyQuery->where('kelompok_id', $this->filterKelompok);
                 }

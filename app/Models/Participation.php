@@ -24,9 +24,9 @@ class Participation extends Model
         return $this->belongsTo(Event::class);
     }
 
-    public function legacyPesertaMapping()
+    public function legacyParticipationMapping()
     {
-        return $this->hasOne(LegacyPesertaMapping::class, 'participation_id');
+        return $this->hasOne(LegacyParticipationMapping::class, 'participation_id');
     }
 
     public function activityRegistrations()

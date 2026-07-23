@@ -40,7 +40,7 @@ function LPesertaMappingFactory_makeMapping(array $overrides = []): LegacyPesert
 }
 
 // ---------------------------------------------------------------------------
-// Schema — transitional (inert columns still physically present)
+// Schema — Sprint 3 final contract (peserta↔Person only)
 // ---------------------------------------------------------------------------
 
 test('legacy_peserta_mappings table has expected columns', function () {
@@ -51,11 +51,7 @@ test('legacy_peserta_mappings table has expected columns', function () {
     expect(in_array('peserta_id', $columns))->toBeTrue();
     expect(in_array('person_id', $columns))->toBeTrue();
 
-    // Sprint 2 transitional: inert columns berikut masih ada secara fisik
-    // tetapi BUKAN runtime contract — dijadwalkan removal Sprint 3.
-    expect(in_array('participation_id', $columns))->toBeTrue();
-    expect(in_array('event_id', $columns))->toBeTrue();
-    expect(in_array('backfill_batch_id', $columns))->toBeTrue();
+    // Sprint 3: transitional columns sudah dihapus (participation_id, event_id, backfill_batch_id)
 
     // Snapshot / metadata columns
     expect(in_array('legacy_nip', $columns))->toBeTrue();

@@ -63,7 +63,7 @@ test('LegacyPesertaMapping can exist without any Participation', function () {
 // 2. LegacyPesertaMapping only represents peserta↔Person
 // ===========================================================================
 
-test('LegacyPesertaMapping does not require participation_id or event_id', function () {
+test('LegacyPesertaMapping can be created with only peserta↔Person', function () {
     $f = sprint2MappingPesertaPerson(50002);
     $mapping = LegacyPesertaMapping::create([
         'peserta_id' => $f['peserta']->id,
@@ -71,8 +71,11 @@ test('LegacyPesertaMapping does not require participation_id or event_id', funct
         'migrated_at' => now(),
     ]);
 
-    expect($mapping->participation_id)->toBeNull()
-        ->and($mapping->event_id)->toBeNull();
+    expect($mapping->id)->not->toBeNull()
+        ->and($mapping->peserta_id)->toBe($f['peserta']->id)
+        ->and($mapping->person_id)->toBe($f['person']->id)
+        ->and($mapping->peserta->id)->toBe($f['peserta']->id)
+        ->and($mapping->person->id)->toBe($f['person']->id);
 });
 
 // ===========================================================================
@@ -250,10 +253,10 @@ test('new registration creates LegacyPesertaMapping (peserta↔Person) and Legac
 });
 
 // ===========================================================================
-// 11. Participant replacement does not write event pointer to LegacyPesertaMapping
+// 11. Participant replacement updates LegacyPesertaMapping (peserta↔Person only)
 // ===========================================================================
 
-test('participant replacement does not write participation_id to LegacyPesertaMapping', function () {
+test('participant replacement updates LegacyPesertaMapping person pointer', function () {
     $f = sprint2MappingPesertaPerson(50011);
     $event = sprint2MappingEvent('l');
 
@@ -270,7 +273,7 @@ test('participant replacement does not write participation_id to LegacyPesertaMa
 
     $pesertaMapping->refresh();
     expect($pesertaMapping->person_id)->toBe($newPerson->id)
-        ->and($pesertaMapping->participation_id)->toBeNull();
+        ->and($pesertaMapping->peserta_id)->toBe($f['peserta']->id);
 });
 
 // ===========================================================================

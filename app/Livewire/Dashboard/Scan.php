@@ -3,7 +3,6 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\EventAttendance;
-use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SesiAbsensi;
@@ -70,7 +69,7 @@ class Scan extends Component
         $search = '%' . trim($this->manualSearch) . '%';
 
         // 1. Canonical: Participation + Person scoped to active event
-        $participations = Participation::with(['person', 'legacyPesertaMapping.peserta'])
+        $participations = Participation::with(['person', 'legacyParticipationMapping.peserta'])
             ->where('event_id', $event->id)
             ->where(function ($q) use ($search) {
                 $q->whereHas('person', fn ($pq) => $pq->where('nama', 'like', $search))

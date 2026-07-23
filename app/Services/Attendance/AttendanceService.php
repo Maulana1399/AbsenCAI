@@ -5,7 +5,7 @@ namespace App\Services\Attendance;
 use App\Models\Absensi;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
-use App\Models\LegacyPesertaMapping;
+
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Models\Participation;
 use App\Models\peserta;

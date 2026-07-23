@@ -33,7 +33,7 @@ class Database extends Component
     public function render()
     {
         $event = app(ActiveEventContext::class)->current();
-        $pesertaQuery = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta.regu', 'person.legacyPesertaMapping.peserta.kelompok', 'legacyPesertaMapping.peserta.regu', 'legacyPesertaMapping.peserta.kelompok'])
+        $pesertaQuery = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta.regu', 'person.legacyPesertaMapping.peserta.kelompok', 'legacyParticipationMapping.peserta.regu', 'legacyParticipationMapping.peserta.kelompok'])
             ->when($event, fn ($query) => $query->where('event_id', $event->id), fn ($query) => $query->whereRaw('0 = 1'));
 
         if ($this->search !== '') {
@@ -47,7 +47,7 @@ class Database extends Component
         }
 
         $daftarPeserta = $pesertaQuery->orderByDesc('id')->get()->map(function (Participation $participation) {
-            $legacyPeserta = $participation->legacyPesertaMapping?->peserta;
+            $legacyPeserta = $participation->legacyParticipationMapping?->peserta;
 
             return (object) [
                 'id' => $participation->id,

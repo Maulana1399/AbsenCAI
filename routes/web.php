@@ -132,7 +132,7 @@ Route::get('qr-label/print/filtered', function () {
 
     $query = Participation::with([
         'person.desa',
-        'legacyPesertaMapping.peserta',
+        'legacyParticipationMapping.peserta',
     ])
         ->where('event_id', $event->id)
         ->whereNotNull('attendance_code');
@@ -144,7 +144,7 @@ Route::get('qr-label/print/filtered', function () {
     }
 
     if (request()->filled('kelompok') || request()->filled('regu')) {
-        $query->whereHas('legacyPesertaMapping.peserta', function ($q) {
+        $query->whereHas('legacyParticipationMapping.peserta', function ($q) {
             if (request()->filled('kelompok')) {
                 $q->where('kelompok_id', request('kelompok'));
             }
@@ -307,7 +307,7 @@ Route::get('qr-label/print/a4', function () {
 
     $query = Participation::with([
         'person.desa',
-        'legacyPesertaMapping.peserta',
+        'legacyParticipationMapping.peserta',
     ])
         ->where('event_id', $event->id)
         ->whereNotNull('attendance_code');
@@ -334,7 +334,7 @@ Route::get('qr-label/print/a4', function () {
     */
 
     if (request()->filled('kelompok') || request()->filled('regu')) {
-        $query->whereHas('legacyPesertaMapping.peserta', function ($q) {
+        $query->whereHas('legacyParticipationMapping.peserta', function ($q) {
             if (request()->filled('kelompok')) {
                 $q->where('kelompok_id', request('kelompok'));
             }

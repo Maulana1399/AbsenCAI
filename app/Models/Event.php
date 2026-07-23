@@ -90,11 +90,6 @@ class Event extends Model
         return $this->belongsToMany(Person::class, 'participations');
     }
 
-    public function legacyPesertaMappings()
-    {
-        return $this->hasMany(LegacyPesertaMapping::class, 'event_id');
-    }
-
     public function eventRoles()
     {
         return $this->hasMany(EventRole::class);
