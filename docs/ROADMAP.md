@@ -636,6 +636,47 @@ Design C: **problem_total = 0**
 
 ---
 
+### PGM.19 Sprint 8A — Legacy Regu Dependency Elimination ✅
+
+**Status:** ✅ COMPLETE / VERIFIED
+
+Eliminated all runtime dependency on `pesertas.regu_id`:
+- RegistrationService dual-write to `pesertas.regu_id` **stopped**
+- `PlacementService::leastFilledRegu` now requires `int $eventId` (no global fallback)
+- `peserta::regu()` relationship **removed**
+- `regu::peserta()` relationship **removed**
+- All production callers forward `$eventId` to `leastFilledRegu`
+- 15 Sprint 8A contract tests created and verified
+
+### PGM.19 Sprint 8B — Physical Regu Retirement ✅
+
+**Status:** ✅ COMPLETE / VERIFIED
+
+Physical column drop + full regression recovery:
+- **Migration**: `pesertas.regu_id` column dropped (FK, index, column)
+- **SQLite regression 1**: Index name mismatch after table rebuild (`pesertas_new_regu_id_index` vs `pesertas_regu_id_index`) — removed explicit `dropIndex`
+- **SQLite regression 2**: FK definition blocks `DROP COLUMN` — explicit table rebuild via `CREATE+INSERT+DROP+RENAME`
+- **Runtime regression**: null `eventId` in `autoPlacement` when no active event context — null-guard added
+- **Test leak**: Missing `Str::createRandomStringsNormally()` in `afterEach` — 50 cascading slug collisions fixed
+- **2 stale test bugs**: `peserta_id` lookup on participations (wrong column), gender null on mount
+- 17 Sprint 8B contract tests created and verified
+- Zero production code regressions
+
+**Final baseline: 1581 passed / 3774 assertions / 0 failures**
+**Design C: problem_total = 0**
+
+### Canonical assignment
+```
+Participation.regu_id — PRESERVED (event-scoped) ✓
+pesertas.regu_id — RETIRED (column dropped) ✓
+peserta::regu() — REMOVED ✓
+regu::peserta() — REMOVED ✓
+regu dual-write — STOPPED ✓
+global regu fallback — REMOVED ✓
+```
+
+---
+
 # Pengajian Desa MVP (PGM Series)
 
 ## Status

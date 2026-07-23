@@ -28,8 +28,8 @@ beforeEach(function () {
     $this->personA = Person::create(['nama' => 'Shared Person', 'nip' => 6001, 'jenis_kelamin' => 'L']);
     $this->personB = Person::create(['nama' => 'Other Person', 'nip' => 6002, 'jenis_kelamin' => 'L']);
 
-    $this->pesertaA = peserta::create(['nama' => 'Peserta Legacy A', 'nip' => 6001, 'attendance_code' => 'KJA-HADIR1', 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id]);
-    $this->pesertaB = peserta::create(['nama' => 'Peserta Legacy B', 'nip' => 6002, 'attendance_code' => 'KJA-IZIN1', 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id]);
+    $this->pesertaA = peserta::create(['nama' => 'Peserta Legacy A', 'nip' => 6001, 'attendance_code' => 'KJA-HADIR1', 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
+    $this->pesertaB = peserta::create(['nama' => 'Peserta Legacy B', 'nip' => 6002, 'attendance_code' => 'KJA-IZIN1', 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
 
     $this->participationA = Participation::create(['person_id' => $this->personA->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL601', 'attendance_code' => 'KJA-A601', 'jenis_peserta' => 'Wajib']);
     $this->participationB = Participation::create(['person_id' => $this->personA->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL602', 'attendance_code' => 'KJA-B602', 'jenis_peserta' => 'Wajib']);

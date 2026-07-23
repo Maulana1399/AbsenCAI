@@ -31,6 +31,7 @@ MVP Development + Pilot
 # Current Sprint
 
 Sprint 3 — Multi Event Architecture + Pengajian Desa MVP (COMPLETE)
+PGM.19 Sprint 8A + 8B — Legacy Regu Retirement (COMPLETE)
 
 Status:
 
@@ -38,6 +39,8 @@ Status:
 ✅ S01–S04 Foundation COMPLETE 100%
 ✅ S3.0–S3.10 all COMPLETE/VERIFIED
 ✅ UI Bug Fix Sprint — COMPLETE
+✅ PGM.19 Sprint 8A — Legacy Regu Dependency Elimination COMPLETE
+✅ PGM.19 Sprint 8B — Physical Regu Retirement COMPLETE / VERIFIED
 
 Target: August 2026 pilot release.
 
@@ -218,13 +221,11 @@ Completed foundation work:
 
 Priority saat ini:
 
-1. **PGM.17 — Pilot Release** ✅ COMPLETE — UI interaction remediation. Full suite: 1570 passed / 3803 assertions / 0 failures. Design C: problem_total = 0.
-2. **Database V2 Part 5 CLOSED** ✅ — Documentation synchronized; semantic coverage audited.
-3. **PGM.18 Sprint 1 ✅ COMPLETE** — Legacy historical tooling removed, Design C diagnostic contract fixed. Verified: 1494 passed / 3581 assertions / 0 failures, Design C: problem_total = 0.
-4. Remaining P2/P3 technical debt items (non-blocking RBAC backlog).
-5. **PGM.18 Sprint 2 ✅ COMPLETE** — Mapping contract refactored, fully verified (1499/3592/0).
-6. **PGM.18 Sprint 3 ✅ COMPLETE** — Physical mapping cleanup: columns dropped, relationships removed, tested (1508/3624/0).
-7. **PGM.18 CLOSED** — All 3 sprints complete.
+1. **PGM.19 Sprint 8A + 8B ✅ COMPLETE** — Legacy regu retirement: runtime dependency eliminated + physical column dropped. Final baseline: **1581 passed / 3774 assertions / 0 failures**. Design C: problem_total = 0.
+2. **PGM.17 — Pilot Release** ✅ COMPLETE.
+3. **PGM.18 Sprint 1–3 ✅ COMPLETE** — Legacy tooling removal, mapping refactor, physical cleanup.
+4. **PGM.18 CLOSED** — All 3 sprints complete.
+5. **PGM.20** — Next: Legacy NIP Retirement Audit (read-only complete, implementation pending).
 
 ## Database V2 Part 5 Closure
 
@@ -315,7 +316,9 @@ Database: SQLite
 - Login page still uses CAI branding — needs KJA Event Manager rebrand
 - No hard-delete for revoked DesaAccessGrants — only soft revocation
 - `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
-- Test suite: 1508 passed, 3624 assertions, 0 failures (post-PGM.18 Sprint 3). Increase from Sprint 2: +9 tests, +32 assertions (Sprint 3 regression test coverage). Baseline Sprint 2: 1499/3592/0. Baseline PGM.17: 1570/3803/0 (difference expected — Sprint 1 intentionally removed 75 tests).
+- **Regu retired from peserta** — `pesertas.regu_id` column dropped, `peserta::regu()` removed, `regu::peserta()` removed, dual-write stopped, global fallback eliminated ✅
+- **Regu on Participation** — canonical event-scoped regu path via `participations.regu_id` ✅
+- Test suite: **1581 passed, 3774 assertions, 0 failures** (post-PGM.19 Sprint 8B). Increase from PGM.18 Sprint 3: +73 tests, +150 assertions (Sprint 8A + 8B regression + contract tests).
 
 ---
 

@@ -24,7 +24,6 @@ beforeEach(function () {
     $desa = \App\Models\desa::create(['desa_asal' => 'Desa Test']);
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Kelompok Test', 'desa_id' => $desa->id]);
 
-    // Create Person A with LEGACY peserta.regu_id = reguGlobal (sengaja berbeda)
     $this->person = Person::create(['nama' => 'Person A', 'nip' => 1001, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
     $this->pesertaRecord = peserta::create([
         'nama' => 'Person A',
@@ -32,7 +31,6 @@ beforeEach(function () {
         'jenis_kelamin' => 'Laki - Laki',
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $this->reguGlobal->id, // GLOBAL — different from canonical
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -79,11 +77,9 @@ beforeEach(function () {
 });
 
 // ──────────────────────────────────────────────
-// 1. Canonical regu preferred over conflicting peserta.regu_id
+// 1. Canonical participation regu is used (legacy peserta.regu_id retired per Sprint 8B)
 // ──────────────────────────────────────────────
-test('canonical participation regu is preferred over conflicting legacy peserta regu_id', function () {
-    $this->pesertaRecord->update(['regu_id' => $this->reguGlobal->id]);
-
+test('canonical participation regu is used (legacy peserta.regu_id retired)', function () {
     $this->partA->refresh();
     $this->partB->refresh();
 

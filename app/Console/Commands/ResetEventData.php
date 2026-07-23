@@ -161,7 +161,7 @@ class ResetEventData extends Command
         $dangerousCascade = [
             'pesertas.desa_id -> desas.id' => ['trigger' => 'DELETE desas', 'effect' => 'CASCADE hapus pesertas'],
             'pesertas.kelompok_id -> kelompoks.id' => ['trigger' => 'DELETE kelompoks', 'effect' => 'CASCADE hapus pesertas'],
-            'pesertas.regu_id -> regus.id' => ['trigger' => 'DELETE regus', 'effect' => 'CASCADE hapus pesertas'],
+            'pesertas.regu_id -> regus.id (LEGACY — frozen column)' => ['trigger' => 'DELETE regus', 'effect' => 'CASCADE hapus pesertas (only if FK present)'],
             'kelompoks.desa_id -> desas.id' => ['trigger' => 'DELETE desas', 'effect' => 'CASCADE hapus kelompoks'],
             'surat_izins.peserta_id -> pesertas.id' => ['trigger' => 'DELETE pesertas', 'effect' => 'CASCADE hapus surat_izins'],
             'surat_izins.created_by -> users.id' => ['trigger' => 'DELETE users', 'effect' => 'CASCADE hapus surat_izins'],
@@ -195,7 +195,7 @@ class ResetEventData extends Command
         }
 
         $snapshot['pesertas_fields'] = DB::table('pesertas')
-            ->select('id', 'nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id', 'regu_id')
+            ->select('id', 'nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id')
             ->orderBy('id')
             ->get()
             ->map(fn ($r) => (array) $r)
@@ -278,7 +278,7 @@ class ResetEventData extends Command
 
         // 2. Peserta fields unchanged
         $pesertasNow = DB::table('pesertas')
-            ->select('id', 'nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id', 'regu_id')
+            ->select('id', 'nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id')
             ->orderBy('id')
             ->get()
             ->keyBy('id');
@@ -290,14 +290,14 @@ class ResetEventData extends Command
                 continue;
             }
             $after = (array) $after;
-            foreach (['nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id', 'regu_id'] as $field) {
+            foreach (['nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id'] as $field) {
                 if ((string) $before[$field] !== (string) $after[$field]) {
                     $errors[] = "Peserta id={$id} {$field} changed: '{$before[$field]}' → '{$after[$field]}'";
                 }
             }
         }
         if (empty($errors)) {
-            $this->line('  ✅ All peserta fields unchanged (nip, participant_number, attendance_code, desa_id, kelompok_id, regu_id)');
+            $this->line('  ✅ All peserta fields unchanged (nip, participant_number, attendance_code, desa_id, kelompok_id)');
         }
 
         // 3. No orphan FK
@@ -321,14 +321,14 @@ class ResetEventData extends Command
             $this->line('  ✅ No orphan kelompok_id');
         }
 
-        $orphanRegu = DB::table('pesertas')
+        $orphanRegu = DB::table('participations')
             ->whereNotNull('regu_id')
             ->whereNotIn('regu_id', $snapshot['valid_regu_ids'])
             ->count();
         if ($orphanRegu > 0) {
-            $errors[] = "{$orphanRegu} peserta(s) have invalid regu_id";
+            $errors[] = "{$orphanRegu} participation(s) have invalid regu_id";
         } else {
-            $this->line('  ✅ No orphan regu_id');
+            $this->line('  ✅ No orphan regu_id in participations');
         }
 
         // 4. Operational tables must be 0 (only during actual execution)

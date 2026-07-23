@@ -183,17 +183,16 @@ class CaiParticipantReplacementService
             ]);
 
             /*
-            * Participation baru mengambil slot event milik peserta lama.
-            * Regu diambil dari canonical oldParticipation.regu_id dengan
-            * fallback ke legacy peserta.regu_id untuk safety.
-            */
+             * Participation baru mengambil slot event milik peserta lama.
+             * Regu diambil dari canonical oldParticipation.regu_id.
+             */
             $newParticipation = Participation::create([
                 'person_id' => $newPerson->id,
                 'event_id' => $participationMapping->event_id,
                 'participant_number' => $participantNumber,
                 'attendance_code' => $attendanceCode,
                 'jenis_peserta' => $peserta->jenis_peserta,
-                'regu_id' => $oldParticipation->regu_id ?? $peserta->regu_id,
+                'regu_id' => $oldParticipation->regu_id,
             ]);
 
             /*
@@ -232,8 +231,9 @@ class CaiParticipantReplacementService
             ]);
 
             /*
-            * Catat audit trail replacement.
-            */
+             * Catat audit trail replacement.
+             * Use canonical oldParticipation.regu_id for event-scoped regu snapshot.
+             */
             $replacement = CaiParticipantReplacement::create([
                 'event_id' => $participationMapping->event_id,
                 'peserta_id' => $peserta->id,
@@ -250,7 +250,7 @@ class CaiParticipantReplacementService
 
                 'desa_id' => $peserta->desa_id,
                 'kelompok_id' => $peserta->kelompok_id,
-                'regu_id' => $peserta->regu_id,
+                'regu_id' => $oldParticipation->regu_id,
 
                 'reason' => $reason,
                 'replaced_by' => auth()->id(),

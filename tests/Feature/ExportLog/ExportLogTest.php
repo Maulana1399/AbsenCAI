@@ -66,7 +66,7 @@ function exportLog_makeMappedParticipation(Event $event, string $name, string $n
     $desa = desa::first() ?? desa::create(['desa_asal' => 'Desa Export']);
     $kelompok = kelompok::first() ?? kelompok::create(['kelompok_asal' => 'Kelompok Export', 'desa_id' => $desa->id]);
     $regu = regu::first() ?? regu::create(['regu' => 'Regu Export', 'jenis_kelamin' => $gender]);
-    $peserta = peserta::create(['nama' => $name, 'nip' => (int) $nip, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'Laki - Laki' : 'Perempuan', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => $status]);
+    $peserta = peserta::create(['nama' => $name, 'nip' => (int) $nip, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'Laki - Laki' : 'Perempuan', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => $status]);
     $person = Person::create(['nama' => $name, 'nip' => (int) $nip, 'jenis_kelamin' => $gender === 'Laki - Laki' ? 'L' : 'P', 'desa_id' => $desa->id]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => $participantNumber, 'attendance_code' => $attendanceCode, 'jenis_peserta' => peserta::JENIS_WAJIB]);
     LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);

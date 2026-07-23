@@ -37,7 +37,7 @@ class GantiPeserta extends Component
         $participation = Participation::with(['person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])->findOrFail($id);
 
         $peserta = $participation->person?->legacyPesertaMapping?->peserta
-            ?? peserta::with(['desa', 'kelompok', 'regu'])->find($id);
+            ?? peserta::with(['desa', 'kelompok'])->find($id);
 
         if ($peserta === null) {
             $this->errorMessage = 'Data legacy peserta tidak ditemukan.';
@@ -62,7 +62,7 @@ class GantiPeserta extends Component
 
         $this->desa = $peserta->desa?->desa_asal ?? '-';
         $this->kelompok = $peserta->kelompok?->kelompok_asal ?? '-';
-        $this->regu = $participation->regu?->regu ?? $peserta->regu?->regu ?? '-';
+        $this->regu = $participation->regu?->regu ?? '-';
 
         $this->jenis_kelamin = $peserta->jenis_kelamin ?? '';
 

@@ -53,7 +53,7 @@ test('legacy participation mappings table exists with expected unique constraint
 
 test('same peserta can map to Event A and Event B while duplicate same event and duplicate participation are rejected', function () {
     $person = Person::create(['nama' => 'Schema Bridge', 'nip' => 10101, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $pesertaModel = peserta::create(['nama' => 'Schema Bridge', 'nip' => 10101, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
+    $pesertaModel = peserta::create(['nama' => 'Schema Bridge', 'nip' => 10101, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-AAAA0001', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL002', 'attendance_code' => 'KJA-BBBB0001', 'jenis_peserta' => 'Wajib']);
 
@@ -68,7 +68,7 @@ test('same peserta can map to Event A and Event B while duplicate same event and
 
 test('resolver uses legacy participation mapping for per-event resolution', function () {
     $person = Person::create(['nama' => 'Resolve Person', 'nip' => 20201, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $pesertaModel = peserta::create(['nama' => 'Resolve Person', 'nip' => 20201, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
+    $pesertaModel = peserta::create(['nama' => 'Resolve Person', 'nip' => 20201, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL010', 'attendance_code' => 'KJA-RESOLVE1', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL011', 'attendance_code' => 'KJA-RESOLVE2', 'jenis_peserta' => 'Wajib']);
 
@@ -148,7 +148,7 @@ test('transaction rollback on bridge failure leaves no partial participation', f
 
 test('populated database safety keeps existing rows and only adds the new bridge table', function () {
     $person = Person::create(['nama' => 'Safety Person', 'nip' => 80801, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $pesertaModel = peserta::create(['nama' => 'Safety Person', 'nip' => 80801, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
+    $pesertaModel = peserta::create(['nama' => 'Safety Person', 'nip' => 80801, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL080', 'attendance_code' => 'KJA-SAFETY', 'jenis_peserta' => 'Wajib']);
     LegacyPesertaMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id]);
     LegacyParticipationMapping::create(['peserta_id' => $pesertaModel->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);

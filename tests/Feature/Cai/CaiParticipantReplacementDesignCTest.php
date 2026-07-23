@@ -44,7 +44,6 @@ function cdr_fixture(): array
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 

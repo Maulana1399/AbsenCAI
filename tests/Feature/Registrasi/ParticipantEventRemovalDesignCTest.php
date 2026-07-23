@@ -37,7 +37,7 @@ function per_fixture(): array
     $eventA = per_event('a');
     $eventB = per_event('b');
     $person = Person::create(['nama' => 'Remove Person', 'nip' => 99001, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
-    $legacy = peserta::create(['nama' => 'Remove Person', 'nip' => 99001, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $legacy = peserta::create(['nama' => 'Remove Person', 'nip' => 99001, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KA001', 'attendance_code' => 'KJA-PERA001', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KB001', 'attendance_code' => 'KJA-PERB001', 'jenis_peserta' => 'Wajib']);
     $mapping = LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => 99001, 'legacy_participant_number' => 'KL001', 'legacy_attendance_code' => 'KJA-PERLEG1', 'migrated_at' => now()]);
@@ -54,7 +54,7 @@ function per_single_fixture(): array
     $regu = regu::create(['regu' => 'PER Single Regu', 'jenis_kelamin' => 'Laki - Laki']);
     $eventA = per_event('single-a');
     $person = Person::create(['nama' => 'Remove Single', 'nip' => 99011, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
-    $legacy = peserta::create(['nama' => 'Remove Single', 'nip' => 99011, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $legacy = peserta::create(['nama' => 'Remove Single', 'nip' => 99011, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KA101', 'attendance_code' => 'KJA-SINGLEA01', 'jenis_peserta' => 'Wajib']);
     $mapping = LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => 99011, 'legacy_participant_number' => 'KL101', 'legacy_attendance_code' => 'KJA-SINGLELEG1', 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $eventA->id, 'migrated_at' => now()]);

@@ -91,9 +91,9 @@ test('deleting regu nullifies participation regu_id', function () {
 });
 
 // ──────────────────────────────────────────────
-// 5. registration writes Participation.regu_id (dual-write)
+// 5. registration writes Participation.regu_id only (dual-write retired per Sprint 7/8A)
 // ──────────────────────────────────────────────
-test('create participant writes regu_id to both peserta and participation', function () {
+test('create participant writes regu_id to participation only (dual-write retired)', function () {
     $reguA = regu::create(['regu' => 'Regu Dual', 'jenis_kelamin' => 'Laki - Laki']);
     $event = Event::create(['name' => 'Dual Event', 'slug' => 'dual-event', 'status' => 'active']);
     app(\App\Support\ActiveEventContext::class)->set($event);
@@ -114,7 +114,7 @@ test('create participant writes regu_id to both peserta and participation', func
 
     $pesertaRecord = peserta::where('nama', 'Dual Peserta')->first();
     expect($pesertaRecord)->not->toBeNull();
-    expect($pesertaRecord->regu_id)->toBe($reguA->id);
+    expect($pesertaRecord->regu_id)->toBeNull();
 
     $participationRecord = Participation::where('person_id', $pesertaRecord->legacyPesertaMapping->person_id)->first();
     expect($participationRecord)->not->toBeNull();
@@ -180,7 +180,7 @@ test('joining second event does not change first event participation regu', func
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Kelompok Join', 'desa_id' => $desa->id]);
 
     // Person A + legacy peserta with reguA
-    $pesertaRecord = peserta::create(['nama' => 'Join Person', 'nip' => 4001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $reguA->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $pesertaRecord = peserta::create(['nama' => 'Join Person', 'nip' => 4001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $person = Person::create(['nama' => 'Join Person', 'nip' => 4001, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
     LegacyPesertaMapping::create(['peserta_id' => $pesertaRecord->id, 'person_id' => $person->id]);
 
@@ -189,7 +189,6 @@ test('joining second event does not change first event participation regu', func
 
     // Join Event B — should NOT change partA's regu_id
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KL301', 'attendance_code' => 'KJA-JB1', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguB->id]);
-    $pesertaRecord->update(['regu_id' => $reguB->id]);
 
     $partA->refresh();
     expect((int) $partA->regu_id)->toBe($reguA->id);
@@ -215,16 +214,19 @@ test('participation with null regu_id is valid', function () {
 });
 
 // ──────────────────────────────────────────────
-// 10. legacy fallback — PlacementService without eventId still works
+// 10. least filled regu uses participations scoped by event (retired legacy peserta fallback)
 // ──────────────────────────────────────────────
-test('placement service legacy fallback without eventId works', function () {
-    $reguA = regu::create(['regu' => 'Legacy Fallback Regu', 'jenis_kelamin' => 'Laki - Laki']);
+test('least filled regu uses participations scoped by event (retired legacy peserta fallback)', function () {
+    $reguA = regu::create(['regu' => 'Event Scoped Regu', 'jenis_kelamin' => 'Laki - Laki']);
+    $reguB = regu::create(['regu' => 'Event Scoped Regu B', 'jenis_kelamin' => 'Laki - Laki']);
+    $event = Event::create(['name' => 'Event Scoped Test', 'slug' => 'event-scoped-test', 'status' => 'active']);
 
-    peserta::create(['nama' => 'Legacy Fallback', 'nip' => 5001, 'jenis_kelamin' => 'Laki - Laki', 'regu_id' => $reguA->id]);
+    $person = Person::create(['nama' => 'Event Scoped Person', 'nip' => 5001, 'jenis_kelamin' => 'L']);
+    Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL501', 'attendance_code' => 'KJA-ES1', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
-    // Without eventId, should still count from pesertas
-    $result = PlacementService::leastFilledRegu('Laki - Laki');
+    $result = PlacementService::leastFilledRegu('Laki - Laki', $event->id);
     expect($result)->toBeInstanceOf(regu::class);
+    expect($result->id)->toBe($reguB->id);
 });
 
 // ──────────────────────────────────────────────
@@ -244,9 +246,9 @@ test('auto placement with event id uses participation count', function () {
 });
 
 // ──────────────────────────────────────────────
-// 12. EditPeserta regu_id write fix
+// 12. EditPeserta regu_id writes to participation only (dual-write retired)
 // ──────────────────────────────────────────────
-test('edit peserta writes regu_id to both peserta and participation', function () {
+test('edit peserta writes regu_id to participation only (dual-write retired)', function () {
     $reguA = regu::create(['regu' => 'Edit Regu A', 'jenis_kelamin' => 'Laki - Laki']);
     $reguB = regu::create(['regu' => 'Edit Regu B', 'jenis_kelamin' => 'Laki - Laki']);
 
@@ -255,26 +257,23 @@ test('edit peserta writes regu_id to both peserta and participation', function (
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Kelompok Edit', 'desa_id' => $desa->id]);
 
     $person = Person::create(['nama' => 'Edit Person', 'nip' => 6001, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
-    $pesertaRecord = peserta::create(['nama' => 'Edit Person', 'nip' => 6001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $reguA->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $pesertaRecord = peserta::create(['nama' => 'Edit Person', 'nip' => 6001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     LegacyPesertaMapping::create(['peserta_id' => $pesertaRecord->id, 'person_id' => $person->id]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL500', 'attendance_code' => 'KJA-EDIT', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
     LegacyParticipationMapping::create(['peserta_id' => $pesertaRecord->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
-    // Simulate EditPeserta::update() logic — write regu_id to both
+    // Simulate EditPeserta::update() — write regu_id to participation only
     $participation->update(['jenis_peserta' => 'Kiriman', 'regu_id' => $reguB->id]);
-    $pesertaRecord->update(['regu_id' => $reguB->id]);
 
     $participation->refresh();
-    $pesertaRecord->refresh();
 
     expect((int) $participation->regu_id)->toBe($reguB->id);
-    expect((int) $pesertaRecord->regu_id)->toBe($reguB->id);
 });
 
 // ──────────────────────────────────────────────
-// 13. Ulang updatePeserta writes regu_id to both
+// 13. Ulang updatePeserta writes regu_id to participation only (dual-write retired)
 // ──────────────────────────────────────────────
-test('ulang update peserta writes regu_id to both peserta and participation', function () {
+test('ulang update peserta writes regu_id to participation only (dual-write retired)', function () {
     $reguA = regu::create(['regu' => 'Ulang Regu A', 'jenis_kelamin' => 'Laki - Laki']);
     $reguB = regu::create(['regu' => 'Ulang Regu B', 'jenis_kelamin' => 'Laki - Laki']);
 
@@ -283,18 +282,15 @@ test('ulang update peserta writes regu_id to both peserta and participation', fu
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Kelompok Ulang', 'desa_id' => $desa->id]);
 
     $person = Person::create(['nama' => 'Ulang Person', 'nip' => 7001, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
-    $pesertaRecord = peserta::create(['nama' => 'Ulang Person', 'nip' => 7001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $reguA->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $pesertaRecord = peserta::create(['nama' => 'Ulang Person', 'nip' => 7001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     LegacyPesertaMapping::create(['peserta_id' => $pesertaRecord->id, 'person_id' => $person->id]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL600', 'attendance_code' => 'KJA-ULANG', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
     LegacyParticipationMapping::create(['peserta_id' => $pesertaRecord->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
-    // Simulate Ulang::updatePeserta() — write regu_id to participation AND peserta
+    // Simulate Ulang::updatePeserta() — write regu_id to participation only
     $participation->update(['jenis_peserta' => 'Kiriman', 'regu_id' => $reguB->id]);
-    $pesertaRecord->update(['regu_id' => $reguB->id]);
 
     $participation->refresh();
-    $pesertaRecord->refresh();
 
     expect((int) $participation->regu_id)->toBe($reguB->id);
-    expect((int) $pesertaRecord->regu_id)->toBe($reguB->id);
 });

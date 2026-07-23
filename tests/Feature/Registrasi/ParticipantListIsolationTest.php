@@ -28,7 +28,7 @@ test('daftar peserta shows only active event participations', function () {
     $eventB = pd_event('b');
     $personA = Person::create(['nama' => 'List Person A', 'nip' => 91001, 'jenis_kelamin' => 'L']);
     $personB = Person::create(['nama' => 'List Person B', 'nip' => 91002, 'jenis_kelamin' => 'P']);
-    $legacy = peserta::create(['nama' => 'Legacy Only', 'nip' => 91003, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'regu_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $legacy = peserta::create(['nama' => 'Legacy Only', 'nip' => 91003, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $partA = Participation::create(['person_id' => $personA->id, 'event_id' => $eventA->id, 'participant_number' => 'PA001', 'attendance_code' => 'KJA-PD-A001', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $personB->id, 'event_id' => $eventB->id, 'participant_number' => 'PB001', 'attendance_code' => 'KJA-PD-B001', 'jenis_peserta' => 'Wajib']);
     LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $personB->id, 'legacy_nip' => 91003, 'legacy_participant_number' => 'PL001', 'legacy_attendance_code' => 'KJA-PD-L001', 'migrated_at' => now()]);
@@ -68,7 +68,7 @@ test('search and delete act on active event participation id', function () {
 test('global legacy peserta without active event participation does not appear', function () {
     $eventA = pd_event('isolated');
     $person = Person::create(['nama' => 'Isolated Person', 'nip' => 93001, 'jenis_kelamin' => 'L']);
-    $legacy = peserta::create(['nama' => 'Isolated Legacy', 'nip' => 93001, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'regu_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $legacy = peserta::create(['nama' => 'Isolated Legacy', 'nip' => 93001, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
 
     app(ActiveEventContext::class)->set($eventA);
 

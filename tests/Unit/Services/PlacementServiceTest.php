@@ -61,38 +61,29 @@ test('generate participant number is isolated per event and ignores legacy peser
 test('least filled regu picks the regu with the fewest participants for the selected gender', function () {
     $reguA = regu::create(['regu' => 'Regu A', 'jenis_kelamin' => 'Laki - Laki']);
     $reguB = regu::create(['regu' => 'Regu B', 'jenis_kelamin' => 'Laki - Laki']);
+    $event = Event::create(['name' => 'Placement Event LFR', 'slug' => 'placement-lfr', 'status' => 'active']);
 
-    peserta::create([
-        'nama' => 'Peserta 1',
-        'nip' => 1001,
-        'jenis_kelamin' => 'Laki - Laki',
-        'regu_id' => $reguA->id,
-    ]);
+    $person1 = Person::create(['nama' => 'P1', 'nip' => 1001, 'jenis_kelamin' => 'L']);
+    $person2 = Person::create(['nama' => 'P2', 'nip' => 1002, 'jenis_kelamin' => 'L']);
+    Participation::create(['person_id' => $person1->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-LFR01', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
+    Participation::create(['person_id' => $person2->id, 'event_id' => $event->id, 'participant_number' => 'KL002', 'attendance_code' => 'KJA-LFR02', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
-    peserta::create([
-        'nama' => 'Peserta 2',
-        'nip' => 1002,
-        'jenis_kelamin' => 'Laki - Laki',
-        'regu_id' => $reguA->id,
-    ]);
-
-    expect(PlacementService::leastFilledRegu('Laki - Laki')?->id)->toBe($reguB->id)
-        ->and(PlacementService::leastFilledReguId('Laki - Laki'))->toBe($reguB->id)
-        ->and(PlacementService::leastFilledReguName('Laki - Laki'))->toBe('Regu B');
+    expect(PlacementService::leastFilledRegu('Laki - Laki', $event->id)?->id)->toBe($reguB->id)
+        ->and(PlacementService::leastFilledReguId('Laki - Laki', $event->id))->toBe($reguB->id)
+        ->and(PlacementService::leastFilledReguName('Laki - Laki', $event->id))->toBe('Regu B');
 });
 
 test('auto placement uses legacy nip compatibility and least filled regu', function () {
     $reguA = regu::create(['regu' => 'Regu A', 'jenis_kelamin' => 'Perempuan']);
     $reguB = regu::create(['regu' => 'Regu B', 'jenis_kelamin' => 'Perempuan']);
+    $event = Event::create(['name' => 'Placement Event AP', 'slug' => 'placement-ap', 'status' => 'active']);
 
-    peserta::create([
-        'nama' => 'Peserta 1',
-        'nip' => 2001,
-        'jenis_kelamin' => 'Perempuan',
-        'regu_id' => $reguA->id,
-    ]);
+    $person1 = Person::create(['nama' => 'P1', 'nip' => 2001, 'jenis_kelamin' => 'P']);
+    // Legacy peserta needed for NIP generation (legacyNextNip queries peserta table)
+    peserta::create(['nama' => 'P1', 'nip' => 2001, 'jenis_kelamin' => 'Perempuan']);
+    Participation::create(['person_id' => $person1->id, 'event_id' => $event->id, 'participant_number' => 'KP001', 'attendance_code' => 'KJA-AP01', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
-    expect(PlacementService::autoPlacement('Perempuan'))->toBe([
+    expect(PlacementService::autoPlacement('Perempuan', $event->id))->toBe([
         'nip' => '2002',
         'regu_id' => $reguB->id,
         'regu_nama' => 'Regu B',

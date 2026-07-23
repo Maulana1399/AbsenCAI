@@ -8,7 +8,67 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 
 # [Unreleased]
 
-## Added (PGM.18 Sprint 3 — Physical Legacy Mapping Contract Cleanup)
+## Added (PGM.19 Sprint 8A — Legacy Regu Dependency Elimination)
+
+### Refactored (PlacementService — strict eventId contract)
+- **`leastFilledRegu()`** signature changed from `(?int $eventId = null)` to `int $eventId` — global fallback removed
+- **`autoPlacement()`** signature preserved as `?int $eventId = null` but null returns null regu
+- All production callers (`SelfRegister`, `TambahPeserta`, `PesertaImport`, `Ulang`) forward `$eventId`
+- `leastFilledReguId()`, `leastFilledReguName()` updated to require `int $eventId`
+
+### Stopped (RegistrationService dual-write)
+- Dual-write to `pesertas.regu_id` **stopped** — line 73 comment documents removal
+- `regu_id` written exclusively to `Participations.regu_id`
+
+### Removed relationships
+- `peserta::regu()` relationship — deleted
+- `regu::peserta()` relationship — deleted
+
+### Cleaned (peserta model)
+- `regu_id` removed from `$fillable` (already done in Sprint 8A)
+- `regu()` relationship removed
+
+### Tests added
+- 15 Sprint 8A contract tests (`Sprint8ALegacyReguDependencyEliminationTest.php`)
+- All 14 Sprint 8A regression failures fixed (6 stale tests, 6 test bugs, 2 API contract bugs — 0 genuine production regressions)
+
+## Added (PGM.19 Sprint 8B — Physical Regu Retirement)
+
+### Migration executed
+- **`2026_08_11_000001_drop_regu_id_from_pesertas_table.php`** — drops FK, index, and column from `pesertas` table
+- SQLite-safe: uses explicit table rebuild when native `DROP COLUMN` is blocked by inline FK definition
+- MySQL path: standard `dropForeign()` + `dropColumn()`
+- Idempotent: guarded with `Schema::hasColumn()`
+
+### Regressions fixed (5 total across test cycle)
+1. **SQLite index name mismatch**: table rebuild renames indexes, `pesertas_new_regu_id_index` vs expected `pesertas_regu_id_index`
+2. **SQLite FK blocks DROP COLUMN**: inline FK definition prevents column drop — explicit `CREATE+INSERT+DROP+RENAME` rebuild
+3. **Str::random leak**: missing `Str::createRandomStringsNormally()` caused 50 cascading slug collisions
+4. **null eventId in autoPlacement**: `TambahPeserta`/`SelfRegister` mount without event context — null guard added
+5. **Stale test bugs**: `peserta_id` column lookup on participations, gender null on mount assertions
+
+### Tests added
+- 17 Sprint 8B contract tests (`Sprint8BPhysicalReguRetirementTest.php`)
+  - Column absence, model without column, null eventId safety, mount without event, with-event placement, database route rendering
+  - `leastFilledRegu` strict int contract enforced
+
+### Final verified baseline
+- **Full suite: 1581 passed / 3774 assertions / 0 failures**
+- **Design C: problem_total = 0**
+- Baseline increase from PGM.18 Sprint 3: +73 tests, +150 assertions
+
+### Sprint 8B final architecture
+```
+Canonical:
+  Participation.regu_id — PRESERVED (event-scoped)
+
+Retired:
+  pesertas.regu_id — column dropped
+  peserta::regu() — relationship deleted
+  regu::peserta() — relationship deleted
+  regu dual-write — stopped
+  global regu fallback — eliminated
+```
 
 ### Refactored (LegacyPesertaMapping — peserta↔Person ONLY, columns dropped)
 - **Migration executed**: `participation_id`, `event_id`, `backfill_batch_id` dropped from `legacy_peserta_mappings` table

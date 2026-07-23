@@ -28,7 +28,7 @@ function sprint2MappingPesertaPerson(int $nip): array
     $desa = \App\Models\desa::create(['desa_asal' => 'S2 Desa']);
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'S2 Kelompok', 'desa_id' => $desa->id]);
     $regu = \App\Models\regu::create(['regu' => 'S2 Regu', 'jenis_kelamin' => 'Laki - Laki']);
-    $p = peserta::create(['nama' => 'S2 Person', 'nip' => $nip, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'regu_id' => $regu->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $p = peserta::create(['nama' => 'S2 Person', 'nip' => $nip, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $person = Person::create(['nama' => 'S2 Person', 'nip' => $nip, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
 
     return [

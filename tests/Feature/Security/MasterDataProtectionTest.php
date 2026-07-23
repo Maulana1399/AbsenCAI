@@ -415,7 +415,7 @@ test('person legacy sync still works for authorized user', function () {
     $person = Person::create(['nama' => 'Sync Source', 'jenis_kelamin' => 'L']);
     $peserta = \App\Models\peserta::create([
         'nama' => 'Sync Source', 'nip' => 9911, 'jenis_kelamin' => 'Laki - Laki',
-        'regu_id' => $regu->id, 'status_registrasi' => 'Belum Registrasi',
+        'status_registrasi' => 'Belum Registrasi',
     ]);
     $participation = Participation::create([
         'person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib',

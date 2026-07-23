@@ -47,7 +47,6 @@ function pe_fixture(): array
         'jenis_peserta' => 'Wajib',
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
     $participationA = Participation::create([
@@ -118,7 +117,7 @@ test('EditPeserta rejects Event A context for Event B only participation', funct
     $eventA = pe_event('a-only');
     $eventB = pe_event('b-only');
     $person = Person::create(['nama' => 'Only B', 'nip' => 90011, 'jenis_kelamin' => 'L', 'desa_id' => null, 'kelompok_id' => null]);
-    $legacy = peserta::create(['nama' => 'Only B', 'nip' => 90011, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'regu_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $legacy = peserta::create(['nama' => 'Only B', 'nip' => 90011, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $participationB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KB010', 'attendance_code' => 'KJA-ONLYB01', 'jenis_peserta' => 'Wajib']);
     LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participationB->id, 'event_id' => $eventB->id, 'migrated_at' => now()]);
@@ -183,7 +182,7 @@ test('Existing Person joining Event B through registration follows Case B withou
     $eventA = pe_event('case-b-a');
     $eventB = pe_event('case-b-b');
     $person = Person::create(['nama' => 'Case B Person', 'nip' => 90021, 'jenis_kelamin' => 'L', 'desa_id' => null, 'kelompok_id' => null]);
-    $legacy = peserta::create(['nama' => 'Case B Person', 'nip' => 90021, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'regu_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    $legacy = peserta::create(['nama' => 'Case B Person', 'nip' => 90021, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
     $participationA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KA010', 'attendance_code' => 'KJA-CASEB010', 'jenis_peserta' => 'Wajib']);
     LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participationA->id, 'event_id' => $eventA->id, 'migrated_at' => now()]);

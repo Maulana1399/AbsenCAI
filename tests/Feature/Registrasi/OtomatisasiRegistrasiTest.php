@@ -11,6 +11,8 @@ use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Support\ActiveEventContext;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Services\Placement\PlacementService;
 use Livewire\Livewire;
 
@@ -35,7 +37,6 @@ beforeEach(function () {
         'jenis_kelamin' => 'Laki - Laki',
         'desa_id' => $this->desa->id,
         'kelompok_id' => $this->kelompok->id,
-        'regu_id' => $this->reguMaleA->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -45,7 +46,6 @@ beforeEach(function () {
         'jenis_kelamin' => 'Laki - Laki',
         'desa_id' => $this->desa->id,
         'kelompok_id' => $this->kelompok->id,
-        'regu_id' => $this->reguMaleA->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -55,7 +55,6 @@ beforeEach(function () {
         'jenis_kelamin' => 'Laki - Laki',
         'desa_id' => $this->desa->id,
         'kelompok_id' => $this->kelompok->id,
-        'regu_id' => $this->reguMaleB->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -65,14 +64,20 @@ beforeEach(function () {
         'jenis_kelamin' => 'Perempuan',
         'desa_id' => $this->desa->id,
         'kelompok_id' => $this->kelompok->id,
-        'regu_id' => $this->reguFemaleA->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 });
 
-test('auto placement picks next nip and least filled regu by gender', function () {
-    $placementMale = PlacementService::autoPlacement('Laki - Laki');
-    $placementFemale = PlacementService::autoPlacement('Perempuan');
+test('auto placement picks next nip and least filled regu by gender with event scope', function () {
+    $event = Event::create(['name' => 'AP Event', 'slug' => 'ap-event', 'status' => 'active']);
+
+    $p1 = Person::create(['nama' => 'AP M1', 'nip' => 100, 'jenis_kelamin' => 'L']);
+    Participation::create(['person_id' => $p1->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-APM1', 'jenis_peserta' => 'Wajib', 'regu_id' => $this->reguMaleA->id]);
+    $p2 = Person::create(['nama' => 'AP F1', 'nip' => 200, 'jenis_kelamin' => 'P']);
+    Participation::create(['person_id' => $p2->id, 'event_id' => $event->id, 'participant_number' => 'KP001', 'attendance_code' => 'KJA-APF1', 'jenis_peserta' => 'Wajib', 'regu_id' => $this->reguFemaleA->id]);
+
+    $placementMale = PlacementService::autoPlacement('Laki - Laki', $event->id);
+    $placementFemale = PlacementService::autoPlacement('Perempuan', $event->id);
 
     expect($placementMale['nip'])->toBe('1001');
     expect($placementMale['regu_id'])->toBe($this->reguMaleB->id);
@@ -95,9 +100,12 @@ test('self register uses automatic nip and least filled regu', function () {
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Baru',
         'nip' => 2001,
-        'regu_id' => $this->reguFemaleA->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
+
+    $newPart = Participation::whereHas('person', fn ($q) => $q->where('nama', 'Peserta Baru'))->first();
+    expect($newPart)->not->toBeNull();
+    expect($newPart->regu_id)->toBe($this->reguFemaleA->id);
 });
 
 test('database peserta form uses automatic nip and least filled regu', function () {
@@ -112,9 +120,12 @@ test('database peserta form uses automatic nip and least filled regu', function 
     $this->assertDatabaseHas('pesertas', [
         'nama' => 'Peserta Database',
         'nip' => 1001,
-        'regu_id' => $this->reguMaleA->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
+
+    $newPart = Participation::whereHas('person', fn ($q) => $q->where('nama', 'Peserta Database'))->first();
+    expect($newPart)->not->toBeNull();
+    expect($newPart->regu_id)->toBe($this->reguMaleA->id);
 });
 
 test('import peserta uses automatic nip and least filled regu', function () {
@@ -128,6 +139,10 @@ test('import peserta uses automatic nip and least filled regu', function () {
     expect($model->nip)->toBe(2001)
         ->and($model->participant_number)->toBe('KP001')
         ->and($model->attendance_code)->toStartWith('KJA-')
-        ->and($model->regu_id)->toBe($this->reguFemaleA->id)
+        ->and($model->regu_id)->toBeNull()
         ->and($model->status_registrasi)->toBe(peserta::STATUS_BELUM_REGISTRASI);
+
+    $newPart = Participation::whereHas('person', fn ($q) => $q->where('nama', 'Peserta Import'))->first();
+    expect($newPart)->not->toBeNull();
+    expect($newPart->regu_id)->toBe($this->reguFemaleA->id);
 });

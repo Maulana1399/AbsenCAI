@@ -46,7 +46,7 @@ function callerPayload(string $nama, int $nip, $desaId, $kelompokId, $reguId): a
 
 test('bridge-first resolver resolves participation by peserta and event', function () {
     $person = Person::create(['nama' => 'Bridge First', 'nip' => 9001, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $legacy = peserta::create(['nama' => 'Bridge First', 'nip' => 9001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
+    $legacy = peserta::create(['nama' => 'Bridge First', 'nip' => 9001, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-A001', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL002', 'attendance_code' => 'KJA-B001', 'jenis_peserta' => 'Wajib']);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
@@ -62,7 +62,7 @@ test('attendance scan resolves active event participation and blocks cross-event
     Config::set('features.attendance_legacy_write', false);
 
     $person = Person::create(['nama' => 'Scan Bridge', 'nip' => 9002, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $legacy = peserta::create(['nama' => 'Scan Bridge', 'nip' => 9002, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER, 'attendance_code' => 'KJA-SCAN-LEGACY']);
+    $legacy = peserta::create(['nama' => 'Scan Bridge', 'nip' => 9002, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER, 'attendance_code' => 'KJA-SCAN-LEGACY']);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL010', 'attendance_code' => 'KJA-SCAN-A', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL011', 'attendance_code' => 'KJA-SCAN-B', 'jenis_peserta' => 'Wajib']);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
@@ -86,7 +86,7 @@ test('attendance scan resolves active event participation and blocks cross-event
 
 test('attendance exception and izin use event-aware participation', function () {
     $person = Person::create(['nama' => 'Izin Bridge', 'nip' => 9003, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $legacy = peserta::create(['nama' => 'Izin Bridge', 'nip' => 9003, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
+    $legacy = peserta::create(['nama' => 'Izin Bridge', 'nip' => 9003, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL020', 'attendance_code' => 'KJA-IZIN-A', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL021', 'attendance_code' => 'KJA-IZIN-B', 'jenis_peserta' => 'Wajib']);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);
@@ -103,7 +103,7 @@ test('attendance exception and izin use event-aware participation', function () 
 
 test('surat izin creation resolves participation by active event', function () {
     $person = Person::create(['nama' => 'Surat Bridge', 'nip' => 9004, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
-    $legacy = peserta::create(['nama' => 'Surat Bridge', 'nip' => 9004, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'regu_id' => $this->regu->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
+    $legacy = peserta::create(['nama' => 'Surat Bridge', 'nip' => 9004, 'jenis_kelamin' => 'Laki - Laki', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id, 'status_registrasi' => peserta::STATUS_SELF_REGISTER]);
     $partA = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL030', 'attendance_code' => 'KJA-SURAT-A', 'jenis_peserta' => 'Wajib']);
     $partB = Participation::create(['person_id' => $person->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL031', 'attendance_code' => 'KJA-SURAT-B', 'jenis_peserta' => 'Wajib']);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $partA->id, 'event_id' => $this->eventA->id]);

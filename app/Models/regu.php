@@ -10,9 +10,6 @@ class regu extends Model
     'regu',
     'jenis_kelamin',
     ];
-    public function peserta() {
-        return $this->hasMany(peserta::class);
-    }
 
     public function participations() {
         return $this->hasMany(Participation::class);

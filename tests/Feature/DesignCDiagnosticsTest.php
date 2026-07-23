@@ -27,7 +27,7 @@ function dc_person(int $nip): Person
 
 function dc_peserta(int $nip): peserta
 {
-    return peserta::create(['nama' => 'DC Peserta', 'nip' => $nip, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'regu_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
+    return peserta::create(['nama' => 'DC Peserta', 'nip' => $nip, 'jenis_kelamin' => 'Laki - Laki', 'jenis_peserta' => 'Wajib', 'desa_id' => null, 'kelompok_id' => null, 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI]);
 }
 
 function dc_participation(Person $person, Event $event, string $suffix): Participation

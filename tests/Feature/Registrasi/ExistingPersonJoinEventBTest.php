@@ -45,7 +45,6 @@ function epj_fixtures(): array
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -305,7 +304,6 @@ test('duplicate names can be disambiguated without automatic merge', function ()
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa_id' => $desaA->id,
         'kelompok_id' => $kelompokA->id,
-        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -318,7 +316,6 @@ test('duplicate names can be disambiguated without automatic merge', function ()
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa_id' => $desaB->id,
         'kelompok_id' => $kelompokB->id,
-        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 

@@ -24,7 +24,6 @@ class peserta extends Model
         'jenis_peserta',
         'kelompok_id',
         'desa_id',
-        'regu_id',
         'status_registrasi',
     ];
 
@@ -70,11 +69,6 @@ class peserta extends Model
     public function desa()
     {
         return $this->belongsTo(desa::class);
-    }
-
-    public function regu()
-    {
-        return $this->belongsTo(regu::class);
     }
 
     public function suratIzins()

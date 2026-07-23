@@ -336,7 +336,6 @@ function pm_mappedPerson(): array
         'jenis_kelamin' => 'Laki - Laki',
         'desa_id' => null,
         'kelompok_id' => null,
-        'regu_id' => $regu->id,
         'status_registrasi' => 'Belum Registrasi',
     ]);
 
@@ -495,7 +494,7 @@ test('edit mapped person does NOT change regu_id on peserta', function () {
         ->call('update');
 
     $setup['peserta']->refresh();
-    expect((int) $setup['peserta']->regu_id)->toBe($originalReguId);
+    expect($setup['peserta']->regu_id)->toBe($originalReguId);
 });
 
 test('edit mapped person does NOT create new Participation', function () {

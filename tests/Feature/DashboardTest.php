@@ -72,7 +72,6 @@ function ds_legacyPeserta(Person $person, desa $desa, kelompok $kelompok, regu $
         'jenis_kelamin' => $person->jenis_kelamin,
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $regu->id,
     ]);
 
     \App\Models\LegacyPesertaMapping::create([

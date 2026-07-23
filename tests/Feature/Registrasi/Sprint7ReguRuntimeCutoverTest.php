@@ -34,16 +34,16 @@ beforeEach(function () {
 
     $this->person = Person::create(['nama' => 'Person S7', 'nip' => 7001, 'jenis_kelamin' => 'L', 'desa_id' => $desa->id, 'kelompok_id' => $kelompok->id]);
 
-    // Legacy peserta has reguGlobal (intentionally different from all event regus)
+    // Legacy peserta record (regu_id column retired per Sprint 8B)
     $this->pesertaRecord = peserta::create([
         'nama' => 'Person S7',
         'nip' => 7001,
         'jenis_kelamin' => 'Laki - Laki',
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $this->reguGlobal->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
+    $this->pesertaRecord->refresh();
 
     LegacyPesertaMapping::create([
         'peserta_id' => $this->pesertaRecord->id,
@@ -200,43 +200,27 @@ test('S7G: attendance read service filter uses canonical participation regu_id',
 });
 
 // ──────────────────────────────────────────────
-// H. Dual-write stopped: updating Participation regu does NOT update peserta.regu_id
+// H. Update Participation regu (legacy dual-write retired per Sprint 7/8B)
 // ──────────────────────────────────────────────
-test('S7H: updating participation regu does not modify legacy peserta regu_id', function () {
-    $originalPesertaReguId = $this->pesertaRecord->regu_id;
-
-    // Simulate EditPeserta::update() — only writes to Participation
+test('S7H: updating participation regu only (legacy dual-write retired)', function () {
     $this->partA->update(['regu_id' => $this->reguEventC->id]);
-
-    // Refresh both
     $this->partA->refresh();
-    $this->pesertaRecord->refresh();
 
-    // Participation should have new regu
     expect((int) $this->partA->regu_id)->toBe($this->reguEventC->id);
-
-    // Legacy peserta should be UNCHANGED (dual-write stopped)
-    expect((int) $this->pesertaRecord->regu_id)->toBe($originalPesertaReguId);
-    expect((int) $this->pesertaRecord->regu_id)->not->toBe($this->reguEventC->id);
 });
 
 // ──────────────────────────────────────────────
-// I. Ulang update does NOT write regu_id to legacy peserta
+// I. Ulang update writes regu_id to Participation (legacy dual-write retired)
 // ──────────────────────────────────────────────
-test('S7I: ulang update does not write regu_id to legacy peserta', function () {
-    $originalPesertaReguId = $this->pesertaRecord->regu_id;
-
-    // Simulate Ulang::updatePeserta() — only writes to Participation
+test('S7I: ulang update writes regu_id to participation only (dual-write retired)', function () {
     $this->partB->update([
         'jenis_peserta' => 'Kiriman',
         'regu_id' => $this->reguEventC->id,
     ]);
 
     $this->partB->refresh();
-    $this->pesertaRecord->refresh();
 
     expect((int) $this->partB->regu_id)->toBe($this->reguEventC->id);
-    expect((int) $this->pesertaRecord->regu_id)->toBe($originalPesertaReguId);
 });
 
 // ──────────────────────────────────────────────
@@ -250,8 +234,6 @@ test('S7J: registration creates participant without dual-write to legacy peserta
     // Mock by setting the active event
     $this->app->make(ActiveEventContext::class)->set($eventD);
 
-    $originalPesertaReguId = $this->pesertaRecord->regu_id;
-
     app(RegistrationService::class)->createParticipant([
         'nama' => 'Person S7',
         'nip' => 7001,
@@ -263,11 +245,12 @@ test('S7J: registration creates participant without dual-write to legacy peserta
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
-    $this->pesertaRecord->refresh();
-
-    // Legacy peserta regu_id should be UNCHANGED (dual-write stopped)
-    expect((int) $this->pesertaRecord->regu_id)->toBe($originalPesertaReguId);
-    expect((int) $this->pesertaRecord->regu_id)->not->toBe($reguD->id);
+    // Participation should have the regu (canonical path: person_id + event_id)
+    $partD = Participation::where('person_id', $this->person->id)
+        ->where('event_id', $eventD->id)
+        ->first();
+    expect($partD)->not->toBeNull();
+    expect((int) $partD->regu_id)->toBe($reguD->id);
 });
 
 // ──────────────────────────────────────────────

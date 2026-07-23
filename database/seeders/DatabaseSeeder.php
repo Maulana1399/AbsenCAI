@@ -100,7 +100,6 @@ class DatabaseSeeder extends Seeder
                     'jenis_kelamin' => 'Laki - Laki',
                     'kelompok_id' => $i % 2 === 0 ? $kelompokB->id : $kelompokA->id,
                     'desa_id' => $i % 2 === 0 ? $desaB->id : $desaA->id,
-                    'regu_id' => $regu->id,
                     'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
                 ]
             );
@@ -118,7 +117,6 @@ class DatabaseSeeder extends Seeder
                     'jenis_kelamin' => 'Perempuan',
                     'kelompok_id' => $i % 2 === 0 ? $kelompokB->id : $kelompokA->id,
                     'desa_id' => $i % 2 === 0 ? $desaB->id : $desaA->id,
-                    'regu_id' => $regu->id,
                     'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
                 ]
             );

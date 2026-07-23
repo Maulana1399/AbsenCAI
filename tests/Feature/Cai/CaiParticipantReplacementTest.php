@@ -56,7 +56,6 @@ function caiReplacementFixture(): array
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
-        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
@@ -174,7 +173,6 @@ test('replacement preserves cai slot and moves mapping to new identity', functio
         ->and($peserta->attendance_code)->toBe('KJA-OLD0001')
         ->and($peserta->desa_id)->toBe($fixture['desa']->id)
         ->and($peserta->kelompok_id)->toBe($fixture['kelompok']->id)
-        ->and($peserta->regu_id)->toBe($fixture['regu']->id)
 
         // Person lama tidak dihapus.
         ->and(Person::find($fixture['oldPerson']->id))->not->toBeNull()
