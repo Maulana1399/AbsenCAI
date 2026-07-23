@@ -13,7 +13,6 @@
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Jenis Kelamin</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Desa</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Kelompok</th>
-                        <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">NIP</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Tanggal Lahir</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Aksi</th>
                     </tr>
@@ -26,7 +25,6 @@
                         <td class="px-6 py-2">{{ $person->jenis_kelamin_label }}</td>
                         <td class="px-6 py-2">{{ $person->desa?->desa_asal ?? '-' }}</td>
                         <td class="px-6 py-2">{{ $person->kelompok?->kelompok_asal ?? '-' }}</td>
-                        <td class="px-6 py-2">{{ $person->nip ?? '-' }}</td>
                         <td class="px-6 py-2">{{ $person->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
                         <td class="px-6 py-2 space-x-2">
                             <flux:button wire:click="edit({{ $person->id }})">Edit</flux:button>
@@ -35,7 +33,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                        <td colspan="7" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
                             Belum ada data Person.
                         </td>
                     </tr>

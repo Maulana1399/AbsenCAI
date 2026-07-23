@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Absensi;
 use App\Models\CaiParticipantReplacement;
 use App\Models\desa;
 use App\Models\Event;
+use App\Models\EventAttendance;
 use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
@@ -116,18 +116,20 @@ test('peserta without operational history is replaceable', function () {
 test('peserta with legacy attendance cannot be replaced', function () {
     $fixture = caiReplacementFixture();
 
-    Absensi::create([
-        'nip' => $fixture['peserta']->nip,
-        'nama' => $fixture['peserta']->nama,
-        'jam_scan' => now(),
-        'sesi_id' => null,
+    EventAttendance::create([
+        'participation_id' => $fixture['oldParticipation']->id,
+        'sesi_absensi_id' => null,
+        'event_id' => $fixture['event']->id,
+        'status' => EventAttendance::STATUS_HADIR,
+        'attended_at' => now(),
+        'method' => 'scan',
     ]);
 
     expect(fn () => app(CaiParticipantReplacementService::class)
         ->assertReplaceable($fixture['peserta']))
         ->toThrow(
             RuntimeException::class,
-            'Peserta sudah memiliki riwayat absensi dan tidak dapat diganti.'
+            'Peserta sudah memiliki riwayat kehadiran event dan tidak dapat diganti.'
         );
 });
 
@@ -168,7 +170,6 @@ test('replacement preserves cai slot and moves mapping to new identity', functio
         ->and($peserta->nama)->toBe('Peserta Pengganti')
 
         // Slot CAI tetap.
-        ->and($peserta->nip)->toBe(1001)
         ->and($peserta->participant_number)->toBe('KL001')
         ->and($peserta->attendance_code)->toBe('KJA-OLD0001')
         ->and($peserta->desa_id)->toBe($fixture['desa']->id)
@@ -202,7 +203,7 @@ test('replacement preserves cai slot and moves mapping to new identity', functio
         ->and($replacement->old_participation_id)->toBe($fixture['oldParticipation']->id)
         ->and($replacement->new_person_id)->toBe($result['person']->id)
         ->and($replacement->new_participation_id)->toBe($result['participation']->id)
-        ->and($replacement->legacy_nip)->toBe(1001)
+        ->and($replacement->legacy_nip)->toBeNull()
         ->and($replacement->participant_number)->toBe('KL001')
         ->and($replacement->attendance_code)->toBe('KJA-OLD0001')
         ->and($replacement->reason)->toBe('Peserta lama berhalangan hadir');
@@ -256,9 +257,8 @@ test('replacement transaction rolls back when new person creation fails', functi
     $mapping = $fixture['mapping']->fresh();
 
     expect($peserta->nama)->toBe('Peserta Lama')
-        ->and($peserta->nip)->toBe(1001)
 
-        // NIP Person lama harus kembali karena transaction rollback.
+        // NIP Person null after rollback (column retired).
         ->and($oldPerson->nip)->toBeNull()
 
         // Identifier Participation lama juga harus kembali.

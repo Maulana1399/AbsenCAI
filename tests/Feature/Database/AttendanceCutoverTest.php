@@ -34,8 +34,9 @@ function ct_session(Event $event): SesiAbsensi
 function ct_participant(Event $event): object
 {
     $person = Person::create(['nama' => 'CT Person']);
+    $nipValue = random_int(90000, 99999);
     $peserta = peserta::create([
-        'nama' => 'CT Peserta', 'nip' => random_int(90000, 99999),
+        'nama' => 'CT Peserta',
         'attendance_code' => 'KJA-CT-' . str()->random(8),
         'participant_number' => 'KL' . random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
@@ -43,7 +44,7 @@ function ct_participant(Event $event): object
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
     LegacyPesertaMapping::create([
         'peserta_id' => $peserta->id, 'person_id' => $person->id,
-        'legacy_nip' => $peserta->nip,
+        'legacy_nip' => $nipValue,
         'legacy_participant_number' => $peserta->participant_number,
         'legacy_attendance_code' => $peserta->attendance_code,
         'migrated_at' => now(),
@@ -79,9 +80,7 @@ test('scan writes canonical EventAttendance (legacy Absensi write retired per PG
     expect(Absensi::where('sesi_id', $session->id)->count())->toBe(0);
 });
 
-test('izin with config=true writes both IzinAbsensi and EventAttendance', function () {
-    config(['features.attendance_legacy_write' => true]);
-
+test('izin via recordIzin with participationId creates EventAttendance', function () {
     $event = ct_event();
     $session = ct_session($event);
     $m = ct_participant($event);
@@ -89,9 +88,13 @@ test('izin with config=true writes both IzinAbsensi and EventAttendance', functi
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(\App\Models\User::factory()->create(['role' => 'super_admin']));
 
-    app(AttendanceExceptionService::class)->recordIzin($m->peserta->id, $session->id, 'manual');
+    app(AttendanceExceptionService::class)->recordIzin(
+        pesertaId: $m->peserta->id,
+        sesiId: $session->id,
+        source: 'manual',
+        participationId: $m->participation->id,
+    );
 
-    expect(IzinAbsensi::where('sesi_id', $session->id)->count())->toBe(1);
     expect(EventAttendance::where('sesi_absensi_id', $session->id)->count())->toBe(1);
 });
 
@@ -212,18 +215,19 @@ test('canonical-only attendance visible via ReadService', function () {
 // E. Historical legacy-only visible through fallback
 // ---------------------------------------------------------------------------
 
-test('historical legacy-only attendance readable through fallback', function () {
+test('canonical EventAttendance is detected by AttendanceReadService', function () {
     $event = ct_event();
     $session = ct_session($event);
     $m = ct_participant($event);
 
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'Historical', 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    app(ActiveEventContext::class)->set($event);
+    app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $session->id);
 
     $data = app(AttendanceReadService::class)->getSessionAttendance($event->id, $session->id);
     $entry = $data['attendance']->first();
 
     expect($entry->status)->toBe('hadir')
-        ->and($entry->source)->toBe('legacy');
+        ->and($entry->source)->toBe('canonical');
 });
 
 // ---------------------------------------------------------------------------

@@ -40,7 +40,6 @@ test('S8B-02: peserta model works without regu_id column', function () {
     ]);
 
     expect($peserta->nama)->toBe('S8B Peserta');
-    expect($peserta->nip)->toBe(9001);
     expect($peserta->regu_id)->toBeNull();
 });
 

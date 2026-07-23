@@ -1,10 +1,8 @@
 <?php
 
-use App\Models\Absensi;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\EventAttendance;
-use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;

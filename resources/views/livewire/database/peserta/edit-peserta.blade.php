@@ -2,8 +2,6 @@
 <flux:modal name="edit-peserta" class="md:w-96">
     <div class="space-y-4">
         <flux:input wire:model="nama" label="Nama Peserta" placeholder="Masukkan nama peserta" />
-        <flux:input wire:model="nip" label="NIP Peserta" readonly />
-
         <div>
             <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Kelamin</label>
             <select wire:model="jenis_kelamin" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">

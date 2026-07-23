@@ -35,16 +35,16 @@ beforeEach(function () {
     $this->participationB = Participation::create(['person_id' => $this->personA->id, 'event_id' => $this->eventB->id, 'participant_number' => 'KL602', 'attendance_code' => 'KJA-B602', 'jenis_peserta' => 'Wajib']);
     $this->participationC = Participation::create(['person_id' => $this->personB->id, 'event_id' => $this->eventA->id, 'participant_number' => 'KL603', 'attendance_code' => 'KJA-A603', 'jenis_peserta' => 'Wajib']);
 
-    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaA->id, 'person_id' => $this->personA->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaA->id, 'person_id' => $this->personA->id, 'legacy_nip' => $this->personA->id]);
     LegacyParticipationMapping::create(['peserta_id' => $this->pesertaA->id, 'person_id' => $this->personA->id, 'participation_id' => $this->participationA->id, 'event_id' => $this->eventA->id]);
-    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaB->id, 'person_id' => $this->personB->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $this->pesertaB->id, 'person_id' => $this->personB->id, 'legacy_nip' => $this->personB->id]);
     LegacyParticipationMapping::create(['peserta_id' => $this->pesertaB->id, 'person_id' => $this->personB->id, 'participation_id' => $this->participationC->id, 'event_id' => $this->eventA->id]);
 
     $this->sessionA = SesiAbsensi::create(['event_id' => $this->eventA->id, 'nama_sesi' => 'Sesi A', 'tanggal' => '2026-07-16', 'aktif' => true]);
     $this->sessionB = SesiAbsensi::create(['event_id' => $this->eventB->id, 'nama_sesi' => 'Sesi B', 'tanggal' => '2026-07-16', 'aktif' => true]);
 
-    Absensi::create(['nip' => $this->pesertaA->nip, 'nama' => $this->pesertaA->nama, 'jam_scan' => '2026-07-16 08:00:00', 'sesi_id' => $this->sessionA->id]);
-    Absensi::create(['nip' => $this->pesertaB->nip, 'nama' => $this->pesertaB->nama, 'jam_scan' => '2026-07-16 08:05:00', 'sesi_id' => $this->sessionB->id]);
+    Absensi::create(['nip' => $this->personA->id, 'nama' => $this->pesertaA->nama, 'jam_scan' => '2026-07-16 08:00:00', 'sesi_id' => $this->sessionA->id]);
+    Absensi::create(['nip' => $this->personB->id, 'nama' => $this->pesertaB->nama, 'jam_scan' => '2026-07-16 08:05:00', 'sesi_id' => $this->sessionB->id]);
 
     IzinAbsensi::create(['peserta_id' => $this->pesertaB->id, 'sesi_id' => $this->sessionA->id, 'status' => 'izin', 'source' => 'manual']);
 });

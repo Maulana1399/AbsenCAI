@@ -2,12 +2,9 @@
 
 namespace App\Services\Attendance;
 
-use App\Models\Absensi;
 use App\Models\EventAttendance;
-use App\Models\IzinAbsensi;
 use App\Models\Participation;
 use App\Models\SesiAbsensi;
-use Illuminate\Database\Eloquent\Collection;
 
 class AttendanceReadService
 {
@@ -40,30 +37,11 @@ class AttendanceReadService
         }
 
         $participationIds = $participations->pluck('id');
-        $participationByPersonId = $participations->keyBy('person_id');
 
         $canonicalRecords = EventAttendance::whereIn('participation_id', $participationIds)
             ->where('sesi_absensi_id', $sessionId)
             ->get()
             ->keyBy('participation_id');
-
-        $legacyNips = $participations->map(function (Participation $p) {
-            return $p->person?->legacyPesertaMapping?->peserta?->nip ?? $p->person?->nip;
-        })->filter()->values();
-
-        $legacyPesertaIds = $participations->map(function (Participation $p) {
-            return $p->person?->legacyPesertaMapping?->peserta?->id;
-        })->filter()->values();
-
-        $legacyHadirByNip = Absensi::where('sesi_id', $sessionId)
-            ->whereIn('nip', $legacyNips)
-            ->get()
-            ->keyBy('nip');
-
-        $legacyIzinByPesertaId = IzinAbsensi::where('sesi_id', $sessionId)
-            ->whereIn('peserta_id', $legacyPesertaIds)
-            ->get()
-            ->keyBy('peserta_id');
 
         $attendance = collect();
         $hadirCount = 0;
@@ -71,25 +49,20 @@ class AttendanceReadService
 
         foreach ($participations as $participation) {
             $person = $participation->person;
-            $legacyPeserta = $person?->legacyPesertaMapping?->peserta;
-            $nip = $legacyPeserta?->nip ?? $person?->nip;
-            $pesertaId = $legacyPeserta?->id;
 
             $canonical = $canonicalRecords->get($participation->id);
-            $legacyHadir = $nip !== null ? $legacyHadirByNip->get($nip) : null;
-            $legacyIzin = $pesertaId !== null ? $legacyIzinByPesertaId->get($pesertaId) : null;
 
-            $status = $this->resolveStatus($canonical, $legacyHadir, $legacyIzin);
-            $source = $canonical !== null ? 'canonical' : ($legacyHadir !== null || $legacyIzin !== null ? 'legacy' : 'none');
+            $status = $this->resolveStatus($canonical);
+            $source = $canonical !== null ? 'canonical' : 'none';
 
             $attendanceEntry = (object) [
                 'participation' => $participation,
                 'person' => $person,
-                'legacyPeserta' => $legacyPeserta,
+                'legacyPeserta' => $person?->legacyPesertaMapping?->peserta,
                 'status' => $status,
                 'source' => $source,
-                'jam_scan' => $canonical?->attended_at ?? $legacyHadir?->jam_scan ?? null,
-                'method' => $canonical?->method ?? ($legacyHadir !== null ? 'scan' : ($legacyIzin !== null ? 'izin' : null)),
+                'jam_scan' => $canonical?->attended_at ?? null,
+                'method' => $canonical?->method ?? null,
             ];
 
             $attendance->push($attendanceEntry);
@@ -113,18 +86,10 @@ class AttendanceReadService
         ];
     }
 
-    private function resolveStatus(?EventAttendance $canonical, $legacyHadir, $legacyIzin): string
+    private function resolveStatus(?EventAttendance $canonical): string
     {
         if ($canonical !== null) {
             return $canonical->status === EventAttendance::STATUS_IZIN ? 'izin' : 'hadir';
-        }
-
-        if ($legacyHadir !== null) {
-            return 'hadir';
-        }
-
-        if ($legacyIzin !== null) {
-            return 'izin';
         }
 
         return 'belum';

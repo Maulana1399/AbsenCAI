@@ -22,8 +22,7 @@ class IndexPerson extends Component
         if (trim($this->search) !== '') {
             $keyword = trim($this->search);
             $query->where(function ($q) use ($keyword) {
-                $q->where('nama', 'like', '%'.$keyword.'%')
-                  ->orWhere('nip', 'like', '%'.$keyword.'%');
+                $q->where('nama', 'like', '%'.$keyword.'%');
             });
         }
 

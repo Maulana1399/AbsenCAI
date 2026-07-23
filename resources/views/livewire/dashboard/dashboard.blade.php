@@ -98,7 +98,7 @@
                     <tr>
                         <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">No</th>
                         <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Nama</th>
-                        <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">NIP</th>
+                        <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">No. Peserta</th>
                         <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Regu</th>
                         <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Kelompok</th>
                         <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Desa</th>
@@ -112,7 +112,7 @@
                         <tr class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
                             <td class="px-4 py-2">{{ $loop->iteration }}</td>
                             <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $entry->person->nama ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $entry->person->nip ?? ($lp->nip ?? '-') }}</td>
+                            <td class="px-4 py-2">{{ $entry->participation->participant_number ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $entry->participation->regu->regu ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $lp->kelompok->kelompok_asal ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $entry->person->desa->desa_asal ?? '-' }}</td>
@@ -138,10 +138,10 @@
                         <tr>
                             <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">No</th>
                             <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Nama</th>
-                            <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">NIP</th>
-                            <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Regu</th>
-                            <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Kelompok</th>
-                            <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Desa</th>
+                        <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">No. Peserta</th>
+                        <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Regu</th>
+                        <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Kelompok</th>
+                        <th class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">Desa</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -152,7 +152,7 @@
                             <tr class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
                                 <td class="px-4 py-2">{{ $loop->iteration }}</td>
                                 <td class="px-4 py-2 font-medium text-zinc-900 dark:text-white">{{ $participation->person?->nama ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ $participation->person?->nip ?? '-' }}</td>
+                                <td class="px-4 py-2">{{ $participation->participant_number ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $participation->regu->regu ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $legacy->kelompok->kelompok_asal ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $participation->person?->desa?->desa_asal ?? '-' }}</td>

@@ -125,8 +125,7 @@ class Ulang extends Component
             $daftarPeserta = Participation::with(['person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])
                 ->when($event, fn ($q) => $q->where('event_id', $event->id), fn ($q) => $q->whereRaw('0 = 1'))
                 ->where(function ($query) use ($search) {
-                    $query->whereHas('person', fn ($q) => $q->where('nama', 'like', '%' . $search . '%'))
-                        ->orWhereHas('person', fn ($q) => $q->where('nip', 'like', '%' . $search . '%'));
+                    $query->whereHas('person', fn ($q) => $q->where('nama', 'like', '%' . $search . '%'));
                 })
                 ->orderByDesc('id')
                 ->limit(10)
@@ -136,7 +135,6 @@ class Ulang extends Component
                     return (object) [
                         'id' => $p->id,
                         'nama' => $p->person?->nama,
-                        'nip' => $p->person?->nip ?? $lp?->nip,
                         'desa' => $p->person?->desa,
                         'kelompok' => $p->person?->kelompok,
                         'regu' => $p->regu,

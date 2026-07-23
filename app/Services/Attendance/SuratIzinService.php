@@ -2,7 +2,6 @@
 
 namespace App\Services\Attendance;
 
-use App\Models\Absensi;
 use App\Models\IzinAbsensi;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
@@ -116,14 +115,6 @@ class SuratIzinService
             $skippedIzin  = [];
 
             foreach ($sesis as $sesi) {
-                if ($surat->peserta && Absensi::where('nip', $surat->peserta->nip)
-                    ->where('sesi_id', $sesi->id)
-                    ->exists()
-                ) {
-                    $skippedHadir[] = $sesi;
-                    continue;
-                }
-
                 if ($surat->peserta_id && IzinAbsensi::where('peserta_id', $surat->peserta_id)
                     ->where('sesi_id', $sesi->id)
                     ->exists()
@@ -301,13 +292,6 @@ class SuratIzinService
             ->get();
 
         foreach ($surats as $surat) {
-            if ($surat->peserta && Absensi::where('nip', $surat->peserta->nip)
-                ->where('sesi_id', $sesi->id)
-                ->exists()
-            ) {
-                continue;
-            }
-
             if ($surat->peserta_id && IzinAbsensi::where('peserta_id', $surat->peserta_id)
                 ->where('sesi_id', $sesi->id)
                 ->exists()

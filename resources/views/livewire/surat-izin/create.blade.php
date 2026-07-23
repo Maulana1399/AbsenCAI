@@ -13,7 +13,7 @@
                 <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Cari Peserta') }}</label>
                 <input wire:model.live.debounce.300ms="searchPeserta" type="text"
                     class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
-                    placeholder="{{ __('Nama / NIP / Attendance Code') }}">
+                    placeholder="{{ __('Nama / Attendance Code') }}">
 
                 @if(strlen($searchPeserta) >= 2 && count($results) > 0)
                     <div class="mt-2 max-h-40 overflow-y-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
@@ -24,7 +24,6 @@
                                 @if($p->source === 'canonical')
                                     <span class="ml-1 text-xs text-blue-500">Person</span>
                                 @endif
-                                <span class="ml-1 text-xs text-zinc-400">{{ $p->nip ?? '-' }}</span>
                             </button>
                         @endforeach
                     </div>

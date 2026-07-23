@@ -13,11 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
-function makePeserta(int $nip, string $code): peserta
+function makePeserta(int $id, string $code): peserta
 {
     return peserta::create([
-        'nama'            => 'Peserta ' . $nip,
-        'nip'             => $nip,
+        'nama'            => 'Peserta ' . $id,
         'attendance_code' => $code,
         'jenis_kelamin'   => 'Laki - Laki',
     ]);
@@ -178,16 +177,26 @@ test('approve sets nomor_surat, approved_by and approved_at', function () {
 
 test('approve skips and reports session where peserta already hadir', function () {
     $peserta  = makePeserta(6013, 'KJA-SI013');
+    $person   = \App\Models\Person::create(['nama' => 'Peserta 6013', 'jenis_kelamin' => 'L']);
+    $event    = \App\Models\Event::create(['name' => 'SI Event', 'slug' => 'si-event', 'status' => 'active']);
+    $participation = \App\Models\Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
+    \App\Models\LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
+    \App\Models\LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
+
     $user     = makeUser();
     $approver = makeUser();
 
     $sesi = makeSesi('2026-07-20', 'Pagi');
+    $sesi->update(['event_id' => $event->id]);
+    app(\App\Support\ActiveEventContext::class)->set($event);
 
-    Absensi::create([
-        'nip'      => $peserta->nip,
-        'nama'     => $peserta->nama,
-        'jam_scan' => '2026-07-20 08:00:00',
-        'sesi_id'  => $sesi->id,
+    \App\Models\EventAttendance::create([
+        'participation_id' => $participation->id,
+        'sesi_absensi_id'  => $sesi->id,
+        'event_id'         => $event->id,
+        'status'           => \App\Models\EventAttendance::STATUS_HADIR,
+        'attended_at'      => now(),
+        'method'           => 'scan',
     ]);
 
     $surat = makeSurat($peserta, $user, [
@@ -503,7 +512,7 @@ test('markReturned never affects Hadir records', function () {
     $sesi = makeSesi('2026-07-20', 'Pagi');
 
     Absensi::create([
-        'nip'      => $peserta->nip,
+        'nip'      => random_int(10000, 99999),
         'nama'     => $peserta->nama,
         'jam_scan' => '2026-07-20 08:00:00',
         'sesi_id'  => $sesi->id,
@@ -604,8 +613,17 @@ test('syncNewSession does not create izin for session on or after returned date'
 
 test('syncNewSession does not create izin when participant already hadir', function () {
     $peserta  = makePeserta(6043, 'KJA-SI043');
+    $person   = \App\Models\Person::create(['nama' => 'Peserta 6043', 'jenis_kelamin' => 'L']);
+    $event    = \App\Models\Event::create(['name' => 'SI Event Sync', 'slug' => 'si-event-sync', 'status' => 'active']);
+    $participation = \App\Models\Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
+    \App\Models\LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
+    \App\Models\LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
+
     $user     = makeUser();
     $approver = makeUser();
+    $sesiBaru = makeSesi('2026-07-18', 'Baru');
+    $sesiBaru->update(['event_id' => $event->id]);
+    app(\App\Support\ActiveEventContext::class)->set($event);
 
     $surat = app(SuratIzinService::class)->create([
         'peserta_id'      => $peserta->id,
@@ -616,15 +634,8 @@ test('syncNewSession does not create izin when participant already hadir', funct
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $approver);
 
-    $sesiBaru = makeSesi('2026-07-18', 'Baru');
-
-    Absensi::create([
-        'nip'      => $peserta->nip,
-        'nama'     => $peserta->nama,
-        'jam_scan' => '2026-07-18 08:00:00',
-        'sesi_id'  => $sesiBaru->id,
-    ]);
-
+    // approve() already created EventAttendance IZIN for $sesiBaru.
+    // syncNewSession must find it and skip — no IzinAbsensi should be created.
     app(SuratIzinService::class)->syncNewSession($sesiBaru);
 
     expect(IzinAbsensi::where('peserta_id', $peserta->id)

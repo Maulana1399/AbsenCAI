@@ -40,7 +40,6 @@ class Database extends Component
             $search = trim($this->search);
             $pesertaQuery->where(function ($query) use ($search) {
                 $query->whereHas('person', fn ($personQuery) => $personQuery->where('nama', 'like', '%'.$search.'%'))
-                    ->orWhereHas('person', fn ($personQuery) => $personQuery->where('nip', 'like', '%'.$search.'%'))
                     ->orWhere('participant_number', 'like', '%'.$search.'%')
                     ->orWhere('attendance_code', 'like', '%'.$search.'%');
             });
@@ -52,7 +51,7 @@ class Database extends Component
             return (object) [
                 'id' => $participation->id,
                 'nama' => $participation->person?->nama ?? $legacyPeserta?->nama,
-                'nip' => $participation->person?->nip ?? $legacyPeserta?->nip,
+                'participant_number' => $participation->participant_number,
                 'jenis_kelamin' => $participation->person?->jenis_kelamin ?? $legacyPeserta?->jenis_kelamin,
                 'jenis_peserta' => $participation->jenis_peserta,
                 'status_registrasi_label' => $legacyPeserta?->status_registrasi_label ?? '-',

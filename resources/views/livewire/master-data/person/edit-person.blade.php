@@ -29,17 +29,6 @@
             @endforeach
         </flux:select>
 
-        <flux:input
-            wire:model="nip"
-            type="number"
-            label="NIP"
-            placeholder="Opsional"
-            :disabled="$nipLocked"
-        />
-        @if ($nipLocked)
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">NIP tidak dapat diubah karena Person terhubung dengan data legacy.</p>
-        @endif
-
         <div class="flex">
             <flux:modal.close>
                 <flux:button variant="ghost">Batal</flux:button>

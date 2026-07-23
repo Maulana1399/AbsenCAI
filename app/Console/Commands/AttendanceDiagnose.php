@@ -92,7 +92,8 @@ class AttendanceDiagnose extends Command
             ];
         }
 
-        $peserta = \App\Models\peserta::where('nip', $absensi->nip)->first();
+        $legacyMapping = \App\Models\LegacyPesertaMapping::where('legacy_nip', (string) $absensi->nip)->first();
+        $peserta = $legacyMapping?->peserta;
 
         if ($peserta === null) {
             return [
@@ -102,7 +103,7 @@ class AttendanceDiagnose extends Command
                 'sesi_id' => $absensi->sesi_id,
                 'event_id' => $eventId,
                 'reason_code' => 'NO_PESERTA',
-                'detail' => "NIP {$absensi->nip} not found in pesertas table",
+                'detail' => "NIP {$absensi->nip} not found via LegacyPesertaMapping",
             ];
         }
 

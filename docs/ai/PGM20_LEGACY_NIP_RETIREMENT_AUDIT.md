@@ -1,6 +1,6 @@
 # PGM.20 LEGACY NIP RETIREMENT AUDIT
 
-**Status:** PHASE 1 + PHASE 2 COMPLETE
+**Status:** PHASES 1–3 COMPLETE
 **Date:** 2026-07-23
 **Previous Sprint:** PGM.19 Sprint 8B — Physical Regu Retirement
 **Next Sprint:** PGM.21 — Physical NIP Column Retirement (proposed)

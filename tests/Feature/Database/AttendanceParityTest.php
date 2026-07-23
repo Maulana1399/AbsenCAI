@@ -47,7 +47,6 @@ function ap_peserta(array $overrides = []): peserta
 
     return peserta::create(array_merge([
         'nama' => 'AP ' . $seq,
-        'nip' => 30000 + (int) substr($seq, -4),
         'attendance_code' => 'KJA-AP-' . $seq,
         'participant_number' => 'KL' . str_pad((string) (1000 + (int) substr($seq, -4)), 3, '0', STR_PAD_LEFT),
         'status_registrasi' => 'Belum Registrasi',
@@ -61,9 +60,11 @@ function ap_mapping(peserta $p, Person $person, Participation $participation, Ev
         'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now(),
     ]);
 
+    $nipValue = $person->id;
+
     return LegacyPesertaMapping::create([
         'peserta_id' => $p->id, 'person_id' => $person->id,
-        'legacy_nip' => $p->nip,
+        'legacy_nip' => $nipValue,
         'legacy_participant_number' => $p->participant_number,
         'legacy_attendance_code' => $p->attendance_code,
         'migrated_at' => now(),
@@ -81,7 +82,9 @@ function ap_mappedParticipant(Event $event): object
 
 function ap_legacyHadir(Event $event, peserta $peserta, SesiAbsensi $session): Absensi
 {
-    return Absensi::create(['nip' => $peserta->nip, 'nama' => $peserta->nama, 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    $mapping = \App\Models\LegacyPesertaMapping::where('peserta_id', $peserta->id)->first();
+    $nipValue = $mapping?->legacy_nip ?? $peserta->id;
+    return Absensi::create(['nip' => $nipValue, 'nama' => $peserta->nama, 'jam_scan' => now(), 'sesi_id' => $session->id]);
 }
 
 function ap_legacyIzin(Event $event, peserta $peserta, SesiAbsensi $session): IzinAbsensi

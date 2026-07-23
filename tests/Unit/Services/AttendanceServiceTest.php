@@ -245,16 +245,16 @@ test('cross-event duplicate detection stays isolated by session', function () {
     expect(EventAttendance::count())->toBe($before);
 });
 
-test('historical legacy absensi using nip and sesi_id remains queryable', function () {
+test('canonical attendance_code resolves to EventAttendance', function () {
     $event = attendanceTest_makeEvent();
     app(ActiveEventContext::class)->set($event);
     [$participant] = attendanceTest_makeMappedLegacyPeserta([
-        'nama' => 'Peserta Histori',
-        'nip' => 2300,
-        'attendance_code' => 'KJA-HIST1',
+        'nama' => 'Peserta Event',
+        'attendance_code' => 'KJA-EVENT-ATTEND',
     ], $event);
-    $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Histori', 'tanggal' => '2026-07-15', 'aktif' => true]);
-    $absensi = Absensi::create(['nip' => $participant->nip, 'nama' => $participant->nama, 'jam_scan' => '2026-07-15 08:00:00', 'sesi_id' => $session->id]);
+    $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Event', 'tanggal' => '2026-07-15', 'aktif' => true]);
 
-    expect(Absensi::where('nip', 2300)->where('sesi_id', $session->id)->first()?->is($absensi))->toBeTrue();
+    $result = app(AttendanceService::class)->processScan('KJA-EVENT-ATTEND', $session->id);
+
+    expect($result['status'])->toBe('success');
 });

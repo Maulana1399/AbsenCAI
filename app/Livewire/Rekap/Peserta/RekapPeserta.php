@@ -72,7 +72,7 @@ class RekapPeserta extends Component
                 'id' => $participation->id,
                 'person' => $person,
                 'nama' => $person?->nama,
-                'nip' => $person?->nip,
+                'participant_number' => $participation->participant_number,
                 'jenis_kelamin' => $person?->jenis_kelamin,
                 'jenis_peserta' => $participation->jenis_peserta,
                 'participant_number' => $participation->participant_number,

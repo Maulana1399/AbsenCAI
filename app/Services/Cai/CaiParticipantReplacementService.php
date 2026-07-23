@@ -2,7 +2,6 @@
 
 namespace App\Services\Cai;
 
-use App\Models\Absensi;
 use App\Models\ActivityRegistration;
 use App\Models\EventAttendance;
 use App\Models\EventCommitteeAssignment;
@@ -38,12 +37,6 @@ class CaiParticipantReplacementService
         if (! $participationMapping) {
             throw new RuntimeException(
                 'Peserta belum memiliki mapping partisipasi dan tidak dapat diganti.'
-            );
-        }
-
-        if (Absensi::query()->where('nip', $peserta->nip)->exists()) {
-            throw new RuntimeException(
-                'Peserta sudah memiliki riwayat absensi dan tidak dapat diganti.'
             );
         }
 

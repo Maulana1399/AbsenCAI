@@ -17,7 +17,7 @@ class GantiPeserta extends Component
     public ?int $peserta_id = null;
 
     public string $nama_lama = '';
-    public ?string $nip = null;
+    public string $participant_number = '';
     public string $desa = '-';
     public string $kelompok = '-';
     public string $regu = '-';
@@ -58,7 +58,7 @@ class GantiPeserta extends Component
 
         $this->peserta_id = $peserta->id;
         $this->nama_lama = $peserta->nama;
-        $this->nip = (string) $peserta->nip;
+        $this->participant_number = $peserta->participant_number ?? '';
 
         $this->desa = $peserta->desa?->desa_asal ?? '-';
         $this->kelompok = $peserta->kelompok?->kelompok_asal ?? '-';
@@ -118,7 +118,7 @@ class GantiPeserta extends Component
 
         $this->peserta_id = null;
         $this->nama_lama = '';
-        $this->nip = null;
+        $this->participant_number = '';
         $this->desa = '-';
         $this->kelompok = '-';
         $this->regu = '-';

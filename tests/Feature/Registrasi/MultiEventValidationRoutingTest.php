@@ -235,7 +235,7 @@ test('existing Person can join second event without NIP collision (Case B)', fun
     // Verify a legacy peserta was created with an internally-generated NIP
     $peserta = $person->legacyPesertaMapping?->peserta;
     expect($peserta)->not->toBeNull();
-    expect($peserta->nip)->not->toBeNull();
+    expect($peserta->nip)->toBeNull();
 
     // Switch to Event B
     $eventB = mvr_event('nip-b');
@@ -267,40 +267,13 @@ test('existing Person can join second event without NIP collision (Case B)', fun
 });
 
 // ---------------------------------------------------------------------------
-// 5. NIP from Person LAIN still rejected
+// 5. NIP retired — no NIP collision test needed (PGM.20)
 // ---------------------------------------------------------------------------
 
-test('NIP belonging to a different Person is still rejected for new Person registration', function () {
-    ['desa' => $desa, 'kelompok' => $kelompok, 'regu' => $regu] = mvr_fixtures();
-    $event = mvr_event('nip-other');
-    app(ActiveEventContext::class)->set($event);
-
-    // Create a Person with NIP 50001
-    Person::create(['nama' => 'Person With NIP']);
-    peserta::create(['nama' => 'Peserta With NIP', 'nip' => 50001, 'status_registrasi' => 'Belum Registrasi']);
-
-    $desaB = desa::create(['desa_asal' => 'Desa B Other']);
-    $kelompokB = kelompok::create(['kelompok_asal' => 'Kelompok B Other', 'desa_id' => $desaB->id]);
-
-    // Different person (nama+desa+kelompok different) trying to use NIP 50001 → Case A, NIP must be unique
-    $existingPerson = Person::where('nama', 'Totally Different Name')
-        ->where('desa_id', $desaB->id)
-        ->where('kelompok_id', $kelompokB->id)
-        ->first();
-
-    // No existing person with this identity — Case A applies
-    expect($existingPerson)->toBeNull();
-
-    // NIP uniqueness check must reject 50001 for a new Person
-    $nipValidator = validator(['nip' => 50001], [
-        'nip' => [
-            'required',
-            'integer',
-            \Illuminate\Validation\Rule::unique('pesertas', 'nip'),
-        ],
-    ]);
-
-    expect($nipValidator->fails())->toBeTrue();
+test('NIP retired per PGM.20 — no collision check needed', function () {
+    // NIP is no longer stored on Person or peserta models
+    // Uniqueness validations against pesertas.nip or people.nip no longer apply
+    expect(true)->toBeTrue();
 });
 
 // ---------------------------------------------------------------------------

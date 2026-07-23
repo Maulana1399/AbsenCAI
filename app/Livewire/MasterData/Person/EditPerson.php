@@ -19,10 +19,8 @@ class EditPerson extends Component
     public string $tanggal_lahir = '';
     public ?string $desa_id = null;
     public ?string $kelompok_id = null;
-    public ?string $nip = null;
 
     public bool $hasLegacyMapping = false;
-    public bool $nipLocked = false;
 
     #[On('editPerson')]
     public function editPerson(int $id): void
@@ -35,11 +33,8 @@ class EditPerson extends Component
         $this->tanggal_lahir = $person->tanggal_lahir?->format('Y-m-d') ?? '';
         $this->desa_id = (string) $person->desa_id;
         $this->kelompok_id = (string) $person->kelompok_id;
-        $this->nip = (string) $person->nip;
 
-        $syncService = app(PersonLegacySyncService::class);
-        $this->hasLegacyMapping = $syncService->hasMapping($person);
-        $this->nipLocked = ! $syncService->canChangeNip($person);
+        $this->hasLegacyMapping = app(PersonLegacySyncService::class)->hasMapping($person);
 
         Flux::modal('edit-person')->show();
     }
@@ -52,20 +47,15 @@ class EditPerson extends Component
 
         $person = Person::findOrFail($this->person_id);
 
-        $syncService = app(PersonLegacySyncService::class);
-
-        $resolvedNip = $syncService->resolveNip($person, $this->nip);
-
         $person->update([
             'nama' => trim($this->nama),
             'jenis_kelamin' => $this->jenis_kelamin,
             'tanggal_lahir' => $this->tanggal_lahir ?: null,
             'desa_id' => $this->desa_id ?: null,
             'kelompok_id' => $this->kelompok_id ?: null,
-            'nip' => $resolvedNip,
         ]);
 
-        $syncService->syncToPeserta($person);
+        app(PersonLegacySyncService::class)->syncToPeserta($person);
 
         $this->dispatch('refreshPerson');
         Flux::modal('edit-person')->close();
@@ -79,7 +69,6 @@ class EditPerson extends Component
             'tanggal_lahir' => 'nullable|date',
             'desa_id' => 'nullable|exists:desas,id',
             'kelompok_id' => 'nullable|exists:kelompoks,id',
-            'nip' => 'nullable|integer|min:1|unique:people,nip,' . $this->person_id,
         ];
     }
 
@@ -89,8 +78,6 @@ class EditPerson extends Component
         'jenis_kelamin.in' => 'Jenis kelamin harus Laki-laki atau Perempuan.',
         'desa_id.exists' => 'Desa tidak ditemukan.',
         'kelompok_id.exists' => 'Kelompok tidak ditemukan.',
-        'nip.unique' => 'NIP sudah digunakan.',
-        'nip.integer' => 'NIP harus berupa angka.',
     ];
 
     public function render()

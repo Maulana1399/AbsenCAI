@@ -5,7 +5,7 @@ use App\Models\Event;
 use App\Models\SesiAbsensi;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\Absensi;
+use App\Models\EventAttendance;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
@@ -68,7 +68,6 @@ function ds_legacyPeserta(Person $person, desa $desa, kelompok $kelompok, regu $
 {
     $p = peserta::create([
         'nama' => $person->nama,
-        'nip' => $person->nip ?? (string) random_int(1001, 1999),
         'jenis_kelamin' => $person->jenis_kelamin,
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
@@ -77,7 +76,7 @@ function ds_legacyPeserta(Person $person, desa $desa, kelompok $kelompok, regu $
     \App\Models\LegacyPesertaMapping::create([
         'peserta_id' => $p->id,
         'person_id' => $person->id,
-        'legacy_nip' => $p->nip,
+        'legacy_nip' => $person->id,
     ]);
     LegacyParticipationMapping::create([
         'peserta_id' => $p->id,
@@ -156,16 +155,18 @@ test('dashboard Alfa count decreases when participant attends', function () {
     $kel = ds_kelompok($desa);
     $person1 = ds_person($desa);
     $person2 = ds_person($desa);
-    $p1 = ds_participation($event, $person1);
-    $p2 = ds_participation($event, $person2);
-    $p1 = ds_legacyPeserta($person1, $desa, $kel, $regu);
+    $part1 = ds_participation($event, $person1);
+    ds_participation($event, $person2);
+    ds_legacyPeserta($person1, $desa, $kel, $regu);
     ds_legacyPeserta($person2, $desa, $kel, $regu);
 
-    Absensi::create([
-        'nip' => $p1->nip,
-        'nama' => $person1->nama,
-        'jam_scan' => now(),
-        'sesi_id' => $sesi->id,
+    EventAttendance::create([
+        'participation_id' => $part1->id,
+        'sesi_absensi_id' => $sesi->id,
+        'event_id' => $event->id,
+        'status' => EventAttendance::STATUS_HADIR,
+        'attended_at' => now(),
+        'method' => 'scan',
     ]);
 
     $user = User::factory()->create(['role' => Role::Admin]);
@@ -185,14 +186,16 @@ test('dashboard Alfa shows 0 when all participants attended', function () {
     $regu = ds_regu();
     $kel = ds_kelompok($desa);
     $person = ds_person($desa);
-    $p = ds_participation($event, $person);
-    $p = ds_legacyPeserta($person, $desa, $kel, $regu);
+    $part = ds_participation($event, $person);
+    ds_legacyPeserta($person, $desa, $kel, $regu);
 
-    Absensi::create([
-        'nip' => $p->nip,
-        'nama' => $person->nama,
-        'jam_scan' => now(),
-        'sesi_id' => $sesi->id,
+    EventAttendance::create([
+        'participation_id' => $part->id,
+        'sesi_absensi_id' => $sesi->id,
+        'event_id' => $event->id,
+        'status' => EventAttendance::STATUS_HADIR,
+        'attended_at' => now(),
+        'method' => 'scan',
     ]);
 
     $user = User::factory()->create(['role' => Role::Admin]);
@@ -231,14 +234,16 @@ test('dashboard attendance from other session does not affect Alfa count', funct
     $kel = ds_kelompok($desa);
     $person = ds_person($desa);
     $participation = ds_participation($event, $person);
-    $p = ds_legacyPeserta($person, $desa, $kel, $regu);
+    ds_legacyPeserta($person, $desa, $kel, $regu);
 
     // Attend in the OTHER session (not active one)
-    Absensi::create([
-        'nip' => $p->nip,
-        'nama' => $person->nama,
-        'jam_scan' => now(),
-        'sesi_id' => $sesiLain->id,
+    EventAttendance::create([
+        'participation_id' => $participation->id,
+        'sesi_absensi_id' => $sesiLain->id,
+        'event_id' => $event->id,
+        'status' => EventAttendance::STATUS_HADIR,
+        'attended_at' => now(),
+        'method' => 'scan',
     ]);
 
     $user = User::factory()->create(['role' => Role::Admin]);

@@ -41,7 +41,8 @@ test('diagnose NO_PESERTA when NIP not in pesertas', function () {
 test('diagnose NO_MAPPING when peserta has no mapping', function () {
     $event = ad_event();
     $session = ad_session($event);
-    peserta::create(['nama' => 'No Map', 'nip' => 88888, 'attendance_code' => 'KJA-NOMAP', 'status_registrasi' => 'Belum Registrasi']);
+    $p = peserta::create(['nama' => 'No Map', 'attendance_code' => 'KJA-NOMAP', 'status_registrasi' => 'Belum Registrasi']);
+    LegacyPesertaMapping::create(['peserta_id' => $p->id, 'person_id' => Person::create(['nama' => 'No Map Person'])->id, 'legacy_nip' => 88888]);
     Absensi::create(['nip' => 88888, 'nama' => 'No Map', 'jam_scan' => now(), 'sesi_id' => $session->id]);
 
     $this->artisan('attendance:diagnose', ['--event' => $event->id])
@@ -61,10 +62,10 @@ test('diagnose NO_EVENT when session has no event_id', function () {
 test('valid mapped attendance not reported as unmappable', function () {
     $event = ad_event();
     $session = ad_session($event);
-    $person = Person::create(['nama' => 'Valid', 'nip' => 66666]);
-    $p = peserta::create(['nama' => 'Valid Peserta', 'nip' => 66666, 'attendance_code' => 'KJA-VALID', 'status_registrasi' => 'Belum Registrasi']);
+    $person = Person::create(['nama' => 'Valid']);
+    $p = peserta::create(['nama' => 'Valid Peserta', 'attendance_code' => 'KJA-VALID', 'status_registrasi' => 'Belum Registrasi']);
     $part = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $p->id, 'person_id' => $person->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $p->id, 'person_id' => $person->id, 'legacy_nip' => 66666]);
     LegacyParticipationMapping::create(['peserta_id' => $p->id, 'person_id' => $person->id, 'participation_id' => $part->id, 'event_id' => $event->id]);
     Absensi::create(['nip' => 66666, 'nama' => 'Valid', 'jam_scan' => now(), 'sesi_id' => $session->id]);
 
@@ -87,7 +88,7 @@ test('diagnose cross-event isolation', function () {
     $eventA = ad_event();
     $eventB = ad_event();
     $sessionB = ad_session($eventB);
-    peserta::create(['nama' => 'Cross', 'nip' => 55555, 'attendance_code' => 'KJA-CROSS', 'status_registrasi' => 'Belum Registrasi']);
+    peserta::create(['nama' => 'Cross', 'attendance_code' => 'KJA-CROSS', 'status_registrasi' => 'Belum Registrasi']);
     Absensi::create(['nip' => 55555, 'nama' => 'Cross', 'jam_scan' => now(), 'sesi_id' => $sessionB->id]);
 
     $this->artisan('attendance:diagnose', ['--event' => $eventA->id])
@@ -98,8 +99,10 @@ test('diagnose cross-event isolation', function () {
 test('diagnose respects --limit option', function () {
     $event = ad_event();
     $session = ad_session($event);
-    peserta::create(['nama' => 'Limit A', 'nip' => 11111, 'attendance_code' => 'KJA-LIMIT1', 'status_registrasi' => 'Belum Registrasi']);
-    peserta::create(['nama' => 'Limit B', 'nip' => 22222, 'attendance_code' => 'KJA-LIMIT2', 'status_registrasi' => 'Belum Registrasi']);
+    $pA = peserta::create(['nama' => 'Limit A', 'attendance_code' => 'KJA-LIMIT1', 'status_registrasi' => 'Belum Registrasi']);
+    $pB = peserta::create(['nama' => 'Limit B', 'attendance_code' => 'KJA-LIMIT2', 'status_registrasi' => 'Belum Registrasi']);
+    LegacyPesertaMapping::create(['peserta_id' => $pA->id, 'person_id' => Person::create(['nama' => 'Person A'])->id, 'legacy_nip' => 11111]);
+    LegacyPesertaMapping::create(['peserta_id' => $pB->id, 'person_id' => Person::create(['nama' => 'Person B'])->id, 'legacy_nip' => 22222]);
     Absensi::create(['nip' => 11111, 'nama' => 'Limit A', 'jam_scan' => now(), 'sesi_id' => $session->id]);
     Absensi::create(['nip' => 22222, 'nama' => 'Limit B', 'jam_scan' => now(), 'sesi_id' => $session->id]);
 

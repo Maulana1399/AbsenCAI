@@ -17,7 +17,6 @@ function auditLegacy_makePeserta(array $overrides = []): peserta
 {
     return peserta::create(array_merge([
         'nama' => 'Test Person',
-        'nip' => fake()->unique()->numberBetween(1000, 9999),
         'jenis_kelamin' => 'Laki - Laki',
     ], $overrides));
 }
@@ -113,27 +112,7 @@ test('command reports null attendance_code', function () {
         ->assertExitCode(0);
 });
 
-test('command reports NIP min and max', function () {
-    peserta::create(['nama' => 'Low', 'nip' => 1001]);
-    peserta::create(['nama' => 'High', 'nip' => 2500]);
 
-    $this->artisan('audit:legacy-data')
-        ->expectsOutputToContain('minimum NIP: 1001')
-        ->expectsOutputToContain('maximum NIP: 2500')
-        ->assertExitCode(0);
-});
-
-test('command reports NIP distribution ranges', function () {
-    peserta::create(['nama' => 'A', 'nip' => 1500]);
-    peserta::create(['nama' => 'B', 'nip' => 2500]);
-    peserta::create(['nama' => 'C', 'nip' => 9999]);
-
-    $this->artisan('audit:legacy-data')
-        ->expectsOutputToContain('1000–1999: 1')
-        ->expectsOutputToContain('2000–2999: 1')
-        ->expectsOutputToContain('outside expected range: 1')
-        ->assertExitCode(0);
-});
 
 // ---------------------------------------------------------------------------
 // Gender variants
@@ -158,7 +137,7 @@ test('command reports all gender variants without modifying them', function () {
         ->expectsOutputToContain('NULL')
         ->assertExitCode(0);
 
-    $dbGender = peserta::where('nip', 1001)->first()->jenis_kelamin;
+    $dbGender = peserta::where('nama', 'A')->first()->jenis_kelamin;
     expect($dbGender)->toBe('Laki - Laki');
 });
 
@@ -188,7 +167,7 @@ test('command does not alter stored gender values', function () {
     $this->artisan('audit:legacy-data')->assertExitCode(0);
 
     $this->assertDatabaseHas('pesertas', [
-        'nip' => 1001,
+        'nama' => 'A',
         'jenis_kelamin' => 'Laki - Laki',
     ]);
 });

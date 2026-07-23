@@ -514,26 +514,6 @@ test('edit standalone person does NOT create legacy peserta', function () {
     expect(\App\Models\peserta::count())->toBe($pesertaCount);
 });
 
-test('nip is locked for mapped person', function () {
-    $user = User::factory()->create(['role' => Role::Admin]);
-    $setup = pm_mappedPerson();
-    $this->actingAs($user);
-
-    Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
-        ->dispatch('editPerson', id: $setup['person']->id)
-        ->assertSet('nipLocked', true);
-});
-
-test('nip can be changed for standalone person', function () {
-    $user = User::factory()->create(['role' => Role::Admin]);
-    $person = pm_person(['nama' => 'NIP Test']);
-    $this->actingAs($user);
-
-    Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
-        ->dispatch('editPerson', id: $person->id)
-        ->assertSet('nipLocked', false);
-});
-
 test('delete guard still works after sync implementation', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
@@ -551,83 +531,75 @@ test('delete guard still works after sync implementation', function () {
 });
 
 // ---------------------------------------------------------------------------
-// NIP server-side enforcement
+// Identity field editing (NIP removed from EditPerson/CreatePerson)
 // ---------------------------------------------------------------------------
 
-test('mapped Person NIP remains null after edit', function () {
+test('edit mapped person syncs all identity fields', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
+    $desa = \App\Models\desa::create(['desa_asal' => 'Identity Sync Desa']);
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
         ->dispatch('editPerson', id: $setup['person']->id)
-        ->set('nama', 'New Name')
+        ->set('nama', 'Identity Sync Name')
+        ->set('jenis_kelamin', 'P')
+        ->set('desa_id', (string) $desa->id)
+        ->set('tanggal_lahir', '2000-01-15')
         ->call('update');
 
     $setup['person']->refresh();
-    expect($setup['person']->nip)->toBeNull();
-});
-
-test('mapped Person peserta.nip remains unchanged after edit', function () {
-    $user = User::factory()->create(['role' => Role::Admin]);
-    $setup = pm_mappedPerson();
-    $originalPesertaNip = $setup['peserta']->nip;
-    $this->actingAs($user);
-
-    Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
-        ->dispatch('editPerson', id: $setup['person']->id)
-        ->set('nama', 'New Name')
-        ->set('nip', '99999')
-        ->call('update');
-
     $setup['peserta']->refresh();
-    expect($setup['peserta']->nip)->toBe($originalPesertaNip);
+
+    expect($setup['person']->nama)->toBe('Identity Sync Name');
+    expect($setup['person']->jenis_kelamin)->toBe('P');
+    expect((int) $setup['person']->desa_id)->toBe($desa->id);
+    expect($setup['person']->tanggal_lahir->format('Y-m-d'))->toBe('2000-01-15');
+
+    expect($setup['peserta']->nama)->toBe('Identity Sync Name');
+    expect($setup['peserta']->jenis_kelamin)->toBe('Perempuan');
+    expect((int) $setup['peserta']->desa_id)->toBe($desa->id);
 });
 
-test('standalone Person NIP remains null after edit', function () {
+test('edit standalone person with identity fields does not create peserta', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
-    $person = pm_person(['nama' => 'NIP Change Test']);
+    $person = pm_person(['nama' => 'Standalone Identity']);
+    $pesertaCount = \App\Models\peserta::count();
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
         ->dispatch('editPerson', id: $person->id)
-        ->set('nama', 'NIP Updated')
+        ->set('nama', 'Updated Standalone Identity')
+        ->set('jenis_kelamin', 'L')
+        ->set('tanggal_lahir', '1999-12-01')
         ->call('update');
 
     $person->refresh();
-    expect($person->nip)->toBeNull();
+
+    expect($person->nama)->toBe('Updated Standalone Identity');
+    expect($person->jenis_kelamin)->toBe('L');
+    expect($person->tanggal_lahir->format('Y-m-d'))->toBe('1999-12-01');
+
+    expect(\App\Models\peserta::count())->toBe($pesertaCount);
 });
 
-test('identity sync still works after NIP enforcement for mapped Person', function () {
+test('create person with tanggal_lahir stores correctly', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
-    $setup = pm_mappedPerson();
     $this->actingAs($user);
 
-    Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
-        ->dispatch('editPerson', id: $setup['person']->id)
-        ->set('nama', 'Sync After NIP Guard')
-        ->set('jenis_kelamin', 'P')
-        ->set('nip', '99999')
-        ->call('update');
+    Livewire::test(\App\Livewire\MasterData\Person\CreatePerson::class)
+        ->set('nama', 'Birthday Person')
+        ->set('jenis_kelamin', 'L')
+        ->set('tanggal_lahir', '2005-06-20')
+        ->call('simpan');
 
-    $setup['peserta']->refresh();
-    expect($setup['peserta']->nama)->toBe('Sync After NIP Guard');
-    expect($setup['peserta']->jenis_kelamin)->toBe('Perempuan');
-});
+    $this->assertDatabaseHas('people', [
+        'nama' => 'Birthday Person',
+        'jenis_kelamin' => 'L',
+    ]);
 
-test('no Participation created when editing mapped Person with NIP manipulation', function () {
-    $user = User::factory()->create(['role' => Role::Admin]);
-    $setup = pm_mappedPerson();
-    $participationCount = Participation::count();
-    $this->actingAs($user);
-
-    Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
-        ->dispatch('editPerson', id: $setup['person']->id)
-        ->set('nama', 'NIP Guard Test')
-        ->set('nip', '99999')
-        ->call('update');
-
-    expect(Participation::count())->toBe($participationCount);
+    $person = Person::where('nama', 'Birthday Person')->first();
+    expect($person->tanggal_lahir->format('Y-m-d'))->toBe('2005-06-20');
 });
 
 // ---------------------------------------------------------------------------

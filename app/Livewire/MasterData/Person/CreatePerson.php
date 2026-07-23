@@ -18,7 +18,6 @@ class CreatePerson extends Component
     public string $tanggal_lahir = '';
     public ?string $desa_id = null;
     public ?string $kelompok_id = null;
-    public ?string $nip = null;
 
     public function render()
     {
@@ -46,14 +45,13 @@ class CreatePerson extends Component
                 'tanggal_lahir' => $this->tanggal_lahir ?: null,
                 'desa_id' => $this->desa_id ?: null,
                 'kelompok_id' => $this->kelompok_id ?: null,
-                'nip' => $this->nip ?: null,
             ]);
 
             $this->dispatch('refreshPerson');
 
             $this->reset([
                 'nama', 'jenis_kelamin', 'tanggal_lahir',
-                'desa_id', 'kelompok_id', 'nip',
+                'desa_id', 'kelompok_id',
             ]);
 
             Flux::modal('tambah-person')->close();
@@ -70,7 +68,6 @@ class CreatePerson extends Component
             'tanggal_lahir' => 'nullable|date',
             'desa_id' => 'nullable|exists:desas,id',
             'kelompok_id' => 'nullable|exists:kelompoks,id',
-            'nip' => 'nullable|integer|min:1|unique:people,nip',
         ];
     }
 
@@ -80,7 +77,5 @@ class CreatePerson extends Component
         'jenis_kelamin.in' => 'Jenis kelamin harus Laki-laki atau Perempuan.',
         'desa_id.exists' => 'Desa tidak ditemukan.',
         'kelompok_id.exists' => 'Kelompok tidak ditemukan.',
-        'nip.unique' => 'NIP sudah digunakan.',
-        'nip.integer' => 'NIP harus berupa angka.',
     ];
 }

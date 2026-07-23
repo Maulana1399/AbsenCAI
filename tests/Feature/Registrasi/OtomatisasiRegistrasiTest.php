@@ -132,7 +132,7 @@ test('import peserta uses automatic nip and least filled regu', function () {
         'desa' => 'Desa A',
     ]);
 
-    expect($model->nip)->not->toBeNull()
+    expect($model->nip)->toBeNull()
         ->and($model->participant_number)->toBe('KP001')
         ->and($model->attendance_code)->toStartWith('KJA-')
         ->and($model->regu_id)->toBeNull()

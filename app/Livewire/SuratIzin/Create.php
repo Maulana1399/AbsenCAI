@@ -32,7 +32,6 @@ class Create extends Component
             $resolver = app(LegacyParticipationResolver::class);
 
             $persons = Person::where('nama', 'like', $search)
-                ->orWhere('nip', 'like', $search)
                 ->limit(10)
                 ->get()
                 ->map(function ($person) use ($event, $resolver) {
@@ -41,7 +40,6 @@ class Create extends Component
                 return (object) [
                     'id' => $person->id,
                     'nama' => $person->nama,
-                    'nip' => $person->nip,
                     'source' => 'canonical',
                     'peserta_id' => $participation ? $resolver->resolvePesertaByParticipation($participation->id, $event?->id)?->id : null,
                 ];
@@ -51,7 +49,6 @@ class Create extends Component
 
             $legacyPesertas = peserta::where(function ($q) use ($search) {
                     $q->where('nama', 'like', $search)
-                      ->orWhere('nip', 'like', $search)
                       ->orWhere('attendance_code', 'like', $search);
                 })
                 ->whereNotIn('nama', $personNames)
@@ -60,7 +57,6 @@ class Create extends Component
                 ->map(fn ($p) => (object) [
                     'id' => $p->id,
                     'nama' => $p->nama,
-                    'nip' => $p->nip,
                     'source' => 'legacy',
                     'peserta_id' => $p->id,
                 ]);
@@ -85,7 +81,7 @@ class Create extends Component
                 $selectedPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
                 if ($selectedPeserta) {
                     $this->selectedPesertaId = $selectedPeserta->id;
-                    $this->selectedPesertaNama = $person->nama . ' (' . ($person->nip ?? '-') . ')';
+                    $this->selectedPesertaNama = $person->nama;
                     $this->searchPeserta = '';
                     return;
                 }
@@ -98,7 +94,7 @@ class Create extends Component
                 $selectedPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
                 if ($selectedPeserta) {
                     $this->selectedPesertaId = $selectedPeserta->id;
-                    $this->selectedPesertaNama = $participation->person->nama . ' (' . ($participation->person->nip ?? '-') . ')';
+                    $this->selectedPesertaNama = $participation->person->nama;
                     $this->searchPeserta = '';
                     return;
                 }
@@ -108,7 +104,7 @@ class Create extends Component
         $p = peserta::find($id);
         if ($p) {
             $this->selectedPesertaId = $p->id;
-            $this->selectedPesertaNama = $p->nama . ' (' . $p->nip . ')';
+            $this->selectedPesertaNama = $p->nama;
             $this->searchPeserta = '';
         }
     }

@@ -11,19 +11,17 @@ class ParticipationResolver
         private readonly LegacyParticipationResolver $legacyParticipationResolver,
     ) {}
 
-    public function resolveByPeserta(peserta $peserta, int $eventId): ?Participation
-    {
-        return $this->legacyParticipationResolver->resolveByPesertaAndEvent($peserta->id, $eventId);
-    }
-
     public function resolveByNip(int $nip, int $eventId): ?Participation
     {
-        $peserta = peserta::where('nip', $nip)->first();
+        $pesertaMapping = \App\Models\LegacyPesertaMapping::where('legacy_nip', (string) $nip)->first();
 
-        if ($peserta === null) {
-            return null;
-        }
+        return $pesertaMapping
+            ? $this->legacyParticipationResolver->resolveByPesertaAndEvent($pesertaMapping->peserta_id, $eventId)
+            : null;
+    }
 
+    public function resolveByPeserta(peserta $peserta, int $eventId): ?Participation
+    {
         return $this->legacyParticipationResolver->resolveByPesertaAndEvent($peserta->id, $eventId);
     }
 

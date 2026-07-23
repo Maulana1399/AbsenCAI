@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
+use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\SuratIzin;
 use Illuminate\Support\Facades\DB;
@@ -363,7 +364,13 @@ class AttendanceBackfillService
 
     private function resolveParticipationByNip(int $nip, int $eventId): Participation|null|false
     {
-        $mappings = LegacyParticipationMapping::whereHas('peserta', fn ($q) => $q->where('nip', $nip))
+        $pesertaMapping = LegacyPesertaMapping::where('legacy_nip', (string) $nip)->first();
+
+        if ($pesertaMapping === null) {
+            return null;
+        }
+
+        $mappings = LegacyParticipationMapping::where('peserta_id', $pesertaMapping->peserta_id)
             ->where('event_id', $eventId)
             ->get();
 

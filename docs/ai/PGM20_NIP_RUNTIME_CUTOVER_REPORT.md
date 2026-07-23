@@ -1,6 +1,6 @@
 # PGM.20 — LEGACY NIP RETIREMENT: PHASE 1 RUNTIME CUTOVER
 
-**Status:** PHASE 1 COMPLETE + PHASE 2 LEGACY BRIDGE CLEANUP COMPLETE — VERIFICATION PENDING
+**Status:** PHASES 1–3 COMPLETE — VERIFICATION PENDING
 **Date:** 2026-07-23
 **Predecessor:** PGM.19 Sprint 8B — Physical Regu Retirement
 **Baseline:** 1581 passed / 3774 assertions / 0 failures
@@ -216,47 +216,59 @@ Expected:
 
 ## 7. PHASE 2 — LEGACY BRIDGE & DISPLAY CLEANUP
 
+*(Documented in earlier session — QR NIP fallback removed, CAI replacement NIP transfer removed, PesertaExport NIP column removed)*
+
+## 8. PHASE 3 — DEAD/OBSOLETE NIP CODE REMOVAL
+
 ### Changes made
 
-| File | Change | Category |
-|------|--------|----------|
-| `app/Services/QR/QRIdentityResolver.php` | Removed `resolveByLegacyNip()` fallback from QR resolution | E |
-| `app/Services/Cai/CaiParticipantReplacementService.php` | Removed dead NIP transfer to Person (was no-op); removed `$legacyNip` capture; reads `legacy_nip` snapshot from `$peserta->nip` directly | E |
-| `app/Exports/PesertaExport.php` | Removed NIP column from Excel export data and headings | D |
+| File | Change | Lines |
+|------|--------|:-----:|
+| `app/Services/Person/PersonLegacySyncService.php` | Removed `canChangeNip()`, `resolveNip()` methods; updated doc comment | -28 |
+| `app/Livewire/MasterData/Person/EditPerson.php` | Removed `$nip`, `$nipLocked` properties; NIP loading, resolution, validation, write | -15 |
+| `app/Livewire/MasterData/Person/CreatePerson.php` | Removed `$nip` property; NIP validation, write, reset | -6 |
+| `resources/views/livewire/master-data/person/edit-person.blade.php` | Removed NIP input field + NIP-locked info text | -10 |
+| `resources/views/livewire/master-data/person/create-person.blade.php` | Removed NIP input field | -1 |
+| `resources/views/livewire/master-data/person/index-person.blade.php` | Removed NIP column header + data cell + colspan correction | -3 |
+| `tests/Feature/MasterData/PersonMasterDataTest.php` | Removed 7 stale NIP tests; added 3 replacement canonical identity tests | ~82 |
 
-### Retained but documented (legacy schema compatibility / read-only)
-- `AttendanceReadService.php` — NIP cross-reference with historical `absensis` records
-- `LegacyParticipationResolver.php` — `resolveByLegacyNip()` method (may still be called from tests/diagnostics)
-- `ParticipationResolver.php` — `resolveByNip()` method (same)
-- `SuratIzinService.php` — legacy Absensi duplicate check (historical records)
-- `AttendanceExceptionService.php` — legacy Absensi duplicate check (historical records)
-- `AttendanceBackfillService.php` — migration tooling
-- `AttendanceParityService.php` — parity audit
-- `AttendanceDiagnose` command — diagnostic tool
-- `AuditLegacyData` command — audit tool
-- `ResetEventData` command — NIP snapshot validation
+### Dead code removed
+All of these were no-ops since PGM.20 Phase 1 removed `'nip'` from Person's `$fillable`:
+- **NIP write in EditPerson::update()**: `'nip' => $resolvedNip` was silently ignored
+- **NIP write in CreatePerson::simpan()**: `'nip' => $this->nip ?: null` was silently ignored
+- **NIP validation in rules**: `'nip' => 'nullable|integer|min:1|unique:people,nip'` — validated column that was never written
+- **`resolveNip()` enforcement**: Always returned `$person->nip` (null) for mapped persons — no-op
+- **`canChangeNip()` lock**: Controlled readonly state of a field that wrote nowhere
+- **NIP search in Person index**: `orWhere('nip', ...)` — searched column that was always null
+- **NIP display in Person index**: `$person->nip ?? '-'` — always showed '-'
 
-### Remaining NIP references classified (post-Phase 2)
+### UI/form contracts removed
+- Person Create form: NIP input field removed (was optional, wrote nowhere)
+- Person Edit form: NIP input field removed (was readonly for mapped, wrote nowhere)
+- Person Edit form: NIP-locked badge removed
+- Person Index table: NIP column removed
 
-| Classification | Count | Description |
-|:---------------|:-----:|-------------|
-| **A — Canonical Person dependency** | **0** | ✅ None |
-| **B — Schema compatibility (pesertas.nip)** | ~8 | `RegistrationService`, `PlacementService::legacyNextNip()`, `peserta.php` fillable, `Absensi.php` fillable |
-| **C — Migration/backfill/diagnostic** | ~19 | `AttendanceDiagnose`, `AuditLegacyData`, `ResetEventData`, `AttendanceBackfillService`, `AttendanceParityService` |
-| **D — Display-only fallback** | ~18 | View files with `?? '-'` patterns — `database.blade.php`, `ulang.blade.php`, `rekap-absensi.blade.php`, `rekap-peserta.blade.php`, `dashboard.blade.php`, `surat-izin/*.blade.php`, `edit-person.blade.php`, `create-person.blade.php`, `index-person.blade.php`, `edit-peserta.blade.php`, `ganti-peserta.blade.php` |
-| **E — Legacy bridge read** | ~8 | `AttendanceReadService`, `LegacyParticipationResolver`, `ParticipationResolver`, `SuratIzinService`, `AttendanceExceptionService`, `CaiParticipantReplacementService` (legacy_nip snapshot only) |
-| **F — Dead/obsolete** | ~5 | `PersonLegacySyncService::canChangeNip()/resolveNip()`, `EditPerson` NIP fields, `CreatePerson` NIP fields — all silently ignored (no-op). Removal deferred to Person master data UI refactor. |
+### Post-Phase 3 remaining NIP references
 
-### Remaining blockers before pesertas.nip schema retirement
+| Classification | Count | Where |
+|:---------------|:-----:|-------|
+| **A — Canonical Person dependency** | **0** | ✅ Fully eliminated |
+| **B — Schema compatibility** | ~8 | `RegistrationService` (internal peserta.nip), `PlacementService::legacyNextNip()`, `peserta.php` fillable, `Absensi.php` model |
+| **C — Diagnostic tooling** | ~19 | `AttendanceDiagnose`, `AuditLegacyData`, `ResetEventData`, `AttendanceBackfillService`, `AttendanceParityService` |
+| **D — Display-only fallback** | ~15 | View files showing legacy peserta.nip (e.g., `database.blade.php:31`, `rekap-absensi.blade.php`) — NOT Person.nip |
+| **E — Legacy bridge read** | ~8 | `AttendanceReadService`, `LegacyParticipationResolver`, `ParticipationResolver`, `SuratIzinService`, `AttendanceExceptionService` |
+| **F — Dead/obsolete** | **0** | ✅ Fully eliminated |
 
-1. **`pesertas.nip` NOT NULL + UNIQUE** — Migration to make nullable + drop unique
-2. **`legacyNextNip()` calls** — Must stop before column can be made nullable
-3. **`absensis` table** — Still contains historical records with NOT NULL nip
-4. **`people.nip` UNIQUE** — Must drop unique constraint
-5. **Display-only NIP refs** — Remove from views (low priority, cosmetic)
-6. **Diagnostic commands** — Update to not depend on NIP
+### Remaining blockers for full NIP retirement (Phase 4)
 
-## 8. GO/NO-GO FOR PHYSICAL NIP RETIREMENT
+1. **`pesertas.nip` NOT NULL + UNIQUE** — Drop migration needed
+2. **`legacyNextNip()` calls** — Must stop before column nullable
+3. **`absensis` table** — Historical records with NOT NULL nip
+4. **`people.nip` UNIQUE** — Drop migration needed
+5. **Diagnostic commands** — Update to not depend on NIP
+6. **Display-only refs** — Remove legacy NIP display (low priority)
+
+## 9. GO/NO-GO FOR PHYSICAL NIP RETIREMENT
 
 ### Phase 1 Runtime Cutover — ✅ COMPLETE
 - [x] Attendance NIP fallback removed from resolveIdentity

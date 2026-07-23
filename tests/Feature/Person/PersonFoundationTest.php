@@ -28,12 +28,9 @@ function PersonFoundation_makeUser(): User
 
 test('people table has expected columns', function () {
     $columns = Schema::getColumnListing('people');
-    $expected = ['id', 'nama', 'jenis_kelamin', 'desa_id', 'nip', 'created_at', 'updated_at'];
+    $expected = ['id', 'nama', 'jenis_kelamin', 'desa_id', 'created_at', 'updated_at'];
 
     expect($columns)->toMatchArray($expected);
-
-    $nipType = Schema::getColumnType('people', 'nip');
-    expect($nipType)->toBe('integer');
 
     $jenisKelaminType = Schema::getColumnType('people', 'jenis_kelamin');
     expect($jenisKelaminType)->toBe('varchar');

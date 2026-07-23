@@ -17,7 +17,6 @@ class peserta extends Model
 
     protected $fillable = [
         'nama',
-        'nip',
         'participant_number',
         'attendance_code',
         'jenis_kelamin',

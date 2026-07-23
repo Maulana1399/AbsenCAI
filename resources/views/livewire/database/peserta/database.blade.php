@@ -3,7 +3,7 @@
         <flux:input
             wire:model.live.debounce.300ms="search"
             type="text"
-            placeholder="Cari nama atau NIP peserta..."
+            placeholder="Cari nama atau nomor peserta..."
             icon="magnifying-glass"
         />
     </div>
@@ -13,7 +13,7 @@
                 <thead class="text-xs uppercase bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
                     <tr>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Nama</th>
-                        <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">NIP</th>
+                        <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">No. Peserta</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Jenis Kelamin</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Jenis Peserta</th>
                         <th class="px-6 py-3 border-b border-zinc-200 dark:border-zinc-700">Status Registrasi</th>
@@ -28,7 +28,7 @@
                     @foreach($daftarPeserta as $peserta)
                         <tr class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
                             <td class="px-6 py-2 font-medium text-zinc-900 dark:text-white">{{ $peserta->nama }}</td>
-                            <td class="px-6 py-2">{{ $peserta->nip }}</td>
+                            <td class="px-6 py-2">{{ $peserta->participant_number ?? '-' }}</td>
                             <td class="px-6 py-2">{{ $peserta->jenis_kelamin }}</td>
                             <td class="px-6 py-2">{{ $peserta->jenis_peserta }}</td>
                             <td class="px-6 py-2">{{ $peserta->status_registrasi_label }}</td>

@@ -63,13 +63,6 @@ class LegacyParticipationResolver
         return null;
     }
 
-    public function resolveByLegacyNip(string|int $nip, int $eventId): ?Participation
-    {
-        $pesertaId = peserta::where('nip', (string) $nip)->value('id');
-
-        return $pesertaId ? $this->resolveByPesertaAndEvent((int) $pesertaId, $eventId) : null;
-    }
-
     public function resolvePesertaByParticipation(int $participationId, ?int $eventId = null): ?peserta
     {
         $mapping = LegacyParticipationMapping::with(['peserta', 'participation', 'person', 'event'])

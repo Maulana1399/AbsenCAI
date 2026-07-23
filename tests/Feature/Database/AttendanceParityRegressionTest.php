@@ -21,10 +21,10 @@ test('attendance:parity command boots without option conflict', function () {
 test('attendance:parity --event works', function () {
     $event = Event::create(['name' => 'Parity Test', 'slug' => 'parity-test', 'status' => 'active']);
     $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi', 'tanggal' => '2026-08-12', 'aktif' => true]);
-    $person = Person::create(['nama' => 'Test', 'nip' => 9001]);
-    $peserta = peserta::create(['nama' => 'Legacy', 'nip' => 9001, 'attendance_code' => 'KJA-PARITY', 'status_registrasi' => 'Belum Registrasi']);
+    $person = Person::create(['nama' => 'Test']);
+    $peserta = peserta::create(['nama' => 'Legacy', 'attendance_code' => 'KJA-PARITY', 'status_registrasi' => 'Belum Registrasi']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
-    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
+    LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'legacy_nip' => 9001]);
     LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id]);
     Absensi::create(['nip' => 9001, 'nama' => 'Test', 'jam_scan' => now(), 'sesi_id' => $session->id]);
     EventAttendance::create([

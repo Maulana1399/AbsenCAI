@@ -34,7 +34,7 @@ function mv_session(Event $event): SesiAbsensi
 function mv_peserta(array $o = []): peserta
 {
     return peserta::create(array_merge([
-        'nama' => 'MV '.str()->random(6), 'nip' => random_int(50000, 99999),
+        'nama' => 'MV '.str()->random(6),
         'attendance_code' => 'KJA-MV-'.str()->random(6),
         'participant_number' => 'KL'.random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
@@ -48,9 +48,11 @@ function mv_mapping(peserta $p, Person $person, Participation $part, Event $even
         'participation_id' => $part->id, 'event_id' => $event->id, 'migrated_at' => now(),
     ]);
 
+    $nipValue = $person->id;
+
     return LegacyPesertaMapping::create([
         'peserta_id' => $p->id, 'person_id' => $person->id,
-        'legacy_nip' => $p->nip,
+        'legacy_nip' => $nipValue,
         'legacy_participant_number' => $p->participant_number,
         'legacy_attendance_code' => $p->attendance_code,
         'migrated_at' => now(),
@@ -74,7 +76,7 @@ test('perfect parity produces GO status', function () {
     $event = mv_event();
     $session = mv_session($event);
     $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    Absensi::create(['nip' => $m->person->id, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
     EventAttendance::create([
         'participation_id' => $m->participation->id, 'sesi_absensi_id' => $session->id,
         'event_id' => $event->id, 'status' => EventAttendance::STATUS_HADIR,
@@ -97,7 +99,7 @@ test('missing canonical produces NO-GO', function () {
     $event = mv_event();
     $session = mv_session($event);
     $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    Absensi::create(['nip' => $m->person->id, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
 
     $result = app(AttendanceParityService::class)->audit($event->id);
 
@@ -109,7 +111,7 @@ test('status conflict produces NO-GO', function () {
     $event = mv_event();
     $session = mv_session($event);
     $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    Absensi::create(['nip' => $m->person->id, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
     EventAttendance::create([
         'participation_id' => $m->participation->id, 'sesi_absensi_id' => $session->id,
         'event_id' => $event->id, 'status' => EventAttendance::STATUS_IZIN,
@@ -129,7 +131,7 @@ test('ReadService uses canonical when both canonical and legacy exist', function
     $event = mv_event();
     $session = mv_session($event);
     $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    Absensi::create(['nip' => $m->person->id, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
     EventAttendance::create([
         'participation_id' => $m->participation->id, 'sesi_absensi_id' => $session->id,
         'event_id' => $event->id, 'status' => EventAttendance::STATUS_HADIR,
@@ -143,20 +145,20 @@ test('ReadService uses canonical when both canonical and legacy exist', function
         ->and($entry->source)->toBe('canonical');
 });
 
-test('ReadService falls back to legacy when canonical missing', function () {
+test('ReadService shows belum when only legacy Absensi exists', function () {
     $event = mv_event();
     $session = mv_session($event);
     $m = mv_participant($event);
-    Absensi::create(['nip' => $m->peserta->nip, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
+    Absensi::create(['nip' => $m->person->id, 'nama' => 'X', 'jam_scan' => now(), 'sesi_id' => $session->id]);
 
     $data = app(AttendanceReadService::class)->getSessionAttendance($event->id, $session->id);
     $entry = $data['attendance']->first();
 
-    expect($entry->status)->toBe('hadir')
-        ->and($entry->source)->toBe('legacy');
+    expect($entry->status)->toBe('belum')
+        ->and($entry->source)->toBe('none');
 });
 
-test('ReadService legacy fallback for izin', function () {
+test('ReadService shows belum when only legacy izin exists', function () {
     $event = mv_event();
     $session = mv_session($event);
     $m = mv_participant($event);
@@ -165,8 +167,8 @@ test('ReadService legacy fallback for izin', function () {
     $data = app(AttendanceReadService::class)->getSessionAttendance($event->id, $session->id);
     $entry = $data['attendance']->first();
 
-    expect($entry->status)->toBe('izin')
-        ->and($entry->source)->toBe('legacy');
+    expect($entry->status)->toBe('belum')
+        ->and($entry->source)->toBe('none');
 });
 
 test('ReadService returns belum when nothing exists', function () {
@@ -206,7 +208,7 @@ test('ReadService does not mix Event A and Event B attendance', function () {
     $eventA = mv_event(); $eventB = mv_event();
     $sessionA = mv_session($eventA); $sessionB = mv_session($eventB);
     $mA = mv_participant($eventA);
-    Absensi::create(['nip' => $mA->peserta->nip, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
+    Absensi::create(['nip' => $mA->person->id, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
     EventAttendance::create([
         'participation_id' => $mA->participation->id, 'sesi_absensi_id' => $sessionA->id,
         'event_id' => $eventA->id, 'status' => EventAttendance::STATUS_HADIR,
@@ -228,13 +230,13 @@ test('auditAll returns summary across events', function () {
     $eventA = mv_event(); $eventB = mv_event();
     $sessionA = mv_session($eventA); $sessionB = mv_session($eventB);
     $mA = mv_participant($eventA); $mB = mv_participant($eventB);
-    Absensi::create(['nip' => $mA->peserta->nip, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
+    Absensi::create(['nip' => $mA->person->id, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
     EventAttendance::create([
         'participation_id' => $mA->participation->id, 'sesi_absensi_id' => $sessionA->id,
         'event_id' => $eventA->id, 'status' => EventAttendance::STATUS_HADIR,
         'attended_at' => now(), 'method' => 'scan',
     ]);
-    Absensi::create(['nip' => $mB->peserta->nip, 'nama' => 'B', 'jam_scan' => now(), 'sesi_id' => $sessionB->id]);
+    Absensi::create(['nip' => $mB->person->id, 'nama' => 'B', 'jam_scan' => now(), 'sesi_id' => $sessionB->id]);
     EventAttendance::create([
         'participation_id' => $mB->participation->id, 'sesi_absensi_id' => $sessionB->id,
         'event_id' => $eventB->id, 'status' => EventAttendance::STATUS_HADIR,
@@ -273,13 +275,13 @@ test('parity per-event isolation', function () {
     $eventA = mv_event(); $eventB = mv_event();
     $sessionA = mv_session($eventA); $sessionB = mv_session($eventB);
     $mA = mv_participant($eventA); $mB = mv_participant($eventB);
-    Absensi::create(['nip' => $mA->peserta->nip, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
+    Absensi::create(['nip' => $mA->person->id, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
     EventAttendance::create([
         'participation_id' => $mA->participation->id, 'sesi_absensi_id' => $sessionA->id,
         'event_id' => $eventA->id, 'status' => EventAttendance::STATUS_HADIR,
         'attended_at' => now(), 'method' => 'scan',
     ]);
-    Absensi::create(['nip' => $mB->peserta->nip, 'nama' => 'B', 'jam_scan' => now(), 'sesi_id' => $sessionB->id]);
+    Absensi::create(['nip' => $mB->person->id, 'nama' => 'B', 'jam_scan' => now(), 'sesi_id' => $sessionB->id]);
 
     $resultA = app(AttendanceParityService::class)->audit($eventA->id);
     $resultB = app(AttendanceParityService::class)->audit($eventB->id);

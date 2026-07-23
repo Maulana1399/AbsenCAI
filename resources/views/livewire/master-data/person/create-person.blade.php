@@ -30,8 +30,6 @@
             @endforeach
         </flux:select>
 
-        <flux:input wire:model="nip" type="number" label="NIP" placeholder="Opsional" />
-
         <div class="flex">
             <flux:modal.close>
                 <flux:button variant="ghost">Batal</flux:button>

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Absensi;
+use App\Models\EventAttendance;
 use App\Models\Event;
 use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
@@ -68,15 +68,15 @@ it('records izin attendance exception', function () {
 
     $record = app(AttendanceExceptionService::class)->recordIzin($participant->id, $session->id);
 
-    expect($record)->toBeInstanceOf(IzinAbsensi::class)
-        ->and($record->peserta_id)->toBe($participant->id)
-        ->and($record->sesi_id)->toBe($session->id)
-        ->and($record->status)->toBe('izin');
+    expect($record)->toBeInstanceOf(EventAttendance::class)
+        ->and($record->participation_id)->toBe($participation->id)
+        ->and($record->sesi_absensi_id)->toBe($session->id)
+        ->and($record->status)->toBe(EventAttendance::STATUS_IZIN);
 
-    $this->assertDatabaseHas('izin_absensis', [
-        'peserta_id' => $participant->id,
-        'sesi_id' => $session->id,
-        'status' => 'izin',
+    $this->assertDatabaseHas('event_attendances', [
+        'participation_id' => $participation->id,
+        'sesi_absensi_id' => $session->id,
+        'status' => EventAttendance::STATUS_IZIN,
     ]);
 });
 
@@ -180,11 +180,13 @@ it('prevents hadir participant from becoming izin', function () {
         'aktif' => true,
     ]);
 
-    Absensi::create([
-        'nip' => $participant->nip,
-        'nama' => $participant->nama,
-        'jam_scan' => '2026-07-16 08:00:00',
-        'sesi_id' => $session->id,
+    EventAttendance::create([
+        'participation_id' => $participation->id,
+        'sesi_absensi_id' => $session->id,
+        'event_id' => $event->id,
+        'status' => EventAttendance::STATUS_HADIR,
+        'attended_at' => '2026-07-16 08:00:00',
+        'method' => 'scan',
     ]);
 
     expect(fn () => app(AttendanceExceptionService::class)->recordIzin($participant->id, $session->id))

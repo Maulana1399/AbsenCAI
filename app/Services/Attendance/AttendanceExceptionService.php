@@ -2,7 +2,6 @@
 
 namespace App\Services\Attendance;
 
-use App\Models\Absensi;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 use App\Models\Participation;
@@ -48,12 +47,6 @@ class AttendanceExceptionService
                 ]);
             }
 
-            if (Absensi::where('nip', $peserta->nip)->where('sesi_id', $sesi->id)->exists()) {
-                throw ValidationException::withMessages([
-                    'peserta' => 'Peserta sudah hadir pada sesi ini.',
-                ]);
-            }
-
             $resolvedParticipation = $eventId !== null
                 ? app(ParticipationResolver::class)->resolveByPeserta($peserta, $eventId)
                 : null;
@@ -96,9 +89,7 @@ class AttendanceExceptionService
         }
 
         try {
-            $writeLegacy = config('features.attendance_legacy_write', true);
-
-            return DB::transaction(function () use ($pesertaId, $sesi, $source, $suratIzinId, $resolvedParticipation, $writeLegacy, $eventId) {
+            return DB::transaction(function () use ($pesertaId, $sesi, $source, $suratIzinId, $resolvedParticipation, $eventId) {
                 if ($resolvedParticipation !== null) {
                     EventAttendance::create([
                         'participation_id' => $resolvedParticipation->id,
@@ -109,31 +100,24 @@ class AttendanceExceptionService
                         'method'           => $source === 'surat_izin' ? 'surat_izin' : 'izin',
                         'recorded_by'      => auth()->id(),
                     ]);
-                }
 
-                $writeLegacyForParticipant = $writeLegacy || $resolvedParticipation === null;
-
-                if ($writeLegacyForParticipant && $pesertaId) {
-                    $peserta = $pesertaId ? \App\Models\peserta::find($pesertaId) : null;
-                    if ($peserta) {
-                        return IzinAbsensi::create([
-                            'peserta_id'    => $peserta->id,
-                            'sesi_id'       => $sesi->id,
-                            'status'        => 'izin',
-                            'source'        => $source,
-                            'surat_izin_id' => $suratIzinId,
-                        ]);
-                    }
-                }
-
-                if ($resolvedParticipation !== null) {
                     return EventAttendance::where('participation_id', $resolvedParticipation->id)
                         ->where('sesi_absensi_id', $sesi->id)
                         ->first();
                 }
 
+                if ($pesertaId) {
+                    return IzinAbsensi::create([
+                        'peserta_id'    => $pesertaId,
+                        'sesi_id'       => $sesi->id,
+                        'status'        => 'izin',
+                        'source'        => $source,
+                        'surat_izin_id' => $suratIzinId,
+                    ]);
+                }
+
                 throw ValidationException::withMessages([
-                    'peserta' => 'Tidak dapat membuat izin: peserta tidak ditemukan dan tidak ada participation.',
+                    'peserta' => 'Peserta ID atau Participation ID wajib diisi.',
                 ]);
             });
         } catch (QueryException $exception) {

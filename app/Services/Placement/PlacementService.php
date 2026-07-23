@@ -24,35 +24,6 @@ class PlacementService
         return $prefix . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
-    public static function legacyNextNip(?string $jenisKelamin = null): int
-    {
-        $jk = strtolower(
-            str_replace([' ', '-'], '', $jenisKelamin ?? '')
-        );
-
-        if ($jk === 'lakilaki') {
-            $last = peserta::where('nip', '>=', 1000)
-                ->where('nip', '<', 2000)
-                ->max('nip');
-
-            return $last
-                ? ((int) $last + 1)
-                : 1001;
-        }
-
-        if ($jk === 'perempuan') {
-            $last = peserta::where('nip', '>=', 2000)
-                ->where('nip', '<', 3000)
-                ->max('nip');
-
-            return $last
-                ? ((int) $last + 1)
-                : 2001;
-        }
-
-        return ((int) (peserta::max('nip') ?? 0)) + 1;
-    }
-
     public static function leastFilledRegu(?string $jenisKelamin = null, int $eventId): ?regu
     {
         $jenisKelaminFix = self::normalizeGender($jenisKelamin);

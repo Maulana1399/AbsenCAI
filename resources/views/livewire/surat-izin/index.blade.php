@@ -60,7 +60,7 @@
                             <td class="px-4 py-3 font-medium text-zinc-900 dark:text-white">{{ $loop->iteration }}</td>
                             <td class="px-4 py-3">
                                 <div class="font-medium text-zinc-900 dark:text-white">{{ $surat->peserta->nama ?? '-' }}</div>
-                                <div class="text-xs text-zinc-500">{{ $surat->peserta->nip ?? '' }}</div>
+                                <div class="text-xs text-zinc-500">{{ $surat->peserta->participant_number ?? '' }}</div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-xs font-medium">
                                 @if($surat->jenis_izin === 'pulang')

@@ -290,7 +290,7 @@ class ResetEventData extends Command
                 continue;
             }
             $after = (array) $after;
-            foreach (['nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id'] as $field) {
+            foreach (['participant_number', 'attendance_code', 'desa_id', 'kelompok_id'] as $field) {
                 if ((string) $before[$field] !== (string) $after[$field]) {
                     $errors[] = "Peserta id={$id} {$field} changed: '{$before[$field]}' → '{$after[$field]}'";
                 }

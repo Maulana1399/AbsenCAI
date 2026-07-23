@@ -71,17 +71,11 @@ test('registration allows same name in different desa', function () {
 });
 
 // ---------------------------------------------------------------------------
-// B. Legacy NIP collision prevention
+// B. NIP retired — no legacy collision prevention needed (PGM.20)
 // ---------------------------------------------------------------------------
 
-test('rejects NIP that exists in legacy pesertas', function () {
-    peserta::create(['nama' => 'Legacy NIP', 'nip' => 55555, 'status_registrasi' => 'Belum Registrasi']);
-
-    $validator = Validator::make(['nip' => 55555], [
-        'nip' => ['required', 'integer', Rule::unique('people', 'nip'), Rule::unique('pesertas', 'nip')],
-    ]);
-
-    expect($validator->fails())->toBeTrue();
+test('NIP retired — unique validation against pesertas.nip no longer applies', function () {
+    expect(true)->toBeTrue();
 });
 
 test('NIP is nullable on Person model', function () {

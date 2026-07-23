@@ -20,7 +20,6 @@ class EditPeserta extends Component
 
     public $peserta;
     public $nama;
-    public $nip;
     public $jenis_kelamin;
     public $jenis_peserta;
     public $desa_id;
@@ -66,7 +65,6 @@ class EditPeserta extends Component
         $this->person_id = $participation->person_id;
         $this->peserta_id = $legacyPeserta?->id;
         $this->nama = $participation->person?->nama;
-        $this->nip = $participation->person?->nip;
         $this->jenis_kelamin = $participation->person?->jenis_kelamin;
         $this->jenis_peserta = $participation->jenis_peserta;
         $this->desa_id = $participation->person?->desa_id;

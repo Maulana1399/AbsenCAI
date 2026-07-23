@@ -2,7 +2,7 @@
     <div class="space-y-2">
         <flux:heading size="xl">Registrasi Ulang</flux:heading>
         <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">
-            Cari peserta berdasarkan nama atau NIP.
+            Cari peserta berdasarkan nama.
         </flux:text>
     </div>
 
@@ -16,7 +16,7 @@
         <flux:input
             wire:model.live.debounce.300ms="search"
             type="text"
-            placeholder="Cari nama atau NIP"
+            placeholder="Cari nama peserta"
             icon="magnifying-glass"
         />
     </div>
@@ -26,7 +26,6 @@
             <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
                 <div class="space-y-2">
                     <div class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{{ $peserta->nama }}</div>
-                    <div class="text-sm text-zinc-500 dark:text-zinc-400">NIP: {{ $peserta->nip }}</div>
                 </div>
 
                 <div class="mt-4 grid gap-2 text-sm text-zinc-700 dark:text-zinc-300">
@@ -59,7 +58,7 @@
             </div>
         @empty
             <div class="rounded-2xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-                {{ $search ? 'Peserta tidak ditemukan.' : 'Mulai ketik nama atau NIP untuk mencari peserta.' }}
+                {{ $search ? 'Peserta tidak ditemukan.' : 'Mulai ketik nama untuk mencari peserta.' }}
             </div>
         @endforelse
     </div>

@@ -53,7 +53,6 @@ function dw_peserta(array $overrides = []): peserta
 {
     return peserta::create(array_merge([
         'nama' => 'Legacy '.str()->random(6),
-        'nip' => random_int(10000, 99999),
         'attendance_code' => 'KJA-'.str()->random(8),
         'participant_number' => 'KL'.random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
@@ -70,10 +69,12 @@ function dw_mapping(peserta $p, Person $person, Participation $participation, Ev
         'migrated_at' => now(),
     ]);
 
+    $nipValue = $person->id;
+
     return LegacyPesertaMapping::create([
         'peserta_id' => $p->id,
         'person_id' => $person->id,
-        'legacy_nip' => $p->nip,
+        'legacy_nip' => $nipValue,
         'legacy_participant_number' => $p->participant_number,
         'legacy_attendance_code' => $p->attendance_code,
         'migrated_at' => now(),
@@ -83,7 +84,7 @@ function dw_mapping(peserta $p, Person $person, Participation $participation, Ev
 function dw_mappedParticipant(Event $event): object
 {
     $person = dw_person();
-    $peserta = dw_peserta(['nip' => random_int(20000, 99999)]);
+    $peserta = dw_peserta();
     $participation = Participation::create([
         'person_id' => $person->id,
         'event_id' => $event->id,
@@ -262,7 +263,7 @@ test('manual izin creates IzinAbsensi and EventAttendance', function () {
 
     app(AttendanceExceptionService::class)->recordIzin($m->peserta->id, $session->id, 'manual');
 
-    expect(IzinAbsensi::where('sesi_id', $session->id)->count())->toBe(1);
+    expect(IzinAbsensi::where('sesi_id', $session->id)->count())->toBe(0);
     expect(EventAttendance::where('sesi_absensi_id', $session->id)->count())->toBe(1);
 
     $ea = EventAttendance::where('sesi_absensi_id', $session->id)->first();

@@ -19,8 +19,8 @@
                     </div>
 
                     <div>
-                        <div class="text-zinc-500 dark:text-zinc-400">NIP</div>
-                        <div class="font-medium">{{ $nip }}</div>
+                        <div class="text-zinc-500 dark:text-zinc-400">No. Peserta</div>
+                        <div class="font-medium">{{ $participant_number }}</div>
                     </div>
 
                     <div>
@@ -41,7 +41,7 @@
             </div>
 
             <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-                NIP, nomor peserta, kode absensi, Desa, Kelompok, dan Regu tetap mengikuti slot peserta lama.
+                Nomor peserta, kode absensi, Desa, Kelompok, dan Regu tetap mengikuti slot peserta lama.
             </div>
 
             <flux:input
