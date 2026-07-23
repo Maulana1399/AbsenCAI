@@ -131,14 +131,13 @@ test('import case C same event does not duplicate membership', function () {
     ]))->toThrow(ValidationException::class);
 });
 
-test('import case B reuses the same NIP', function () {
+test('import case B reuses the same Person', function () {
     $ctx = pid_fixtures();
     $first = pid_create_case_a($ctx);
     app(ActiveEventContext::class)->set($ctx['eventB']);
 
     $result = app(RegistrationService::class)->createParticipant([
         'nama' => 'Import Alpha',
-        'nip' => $first['person']->nip,
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_KIRIMAN,
         'desa_id' => $ctx['desaA']->id,
@@ -148,7 +147,7 @@ test('import case B reuses the same NIP', function () {
     ]);
 
     expect($result)->toBeInstanceOf(peserta::class)
-        ->and(Person::where('nip', $first['person']->nip)->count())->toBe(1);
+        ->and(Person::count())->toBe(1);
 });
 
 test('import preserves event-specific participant identifiers across events', function () {
@@ -161,7 +160,6 @@ test('import preserves event-specific participant identifiers across events', fu
 
     app(RegistrationService::class)->createParticipant([
         'nama' => 'Import Alpha',
-        'nip' => $a['person']->nip,
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_KIRIMAN,
         'desa_id' => $ctx['desaA']->id,
@@ -185,21 +183,23 @@ test('import preserves event-specific participant identifiers across events', fu
         ->and($pa->attendance_code)->not->toBe($pb->attendance_code);
 });
 
-test('different Person cannot reuse existing NIP', function () {
+test('different Person without conflict passes registration', function () {
     $ctx = pid_fixtures();
     pid_create_case_a($ctx);
     app(ActiveEventContext::class)->set($ctx['eventB']);
 
-    expect(fn () => app(RegistrationService::class)->createParticipant([
+    $result = app(RegistrationService::class)->createParticipant([
         'nama' => 'Different Person',
-        'nip' => 11001,
         'jenis_kelamin' => 'Perempuan',
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa_id' => $ctx['desaB']->id,
         'kelompok_id' => $ctx['kelompokB']->id,
         'regu_id' => $ctx['reguP']->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-    ]))->toThrow(ValidationException::class);
+    ]);
+
+    expect($result)->toBeInstanceOf(peserta::class)
+        ->and(Person::count())->toBe(2);
 });
 
 test('same name different desa creates separate Person', function () {
@@ -249,7 +249,6 @@ test('case B bridge failure rolls back attempted membership', function () {
 
     expect(fn () => app(RegistrationService::class)->createParticipant([
         'nama' => 'Import Alpha',
-        'nip' => $first['person']->nip,
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_KIRIMAN,
         'desa_id' => $ctx['desaA']->id,

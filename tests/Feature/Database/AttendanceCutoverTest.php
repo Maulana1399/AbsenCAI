@@ -33,9 +33,9 @@ function ct_session(Event $event): SesiAbsensi
 
 function ct_participant(Event $event): object
 {
-    $person = Person::create(['nama' => 'CT Person', 'nip' => random_int(90000, 99999)]);
+    $person = Person::create(['nama' => 'CT Person']);
     $peserta = peserta::create([
-        'nama' => 'CT Peserta', 'nip' => $person->nip,
+        'nama' => 'CT Peserta', 'nip' => random_int(90000, 99999),
         'attendance_code' => 'KJA-CT-' . str()->random(8),
         'participant_number' => 'KL' . random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
@@ -65,9 +65,7 @@ test('default config is true preserving dual-write', function () {
     expect(config('features.attendance_legacy_write'))->toBeTrue();
 });
 
-test('scan with config=true writes both Absensi and EventAttendance', function () {
-    config(['features.attendance_legacy_write' => true]);
-
+test('scan writes canonical EventAttendance (legacy Absensi write retired per PGM.20)', function () {
     $event = ct_event();
     $session = ct_session($event);
     $m = ct_participant($event);
@@ -77,8 +75,8 @@ test('scan with config=true writes both Absensi and EventAttendance', function (
 
     app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $session->id);
 
-    expect(Absensi::where('sesi_id', $session->id)->count())->toBe(1);
     expect(EventAttendance::where('sesi_absensi_id', $session->id)->count())->toBe(1);
+    expect(Absensi::where('sesi_id', $session->id)->count())->toBe(0);
 });
 
 test('izin with config=true writes both IzinAbsensi and EventAttendance', function () {

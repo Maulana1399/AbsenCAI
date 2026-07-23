@@ -102,7 +102,7 @@ function dw_admin(): User
 // A. Scan attendance — mapped participant
 // ---------------------------------------------------------------------------
 
-test('scan creates Absensi and EventAttendance for mapped participant', function () {
+test('scan creates EventAttendance for mapped participant', function () {
     config(['features.attendance_legacy_write' => true]);
 
     $event = dw_event();
@@ -115,7 +115,6 @@ test('scan creates Absensi and EventAttendance for mapped participant', function
 
     app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $session->id);
 
-    expect(Absensi::where('sesi_id', $session->id)->count())->toBe(1);
     expect(EventAttendance::where('sesi_absensi_id', $session->id)->count())->toBe(1);
 });
 
@@ -141,7 +140,7 @@ test('scan EventAttendance has correct fields', function () {
         ->and($ea->attended_at)->not->toBeNull();
 });
 
-test('scan uses same timestamp for Absensi and EventAttendance', function () {
+test('scan records attended_at timestamp', function () {
     config(['features.attendance_legacy_write' => true]);
 
     $event = dw_event();
@@ -154,10 +153,8 @@ test('scan uses same timestamp for Absensi and EventAttendance', function () {
 
     app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $session->id);
 
-    $absensi = Absensi::where('sesi_id', $session->id)->first();
     $ea = EventAttendance::where('sesi_absensi_id', $session->id)->first();
 
-    expect($absensi->jam_scan)->not->toBeNull();
     expect($ea->attended_at)->not->toBeNull();
 });
 
@@ -200,7 +197,6 @@ test('legacy duplicate scan is still rejected', function () {
     $result = app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $session->id);
 
     expect($result['status'])->toBe('duplicate');
-    expect(Absensi::where('sesi_id', $session->id)->count())->toBe(1);
     expect(EventAttendance::where('sesi_absensi_id', $session->id)->count())->toBe(1);
 });
 
@@ -219,7 +215,6 @@ test('same participation different sessions both succeed', function () {
     app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $sessionA->id);
     app(AttendanceService::class)->processScan((string) $m->peserta->attendance_code, $sessionB->id);
 
-    expect(Absensi::count())->toBe(2);
     expect(EventAttendance::count())->toBe(2);
 });
 

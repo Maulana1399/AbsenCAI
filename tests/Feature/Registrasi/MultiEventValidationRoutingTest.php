@@ -114,7 +114,7 @@ test('Case B: existing Person joining new Event passes validation layer and reac
 
     // NIP for Case B comes from Person, not from form
     $nipForCaseB = $existingPerson->nip;
-    expect($nipForCaseB)->toBe(20001);
+    expect($nipForCaseB)->toBeNull();
 
     // Attempt to register — will succeed at service level but may fail at DB schema
     // (UNIQUE(nama,desa,kelompok) on pesertas table not yet migrated for multi-event)
@@ -206,10 +206,10 @@ test('Case C: existing Person same Event is rejected before reaching Registratio
 });
 
 // ---------------------------------------------------------------------------
-// 4. NIP — existing Person NIP does NOT trigger collision against itself
+// 4. Case B reuses existing Person — no NIP collision (NIP retired per PGM.20)
 // ---------------------------------------------------------------------------
 
-test('NIP from existing Person is not treated as collision with itself in Case B', function () {
+test('existing Person can join second event without NIP collision (Case B)', function () {
     ['desa' => $desa, 'kelompok' => $kelompok, 'regu' => $regu] = mvr_fixtures();
 
     $eventA = mvr_event('nip-a');
@@ -217,10 +217,9 @@ test('NIP from existing Person is not treated as collision with itself in Case B
 
     $svc = app(RegistrationService::class);
 
-    // Create Person with NIP 40001 in Event A
+    // Create Person in Event A — NIP is internally generated for legacy peserta compatibility
     $svc->createParticipant([
         'nama'             => 'NIP Self Check',
-        'nip'              => 40001,
         'jenis_kelamin'    => 'Laki - Laki',
         'jenis_peserta'    => 'Wajib',
         'desa_id'          => $desa->id,
@@ -230,32 +229,41 @@ test('NIP from existing Person is not treated as collision with itself in Case B
     ]);
 
     $person = Person::where('nama', 'NIP Self Check')->first();
-    expect($person->nip)->toBe(40001);
+    // Person.nip is null per PGM.20 — NIP is not a canonical Person identifier
+    expect($person->nip)->toBeNull();
+
+    // Verify a legacy peserta was created with an internally-generated NIP
+    $peserta = $person->legacyPesertaMapping?->peserta;
+    expect($peserta)->not->toBeNull();
+    expect($peserta->nip)->not->toBeNull();
 
     // Switch to Event B
     $eventB = mvr_event('nip-b');
     app(ActiveEventContext::class)->set($eventB);
 
-    // Simulate validation layer NIP check for Case B
+    // Case B: existing Person joins Event B — no NIP collision check needed
     $existingPerson = Person::where('nama', 'NIP Self Check')
         ->where('desa_id', $desa->id)
         ->where('kelompok_id', $kelompok->id)
         ->first();
 
-    // Case B: NIP is taken from Person, no collision check needed
     expect($existingPerson)->not->toBeNull();
-    $nipForCaseB = $existingPerson->nip;
-    expect($nipForCaseB)->toBe(40001);
 
-    // The validation layer skips NIP uniqueness check when Person is found
-    // (NIP belongs to Person, not being assigned as new)
-    // Verify NIP 40001 exists in pesertas but does NOT cause rejection in Case B flow
-    $pesertaWithNip = peserta::where('nip', 40001)->first();
-    expect($pesertaWithNip)->not->toBeNull();
+    // Register to Event B — uses existing Person (Case B)
+    $svc->createParticipant([
+        'nama'             => 'NIP Self Check',
+        'jenis_kelamin'    => 'Laki - Laki',
+        'jenis_peserta'    => 'Wajib',
+        'desa_id'          => $desa->id,
+        'kelompok_id'      => $kelompok->id,
+        'regu_id'          => $regu->id,
+        'status_registrasi' => peserta::STATUS_SELF_REGISTER,
+    ]);
 
-    // In Case B validation: we use person->nip, bypass unique check
-    // This is the correct behavior — documented here
-    expect($nipForCaseB)->toBe($pesertaWithNip->nip);
+    // Two participations, one Person, two bridge records
+    expect(Participation::where('person_id', $existingPerson->id)->count())->toBe(2);
+    expect(LegacyPesertaMapping::count())->toBe(1);
+    expect(LegacyParticipationMapping::count())->toBe(2);
 });
 
 // ---------------------------------------------------------------------------
@@ -268,7 +276,7 @@ test('NIP belonging to a different Person is still rejected for new Person regis
     app(ActiveEventContext::class)->set($event);
 
     // Create a Person with NIP 50001
-    Person::create(['nama' => 'Person With NIP', 'nip' => 50001]);
+    Person::create(['nama' => 'Person With NIP']);
     peserta::create(['nama' => 'Peserta With NIP', 'nip' => 50001, 'status_registrasi' => 'Belum Registrasi']);
 
     $desaB = desa::create(['desa_asal' => 'Desa B Other']);
@@ -288,7 +296,6 @@ test('NIP belonging to a different Person is still rejected for new Person regis
         'nip' => [
             'required',
             'integer',
-            \Illuminate\Validation\Rule::unique('people', 'nip'),
             \Illuminate\Validation\Rule::unique('pesertas', 'nip'),
         ],
     ]);

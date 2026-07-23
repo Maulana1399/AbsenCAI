@@ -29,9 +29,9 @@ function fl_session(Event $event): SesiAbsensi
 
 function fl_participant(Event $event): object
 {
-    $person = Person::create(['nama' => 'FL Person', 'nip' => random_int(90000, 99999)]);
+    $person = Person::create(['nama' => 'FL Person']);
     $peserta = peserta::create([
-        'nama' => 'FL Peserta', 'nip' => $person->nip,
+        'nama' => 'FL Peserta', 'nip' => random_int(90000, 99999),
         'attendance_code' => 'KJA-FL-' . str()->random(8),
         'participant_number' => 'KL' . random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',

@@ -1,9 +1,11 @@
 # PGM.20 LEGACY NIP RETIREMENT AUDIT
 
-**Status:** READ-ONLY AUDIT COMPLETE
+**Status:** PHASE 1 RUNTIME CUTOVER COMPLETE
 **Date:** 2026-07-23
 **Previous Sprint:** PGM.19 Sprint 8B — Physical Regu Retirement
-**Next Sprint:** PGM.21 — NIP Runtime Retirement (proposed)
+**Next Sprint:** PGM.21 — Physical NIP Column Retirement (proposed)
+
+**Phase 1 changes:** See `docs/ai/PGM20_NIP_RUNTIME_CUTOVER_REPORT.md`
 
 ---
 

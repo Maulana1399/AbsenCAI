@@ -70,7 +70,7 @@ test('Case B routing reaches RegistrationService but legacy UNIQUE constraint ma
 
     $person = Person::where('nama', 'Same Name')->first();
     expect($person)->not->toBeNull();
-    expect($person->nip)->toBe(20001);
+    expect($person->nip)->toBeNull();
 
     // Case B: NIP is reused from Person (20001), not 20002
     // DB UNIQUE(nama, desa_id, kelompok_id) on pesertas still blocks — ValidationException expected

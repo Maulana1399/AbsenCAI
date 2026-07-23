@@ -11,7 +11,6 @@ class AttendanceIdentity
     public readonly ?int $pesertaId;
     public readonly ?int $participationId;
     public readonly ?int $personId;
-    public readonly ?string $nip;
     public readonly ?string $nama;
 
     public function __construct(
@@ -22,7 +21,6 @@ class AttendanceIdentity
         $this->pesertaId = $this->peserta?->id;
         $this->participationId = $this->participation?->id;
         $this->personId = $this->person?->id;
-        $this->nip = $this->peserta?->nip ?? $this->person?->nip;
         $this->nama = $this->person?->nama ?? $this->peserta?->nama;
     }
 

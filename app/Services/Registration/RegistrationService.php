@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+// @todo PGM.20 Phase 2: Remove legacyNextNip when peserta.nip column becomes nullable
+
 class RegistrationService
 {
     public function createParticipant(array $data): peserta
@@ -57,8 +59,6 @@ class RegistrationService
                         ]);
                     }
 
-                    $nip = $legacyPeserta->nip ?? $person->nip;
-
                     $reguId = $data['regu_id'] ?? null;
 
                     $participation = Participation::create([
@@ -84,9 +84,13 @@ class RegistrationService
                 }
 
                 // CASE A: New Person — create full set
+                // NIP is still required for peserta.nip (NOT NULL schema constraint).
+                // Person.nip is set to null (column is nullable). NIP will be
+                // retired entirely in PGM.20 Phase 2 (physical column removal).
+                $internalNip = PlacementService::legacyNextNip($data['jenis_kelamin'] ?? null);
                 $peserta = peserta::create([
                     'nama' => $data['nama'],
-                    'nip' => $data['nip'],
+                    'nip' => $internalNip,
                     'participant_number' => $legacyParticipantNumber,
                     'attendance_code' => $attendanceCode,
                     'jenis_kelamin' => $data['jenis_kelamin'],
@@ -98,7 +102,7 @@ class RegistrationService
 
                 $person = Person::create([
                     'nama' => $data['nama'],
-                    'nip' => $data['nip'],
+                    'nip' => null,
                     'jenis_kelamin' => $data['jenis_kelamin'] === 'Perempuan' ? 'P' : 'L',
                     'desa_id' => $data['desa_id'],
                     'kelompok_id' => $data['kelompok_id'] ?? null,

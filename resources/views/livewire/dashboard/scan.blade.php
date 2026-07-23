@@ -81,11 +81,6 @@
                 </div>
 
                 <div class="flex justify-between gap-4">
-                    <span class="font-medium">NIP:</span>
-                    <span class="font-bold">{{ $nip }}</span>
-                </div>
-
-                <div class="flex justify-between gap-4">
                     <span class="font-medium">Jam Scan:</span>
                     <span class="font-bold">{{ $jam_scan }}</span>
                 </div>
@@ -125,7 +120,7 @@
                                     <span class="ml-1 text-xs text-zinc-400">legacy</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $p['participant_number'] ?? '-' }} · {{ $p['nip'] ?? '-' }}</div>
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $p['participant_number'] ?? '-' }}</div>
                         </button>
                     @empty
                         <div class="rounded-xl border border-dashed border-zinc-200 px-3 py-2 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">Cari peserta untuk absen manual.</div>

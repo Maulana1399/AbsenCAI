@@ -9,10 +9,9 @@ class Person extends Model
     protected $fillable = [
         'nama',
         'jenis_kelamin',
-        'tanggal_lahir',
         'desa_id',
         'kelompok_id',
-        'nip',
+        'tanggal_lahir',
     ];
 
     protected function casts(): array

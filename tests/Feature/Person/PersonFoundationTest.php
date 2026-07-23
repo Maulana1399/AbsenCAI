@@ -66,13 +66,14 @@ test('person can have all optional fields', function () {
     expect($person->nama)->toBe('Jane Doe')
         ->and($person->jenis_kelamin)->toBe('P')
         ->and($person->desa_id)->toBe($desa->id)
-        ->and($person->nip)->toBe(12345);
+        ->and($person->nip)->toBeNull();
 });
 
-test('person nip must be unique', function () {
-    PersonFoundation_makePerson(['nip' => 10001, 'nama' => 'Person A']);
-    expect(fn () => PersonFoundation_makePerson(['nip' => 10001, 'nama' => 'Person B']))
-        ->toThrow(\Illuminate\Database\QueryException::class);
+test('person nip is silently ignored and allows multiple nulls', function () {
+    PersonFoundation_makePerson(['nama' => 'Person A']);
+    PersonFoundation_makePerson(['nama' => 'Person B']);
+
+    expect(Person::count())->toBe(2);
 });
 
 test('person nip can be null for multiple records', function () {
@@ -139,7 +140,7 @@ test('person uses people table', function () {
 });
 
 test('person records can be queried', function () {
-    PersonFoundation_makePerson(['nama' => 'Alpha', 'nip' => 1]);
+    PersonFoundation_makePerson(['nama' => 'Alpha']);
     PersonFoundation_makePerson(['nama' => 'Beta', 'nip' => 2]);
     PersonFoundation_makePerson(['nama' => 'Gamma', 'nip' => 3]);
 
@@ -147,5 +148,5 @@ test('person records can be queried', function () {
 
     $first = Person::where('nama', 'Alpha')->first();
     expect($first)->not->toBeNull()
-        ->and($first->nip)->toBe(1);
+        ->and($first->nip)->toBeNull();
 });

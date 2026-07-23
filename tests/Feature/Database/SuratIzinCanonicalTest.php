@@ -30,9 +30,9 @@ function si_session(Event $event): SesiAbsensi
 
 function si_participant(Event $event): object
 {
-    $person = Person::create(['nama' => 'SI Person', 'nip' => random_int(90000, 99999)]);
+    $person = Person::create(['nama' => 'SI Person']);
     $peserta = peserta::create([
-        'nama' => 'SI Peserta', 'nip' => $person->nip,
+        'nama' => 'SI Peserta', 'nip' => random_int(90000, 99999),
         'attendance_code' => 'KJA-SI-' . str()->random(8),
         'participant_number' => 'KL' . random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',

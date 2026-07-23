@@ -76,13 +76,11 @@ class PlacementService
 
     public static function autoPlacement(?string $jenisKelamin = null, ?int $eventId = null): array
     {
-        // Placement is event-scoped. When no event context exists (null eventId),
-        // skip leastFilledRegu (which requires int) and return null regu.
-        // NIP generation (legacyNextNip) is global and does not require eventId.
+        // NIP generation retired per PGM.20. Use participant_number for
+        // human-facing participant identity within an event.
         $regu = $eventId !== null ? self::leastFilledRegu($jenisKelamin, $eventId) : null;
 
         return [
-            'nip' => (string) self::legacyNextNip($jenisKelamin),
             'regu_id' => $regu?->id,
             'regu_nama' => $regu?->regu ?? '-',
         ];

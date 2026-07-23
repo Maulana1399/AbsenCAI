@@ -459,10 +459,10 @@ test('multi event identity contract — one person, two events, two participatio
 // ---------------------------------------------------------------------------
 
 test('existing Person foundation remains unaffected', function () {
-    $person = ParticipationFoundation_makePerson(['nama' => 'Person', 'nip' => 1001]);
+    $person = ParticipationFoundation_makePerson(['nama' => 'Person']);
 
     expect($person->nama)->toBe('Person')
-        ->and($person->nip)->toBe(1001)
+        ->and($person->nip)->toBeNull()
         ->and($person->participations->count())->toBe(0);
 });
 

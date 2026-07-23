@@ -50,7 +50,6 @@ function epj_fixtures(): array
 
     $person = Person::create([
         'nama' => 'EPJ Existing Person',
-        'nip' => 95001,
         'jenis_kelamin' => 'L',
         'desa_id' => $desa->id,
         'kelompok_id' => $kelompok->id,
@@ -249,7 +248,6 @@ test('existing Person search works by nama and NIP', function () {
 
     $personB = Person::create([
         'nama' => 'EPJ Other Person',
-        'nip' => 95002,
         'jenis_kelamin' => 'P',
         'desa_id' => $f['desa']->id,
         'kelompok_id' => $f['kelompok']->id,
@@ -271,11 +269,11 @@ test('existing Person search works by nama and NIP', function () {
     Livewire::actingAs($user)
         ->test(TambahPeserta::class)
         ->call('switchMode', 'existing')
-        ->set('searchPerson', '95001')
+        ->set('searchPerson', 'EPJ Other')
         ->assertSet('searchResults', function ($results) {
             expect(count($results))->toBeGreaterThanOrEqual(1);
-            $nips = array_column($results, 'nip');
-            expect(in_array(95001, $nips))->toBeTrue();
+            $names = array_column($results, 'nama');
+            expect(in_array('EPJ Other Person', $names))->toBeTrue();
             return true;
         });
 });
@@ -321,7 +319,6 @@ test('duplicate names can be disambiguated without automatic merge', function ()
 
     $personA = Person::create([
         'nama' => 'Common Name',
-        'nip' => 96001,
         'jenis_kelamin' => 'L',
         'desa_id' => $desaA->id,
         'kelompok_id' => $kelompokA->id,
@@ -329,7 +326,6 @@ test('duplicate names can be disambiguated without automatic merge', function ()
 
     $personB = Person::create([
         'nama' => 'Common Name',
-        'nip' => 96002,
         'jenis_kelamin' => 'L',
         'desa_id' => $desaB->id,
         'kelompok_id' => $kelompokB->id,

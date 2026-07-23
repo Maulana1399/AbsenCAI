@@ -45,7 +45,6 @@ class PesertaImport implements ToModel, WithHeadingRow
 
         return app(RegistrationService::class)->createParticipant([
             'nama' => trim($row['nama']),
-            'nip' => $autoPlacement['nip'],
             'jenis_kelamin' => $jenisKelamin,
             'jenis_peserta' => $row['jenis_peserta']
                 ?? peserta::JENIS_KIRIMAN,

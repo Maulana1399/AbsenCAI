@@ -23,8 +23,6 @@ class SelfRegister extends Component
 
     public string $nama = '';
 
-    public string $nip = '';
-
     public string $jenis_kelamin = '';
 
     public string $jenis_peserta = peserta::JENIS_WAJIB;
@@ -45,22 +43,21 @@ class SelfRegister extends Component
     {
         $this->daftarDesa = desa::orderBy('desa_asal')->get();
         $this->daftarKelompok = kelompok::with('desa')->orderBy('kelompok_asal')->get();
-        $this->fillAutoPlacement();
+        $this->fillReguPlacement();
     }
 
-    public function fillAutoPlacement(): void
+    public function fillReguPlacement(): void
     {
         $eventId = app(ActiveEventContext::class)->id();
         $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null, $eventId);
 
-        $this->nip = $autoPlacement['nip'];
         $this->regu_id = $autoPlacement['regu_id'];
         $this->regu_nama = $autoPlacement['regu_nama'];
     }
 
     public function updatedJenisKelamin(): void
     {
-        $this->fillAutoPlacement();
+        $this->fillReguPlacement();
     }
 
     public function register(): void
@@ -73,7 +70,7 @@ class SelfRegister extends Component
         $this->processing = true;
 
         try {
-            $this->fillAutoPlacement();
+            $this->fillReguPlacement();
 
             $validated = $this->validate([
                 'nama'          => ['required', 'string', 'max:255'],
@@ -82,7 +79,6 @@ class SelfRegister extends Component
                 'desa_id'       => ['required', Rule::exists('desas', 'id')],
                 'kelompok_id'   => ['required', Rule::exists('kelompoks', 'id')],
                 'regu_id'       => ['required', Rule::exists('regus', 'id')],
-                'nip'           => ['required', 'integer'],
             ]);
 
             $existingPerson = Person::where('nama', $validated['nama'])
@@ -105,32 +101,10 @@ class SelfRegister extends Component
                         ]);
                     }
                 }
-
-                // Case B: existing Person, new event — NIP dari Person, bukan dari form
-                $nip = $existingPerson->nip ?? (int) $validated['nip'];
-            } else {
-                // Case A: new Person — validate NIP uniqueness against both tables
-                $nipValidator = validator(['nip' => $validated['nip']], [
-                    'nip' => [
-                        'required',
-                        'integer',
-                        Rule::unique('people', 'nip'),
-                        Rule::unique('pesertas', 'nip'),
-                    ],
-                ]);
-
-                if ($nipValidator->fails()) {
-                    throw ValidationException::withMessages([
-                        'nip' => $nipValidator->errors()->first('nip'),
-                    ]);
-                }
-
-                $nip = (int) $validated['nip'];
             }
 
             app(RegistrationService::class)->createParticipant([
                 'nama'             => $validated['nama'],
-                'nip'              => $nip,
                 'jenis_kelamin'    => $validated['jenis_kelamin'],
                 'jenis_peserta'    => $validated['jenis_peserta'],
                 'desa_id'          => $validated['desa_id'],
@@ -141,7 +115,6 @@ class SelfRegister extends Component
 
             session()->flash('self_register', [
                 'nama'     => $this->nama,
-                'nip'      => $nip,
                 'desa'     => desa::find($this->desa_id)?->desa_asal,
                 'kelompok' => kelompok::find($this->kelompok_id)?->kelompok_asal,
             ]);

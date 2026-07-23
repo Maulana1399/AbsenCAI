@@ -45,11 +45,6 @@ class peserta extends Model
         ];
     }
 
-    public static function nextAutoNip(?string $jenisKelamin = null): int
-    {
-        return PlacementService::legacyNextNip($jenisKelamin);
-    }
-
     public static function nextAutoParticipantNumber(?string $jenisKelamin = null): string
     {
         return PlacementService::generateParticipantNumber($jenisKelamin);

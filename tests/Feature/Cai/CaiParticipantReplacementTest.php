@@ -177,7 +177,7 @@ test('replacement preserves cai slot and moves mapping to new identity', functio
         // Person lama tidak dihapus.
         ->and(Person::find($fixture['oldPerson']->id))->not->toBeNull()
         ->and($oldPerson->nip)->toBeNull()
-        ->and($result['person']->nip)->toBe(1001)   
+        ->and($result['person']->nip)->toBeNull()   
 
         // Participation lama tetap ada tetapi identifier operasional dilepas.
         ->and($oldParticipation)->not->toBeNull()
@@ -229,7 +229,7 @@ test('replacement cannot be performed on non cai event', function () {
     );
 
     expect($fixture['peserta']->fresh()->nama)->toBe('Peserta Lama')
-        ->and($fixture['oldPerson']->fresh()->nip)->toBe(1001)
+        ->and($fixture['oldPerson']->fresh()->nip)->toBeNull()
         ->and($fixture['oldParticipation']->fresh()->participant_number)->toBe('KL001')
         ->and($fixture['oldParticipation']->fresh()->attendance_code)->toBe('KJA-OLD0001')
         ->and(CaiParticipantReplacement::count())->toBe(0);
@@ -259,7 +259,7 @@ test('replacement transaction rolls back when new person creation fails', functi
         ->and($peserta->nip)->toBe(1001)
 
         // NIP Person lama harus kembali karena transaction rollback.
-        ->and($oldPerson->nip)->toBe(1001)
+        ->and($oldPerson->nip)->toBeNull()
 
         // Identifier Participation lama juga harus kembali.
         ->and($oldParticipation->participant_number)->toBe('KL001')

@@ -27,9 +27,9 @@ function iz_session(Event $event): SesiAbsensi
 
 function iz_mappedParticipant(Event $event): object
 {
-    $person = Person::create(['nama' => 'IZ Mapped', 'nip' => random_int(70000, 79999)]);
+    $person = Person::create(['nama' => 'IZ Mapped']);
     $peserta = peserta::create([
-        'nama' => 'IZ Peserta', 'nip' => $person->nip,
+        'nama' => 'IZ Peserta', 'nip' => random_int(70000, 79999),
         'attendance_code' => 'KJA-IZ-' . str()->random(8),
         'status_registrasi' => 'Belum Registrasi',
     ]);
@@ -51,7 +51,7 @@ function iz_mappedParticipant(Event $event): object
 
 function iz_canonicalOnlyParticipant(Event $event): object
 {
-    $person = Person::create(['nama' => 'IZ Canonical', 'nip' => random_int(80000, 89999)]);
+    $person = Person::create(['nama' => 'IZ Canonical']);
     $participation = Participation::create([
         'person_id' => $person->id, 'event_id' => $event->id,
         'jenis_peserta' => 'Wajib',

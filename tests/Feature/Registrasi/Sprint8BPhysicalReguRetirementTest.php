@@ -138,7 +138,7 @@ test('S8B-06: EditPeserta updates Participation.regu_id without legacy column', 
     $reguA = regu::create(['regu' => 'S8B Edit Regu A', 'jenis_kelamin' => 'Laki - Laki']);
     $reguB = regu::create(['regu' => 'S8B Edit Regu B', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $person = Person::create(['nama' => 'S8B Edit', 'nip' => 9005, 'jenis_kelamin' => 'L']);
+    $person = Person::create(['nama' => 'S8B Edit', 'jenis_kelamin' => 'L']);
     $pesertaRecord = peserta::create([
         'nama' => 'S8B Edit',
         'nip' => 9005,
@@ -170,7 +170,7 @@ test('S8B-07: Ulang updates Participation.regu_id without legacy column', functi
     $reguA = regu::create(['regu' => 'S8B Ulang Regu A', 'jenis_kelamin' => 'Laki - Laki']);
     $reguB = regu::create(['regu' => 'S8B Ulang Regu B', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $person = Person::create(['nama' => 'S8B Ulang', 'nip' => 9006, 'jenis_kelamin' => 'L']);
+    $person = Person::create(['nama' => 'S8B Ulang', 'jenis_kelamin' => 'L']);
     $pesertaRecord = peserta::create([
         'nama' => 'S8B Ulang',
         'nip' => 9006,
@@ -202,7 +202,7 @@ test('S8B-08: PlacementService works with participations scoped by eventId', fun
     $reguA = regu::create(['regu' => 'S8B Pl Regu A', 'jenis_kelamin' => 'Laki - Laki']);
     $reguB = regu::create(['regu' => 'S8B Pl Regu B', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $p1 = Person::create(['nama' => 'S8B P1', 'nip' => 9901, 'jenis_kelamin' => 'L']);
+    $p1 = Person::create(['nama' => 'S8B P1', 'jenis_kelamin' => 'L']);
     Participation::create([
         'person_id' => $p1->id,
         'event_id' => $event->id,
@@ -223,7 +223,7 @@ test('S8B-08: PlacementService works with participations scoped by eventId', fun
 test('S8B-09: regu participations relationship works using participations table', function () {
     $event = Event::create(['name' => 'S8B Rel', 'slug' => 's8b-rel', 'status' => 'active']);
     $regu = regu::create(['regu' => 'S8B Rel Regu', 'jenis_kelamin' => 'Laki - Laki']);
-    $person = Person::create(['nama' => 'S8B Rel', 'nip' => 9902, 'jenis_kelamin' => 'L']);
+    $person = Person::create(['nama' => 'S8B Rel', 'jenis_kelamin' => 'L']);
 
     Participation::create([
         'person_id' => $person->id,
@@ -265,7 +265,6 @@ test('S8B-11: migration can run again (idempotent)', function () {
 // ──────────────────────────────────────────────
 test('S8B-12: autoPlacement with null eventId returns null regu without crashing', function () {
     $result = PlacementService::autoPlacement('Laki - Laki', null);
-    expect($result)->toHaveKey('nip');
     expect($result)->toHaveKey('regu_id');
     expect($result)->toHaveKey('regu_nama');
     expect($result['regu_id'])->toBeNull();

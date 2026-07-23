@@ -11,7 +11,6 @@
 
         <div class="mt-6 space-y-3 rounded-xl bg-zinc-50 p-4 text-sm dark:bg-zinc-900/60">
             <div><span class="font-medium">Nama:</span> {{ $registrasi['nama'] ?? '-' }}</div>
-            <div><span class="font-medium">NIP:</span> {{ $registrasi['nip'] ?? '-' }}</div>
             <div><span class="font-medium">Desa:</span> {{ $registrasi['desa'] ?? '-' }}</div>
             <div><span class="font-medium">Kelompok:</span> {{ $registrasi['kelompok'] ?? '-' }}</div>
         </div>

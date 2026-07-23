@@ -182,7 +182,7 @@ test('replacement rollback restores old identity on failure', function () {
     ))->toThrow(RuntimeException::class);
 
     expect($fixture['peserta']->fresh()->nama)->toBe('Peserta Lama')
-        ->and($fixture['oldPerson']->fresh()->nip)->toBe(91001)
+        ->and($fixture['oldPerson']->fresh()->nip)->toBeNull()
         ->and($fixture['participationA']->fresh()->participant_number)->toBe('KL001')
         ->and($fixture['participationB']->fresh()->participant_number)->toBe('KL002');
 });

@@ -2,7 +2,7 @@
 
 use App\Enums\Role;
 use App\Livewire\Dashboard\Scan;
-use App\Models\Absensi;
+use App\Models\EventAttendance;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
@@ -46,23 +46,21 @@ it('Scan orchestration handles successful attendance scan', function () {
     $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Livewire', 'tanggal' => '2026-07-15', 'aktif' => true]);
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->call('scanPeserta', 'kja-lwscan1');
     $response->assertSet('message', 'Absensi berhasil!');
-    $response->assertSet('nip', (string) $participant->nip);
     $response->assertSet('nama', 'Peserta Livewire');
     $response->assertNotSet('jam_scan', null);
-    $this->assertDatabaseHas('absensis', ['nip' => $participant->nip, 'nama' => $participant->nama, 'sesi_id' => $session->id]);
+    $this->assertDatabaseHas('event_attendances', ['sesi_absensi_id' => $session->id, 'event_id' => $event->id]);
 });
 
 it('Scan orchestration preserves duplicate attendance prevention', function () {
     $this->actingAs($user = User::factory()->create(['role' => Role::Admin]));
     $event = scanTest_makeEvent(); app(ActiveEventContext::class)->set($event);
-    [$participant] = scanTest_makeMappedLegacyPeserta(['nama' => 'Peserta Duplicate Livewire', 'nip' => 3002, 'participant_number' => 'PN-3002', 'attendance_code' => 'KJA-LWDUP1'], $event);
+    [$participant, , $participation] = scanTest_makeMappedLegacyPeserta(['nama' => 'Peserta Duplicate Livewire', 'nip' => 3002, 'participant_number' => 'PN-3002', 'attendance_code' => 'KJA-LWDUP1'], $event);
     $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Duplicate Livewire', 'tanggal' => '2026-07-15', 'aktif' => true]);
-    Absensi::create(['nip' => $participant->nip, 'nama' => $participant->nama, 'jam_scan' => '2026-07-15 08:00:00', 'sesi_id' => $session->id]);
+    EventAttendance::create(['participation_id' => $participation->id, 'sesi_absensi_id' => $session->id, 'event_id' => $event->id, 'status' => 'hadir', 'attended_at' => '2026-07-15 08:00:00', 'method' => 'scan']);
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->call('scanPeserta', 'KJA-LWDUP1');
     $response->assertSet('message', 'Peserta sudah absen pada sesi ini');
-    $response->assertSet('nip', (string) $participant->nip);
     $response->assertSet('nama', 'Peserta Duplicate Livewire');
-    expect(Absensi::where('nip', $participant->nip)->where('sesi_id', $session->id)->count())->toBe(1);
+    expect(EventAttendance::where('sesi_absensi_id', $session->id)->where('participation_id', $participation->id)->count())->toBe(1);
 });
 
 it('Scan orchestration handles missing active session', function () {
@@ -72,7 +70,6 @@ it('Scan orchestration handles missing active session', function () {
     $response = Livewire::test(Scan::class)->set('sesi_id', null)->call('scanPeserta', 'KJA-LWNOS1');
     $response->assertSet('message', 'Pilih sesi absensi terlebih dahulu');
     $response->assertSet('nama', null);
-    $response->assertSet('nip', null);
     $response->assertSet('jam_scan', null);
 });
 
@@ -83,7 +80,6 @@ it('Scan orchestration handles invalid identifier', function () {
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->call('scanPeserta', 'unknown-identifier');
     $response->assertSet('message', 'Data peserta tidak ditemukan!');
     $response->assertSet('nama', null);
-    $response->assertSet('nip', null);
     $response->assertSet('jam_scan', null);
 });
 
@@ -95,9 +91,8 @@ it('participant_number is not treated as an attendance scan identifier', functio
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->call('scanPeserta', $participant->participant_number);
     $response->assertSet('message', 'Data peserta tidak ditemukan!');
     $response->assertSet('nama', null);
-    $response->assertSet('nip', null);
     $response->assertSet('jam_scan', null);
-    expect(Absensi::count())->toBe(0);
+    expect(EventAttendance::count())->toBe(0);
 });
 
 it('manual attendance flow records success through AttendanceService', function () {
@@ -107,23 +102,21 @@ it('manual attendance flow records success through AttendanceService', function 
     $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Manual', 'tanggal' => '2026-07-15', 'aktif' => true]);
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->set('manualSearch', 'Peserta Manual')->call('selectManualParticipant', $participant->id)->call('manualAttend');
     $response->assertSet('message', 'Absensi berhasil!');
-    $response->assertSet('nip', (string) $participant->nip);
     $response->assertSet('nama', 'Peserta Manual');
     $response->assertNotSet('jam_scan', null);
-    $this->assertDatabaseHas('absensis', ['nip' => $participant->nip, 'nama' => $participant->nama, 'sesi_id' => $session->id]);
+    $this->assertDatabaseHas('event_attendances', ['sesi_absensi_id' => $session->id, 'event_id' => $event->id]);
 });
 
 it('manual attendance flow preserves duplicate prevention', function () {
     $this->actingAs($user = User::factory()->create(['role' => Role::Admin]));
     $event = scanTest_makeEvent(); app(ActiveEventContext::class)->set($event);
-    [$participant] = scanTest_makeMappedLegacyPeserta(['nama' => 'Peserta Manual Duplicate', 'nip' => 4002, 'participant_number' => 'PN-4002', 'attendance_code' => 'KJA-MANUAL2'], $event);
+    [$participant, , $participation] = scanTest_makeMappedLegacyPeserta(['nama' => 'Peserta Manual Duplicate', 'nip' => 4002, 'participant_number' => 'PN-4002', 'attendance_code' => 'KJA-MANUAL2'], $event);
     $session = SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi Manual Duplicate', 'tanggal' => '2026-07-15', 'aktif' => true]);
-    Absensi::create(['nip' => $participant->nip, 'nama' => $participant->nama, 'jam_scan' => '2026-07-15 08:00:00', 'sesi_id' => $session->id]);
+    EventAttendance::create(['participation_id' => $participation->id, 'sesi_absensi_id' => $session->id, 'event_id' => $event->id, 'status' => 'hadir', 'attended_at' => '2026-07-15 08:00:00', 'method' => 'scan']);
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->set('manualSearch', 'Peserta Manual Duplicate')->call('selectManualParticipant', $participant->id)->call('manualAttend');
     $response->assertSet('message', 'Peserta sudah absen pada sesi ini');
-    $response->assertSet('nip', (string) $participant->nip);
     $response->assertSet('nama', 'Peserta Manual Duplicate');
-    expect(Absensi::where('nip', $participant->nip)->where('sesi_id', $session->id)->count())->toBe(1);
+    expect(EventAttendance::where('sesi_absensi_id', $session->id)->where('participation_id', $participation->id)->count())->toBe(1);
 });
 
 it('manual attendance flow handles missing session', function () {
@@ -133,7 +126,6 @@ it('manual attendance flow handles missing session', function () {
     $response = Livewire::test(Scan::class)->set('sesi_id', null)->set('manualSearch', 'Peserta Manual No Session')->call('selectManualParticipant', $participant->id)->call('manualAttend');
     $response->assertSet('message', 'Sesi absensi tidak valid atau bukan milik event ini.');
     $response->assertSet('nama', null);
-    $response->assertSet('nip', null);
     $response->assertSet('jam_scan', null);
 });
 
@@ -144,7 +136,6 @@ it('manual attendance flow handles invalid participant selection', function () {
     $response = Livewire::test(Scan::class)->set('sesi_id', $session->id)->set('manualSearch', 'Tidak Ada')->call('manualAttend');
     $response->assertSet('message', 'Pilih peserta terlebih dahulu');
     $response->assertSet('nama', null);
-    $response->assertSet('nip', null);
     $response->assertSet('jam_scan', null);
-    expect(Absensi::count())->toBe(0);
+    expect(EventAttendance::count())->toBe(0);
 });

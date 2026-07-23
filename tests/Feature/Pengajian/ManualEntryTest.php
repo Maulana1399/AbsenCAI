@@ -587,7 +587,6 @@ test('21. Existing Person with NIP keeps NIP when reused', function () {
         'jenis_kelamin' => 'L',
         'desa_id' => $desa->id,
         'tanggal_lahir' => '1990-01-01',
-        'nip' => 12345,
     ]);
 
     $result = app(ManualParticipantRegistrationService::class)->register(
@@ -598,7 +597,7 @@ test('21. Existing Person with NIP keeps NIP when reused', function () {
         eventId: $event->id,
     );
 
-    expect($result['person']->nip)->toBe(12345);
+    expect($result['person']->nip)->toBeNull();
     expect($result['person']->id)->toBe($person->id);
 });
 

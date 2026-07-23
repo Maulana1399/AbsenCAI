@@ -35,8 +35,6 @@
         @if ($mode === 'baru')
             <flux:input wire:model="nama" label="Nama Peserta" placeholder="Masukkan nama peserta" />
 
-            <flux:input wire:model="nip" label="NIP Peserta" readonly />
-
             <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
                 Regu otomatis: <span class="font-medium">{{ $regu_nama }}</span>
             </div>
@@ -87,7 +85,7 @@
                 <flux:button type="submit" variant="primary" wire:click='simpan' wire:loading.attr="disabled" wire:target="simpan">Simpan</flux:button>
             </div>
         @else
-            <flux:input wire:model.live="searchPerson" label="Cari Peserta" placeholder="Cari berdasarkan nama atau NIP..." />
+            <flux:input wire:model.live="searchPerson" label="Cari Peserta" placeholder="Cari berdasarkan nama..." />
 
             @if (!empty($searchResults))
                 <div class="max-h-60 space-y-2 overflow-y-auto">
@@ -96,8 +94,7 @@
                             class="w-full rounded-xl border border-zinc-200 p-3 text-left transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900">
                             <div class="font-medium text-zinc-900 dark:text-white">{{ $result['nama'] }}</div>
                             <div class="mt-0.5 text-sm text-zinc-500">
-                                NIP: {{ $result['nip'] ?? '-' }}
-                                @if($result['desa']) | {{ $result['desa'] }} @endif
+                                @if($result['desa']) {{ $result['desa'] }} @endif
                                 @if($result['kelompok']) | {{ $result['kelompok'] }} @endif
                                 @if($result['regu']) | {{ $result['regu'] }} @endif
                             </div>
@@ -114,7 +111,6 @@
                     <div class="text-sm font-medium text-green-800 dark:text-green-200">Peserta Dipilih</div>
                     <div class="mt-1 text-sm text-green-700 dark:text-green-300">
                         <div class="font-semibold">{{ $selectedPerson['nama'] }}</div>
-                        <div>NIP: {{ $selectedPerson['nip'] ?? '-' }}</div>
                         <div>
                             {{ $selectedPerson['desa'] ?? '-' }},
                             {{ $selectedPerson['kelompok'] ?? '-' }},

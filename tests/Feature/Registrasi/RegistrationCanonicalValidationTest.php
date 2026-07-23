@@ -30,7 +30,7 @@ beforeEach(function () {
 // ---------------------------------------------------------------------------
 
 test('registration rejects duplicate Person with same name+desa+kelompok', function () {
-    Person::create(['nama' => 'Duplicate Person', 'nip' => 10001, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
+    Person::create(['nama' => 'Duplicate Person', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
 
     $validator = Validator::make([
         'nama' => 'Duplicate Person',
@@ -52,7 +52,7 @@ test('registration allows same name in different desa', function () {
     $desaB = \App\Models\desa::create(['desa_asal' => 'Desa B']);
     $kelompokB = \App\Models\kelompok::create(['kelompok_asal' => 'Kelompok B', 'desa_id' => $desaB->id]);
 
-    Person::create(['nama' => 'Common Name', 'nip' => 20001, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
+    Person::create(['nama' => 'Common Name', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
 
     $validator = Validator::make([
         'nama' => 'Common Name',
@@ -84,14 +84,14 @@ test('rejects NIP that exists in legacy pesertas', function () {
     expect($validator->fails())->toBeTrue();
 });
 
-test('rejects NIP that exists in canonical Person', function () {
-    Person::create(['nama' => 'Canonical NIP', 'nip' => 66666]);
+test('NIP is nullable on Person model', function () {
+    Person::create(['nama' => 'Canonical NIP']);
 
-    $validator = Validator::make(['nip' => 66666], [
-        'nip' => ['required', 'integer', Rule::unique('people', 'nip'), Rule::unique('pesertas', 'nip')],
+    $validator = Validator::make(['nip' => null], [
+        'nip' => ['nullable', 'integer'],
     ]);
 
-    expect($validator->fails())->toBeTrue();
+    expect($validator->passes())->toBeTrue();
 });
 
 // ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@ test('RegistrationService creates all 4 records', function () {
 test('TambahPeserta routes existing Person without active-event Participation to Case B (not rejected at validation layer)', function () {
     // Person exists, but has no Participation in the active event
     // Validation layer should NOT reject — Case B path must be reached
-    Person::create(['nama' => 'Already Exists', 'nip' => 77777, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
+    Person::create(['nama' => 'Already Exists', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
 
     $this->actingAs(\App\Models\User::factory()->create(['role' => 'admin']));
     $response = Livewire::test(\App\Livewire\Database\Peserta\TambahPeserta::class)
@@ -155,7 +155,7 @@ test('TambahPeserta routes existing Person without active-event Participation to
 
 test('TambahPeserta Case C: existing Person WITH Participation in active event is rejected at validation layer', function () {
     // Person exists AND has a Participation in the active event → Case C → rejected at validation
-    $person = Person::create(['nama' => 'Already Exists In Event', 'nip' => 77778, 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
+    $person = Person::create(['nama' => 'Already Exists In Event', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
     Participation::create([
         'person_id'          => $person->id,
         'event_id'           => $this->event->id,

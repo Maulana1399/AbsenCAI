@@ -16,14 +16,6 @@
             placeholder="Masukkan nama lengkap"
         />
 
-        <flux:input
-            wire:model="nip"
-            label="NIP"
-            type="number"
-            readonly
-            placeholder="Masukkan NIP"
-        />
-
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Jenis Kelamin</label>
             <select wire:model.live="jenis_kelamin" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">

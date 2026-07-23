@@ -23,7 +23,6 @@ class TambahPeserta extends Component
     public string $mode = 'baru';
 
     public $nama = '';
-    public $nip = '';
     public $daftarDesa = [];
     public $desa_id;
     public $daftarKelompok = [];
@@ -53,7 +52,6 @@ class TambahPeserta extends Component
         $eventId = app(ActiveEventContext::class)->id();
         $autoPlacement = PlacementService::autoPlacement($this->jenis_kelamin ?: null, $eventId);
 
-        $this->nip = $autoPlacement['nip'];
         $this->regu_id = $autoPlacement['regu_id'];
         $this->regu_nama = $autoPlacement['regu_nama'];
     }
@@ -82,7 +80,6 @@ class TambahPeserta extends Component
                 'desa_id'      => 'required|exists:desas,id',
                 'kelompok_id'  => 'required|exists:kelompoks,id',
                 'regu_id'      => 'required|exists:regus,id',
-                'nip'          => ['required', 'integer'],
             ]);
 
             $existingPerson = Person::where('nama', $this->nama)
@@ -104,29 +101,10 @@ class TambahPeserta extends Component
                         ]);
                     }
                 }
-
-                $nip = $existingPerson->nip ?? (int) $this->nip;
-            } else {
-                $nipValidator = validator(['nip' => $this->nip], [
-                    'nip' => [
-                        'required',
-                        'integer',
-                        Rule::unique('people', 'nip'),
-                        Rule::unique('pesertas', 'nip'),
-                    ],
-                ]);
-
-                if ($nipValidator->fails()) {
-                    $this->addError('nip', $nipValidator->errors()->first('nip'));
-                    return;
-                }
-
-                $nip = (int) $this->nip;
             }
 
             app(RegistrationService::class)->createParticipant([
                 'nama'             => $this->nama,
-                'nip'              => $nip,
                 'jenis_kelamin'    => $this->jenis_kelamin,
                 'jenis_peserta'    => $this->jenis_peserta,
                 'desa_id'          => $this->desa_id,
@@ -166,8 +144,7 @@ class TambahPeserta extends Component
         }
 
         $results = Person::where(function ($q) use ($query) {
-            $q->where('nama', 'like', "%{$query}%")
-              ->orWhere('nip', 'like', "%{$query}%");
+            $q->where('nama', 'like', "%{$query}%");
         })
         ->with(['desa', 'kelompok', 'participations' => fn ($q) => $q->with('regu')->latest()->limit(1)])
         ->limit(10)
@@ -178,7 +155,6 @@ class TambahPeserta extends Component
             return [
                 'id' => $p->id,
                 'nama' => $p->nama,
-                'nip' => $p->nip,
                 'desa' => $p->desa?->desa_asal,
                 'kelompok' => $p->kelompok?->kelompok_asal,
                 'jenis_kelamin' => $p->jenis_kelamin_label,
@@ -194,7 +170,6 @@ class TambahPeserta extends Component
         $this->selectedPersonId = $person->id;
         $this->selectedPerson = [
             'nama' => $person->nama,
-            'nip' => $person->nip,
             'desa' => $person->desa?->desa_asal,
             'kelompok' => $person->kelompok?->kelompok_asal,
             'jenis_kelamin' => $person->jenis_kelamin_label,

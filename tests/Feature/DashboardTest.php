@@ -158,11 +158,11 @@ test('dashboard Alfa count decreases when participant attends', function () {
     $person2 = ds_person($desa);
     $p1 = ds_participation($event, $person1);
     $p2 = ds_participation($event, $person2);
-    ds_legacyPeserta($person1, $desa, $kel, $regu);
+    $p1 = ds_legacyPeserta($person1, $desa, $kel, $regu);
     ds_legacyPeserta($person2, $desa, $kel, $regu);
 
     Absensi::create([
-        'nip' => $person1->nip,
+        'nip' => $p1->nip,
         'nama' => $person1->nama,
         'jam_scan' => now(),
         'sesi_id' => $sesi->id,
@@ -186,10 +186,10 @@ test('dashboard Alfa shows 0 when all participants attended', function () {
     $kel = ds_kelompok($desa);
     $person = ds_person($desa);
     $p = ds_participation($event, $person);
-    ds_legacyPeserta($person, $desa, $kel, $regu);
+    $p = ds_legacyPeserta($person, $desa, $kel, $regu);
 
     Absensi::create([
-        'nip' => $person->nip,
+        'nip' => $p->nip,
         'nama' => $person->nama,
         'jam_scan' => now(),
         'sesi_id' => $sesi->id,
@@ -230,12 +230,12 @@ test('dashboard attendance from other session does not affect Alfa count', funct
     $regu = ds_regu();
     $kel = ds_kelompok($desa);
     $person = ds_person($desa);
-    $p = ds_participation($event, $person);
-    ds_legacyPeserta($person, $desa, $kel, $regu);
+    $participation = ds_participation($event, $person);
+    $p = ds_legacyPeserta($person, $desa, $kel, $regu);
 
     // Attend in the OTHER session (not active one)
     Absensi::create([
-        'nip' => $person->nip,
+        'nip' => $p->nip,
         'nama' => $person->nama,
         'jam_scan' => now(),
         'sesi_id' => $sesiLain->id,

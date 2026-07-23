@@ -2,7 +2,6 @@
 
 namespace App\Services\Attendance;
 
-use App\Models\Absensi;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 
@@ -83,40 +82,13 @@ class AttendanceService
                     'peserta' => 'Peserta sedang berstatus izin pada sesi ini.',
                 ]);
             }
-
-            $lastAbsensi = Absensi::where('nip', $identity->nip)
-                ->where('sesi_id', $sesi->id)
-                ->first();
-
-            if ($lastAbsensi) {
-                return [
-                    'status' => 'duplicate',
-                    'message' => 'Peserta sudah absen pada sesi ini',
-                    'identity' => $identity,
-                    'peserta' => $identity->peserta,
-                    'sesi' => $sesi,
-                ];
-            }
         }
 
         $now = Carbon::now();
         $jamScan = $now->format('Y-m-d H:i:s');
-        $writeLegacy = config('features.attendance_legacy_write', true);
-        $mustWriteLegacy = $identity->isLegacy() && !$identity->isCanonical();
 
-        $absensi = DB::transaction(function () use ($identity, $sesi, $jamScan, $now, $activeEvent, $method, $writeLegacy, $mustWriteLegacy) {
-            $a = null;
-
-            if (($writeLegacy || $mustWriteLegacy) && $identity->isLegacy() && $identity->pesertaId) {
-                $a = Absensi::create([
-                    'nip' => $identity->nip,
-                    'nama' => $identity->nama,
-                    'jam_scan' => $jamScan,
-                    'sesi_id' => $sesi->id,
-                ]);
-            }
-
-            if ($identity->isCanonical()) {
+        if ($identity->isCanonical()) {
+            DB::transaction(function () use ($identity, $sesi, $now, $activeEvent, $method) {
                 EventAttendance::create([
                     'participation_id' => $identity->participationId,
                     'sesi_absensi_id' => $sesi->id,
@@ -126,10 +98,8 @@ class AttendanceService
                     'method' => $method,
                     'recorded_by' => auth()->id(),
                 ]);
-            }
-
-            return $a;
-        });
+            });
+        }
 
         return [
             'status' => 'success',
@@ -138,7 +108,6 @@ class AttendanceService
             'peserta' => $identity->peserta,
             'sesi' => $sesi,
             'jam_scan' => $jamScan,
-            'absensi' => $absensi,
         ];
     }
 
@@ -185,27 +154,8 @@ class AttendanceService
             );
         }
 
-        $pesertaByNip = peserta::where('nip', $identifier)->first();
-
-        if ($pesertaByNip) {
-            $participationByNip = $resolver->resolveByLegacyNip($identifier, $eventId);
-
-            if ($participationByNip) {
-                $pesertaByNipResolved = $resolver->resolvePesertaByParticipation($participationByNip->id, $eventId);
-                return new AttendanceIdentity(
-                    participation: $participationByNip,
-                    peserta: $pesertaByNipResolved ?? $pesertaByNip,
-                    person: $participationByNip->person,
-                );
-            }
-
-            return new AttendanceIdentity(
-                participation: null,
-                peserta: null,
-                person: null,
-            );
-        }
-
+        // NIP-based fallback retired per PGM.20.
+        // All participants should have attendance_code-based resolution.
         return new AttendanceIdentity(
             participation: null,
             peserta: null,

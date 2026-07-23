@@ -84,7 +84,6 @@ test('auto placement uses legacy nip compatibility and least filled regu', funct
     Participation::create(['person_id' => $person1->id, 'event_id' => $event->id, 'participant_number' => 'KP001', 'attendance_code' => 'KJA-AP01', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
     expect(PlacementService::autoPlacement('Perempuan', $event->id))->toBe([
-        'nip' => '2002',
         'regu_id' => $reguB->id,
         'regu_nama' => 'Regu B',
     ]);

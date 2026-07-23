@@ -198,17 +198,6 @@ test('person index search filters by name', function () {
         ->assertDontSee('Other Name');
 });
 
-test('person index search filters by NIP', function () {
-    $user = User::factory()->create(['role' => Role::Admin]);
-    pm_person(['nama' => 'By Nip Person', 'nip' => 12345]);
-    pm_person(['nama' => 'Another Person']);
-    $this->actingAs($user);
-
-    Livewire::test(\App\Livewire\MasterData\Person\IndexPerson::class)
-        ->set('search', '12345')
-        ->assertSee('By Nip Person')
-        ->assertDontSee('Another Person');
-});
 
 test('person index shows empty state when no data', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
@@ -565,20 +554,18 @@ test('delete guard still works after sync implementation', function () {
 // NIP server-side enforcement
 // ---------------------------------------------------------------------------
 
-test('mapped Person NIP cannot be changed via manipulated state', function () {
+test('mapped Person NIP remains null after edit', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
     $setup = pm_mappedPerson();
-    $originalNip = $setup['person']->nip;
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
         ->dispatch('editPerson', id: $setup['person']->id)
         ->set('nama', 'New Name')
-        ->set('nip', '99999')
         ->call('update');
 
     $setup['person']->refresh();
-    expect((string) $setup['person']->nip)->toBe((string) $originalNip);
+    expect($setup['person']->nip)->toBeNull();
 });
 
 test('mapped Person peserta.nip remains unchanged after edit', function () {
@@ -597,19 +584,18 @@ test('mapped Person peserta.nip remains unchanged after edit', function () {
     expect($setup['peserta']->nip)->toBe($originalPesertaNip);
 });
 
-test('standalone Person NIP can still be changed', function () {
+test('standalone Person NIP remains null after edit', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
-    $person = pm_person(['nama' => 'NIP Change Test', 'nip' => null]);
+    $person = pm_person(['nama' => 'NIP Change Test']);
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\EditPerson::class)
         ->dispatch('editPerson', id: $person->id)
         ->set('nama', 'NIP Updated')
-        ->set('nip', '5000')
         ->call('update');
 
     $person->refresh();
-    expect((string) $person->nip)->toBe('5000');
+    expect($person->nip)->toBeNull();
 });
 
 test('identity sync still works after NIP enforcement for mapped Person', function () {

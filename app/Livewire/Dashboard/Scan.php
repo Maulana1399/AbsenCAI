@@ -17,7 +17,6 @@ use Livewire\Component;
 class Scan extends Component
 {
     public $nama;
-    public $nip;
     public $jam_scan;
     public $message;
 
@@ -73,7 +72,6 @@ class Scan extends Component
             ->where('event_id', $event->id)
             ->where(function ($q) use ($search) {
                 $q->whereHas('person', fn ($pq) => $pq->where('nama', 'like', $search))
-                  ->orWhereHas('person', fn ($pq) => $pq->where('nip', 'like', $search))
                   ->orWhere('participant_number', 'like', $search);
             })
             ->limit(10)
@@ -83,7 +81,6 @@ class Scan extends Component
                 'person_id' => $part->person_id,
                 'peserta_id' => $part->person?->legacyPesertaMapping?->peserta_id,
                 'nama' => $part->person?->nama,
-                'nip' => $part->person?->nip,
                 'participant_number' => $part->participant_number,
                 'attendance_code' => $part->attendance_code,
                 'source' => 'canonical',
@@ -93,8 +90,7 @@ class Scan extends Component
         $resolver = app(LegacyParticipationResolver::class);
         $searchPeserta = \App\Models\peserta::where(function ($q) use ($search) {
                 $q->where('nama', 'like', $search)
-                  ->orWhere('participant_number', 'like', $search)
-                  ->orWhere('nip', 'like', $search);
+                  ->orWhere('participant_number', 'like', $search);
             })
             ->limit(20)
             ->get()
@@ -109,7 +105,6 @@ class Scan extends Component
                     'person_id' => $participation->person_id,
                     'peserta_id' => $resolver->resolvePesertaByParticipation($participation->id, $event->id)?->id ?? $p->id,
                     'nama' => $participation->person?->nama ?? $p->nama,
-                    'nip' => $participation->person?->nip ?? $p->nip,
                     'participant_number' => $participation->participant_number,
                     'attendance_code' => $participation->attendance_code,
                     'source' => 'legacy',
@@ -137,7 +132,6 @@ class Scan extends Component
             $this->selectedManualParticipantId = $part->id;
             $this->selectedSource = 'canonical';
             $this->nama = $part->person?->nama;
-            $this->nip = $part->person?->nip;
             $this->manualSearch = ($part->person?->nama ?? '') . ' · ' . ($part->participant_number ?? '-');
             $this->message = null;
 
@@ -151,8 +145,7 @@ class Scan extends Component
                 $this->selectedManualParticipantId = $participation->id;
                 $this->selectedSource = 'canonical';
                 $this->nama = $participation->person?->nama ?? $peserta->nama;
-                $this->nip = $participation->person?->nip ?? $peserta->nip;
-                $this->manualSearch = ($participation->person?->nama ?? $peserta->nama) . ' · ' . ($participation->participant_number ?? $peserta->nip);
+                $this->manualSearch = ($participation->person?->nama ?? $peserta->nama) . ' · ' . ($participation->participant_number ?? '-');
                 $this->message = null;
 
                 return;
@@ -173,7 +166,6 @@ class Scan extends Component
         if (! $this->validateSessionForEvent($event->id)) {
             $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
             $this->nama = null;
-            $this->nip = null;
             $this->jam_scan = null;
             return;
         }
@@ -205,7 +197,6 @@ class Scan extends Component
         if (! $attendanceCode) {
             $this->message = 'Pilih peserta terlebih dahulu';
             $this->nama = null;
-            $this->nip = null;
             $this->jam_scan = null;
             return;
         }
@@ -220,12 +211,10 @@ class Scan extends Component
 
         if ($result['status'] === 'not_found' || $result['status'] === 'session_required') {
             $this->nama = null;
-            $this->nip = null;
             $this->jam_scan = null;
             return;
         }
 
-        $this->nip = $result['identity']->nip;
         $this->nama = $result['identity']->nama;
         $this->jam_scan = $result['jam_scan'] ?? null;
     }
@@ -279,7 +268,6 @@ class Scan extends Component
             );
 
             $this->nama = \App\Models\peserta::find($pesertaId)?->nama ?? '-';
-            $this->nip = \App\Models\peserta::find($pesertaId)?->nip;
             $this->jam_scan = null;
             $this->message = 'Peserta berhasil dicatat sebagai izin';
         } catch (ValidationException $exception) {
@@ -303,13 +291,11 @@ class Scan extends Component
 
         if ($result['status'] === 'not_found' || $result['status'] === 'session_required') {
             $this->nama = null;
-            $this->nip = null;
             $this->jam_scan = null;
 
             return;
         }
 
-        $this->nip = $result['identity']->nip;
         $this->nama = $result['identity']->nama;
         $this->jam_scan = $result['jam_scan'] ?? null;
     }
@@ -328,7 +314,6 @@ class Scan extends Component
     public function restartScan()
     {
         $this->nama = null;
-        $this->nip = null;
         $this->jam_scan = null;
         $this->message = null;
         $this->manualSearch = '';
