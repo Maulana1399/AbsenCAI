@@ -83,6 +83,13 @@
                         >
                             {{ __('Daftar Peserta') }}
                         </flux:navlist.item>
+                        <flux:navlist.item
+                            :href="route('regu')"
+                            :current="request()->routeIs('regu')"
+                            wire:navigate
+                        >
+                            {{ __('Regu') }}
+                        </flux:navlist.item>
                     </flux:navlist.group>
                     @endcan
 

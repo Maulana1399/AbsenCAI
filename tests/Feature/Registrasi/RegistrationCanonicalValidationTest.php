@@ -148,8 +148,14 @@ test('TambahPeserta routes existing Person without active-event Participation to
 });
 
 test('TambahPeserta Case C: existing Person WITH Participation in active event is rejected at validation layer', function () {
-    // Person exists AND has a Participation in the active event → Case C → rejected at validation
-    $person = Person::create(['nama' => 'Already Exists In Event', 'desa_id' => $this->desa->id, 'kelompok_id' => $this->kelompok->id]);
+    // Person exists (same name + same birthday → strong duplicate) AND has a Participation
+    // in the active event → Case C → rejected at validation.
+    $person = Person::create([
+        'nama' => 'Already Exists In Event',
+        'tanggal_lahir' => '1990-01-01',
+        'desa_id' => $this->desa->id,
+        'kelompok_id' => $this->kelompok->id,
+    ]);
     Participation::create([
         'person_id'          => $person->id,
         'event_id'           => $this->event->id,
@@ -161,6 +167,7 @@ test('TambahPeserta Case C: existing Person WITH Participation in active event i
     $this->actingAs(\App\Models\User::factory()->create(['role' => 'admin']));
     $response = Livewire::test(\App\Livewire\Database\Peserta\TambahPeserta::class)
         ->set('nama', 'Already Exists In Event')
+        ->set('tanggal_lahir', '1990-01-01')
         ->set('desa_id', $this->desa->id)
         ->set('kelompok_id', $this->kelompok->id)
         ->set('jenis_kelamin', 'Laki - Laki')

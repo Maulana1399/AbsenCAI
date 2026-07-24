@@ -43,6 +43,7 @@ class Ulang extends Component
 
         $participation->update([
             'jenis_peserta' => $participation->jenis_peserta,
+            'status_registrasi' => peserta::STATUS_REGISTRASI_ULANG,
         ]);
 
         $legacyPeserta = $participation->person?->legacyPesertaMapping?->peserta;
@@ -138,7 +139,7 @@ class Ulang extends Component
                         'desa' => $p->person?->desa,
                         'kelompok' => $p->person?->kelompok,
                         'regu' => $p->regu,
-                        'status_registrasi_label' => $lp?->status_registrasi_label ?? '-',
+                        'status_registrasi_label' => $p->status_registrasi ?? $lp?->status_registrasi_label ?? 'Belum Registrasi',
                     ];
                 });
         }

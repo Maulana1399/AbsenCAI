@@ -145,13 +145,13 @@ test('master-data landing shows Kelompok card', function () {
     $response->assertSee(route('kelompok', [], false));
 });
 
-test('master-data landing does not show Regu as navigation card', function () {
+test('regu is accessible via sidebar not master-data navigation', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
 
-    $response = $this->get('/master-data');
+    $response = $this->get('/regu');
     $response->assertOk();
-    $response->assertDontSee('Regu');
+    $response->assertSee('DATA REGU');
 });
 
 // ---------------------------------------------------------------------------

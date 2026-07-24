@@ -138,7 +138,8 @@ test('unauthorized role cannot execute replacement via livewire request', functi
     $this->actingAs(caiUser(Role::OperatorScan->value));
 
     Livewire\Livewire::test(\App\Livewire\Database\Peserta\GantiPeserta::class)
-        ->set('peserta_id', $fixture['peserta']->id)
+        ->set('participation_id', $fixture['oldParticipation']->id)
+        ->set('event_id', $fixture['event']->id)
         ->set('nama', 'Hacked Replacement')
         ->set('jenis_kelamin', 'Laki - Laki')
         ->set('reason', 'Unauthorized attempt')

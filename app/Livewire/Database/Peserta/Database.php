@@ -48,13 +48,17 @@ class Database extends Component
         $daftarPeserta = $pesertaQuery->orderByDesc('id')->get()->map(function (Participation $participation) {
             $legacyPeserta = $participation->legacyParticipationMapping?->peserta;
 
+            $status = $participation->status_registrasi
+                ?? $legacyPeserta?->status_registrasi
+                ?? 'Belum Registrasi';
+
             return (object) [
                 'id' => $participation->id,
                 'nama' => $participation->person?->nama ?? $legacyPeserta?->nama,
                 'participant_number' => $participation->participant_number,
                 'jenis_kelamin' => $participation->person?->jenis_kelamin ?? $legacyPeserta?->jenis_kelamin,
                 'jenis_peserta' => $participation->jenis_peserta,
-                'status_registrasi_label' => $legacyPeserta?->status_registrasi_label ?? '-',
+                'status_registrasi_label' => $status,
                 'desa' => $participation->person?->desa,
                 'kelompok' => $participation->person?->kelompok ?? $legacyPeserta?->kelompok,
                 'regu' => $participation->regu,

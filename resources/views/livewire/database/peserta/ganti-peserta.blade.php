@@ -120,9 +120,7 @@
             </div>
 
             <div class="flex justify-end">
-                <flux:button
-                    wire:click="$dispatch('close-modal', { name: 'ganti-peserta-error' })"
-                >
+                <flux:button x-on:click="$modal('ganti-peserta-error').close()">
                     Tutup
                 </flux:button>
             </div>

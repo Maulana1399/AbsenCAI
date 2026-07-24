@@ -35,6 +35,8 @@
         @if ($mode === 'baru')
             <flux:input wire:model="nama" label="Nama Peserta" placeholder="Masukkan nama peserta" />
 
+            <flux:input wire:model="tanggal_lahir" type="date" label="Tanggal Lahir" />
+
             <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
                 Regu otomatis: <span class="font-medium">{{ $regu_nama }}</span>
             </div>
@@ -44,23 +46,47 @@
                 <flux:select.option value="Perempuan">Perempuan</flux:select.option>
             </flux:select>
 
-            <flux:select wire:model="jenis_peserta" label="Jenis Peserta" placeholder="-- Pilih Jenis Peserta --">
+            <flux:select wire:model.live="jenis_peserta" label="Jenis Peserta" placeholder="-- Pilih Jenis Peserta --">
                 <flux:select.option value="Wajib">Wajib</flux:select.option>
                 <flux:select.option value="Kiriman">Kiriman</flux:select.option>
                 <flux:select.option value="Person">Person</flux:select.option>
             </flux:select>
 
-            <flux:select wire:model="desa_id" label="Pilih Desa" placeholder="-- Pilih Desa --">
+            <flux:select wire:model.live="desa_id" label="Pilih Desa" placeholder="-- Pilih Desa --">
                 @foreach($daftarDesa as $desa)
                     <flux:select.option value="{{ $desa->id }}">{{ $desa->desa_asal }}</flux:select.option>
                 @endforeach
             </flux:select>
 
-            <flux:select wire:model="kelompok_id" label="Pilih Kelompok" placeholder="-- Pilih Kelompok --">
+            <flux:select wire:model.live="kelompok_id" label="Pilih Kelompok" placeholder="-- Pilih Kelompok --">
                 @foreach($daftarKelompok as $kelompok)
                     <flux:select.option value="{{ $kelompok->id }}">{{ $kelompok->kelompok_asal }}</flux:select.option>
                 @endforeach
             </flux:select>
+
+            @if ($showDuplicateWarning)
+                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
+                    <div class="text-sm font-medium text-amber-800 dark:text-amber-200">Kemungkinan orang ini sudah terdaftar</div>
+                    <div class="mt-2 space-y-2">
+                        @foreach($duplicateCandidates as $candidate)
+                            <div class="rounded-lg border border-amber-300 bg-white p-3 text-sm dark:border-amber-700 dark:bg-amber-900/30">
+                                <div class="font-medium text-amber-900 dark:text-amber-100">{{ $candidate['nama'] }}</div>
+                                <div class="mt-0.5 text-amber-700 dark:text-amber-300">
+                                    @if($candidate['tanggal_lahir']) {{ $candidate['tanggal_lahir'] }} @endif
+                                    @if($candidate['jenis_kelamin']) | {{ $candidate['jenis_kelamin'] }} @endif
+                                    @if($candidate['desa']) | {{ $candidate['desa'] }} @endif
+                                    @if($candidate['kelompok']) | {{ $candidate['kelompok'] }} @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <flux:button wire:click="ignoreDuplicateWarning" variant="primary" size="sm">
+                            Tetap Buat Orang Baru
+                        </flux:button>
+                    </div>
+                </div>
+            @endif
 
             <div class="flex">
                 <flux:modal.close>

@@ -288,14 +288,16 @@ test('S8B-14: TambahPeserta with active event uses event-scoped placement', func
     $regu = regu::create(['regu' => 'S8B TPMNT Regu', 'jenis_kelamin' => 'Laki - Laki']);
 
     $component = Livewire::test(\App\Livewire\Database\Peserta\TambahPeserta::class);
-    // Mount with null jenis_kelamin: leastFilledRegu(null, ...) searches
-    // for regu WHERE jenis_kelamin IS NULL — no match, so regu_id is null.
-    // After setting jenis_kelamin, the updatedJenisKelamin hook runs
-    // generateAutoFields() with the correct gender + event-scoped placement.
-    $component->assertSet('regu_id', null);
-    $component->set('jenis_kelamin', 'Laki - Laki');
+    // Mount with default jenis_kelamin = 'Laki - Laki': leastFilledRegu
+    // finds the regu with matching gender + event-scoped placement.
     $component->assertSet('regu_id', $regu->id);
     $component->assertSet('regu_nama', $regu->regu);
+    // User override still works
+    $component->set('jenis_kelamin', 'Perempuan');
+    $component->assertSet('regu_id', null);
+    $component->assertSet('regu_nama', '-');
+    $component->set('jenis_kelamin', 'Laki - Laki');
+    $component->assertSet('regu_id', $regu->id);
 });
 
 // ──────────────────────────────────────────────

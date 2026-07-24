@@ -30,7 +30,9 @@ MVP Development + Pilot
 
 # Current Sprint
 
-Sprint 3 — Multi Event Architecture + Pengajian Desa MVP (COMPLETE)
+Multi Event Architecture + Pengajian Desa MVP + UI Bug Fix Sprint (COMPLETE)
+
+Status: ✅ All major sprints complete. Remaining UI fixes (#10, #11, #12) pending runtime verification.
 PGM.19 Sprint 8A + 8B — Legacy Regu Retirement (COMPLETE)
 PGM.20 Legacy NIP Retirement (COMPLETE)
 
@@ -39,10 +41,9 @@ Status:
 ✅ PGM.12–PGM.17 COMPLETE
 ✅ S01–S04 Foundation COMPLETE 100%
 ✅ S3.0–S3.10 all COMPLETE/VERIFIED
-✅ UI Bug Fix Sprint — COMPLETE
+✅ UI Bug Fix Sprint — Batch 1–3 COMPLETE. Batch 4 (#10, #11, #12) in progress.
 ✅ PGM.19 Sprint 8A — Legacy Regu Dependency Elimination COMPLETE
 ✅ PGM.19 Sprint 8B — Physical Regu Retirement COMPLETE / VERIFIED
-✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) COMPLETE / VERIFIED
 ✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) COMPLETE / VERIFIED
 
 Target: August 2026 pilot release.
@@ -229,6 +230,10 @@ Priority saat ini:
 3. **PGM.17 — Pilot Release** ✅ COMPLETE.
 4. **PGM.18 Sprint 1–3 ✅ COMPLETE** — Legacy tooling removal, mapping refactor, physical cleanup.
 5. **PGM.18 CLOSED** — All 3 sprints complete.
+6. **UI Bug Fix Sprint — Batch 4 Remaining Items** 🔄:
+   - #10 Dark Mode: RE-OPENED — PENDING RUNTIME VERIFICATION
+   - #11 Responsive: IMPLEMENTED — PENDING RUNTIME VERIFICATION (layout `pengajian.blade.php`)
+   - #12 Event Isolation: OPEN — LOGIC GAP FOUND (AccessIndex query fixed)
 
 ## Database V2 Part 5 Closure
 
@@ -327,6 +332,20 @@ Database: SQLite
 ---
 
 # Next Work
+
+**UI Bug Fix Sprint — Batch 4 Remaining Items** 🔄:
+
+1. **#10 Dark Mode** — RE-OPENED — PENDING RUNTIME VERIFICATION
+   - File: Multiple files (access-index, event/index)
+   - Fix: `dark:text-zinc-100` → `dark:text-white` di select, textarea, heading
+
+2. **#11 Responsive Pengajian Layout** — IMPLEMENTED — PENDING RUNTIME VERIFICATION
+   - File: `resources/views/components/layouts/pengajian.blade.php` (BARU)
+   - Fix: Layout baru dengan `max-w-4xl`, tidak restrictif seperti `simple.blade.php`
+
+3. **#12 Event Isolation Access Desa** — OPEN — LOGIC GAP FOUND
+   - File: `app/Livewire/Pengajian/Admin/AccessIndex.php`
+   - Fix: Query `render()` sekarang filter `where('event_id', $activeEventId)`
 
 **PGM.21 — (future sprint TBD)**
 

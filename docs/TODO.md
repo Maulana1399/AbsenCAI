@@ -306,7 +306,7 @@ Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 ## UI Bug Fix Sprint
 
-Status: ✅ COMPLETE
+Status: ✅ COMPLETE (Batch 1–3 resolved). Batch 4 bugs #10, #11, #12 masih dalam progress.
 
 Priority: Critical/High
 
@@ -318,19 +318,18 @@ Berdasarkan audit dokumentasi dan codebase pada 2026-07-20, teridentifikasi 11 a
 
 | # | Kategori | Deskripsi | Prioritas | File Utama | Status Verifikasi |
 |---|----------|-----------|-----------|------------|-------------------|
-| 1 | Branding & Navigation | Landing page (`/`) masih branding CAI: logo "CAI", judul "CINTA ALAM INDONESIA 2025" | Medium | `resources/views/welcome.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
-| 2 | Branding & Navigation | Login page masih branding CAI: logo "CAI", judul "Cinta Alam Indonesia" | Medium | `resources/views/livewire/auth/login.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
-| 6 | Branding & Navigation | KJA logo di sidebar mengarah ke dashboard CAI (`route('dashboard')`), bukan global/KJA dashboard | High | `resources/views/components/layouts/app/sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
-| 4 | Branding & Navigation | Menu "Pengajian" (Akses Desa, Regional Report) muncul di event CAI | Low | `resources/views/components/layouts/app/sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ 908 tests passed, runtime verification 1-5 OK |
-| 5 | Access Token UI | Tidak ada tombol delete/hard-delete untuk access token yang sudah di-revoke | Medium | `AccessIndex.php`, `DesaAccessService.php` | **IMPLEMENTED — RUNTIME FIX REQUIRED** ⏳ Delete confirmation primary button tidak terlihat (layout flex dan warna). Diperbaiki dengan `font-bold`, `py-3`, layout flex-col gap-2 |
-| 7 | Access Token UI & Security | Raw token ditampilkan penuh di modal creation (sekali saja) | High | `access-index.blade.php` | **SECURITY AUDIT COMPLETE** ✅ DB hanya hash, one-time reveal. **RUNTIME FIX REQUIRED** ⏳ Modal overflow diperbaiki dengan `<textarea readonly>` |
-| 8 | Access Token UI | Token overflow/UI kurang rapi | Medium | `access-index.blade.php` | **OPEN — RUNTIME FIX REQUIRED** ⏳ `break-all` + `min-w-0` tidak cukup. Diganti dengan `<textarea readonly rows="3">` untuk wrapping native + select-all + copy |
-| 10 | Dark Mode | Heading dan table text masih gelap di dark mode | Medium | Multiple files | **RE-OPENED — RUNTIME VERIFICATION FAILED** ⏳ Fixed: `dark:text-zinc-100` → `dark:text-white` di select, textarea, heading. Butuh runtime verification ulang |
-| 3 | Functional/UI Logic | Stat "Peserta Belum Absen" — label "Alfa", nilai selalu integer, tidak pernah "-" | Medium | `Dashboard.php`, `dashboard.blade.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Root cause: tabel mengakses properti legacy peserta pada Participation. Fix: person chain |
-| 9 | Filter/Regional Report | Filter Hadir/Tidak + Metode di Regional Report | Medium | `RegionalReport.php`, `regional-report.blade.php` | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Service layer PGM.16 tests pass. Added `wire:model.live` + Livewire component filter tests |
-| 10 | Dark Mode | Dark mode text contrast pada Akses Desa & Kelola Event | - | `access-index.blade.php`, `event/index.blade.php` | **Resolved** — audit shows all elements have proper `dark:text-*` classes |
-| 11 | Responsive Layout | `/pengajian` dan halaman operasional Pengajian layout terlalu sempit | High | `pengajian.blade.php`, semua component Pengajian | **IMPLEMENTED — PENDING RUNTIME VERIFICATION** ⏳ Root cause: layout `simple.blade.php` terlalu restrictif (`max-w-2xl`). Fix: buat layout baru `pengajian.blade.php` dengan `max-w-4xl` dan update semua component Pengajian |
-| 12 | Event Isolation | Access Desa menampilkan grant dari event lain | High | `AccessIndex.php` | **OPEN — LOGIC GAP FOUND** ⏳ Query `render()` tidak filter berdasarkan active event. Fixed: tambah `where('event_id', $activeEventId)` |
+| 1 | Branding & Navigation | Landing page masih branding CAI | Medium | `welcome.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 2 | Branding & Navigation | Login page masih branding CAI | Medium | `login.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 3 | Functional/UI Logic | Dashboard "Belum Absen" tabel menampilkan "-" | Medium | `Dashboard.php` | **RESOLVED — VERIFIED** ✅ |
+| 4 | Branding & Navigation | Menu "Pengajian" di sidebar event CAI | Low | `sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 5 | Access Token UI | Tidak ada tombol delete untuk revoked token | Medium | `AccessIndex.php` | **RESOLVED — VERIFIED** ✅ |
+| 6 | Branding & Navigation | KJA logo arah ke dashboard CAI | High | `sidebar.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 7 | Security | Raw token display di modal | High | `access-index.blade.php` | **SECURITY AUDIT COMPLETE** ✅ DB hanya hash, one-time reveal |
+| 8 | Access Token UI | Token overflow/UI kurang rapi | Medium | `access-index.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 9 | Filter/Regional Report | Filter kombinasi Regional Report | Medium | `RegionalReport.php` | **RESOLVED — VERIFIED** ✅ |
+| 10 | Dark Mode | Heading/text gelap di dark mode | Medium | Multiple files | **IMPLEMENTED — NEEDS VISUAL VERIFICATION** ⏳ |
+| 11 | Responsive | Layout Pengajian sempit di desktop | High | `pengajian.blade.php` | **IMPLEMENTED — NEEDS VISUAL VERIFICATION** ⏳ |
+| 12 | Event Isolation | Access Desa lihat grant event lain | High | `AccessIndex.php` | **IMPLEMENTED — NEEDS TEST VERIFICATION** ⏳ |
 
 ---
 

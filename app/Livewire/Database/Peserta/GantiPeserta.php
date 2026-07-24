@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Database\Peserta;
 
+use App\Models\CaiParticipantReplacement;
 use App\Models\Participation;
-use App\Models\peserta;
+use App\Models\Person;
 use App\Services\Cai\CaiParticipantReplacementService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 use Flux\Flux;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -14,7 +16,8 @@ use Throwable;
 
 class GantiPeserta extends Component
 {
-    public ?int $peserta_id = null;
+    public ?int $participation_id = null;
+    public ?int $event_id = null;
 
     public string $nama_lama = '';
     public string $participant_number = '';
@@ -34,37 +37,45 @@ class GantiPeserta extends Component
     {
         $this->resetForm();
 
-        $participation = Participation::with(['person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])->findOrFail($id);
+        $participation = Participation::with(['event', 'person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])->findOrFail($id);
 
-        $peserta = $participation->person?->legacyPesertaMapping?->peserta
-            ?? peserta::with(['desa', 'kelompok'])->find($id);
+        $event = $participation->event;
 
-        if ($peserta === null) {
-            $this->errorMessage = 'Data legacy peserta tidak ditemukan.';
+        if (! $event || ! $event->isCai()) {
+            $this->errorMessage = 'Penggantian peserta hanya dapat dilakukan pada event CAI.';
             Flux::modal('ganti-peserta-error')->show();
             return;
         }
 
-        try {
-            app(CaiParticipantReplacementService::class)
-                ->assertReplaceable($peserta);
-        } catch (RuntimeException $e) {
-            $this->errorMessage = $e->getMessage();
+        $this->participation_id = $participation->id;
+        $this->event_id = $participation->event_id;
 
-            Flux::modal('ganti-peserta-error')->show();
+        $legacyPeserta = $participation->person?->legacyPesertaMapping?->peserta;
 
-            return;
+        if ($legacyPeserta) {
+            try {
+                app(CaiParticipantReplacementService::class)
+                    ->assertReplaceable($legacyPeserta);
+            } catch (RuntimeException $e) {
+                $this->errorMessage = $e->getMessage();
+                Flux::modal('ganti-peserta-error')->show();
+                return;
+            }
+
+            $this->nama_lama = $legacyPeserta->nama;
+            $this->participant_number = $legacyPeserta->participant_number ?? '';
+            $this->desa = $legacyPeserta->desa?->desa_asal ?? '-';
+            $this->kelompok = $legacyPeserta->kelompok?->kelompok_asal ?? '-';
+            $this->jenis_kelamin = $legacyPeserta->jenis_kelamin ?? '';
+        } else {
+            $this->nama_lama = $participation->person?->nama ?? '-';
+            $this->participant_number = $participation->participant_number ?? '';
+            $this->desa = $participation->person?->desa?->desa_asal ?? '-';
+            $this->kelompok = $participation->person?->kelompok?->kelompok_asal ?? '-';
+            $this->jenis_kelamin = $participation->person?->jenis_kelamin_label ?? '';
         }
 
-        $this->peserta_id = $peserta->id;
-        $this->nama_lama = $peserta->nama;
-        $this->participant_number = $peserta->participant_number ?? '';
-
-        $this->desa = $peserta->desa?->desa_asal ?? '-';
-        $this->kelompok = $peserta->kelompok?->kelompok_asal ?? '-';
         $this->regu = $participation->regu?->regu ?? '-';
-
-        $this->jenis_kelamin = $peserta->jenis_kelamin ?? '';
 
         Flux::modal('ganti-peserta')->show();
     }
@@ -74,7 +85,8 @@ class GantiPeserta extends Component
         Gate::authorize('manage-participants');
 
         $validated = $this->validate([
-            'peserta_id' => ['required', 'integer'],
+            'participation_id' => ['required', 'integer'],
+            'event_id' => ['required', 'integer'],
             'nama' => ['required', 'string', 'max:255'],
             'jenis_kelamin' => ['required', 'in:Laki - Laki,Perempuan'],
             'tanggal_lahir' => ['nullable', 'date_format:Y-m-d'],
@@ -87,17 +99,84 @@ class GantiPeserta extends Component
         ]);
 
         try {
-            $peserta = peserta::findOrFail($validated['peserta_id']);
+            $oldParticipation = Participation::with('person.legacyPesertaMapping.peserta')->findOrFail($validated['participation_id']);
 
-            app(CaiParticipantReplacementService::class)->replace(
-                $peserta,
-                [
-                    'nama' => $validated['nama'],
-                    'jenis_kelamin' => $validated['jenis_kelamin'],
-                    'tanggal_lahir' => $validated['tanggal_lahir'] ?: null,
-                ],
-                $validated['reason'],
-            );
+            $event = \App\Models\Event::findOrFail($validated['event_id']);
+
+            if (! $event->isCai()) {
+                throw new RuntimeException('Penggantian peserta hanya dapat dilakukan pada event CAI.');
+            }
+
+            $legacyPeserta = $oldParticipation->person?->legacyPesertaMapping?->peserta;
+
+            DB::transaction(function () use ($validated, $oldParticipation, $legacyPeserta, $event) {
+                $oldParticipation->refresh();
+                $oldParticipation = Participation::query()->lockForUpdate()->findOrFail($oldParticipation->id);
+
+                $participantNumber = $oldParticipation->participant_number;
+                $attendanceCode = $oldParticipation->attendance_code;
+
+                $genderLabel = $legacyPeserta
+                    ? $legacyPeserta->jenis_kelamin ?? $validated['jenis_kelamin']
+                    : $oldParticipation->person?->jenis_kelamin_label ?? $validated['jenis_kelamin'];
+
+                if ($genderLabel !== $validated['jenis_kelamin']) {
+                    $participantNumber = PlacementService::generateParticipantNumber(
+                        $event->id,
+                        $validated['jenis_kelamin'],
+                    );
+                }
+
+                if ($legacyPeserta) {
+                    app(CaiParticipantReplacementService::class)->replace(
+                        $legacyPeserta,
+                        [
+                            'nama' => $validated['nama'],
+                            'jenis_kelamin' => $validated['jenis_kelamin'],
+                            'tanggal_lahir' => $validated['tanggal_lahir'] ?: null,
+                        ],
+                        $validated['reason'],
+                    );
+                } else {
+                    $oldParticipation->update([
+                        'participant_number' => null,
+                        'attendance_code' => null,
+                    ]);
+
+                    $newPerson = Person::create([
+                        'nama' => $validated['nama'],
+                        'jenis_kelamin' => $validated['jenis_kelamin'] === 'Perempuan' ? 'P' : 'L',
+                        'tanggal_lahir' => $validated['tanggal_lahir'] ?: null,
+                        'desa_id' => $oldParticipation->person?->desa_id,
+                        'kelompok_id' => $oldParticipation->person?->kelompok_id,
+                    ]);
+
+                    $newParticipation = Participation::create([
+                        'person_id' => $newPerson->id,
+                        'event_id' => $event->id,
+                        'participant_number' => $participantNumber,
+                        'attendance_code' => $attendanceCode,
+                        'jenis_peserta' => $oldParticipation->jenis_peserta,
+                        'regu_id' => $oldParticipation->regu_id,
+                    ]);
+
+                    CaiParticipantReplacement::create([
+                        'event_id' => $event->id,
+                        'old_person_id' => $oldParticipation->person_id,
+                        'old_participation_id' => $oldParticipation->id,
+                        'new_person_id' => $newPerson->id,
+                        'new_participation_id' => $newParticipation->id,
+                        'participant_number' => $participantNumber,
+                        'attendance_code' => $attendanceCode,
+                        'desa_id' => $oldParticipation->person?->desa_id,
+                        'kelompok_id' => $oldParticipation->person?->kelompok_id,
+                        'regu_id' => $oldParticipation->regu_id,
+                        'reason' => $validated['reason'],
+                        'replaced_by' => auth()->id(),
+                        'replaced_at' => now(),
+                    ]);
+                }
+            });
 
             Flux::modal('ganti-peserta')->close();
 
@@ -116,7 +195,8 @@ class GantiPeserta extends Component
     {
         $this->resetValidation();
 
-        $this->peserta_id = null;
+        $this->participation_id = null;
+        $this->event_id = null;
         $this->nama_lama = '';
         $this->participant_number = '';
         $this->desa = '-';

@@ -13,6 +13,7 @@ use App\Models\SuratIzin;
 use App\Models\CaiParticipantReplacement;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Services\Placement\PlacementService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -137,6 +138,17 @@ class CaiParticipantReplacementService
     * bukan identitas personal orang lama.
     */
     $participantNumber = $peserta->participant_number;
+
+    if (
+        isset($replacementData['jenis_kelamin'])
+        && $replacementData['jenis_kelamin'] !== $peserta->jenis_kelamin
+    ) {
+        $participantNumber = PlacementService::generateParticipantNumber(
+            $participationMapping->event_id,
+            $replacementData['jenis_kelamin'],
+        );
+    }
+
     $attendanceCode = $peserta->attendance_code;
 
             /*

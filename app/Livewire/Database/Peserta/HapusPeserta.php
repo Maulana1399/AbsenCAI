@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Database\Peserta;
 
+use App\Models\CaiParticipantReplacement;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
@@ -99,15 +100,19 @@ class HapusPeserta extends Component
                 return;
             }
 
+            CaiParticipantReplacement::where('old_participation_id', $participation->id)
+                ->update(['old_participation_id' => null]);
+            CaiParticipantReplacement::where('new_participation_id', $participation->id)
+                ->update(['new_participation_id' => null]);
+
             $mapping = LegacyParticipationMapping::where('participation_id', $participation->id)
                 ->where('event_id', $event->id)
                 ->first();
 
-            if ($mapping === null) {
-                return;
+            if ($mapping !== null) {
+                $mapping->delete();
             }
 
-            $mapping->delete();
             $participation->delete();
         });
 

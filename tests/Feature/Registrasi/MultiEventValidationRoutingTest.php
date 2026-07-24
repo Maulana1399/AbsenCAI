@@ -436,16 +436,19 @@ test('TambahPeserta Case C rejected with user-friendly message', function () {
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 
+    $person = Person::where('nama', 'TambahPeserta Dup')->first();
+    $person->update(['tanggal_lahir' => '1990-01-01']);
+
     $user = User::factory()->create(['role' => 'admin']);
 
     Livewire::actingAs($user)
         ->test(TambahPeserta::class)
         ->set('nama', 'TambahPeserta Dup')
+        ->set('tanggal_lahir', '1990-01-01')
         ->set('jenis_kelamin', 'Laki - Laki')
         ->set('jenis_peserta', 'Wajib')
         ->set('desa_id', $desa->id)
         ->set('kelompok_id', $kelompok->id)
-        ->set('regu_id', $regu->id)
         ->call('simpan')
         ->assertHasErrors(['nama']);
 });

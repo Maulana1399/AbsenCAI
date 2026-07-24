@@ -19,8 +19,10 @@ class RegistrationService
 {
     public function createParticipant(array $data): peserta
     {
+        $forceNewPerson = ! empty($data['_force_new_person']);
+
         try {
-            return DB::transaction(function () use ($data) {
+            return DB::transaction(function () use ($data, $forceNewPerson) {
                 $event = $this->activeEvent();
                 $participantNumber = $data['participant_number'] ?? $this->nextParticipantNumber($event->id, $data['jenis_kelamin'] ?? null);
                 $attendanceCode = $data['attendance_code'] ?? $this->generateAttendanceCode();
@@ -29,11 +31,15 @@ class RegistrationService
                 $this->ensureUniqueForEvent($event->id, $participantNumber);
                 $this->ensureUniqueAttendanceCode($attendanceCode);
 
-                // Look up existing Person by canonical identity (nama + desa + kelompok)
-                $person = Person::where('nama', $data['nama'])
-                    ->where('desa_id', $data['desa_id'])
-                    ->where('kelompok_id', $data['kelompok_id'])
-                    ->first();
+                $person = null;
+                $legacyPeserta = null;
+
+                if (! $forceNewPerson) {
+                    $person = Person::where('nama', $data['nama'])
+                        ->where('desa_id', $data['desa_id'])
+                        ->where('kelompok_id', $data['kelompok_id'])
+                        ->first();
+                }
 
                 if ($person) {
                     $existingParticipation = Participation::where('person_id', $person->id)
@@ -51,12 +57,6 @@ class RegistrationService
                         ->where('kelompok_id', $data['kelompok_id'])
                         ->first();
 
-                    if (! $legacyPeserta) {
-                        throw ValidationException::withMessages([
-                            'nama' => 'Legacy peserta compatibility record tidak ditemukan untuk identity ini.',
-                        ]);
-                    }
-
                     $reguId = $data['regu_id'] ?? null;
 
                     $participation = Participation::create([
@@ -65,8 +65,30 @@ class RegistrationService
                     'participant_number' => $participantNumber,
                     'attendance_code' => $attendanceCode,
                     'jenis_peserta' => $data['jenis_peserta'],
+                    'status_registrasi' => $data['status_registrasi'] ?? null,
                     'regu_id' => $reguId,
                 ]);
+
+                    if (! $legacyPeserta) {
+                        $legacyPeserta = peserta::create([
+                            'nama' => $data['nama'],
+                            'participant_number' => $legacyParticipantNumber,
+                            'attendance_code' => $attendanceCode,
+                            'jenis_kelamin' => $data['jenis_kelamin'],
+                            'jenis_peserta' => $data['jenis_peserta'],
+                            'desa_id' => $data['desa_id'],
+                            'kelompok_id' => $data['kelompok_id'],
+                            'status_registrasi' => $data['status_registrasi'],
+                        ]);
+
+                        LegacyPesertaMapping::create([
+                            'peserta_id' => $legacyPeserta->id,
+                            'person_id' => $person->id,
+                            'legacy_participant_number' => $legacyParticipantNumber,
+                            'legacy_attendance_code' => $attendanceCode,
+                            'migrated_at' => now(),
+                        ]);
+                    }
 
                     // Dual-write to legacy pesertas.regu_id stopped per Sprint 7
 
@@ -97,6 +119,7 @@ class RegistrationService
                     'nama' => $data['nama'],
                     'nip' => null,
                     'jenis_kelamin' => $data['jenis_kelamin'] === 'Perempuan' ? 'P' : 'L',
+                    'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
                     'desa_id' => $data['desa_id'],
                     'kelompok_id' => $data['kelompok_id'] ?? null,
                 ]);
@@ -107,6 +130,7 @@ class RegistrationService
                     'participant_number' => $participantNumber,
                     'attendance_code' => $attendanceCode,
                     'jenis_peserta' => $data['jenis_peserta'],
+                    'status_registrasi' => $data['status_registrasi'] ?? null,
                     'regu_id' => $data['regu_id'] ?? null,
                 ]);
 

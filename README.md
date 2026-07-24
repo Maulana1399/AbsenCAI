@@ -11,20 +11,17 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Area | Status |
 |------|--------|
 | CAI Operational | ✅ Stable — all modules operational |
-| S01 Foundation | ✅ COMPLETE 100% |
-| S02 Placement & Registration | ✅ COMPLETE 100% |
-| S03 Attendance | ✅ COMPLETE 100% |
-| S04 Identity & QR | ✅ COMPLETE 100% |
+| S01–S04 Foundation | ✅ COMPLETE 100% |
 | Multi Event Architecture | ✅ S3.0–S3.10 Complete |
-| S03 RBAC (Event & CAI Protection) | ✅ COMPLETE — routes + Livewire protected |
-| Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete — UI remediated |
-| S04 RBAC (Pengajian Admin Protection) | ✅ COMPLETE — routes + Livewire protected |
-| User Management | ✅ COMPLETE — Super Admin only, Master Data card |
-| S05 RBAC (Remaining Security Protection) | ✅ COMPLETE — all routes + mutations protected |
-| S06 RBAC (Sidebar Visibility) | ✅ COMPLETE — all menus gated with @can() directives |
-| PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` dropped, regu dual-write stopped |
-| PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture, `people.nip` and `pesertas.nip` dropped |
-| Test Baseline | ✅ 1574 passed / 3745 assertions / 0 failures — Design C problem_total = 0 |
+| RBAC (S1–S7) | ✅ COMPLETE — 9 roles, 15 gates, event-scoped |
+| Person Master Data CRUD | ✅ COMPLETE |
+| User Management | ✅ COMPLETE — Super Admin only |
+| Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete |
+| UI Bug Fix Sprint | ✅ Batch 1–3 VERIFIED. Batch 4 (#10, #11, #12) in progress |
+| PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` retired |
+| PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture |
+| Database V2 / Design C | ✅ problem_total = 0 |
+| Test Baseline | ✅ 1574 passed / 3745 assertions / 0 failures |
 
 ---
 
@@ -40,18 +37,17 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 ## Key Architecture
 
 ```
+Person (canonical identity)
+  → Participation (event-scoped membership)
+    → EventAttendance (canonical attendance fact)
+
 Event (type: cai | pengajian)
   → Participation (event-scoped enrollment)
-    → Person (canonical identity)
-    → EventAttendance (attendance fact)
-
-Event
   → DesaAccessGrant (token-based desa access)
-    → EventAttendance (scoped per event + desa)
 
-peserta (legacy runtime)
-  → LegacyPesertaMapping (compatibility bridge)
-    → Person → Participation → Event
+peserta (legacy compatibility only)
+  → LegacyPesertaMapping (bridge peserta↔Person)
+  → LegacyParticipationMapping (bridge peserta↔Participation)
 ```
 
 ---
@@ -61,42 +57,33 @@ peserta (legacy runtime)
 Sidebar is event-type-aware with global Master Data:
 - **CAI events** → full operational menu (Absensi, Registrasi, Database, Laporan, QR & Label, etc.)
 - **Pengajian events** → clean Pengajian menu (Regional Report, Peserta, Import Massal, Akses Desa)
-- **All authenticated users** → **Master Data** menu → landing page (`/master-data`) with Person, Desa, Kelompok cards — always visible regardless of event context
+- **All authenticated users** → **Master Data** menu with Person, Desa, Kelompok cards
 
 ---
 
 ## Modules
 
 ### CAI Operational
-- Attendance (QR scan, manual, self-register)
-- Participant registration and import
-- Reports and exports
+- Attendance (QR scan via EventAttendance, no legacy dual-write)
+- Participant registration and import (canonical Person→Participation flow)
+- Reports and exports (event-scoped)
 - Permission letters (Surat Izin)
 - Activity log
 
 ### Pengajian Desa MVP
-- Token-based desa operator access
+- Token-based desa operator access (DesaAccessGrant)
 - Self-attendance via QR
 - Operator-assisted attendance
 - Manual participant entry
-- **Bulk participant import** (CSV/Excel)
+- Bulk participant import (CSV/Excel)
 - Regional and desa-level reports
 - Identity correction workflow
 
----
-
-## UI Bug Backlog
-
-Teridentifikasi 11 area perbaikan UI yang perlu ditangani di sprint mendatang. Lihat `docs/TODO.md` → **UI Bug Fix Sprint** untuk detail.
-
-| Kategori | Item |
-|----------|------|
-| Branding & Navigation | Landing page, Login, KJA logo default, "Pengajian" menu in CAI |
-| Access Token UI & Security | Raw token display, token overflow, missing delete button |
-| Functional/UI Logic | Dashboard "Belum Absen" stat, "Pengajian" menu in CAI event |
-| Filter/Regional Report | Report filter combinations (Hadir/Tidak/Metode) |
-| Dark Mode | Text contrast on Akses Desa / Kelola Event pages |
-| Responsive Layout | /pengajian page on desktop |
+### RBAC
+- 9 roles: Super Admin, Admin, Ketua Event, Sekretariat, PJ Divisi, Operator Registrasi, Operator Scan, Juri, Viewer
+- 15 Gate abilities with Super Admin bypass
+- Event-scoped KetuaEvent authorization
+- All routes + Livewire mutations protected
 
 ---
 
@@ -111,6 +98,7 @@ See `docs/` directory for full documentation.
 | `HANDOFF.md` | Non-technical project overview |
 | `PENGAJIAN_MVP_OPERATIONAL.md` | Pengajian module operational guide |
 | `ai/CURRENT_STATE.md` | Current development snapshot |
+| `ai/LAPORAN_STATUS_PROYEK_FINAL_20260724.md` | Final project status report |
 
 ---
 

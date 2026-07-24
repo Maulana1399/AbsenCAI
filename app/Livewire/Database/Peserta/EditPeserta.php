@@ -65,7 +65,7 @@ class EditPeserta extends Component
         $this->person_id = $participation->person_id;
         $this->peserta_id = $legacyPeserta?->id;
         $this->nama = $participation->person?->nama;
-        $this->jenis_kelamin = $participation->person?->jenis_kelamin;
+        $this->jenis_kelamin = $participation->person?->jenis_kelamin_label;
         $this->jenis_peserta = $participation->jenis_peserta;
         $this->desa_id = $participation->person?->desa_id;
         $this->kelompok_id = $participation->person?->kelompok_id;
@@ -80,9 +80,9 @@ class EditPeserta extends Component
             'nama' => 'required',
             'jenis_kelamin' => 'required',
             'jenis_peserta' => 'required|in:Wajib,Kiriman,Person',
-            'desa_id' => 'required',
-            'kelompok_id' => 'required',
-            'regu_id' => 'required'
+            'desa_id' => 'nullable|exists:desas,id',
+            'kelompok_id' => 'nullable|exists:kelompoks,id',
+            'regu_id' => 'nullable|exists:regus,id',
         ]);
 
         $event = app(ActiveEventContext::class)->current();

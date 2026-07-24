@@ -12,6 +12,7 @@ class Participation extends Model
         'participant_number',
         'attendance_code',
         'jenis_peserta',
+        'status_registrasi',
         'regu_id',
     ];
 
