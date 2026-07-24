@@ -5,10 +5,11 @@
         <p>Anda akan menghapus sesi: <strong>{{ $sesi_nama }}</strong></p>
     </div>
 
-    <div class="mt-4 flex justify-end gap-2">
+    <div class="flex gap-2">
         <flux:modal.close>
             <flux:button variant="ghost">Batal</flux:button>
         </flux:modal.close>
+        <flux:spacer />
         <flux:button variant="danger" wire:click.prevent="delete">Hapus</flux:button>
     </div>
 </flux:modal>

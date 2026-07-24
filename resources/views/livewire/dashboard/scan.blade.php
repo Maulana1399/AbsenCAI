@@ -66,11 +66,9 @@
             </div>
         </div>
 
-        <button wire:click="restartScan"
-            type="button"
-            class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600">
+        <flux:button wire:click="restartScan" variant="primary" class="w-full">
             Scan Lagi
-        </button>
+        </flux:button>
 
 
         <div class="w-full rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-950 sm:p-5">
@@ -128,23 +126,22 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <button
-                        type="button"
+                    <flux:button
                         wire:click="manualAttend"
-                        @disabled(! $selectedManualParticipantId || ! $sesi_id)
-                        class="w-full rounded-xl bg-blue-500 px-4 py-3 font-medium text-white shadow-sm hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
+                        variant="primary"
+                        class="w-full"
+                        :disabled="! $selectedManualParticipantId || ! $sesi_id"
                     >
                         Catat Hadir
-                    </button>
+                    </flux:button>
 
-                    <button
-                        type="button"
+                    <flux:button
                         wire:click="manualIzin"
-                        @disabled(! $selectedManualParticipantId || ! $sesi_id)
-                        class="w-full rounded-xl border border-zinc-300 px-4 py-3 font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                        class="w-full"
+                        :disabled="! $selectedManualParticipantId || ! $sesi_id"
                     >
                         Catat Izin
-                    </button>
+                    </flux:button>
                 </div>
             </div>
         </div>
@@ -295,30 +292,5 @@ Livewire.on('restartScanner', async ()=>{
 
 </script>
 
-
-<!-- <style>
-
-#qr-reader {
-    width:400px !important;
-    max-width:100% !important;
-    overflow:hidden !important;
-    border:none !important;
-}
-
-
-#qr-reader video {
-    width:400px !important;
-    max-width:100% !important;
-    height:300px !important;
-    object-fit:cover !important;
-    border-radius:16px;
-}
-
-
-#qr-reader__dashboard {
-    display:none !important;
-}
-
-</style> -->
 
 @endpush

@@ -66,12 +66,11 @@
 
                     <div>
                         <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Event Role</label>
-                        <select wire:model="newEventRoleId" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
-                            <option value="">Pilih role...</option>
+                        <flux:select wire:model="newEventRoleId" placeholder="Pilih role...">
                             @foreach ($roles as $role)
-                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                <flux:select.option value="{{ $role->id }}">{{ $role->name }}</flux:select.option>
                             @endforeach
-                        </select>
+                        </flux:select>
                         @error('newEventRoleId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>

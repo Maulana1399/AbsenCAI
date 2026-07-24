@@ -18,6 +18,8 @@
         </a>
     </form>
     @if (session()->has('success'))
-        <div class="text-green-600 mt-2">{{ session('success') }}</div>
+        <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+            {{ session('success') }}
+        </div>
     @endif
 </div>

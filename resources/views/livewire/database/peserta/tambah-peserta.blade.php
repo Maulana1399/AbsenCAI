@@ -1,6 +1,6 @@
 <div>
     <flux:modal.trigger name="tambah-peserta">
-    <flux:button class="bg-blue-500 text-white hover:bg-blue-600">Tambah Peserta</flux:button>
+    <flux:button variant="primary">Tambah Peserta</flux:button>
     </flux:modal.trigger>
 
 <flux:modal name="tambah-peserta" class="md:w-96">
@@ -39,43 +39,28 @@
                 Regu otomatis: <span class="font-medium">{{ $regu_nama }}</span>
             </div>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Kelamin</label>
-                <select wire:model.live="jenis_kelamin" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
-                    <option value="">-- Pilih Jenis Kelamin --</option>
-                    <option value="Laki - Laki">Laki - Laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                </select>
-            </div>
+            <flux:select wire:model.live="jenis_kelamin" label="Jenis Kelamin" placeholder="-- Pilih Jenis Kelamin --">
+                <flux:select.option value="Laki - Laki">Laki - Laki</flux:select.option>
+                <flux:select.option value="Perempuan">Perempuan</flux:select.option>
+            </flux:select>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Peserta</label>
-                <select wire:model="jenis_peserta" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
-                    <option value="Wajib">Wajib</option>
-                    <option value="Kiriman">Kiriman</option>
-                    <option value="Person">Person</option>
-                </select>
-            </div>
+            <flux:select wire:model="jenis_peserta" label="Jenis Peserta" placeholder="-- Pilih Jenis Peserta --">
+                <flux:select.option value="Wajib">Wajib</flux:select.option>
+                <flux:select.option value="Kiriman">Kiriman</flux:select.option>
+                <flux:select.option value="Person">Person</flux:select.option>
+            </flux:select>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Pilih Desa</label>
-                <select wire:model="desa_id" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
-                    <option value="">-- Pilih Desa --</option>
-                    @foreach($daftarDesa as $desa)
-                        <option value="{{ $desa->id }}">{{ $desa->desa_asal }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <flux:select wire:model="desa_id" label="Pilih Desa" placeholder="-- Pilih Desa --">
+                @foreach($daftarDesa as $desa)
+                    <flux:select.option value="{{ $desa->id }}">{{ $desa->desa_asal }}</flux:select.option>
+                @endforeach
+            </flux:select>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Pilih Kelompok</label>
-                <select wire:model="kelompok_id" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
-                    <option value="">-- Pilih Kelompok --</option>
-                    @foreach($daftarKelompok as $kelompok)
-                        <option value="{{ $kelompok->id }}">{{ $kelompok->kelompok_asal }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <flux:select wire:model="kelompok_id" label="Pilih Kelompok" placeholder="-- Pilih Kelompok --">
+                @foreach($daftarKelompok as $kelompok)
+                    <flux:select.option value="{{ $kelompok->id }}">{{ $kelompok->kelompok_asal }}</flux:select.option>
+                @endforeach
+            </flux:select>
 
             <div class="flex">
                 <flux:modal.close>
@@ -124,14 +109,11 @@
                     </button>
                 </div>
 
-                <div>
-                    <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">Jenis Peserta untuk Event Ini</label>
-                    <select wire:model="existingJenisPeserta" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
-                        <option value="Wajib">Wajib</option>
-                        <option value="Kiriman">Kiriman</option>
-                        <option value="Person">Person</option>
-                    </select>
-                </div>
+                <flux:select wire:model="existingJenisPeserta" label="Jenis Peserta untuk Event Ini">
+                    <flux:select.option value="Wajib">Wajib</flux:select.option>
+                    <flux:select.option value="Kiriman">Kiriman</flux:select.option>
+                    <flux:select.option value="Person">Person</flux:select.option>
+                </flux:select>
 
                 <div class="flex">
                     <flux:modal.close>

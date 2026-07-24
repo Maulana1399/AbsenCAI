@@ -560,3 +560,34 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 - **Sidebar visibility** — User Management menu gated with `@can('manage-users')`
 - **Route** — `/users` with `auth`, `verified`, and `can:manage-users` middleware
 - **Tests** — dedicated test coverage for CRUD, delete safety, authorization, and activity logging
+
+---
+
+# UI Standardization (Phase 2–6)
+
+## Status
+
+✅ COMPLETE (2026-07-24).
+
+### What was done
+- **Phase 2 — Table Standardization**: Standarisasi padding tabel dari `px-6` ke `px-4 py-3` di 6 tabel (Database Peserta, Desa, Kelompok, Regu, Sesi, Person)
+- **Phase 3 — Form Standardization**: Migrasi 22 raw `<select>` ke `flux:select` di 8 file (TambahPeserta, EditPeserta, GantiPeserta, Dashboard, Event, Committee, QR Label)
+- **Phase 4 — Button Cleanup**: Standarisasi 16 tombol ke `flux:button` dengan variant yang sesuai (primary, danger, ghost), hapus inline `style=""` dan custom Tailwind
+- **Phase 5 — CSS Cleanup**: Hapus dead CSS di app.css (commented icon rule), hapus duplicate QR CSS di scan.blade.php (commented style block)
+- **Phase 6 — Alert & Badge Standardization**: Standarisasi 7 alert instances ke pattern `rounded-lg border border-green/bg-green`, hapus varian `rounded-xl` dan `dark:bg-*-950/30`
+- **Modal Consistency**: Standarisasi 5 modal footer dari `flex justify-end gap-2` ke `flex gap-2` + `flux:spacer`
+
+### Files changed
+- 1 CSS file, 25 Blade view files (total 26 files)
+- No changes to business logic, database, or architecture
+
+### Verification
+- Full test suite: **1574 passed** (3745 assertions)
+- Design C diagnostic: **problem_total = 0**
+
+### Not included (Phase 7 deferred)
+- Pengajian design language integration — akan direview terpisah dengan risiko lebih besar
+
+### Reference
+- Laporan lengkap: `docs/ai/UI_STANDARDIZATION_REPORT.md`
+- UI Design System: `docs/UI_DESIGN_SYSTEM.md`

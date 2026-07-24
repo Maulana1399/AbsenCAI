@@ -31,10 +31,11 @@
             </div>
         </div>
 
-        <div class="flex justify-end gap-2">
+        <div class="flex gap-2">
             <flux:modal.close>
                 <flux:button variant="ghost">Batal</flux:button>
             </flux:modal.close>
+            <flux:spacer />
             <flux:button wire:click="update" variant="primary" :loading="$processing">
                 Simpan
             </flux:button>

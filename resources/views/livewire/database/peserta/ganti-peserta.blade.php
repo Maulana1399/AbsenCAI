@@ -50,26 +50,16 @@
                 placeholder="Masukkan nama peserta pengganti"
             />
 
-            <div>
-                <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Jenis Kelamin
-                </label>
+            <flux:select wire:model="jenis_kelamin" label="Jenis Kelamin" placeholder="-- Pilih Jenis Kelamin --">
+                <flux:select.option value="Laki - Laki">Laki - Laki</flux:select.option>
+                <flux:select.option value="Perempuan">Perempuan</flux:select.option>
+            </flux:select>
 
-                <select
-                    wire:model="jenis_kelamin"
-                    class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
-                >
-                    <option value="">-- Pilih Jenis Kelamin --</option>
-                    <option value="Laki - Laki">Laki - Laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                </select>
-
-                @error('jenis_kelamin')
-                    <div class="mt-1 text-sm text-red-600">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
+            @error('jenis_kelamin')
+                <div class="mt-1 text-sm text-red-600">
+                    {{ $message }}
+                </div>
+            @enderror
 
             <flux:input
                 wire:model="tanggal_lahir"
@@ -96,10 +86,11 @@
                 @enderror
             </div>
 
-            <div class="flex justify-end gap-2">
+            <div class="flex gap-2">
                 <flux:modal.close>
                     <flux:button variant="ghost">Batal</flux:button>
                 </flux:modal.close>
+                <flux:spacer />
                 <flux:button
                     variant="primary"
                     wire:click="replace"

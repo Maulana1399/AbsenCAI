@@ -7,10 +7,11 @@
         <flux:checkbox wire:model="aktif">Aktifkan sesi ini</flux:checkbox>
     </div>
 
-    <div class="mt-4 flex justify-end gap-2">
+    <div class="flex gap-2">
         <flux:modal.close>
             <flux:button variant="ghost">Batal</flux:button>
         </flux:modal.close>
+        <flux:spacer />
         <flux:button wire:click.prevent="update">Update</flux:button>
     </div>
 </flux:modal>

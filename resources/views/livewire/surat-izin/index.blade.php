@@ -1,12 +1,12 @@
 <div class="space-y-6">
     {{-- Flash messages --}}
     @if (session('success'))
-        <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300">
+        <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
             {{ session('success') }}
         </div>
     @endif
     @if (session('error'))
-        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300">
+        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
             {{ session('error') }}
         </div>
     @endif
@@ -94,38 +94,29 @@
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex flex-wrap gap-1.5">
                                     @if ($surat->isDraft())
-                                        <button wire:click="submit({{ $surat->id }})" wire:confirm="{{ __('Submit surat izin ini?') }}"
-                                            class="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
-                                            style="background-color: #2563eb;">
+                                        <flux:button wire:click="submit({{ $surat->id }})" wire:confirm="{{ __('Submit surat izin ini?') }}" variant="primary" size="sm">
                                             {{ __('Submit') }}
-                                        </button>
+                                        </flux:button>
                                     @endif
 
                                     @if ($surat->isPending())
-                                        <button wire:click="confirmApprove({{ $surat->id }})"
-                                            class="inline-flex items-center rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
-                                            style="background-color: #16a34a;">
+                                        <flux:button wire:click="confirmApprove({{ $surat->id }})" variant="primary" size="sm">
                                             {{ __('Setujui') }}
-                                        </button>
-                                        <button wire:click="reject({{ $surat->id }})" wire:confirm="{{ __('Tolak surat izin ini?') }}"
-                                            class="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
-                                            style="background-color: #dc2626;">
+                                        </flux:button>
+                                        <flux:button wire:click="reject({{ $surat->id }})" wire:confirm="{{ __('Tolak surat izin ini?') }}" variant="danger" size="sm">
                                             {{ __('Tolak') }}
-                                        </button>
+                                        </flux:button>
                                     @endif
 
                                     @if ($surat->isApproved() && !$surat->isReturned())
-                                        <button wire:click="confirmReturn({{ $surat->id }})"
-                                            class="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
-                                            style="background-color: #2563eb;">
+                                        <flux:button wire:click="confirmReturn({{ $surat->id }})" variant="primary" size="sm">
                                             {{ __('Tandai Kembali') }}
-                                        </button>
+                                        </flux:button>
                                     @endif
                                     @if ($surat->isApproved())
-                                        <a href="{{ route('surat-izin.print', $surat->id) }}" target="_blank"
-                                            class="inline-flex items-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700">
+                                        <flux:button :href="route('surat-izin.print', $surat->id)" target="_blank" size="sm">
                                             {{ __('Print') }}
-                                        </a>
+                                        </flux:button>
                                     @endif
                                 </div>
                             </td>

@@ -14,9 +14,9 @@
             <div class="mt-1 text-lg font-bold text-zinc-900 dark:text-white">{{ $sesiAktif?->nama_sesi ?? 'Belum ada sesi aktif' }}</div>
             <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $sesiAktif?->tanggal ?? '' }}</div>
             <flux:modal.trigger name="ganti-sesi">
-                <button class="mt-3 inline-flex items-center rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">
+                <flux:button size="sm" variant="primary" class="mt-3">
                     Ganti Sesi
-                </button>
+                </flux:button>
             </flux:modal.trigger>
         </div>
         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
@@ -39,16 +39,11 @@
 
     {{-- FILTER --}}
     <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Filter Regu</label>
-        <select
-            wire:model.live="regu_id"
-            class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white md:max-w-xs"
-        >
-            <option value="">-- Semua Regu --</option>
+        <flux:select wire:model.live="regu_id" label="Filter Regu" placeholder="-- Semua Regu --" class="md:max-w-xs">
             @foreach($daftarRegu as $regu)
-                <option value="{{ $regu->id }}">{{ $regu->regu }}</option>
+                <flux:select.option value="{{ $regu->id }}">{{ $regu->regu }}</flux:select.option>
             @endforeach
-        </select>
+        </flux:select>
     </div>
 
     {{-- MODAL GANTI SESI --}}
@@ -68,11 +63,12 @@
                     @if($sesi->aktif)
                         <span class="rounded-lg bg-green-100 dark:bg-green-900/40 px-3 py-1 text-sm text-green-700 dark:text-green-300">Aktif</span>
                     @else
-                        <button
+                        <flux:button
                             wire:click="activateSesi({{ $sesi->id }})"
-                            class="rounded-xl bg-blue-600 px-3 py-1.5 text-sm text-white transition hover:bg-blue-700">
+                            size="sm"
+                            variant="primary">
                             Aktifkan
-                        </button>
+                        </flux:button>
                     @endif
                 </div>
             @endforeach
