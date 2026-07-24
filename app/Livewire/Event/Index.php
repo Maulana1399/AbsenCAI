@@ -21,6 +21,8 @@ class Index extends Component
 
     public bool $processing = false;
 
+    public ?int $deleteEventId = null;
+
     public function render()
     {
         return view('livewire.event.index', [
@@ -101,6 +103,57 @@ class Index extends Component
         $event->update(['status' => 'active']);
 
         session()->flash('success', 'Event berhasil diaktifkan.');
+    }
+
+    public function confirmDelete(int $eventId): void
+    {
+        $this->deleteEventId = $eventId;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->deleteEventId = null;
+    }
+
+    public function delete(): void
+    {
+        Gate::authorize('manage-events');
+
+        if ($this->deleteEventId === null) {
+            return;
+        }
+
+        $event = Event::find($this->deleteEventId);
+
+        if (! $event) {
+            session()->flash('error', 'Event tidak ditemukan.');
+            $this->deleteEventId = null;
+
+            return;
+        }
+
+        if ($event->slug === 'cai-operational') {
+            session()->flash('error', 'Legacy CAI Event tidak dapat dihapus.');
+            $this->deleteEventId = null;
+
+            return;
+        }
+
+        if ($event->hasRuntimeDependencies()) {
+            session()->flash('error', 'Event tidak dapat dihapus karena masih memiliki data terkait.');
+            $this->deleteEventId = null;
+
+            return;
+        }
+
+        $context = app(ActiveEventContext::class);
+        if ($context->id() === $event->id) {
+            $context->clear();
+        }
+
+        $event->delete();
+        $this->deleteEventId = null;
+        session()->flash('success', 'Event berhasil dihapus.');
     }
 
     public function edit(int $eventId): void

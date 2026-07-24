@@ -10,6 +10,7 @@ class DesaAccessGrant extends Model
         'event_id',
         'desa_id',
         'token_hash',
+        'encrypted_token',
         'token_prefix',
         'valid_from',
         'valid_until',

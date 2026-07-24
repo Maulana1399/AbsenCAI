@@ -118,7 +118,6 @@ test('unauthorized role cannot create access grant', function () {
 
     Livewire::test(\App\Livewire\Pengajian\Admin\AccessIndex::class)
         ->set('showCreateForm', true)
-        ->set('eventId', (string) $event->id)
         ->set('desaId', (string) $desa->id)
         ->set('validFrom', now()->format('Y-m-d\TH:i'))
         ->set('validUntil', now()->addDay()->format('Y-m-d\TH:i'))
@@ -135,11 +134,11 @@ test('admin can create access grant', function () {
 
     Livewire::test(\App\Livewire\Pengajian\Admin\AccessIndex::class)
         ->set('showCreateForm', true)
-        ->set('eventId', (string) $event->id)
         ->set('desaId', (string) $desa->id)
         ->set('validFrom', now()->format('Y-m-d\TH:i'))
         ->set('validUntil', now()->addDay()->format('Y-m-d\TH:i'))
-        ->call('create');
+        ->call('create')
+        ->assertDispatched('pengajian-raw-token-created');
 
     $this->assertDatabaseHas('desa_access_grants', [
         'event_id' => $event->id,
@@ -215,8 +214,9 @@ test('unauthorized role cannot submit admin manual entry', function () {
     $user = s4_user('operator_scan');
     $this->actingAs($user);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(\App\Livewire\Pengajian\Admin\ManualEntry::class)
-        ->set('eventId', (string) $event->id)
         ->set('desaId', (string) $desa->id)
         ->set('nama', 'Hacker Person')
         ->set('jenisKelamin', 'L')
@@ -311,4 +311,49 @@ test('event cai protection still enforced after S4', function () {
     // operator_scan can access /absensi (has manage-attendance)
     // but cannot access /sesi-absensi (needs manage-sessions)
     $this->get('/sesi-absensi')->assertForbidden();
+});
+
+// ---------------------------------------------------------------------------
+// PGM.25J — Download Template Import Person
+// ---------------------------------------------------------------------------
+
+test('import template route requires auth', function () {
+    $this->get(route('pengajian.import-massal.template', absolute: false))
+        ->assertRedirect(route('login', absolute: false));
+});
+
+test('import template route requires manage-pengajian', function () {
+    $this->actingAs(s4_user('operator_scan'));
+    $this->get(route('pengajian.import-massal.template', absolute: false))
+        ->assertForbidden();
+});
+
+test('import template download succeeds for authorized user', function () {
+    $this->actingAs(s4_user('admin'));
+
+    $response = $this->get(route('pengajian.import-massal.template', absolute: false));
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    $response->assertHeader('Content-Disposition', 'attachment; filename=template_import_person.xlsx');
+});
+
+test('import template returns BinaryFileResponse not rendered HTML', function () {
+    $this->actingAs(s4_user('admin'));
+
+    $response = $this->get(route('pengajian.import-massal.template', absolute: false));
+
+    $contentType = $response->headers->get('Content-Type');
+    expect($contentType)->toContain('vnd.openxmlformats-officedocument');
+    expect($contentType)->not->toContain('text/html');
+    expect($contentType)->not->toContain('application/xml');
+});
+
+test('import template file has correct filename', function () {
+    $this->actingAs(s4_user('admin'));
+
+    $response = $this->get(route('pengajian.import-massal.template', absolute: false));
+
+    $disposition = $response->headers->get('Content-Disposition');
+    expect($disposition)->toContain('template_import_person.xlsx');
 });

@@ -29,16 +29,14 @@ class SelfAttendance extends Component
 
     public ?int $selectedPersonId = null;
     public ?string $selectedPersonName = null;
-    public bool $selectedPersonHasBirthDate = false;
-    public ?string $selectedPersonBirthDateMasked = null;
 
     public string $birthDate = '';
     public bool $birthDateVerified = false;
-    public bool $verificationSkipped = false;
+    public bool $verificationFailed = false;
 
-    public string $correctionReason = '';
-    public string $correctionName = '';
+    public bool $showingCorrectionForm = false;
     public string $correctionBirthDate = '';
+    public string $correctionReason = '';
     public bool $correctionSubmitted = false;
 
     public ?string $errorMessage = null;
@@ -99,7 +97,9 @@ class SelfAttendance extends Component
         $this->selectedPersonId = $personId;
         $this->birthDate = '';
         $this->birthDateVerified = false;
-        $this->verificationSkipped = false;
+        $this->verificationFailed = false;
+        $this->showingCorrectionForm = false;
+        $this->correctionBirthDate = '';
         $this->correctionReason = '';
         $this->correctionSubmitted = false;
 
@@ -121,14 +121,7 @@ class SelfAttendance extends Component
         }
 
         $this->selectedPersonName = $person->nama;
-        $this->selectedPersonHasBirthDate = $person->tanggal_lahir !== null;
-        $this->selectedPersonBirthDateMasked = $person->tanggal_lahir?->format('d M');
-
-        if ($this->selectedPersonHasBirthDate) {
-            $this->step = 3;
-        } else {
-            $this->step = 4;
-        }
+        $this->step = 3;
     }
 
     public function verifyBirthDate(): void
@@ -138,6 +131,7 @@ class SelfAttendance extends Component
         }
 
         $this->errorMessage = null;
+        $this->verificationFailed = false;
 
         $person = Person::find($this->selectedPersonId);
 
@@ -151,19 +145,89 @@ class SelfAttendance extends Component
 
         if ($verified) {
             $this->birthDateVerified = true;
-            $this->step = 4;
+            $this->confirmAttendance();
         } else {
-            $this->errorMessage = 'Tanggal lahir tidak sesuai. Silakan coba lagi.';
+            $this->verificationFailed = true;
         }
     }
 
-    public function proceedWithoutBirthDate(): void
+    public function retryVerification(): void
     {
-        $this->verificationSkipped = true;
-        $this->step = 4;
+        $this->birthDate = '';
+        $this->verificationFailed = false;
+        $this->showingCorrectionForm = false;
+        $this->correctionBirthDate = '';
+        $this->correctionReason = '';
+        $this->correctionSubmitted = false;
+        $this->errorMessage = null;
     }
 
-    public function confirmAttendance(): void
+    public function showCorrectionForm(): void
+    {
+        $this->showingCorrectionForm = true;
+        $this->correctionBirthDate = $this->birthDate;
+    }
+
+    public function submitCorrection(): void
+    {
+        if ($this->selectedPersonId === null) {
+            $this->errorMessage = 'Sesi tidak valid.';
+            return;
+        }
+
+        if (trim($this->correctionBirthDate) === '') {
+            $this->errorMessage = 'Tanggal lahir yang benar wajib diisi.';
+            return;
+        }
+
+        if (trim($this->correctionReason) === '') {
+            $this->errorMessage = 'Alasan perubahan wajib diisi.';
+            return;
+        }
+
+        $grant = $this->resolveValidGrant();
+
+        if ($grant === null) {
+            return;
+        }
+
+        $person = app(PengajianIdentityService::class)
+            ->findPersonInDesa($this->selectedPersonId, $grant->desa_id);
+
+        if ($person === null) {
+            $this->errorMessage = 'Data peserta tidak valid.';
+            return;
+        }
+
+        $this->processing = true;
+        $this->errorMessage = null;
+
+        $proposed = [
+            'requested_birth_date' => trim($this->correctionBirthDate),
+            'reason' => trim($this->correctionReason),
+        ];
+
+        try {
+            app(IdentityCorrectionService::class)->submitFromPublicContext(
+                $person,
+                $grant,
+                $proposed,
+            );
+
+            $this->correctionSubmitted = true;
+            $this->errorMessage = 'Pengajuan perubahan data berhasil dikirim untuk ditinjau.';
+        } catch (\Throwable $e) {
+            $this->errorMessage = match ($e->getMessage()) {
+                'Permintaan koreksi yang identik sudah menunggu review.' => 'Permintaan sudah dikirim sebelumnya.',
+                'Tidak ada perubahan data yang perlu dikoreksi.' => 'Tanggal lahir yang diajukan sama dengan data saat ini.',
+                default => 'Terjadi kesalahan saat mengirim pengajuan.',
+            };
+        } finally {
+            $this->processing = false;
+        }
+    }
+
+    private function confirmAttendance(): void
     {
         if ($this->selectedPersonId === null) {
             $this->errorMessage = 'Sesi tidak valid. Silakan scan QR ulang.';
@@ -223,59 +287,6 @@ class SelfAttendance extends Component
         }
     }
 
-    public function submitCorrection(): void
-    {
-        if ($this->selectedPersonId === null) {
-            $this->errorMessage = 'Sesi tidak valid.';
-            return;
-        }
-
-        $grant = $this->resolveValidGrant();
-
-        if ($grant === null) {
-            return;
-        }
-
-        $person = app(PengajianIdentityService::class)
-            ->findPersonInDesa($this->selectedPersonId, $grant->desa_id);
-
-        if ($person === null) {
-            $this->errorMessage = 'Data peserta tidak valid.';
-            return;
-        }
-
-        $this->processing = true;
-        $this->errorMessage = null;
-
-        $proposed = ['reason' => $this->correctionReason ?: null];
-
-        if (trim($this->correctionName) !== '') {
-            $proposed['requested_name'] = trim($this->correctionName);
-        }
-
-        if (trim($this->correctionBirthDate) !== '') {
-            $proposed['requested_birth_date'] = trim($this->correctionBirthDate);
-        }
-
-        try {
-            app(IdentityCorrectionService::class)->submitFromPublicContext(
-                $person,
-                $grant,
-                $proposed,
-            );
-
-            $this->correctionSubmitted = true;
-        } catch (\Throwable $e) {
-            $this->errorMessage = match ($e->getMessage()) {
-                'Permintaan koreksi yang identik sudah menunggu review.' => 'Permintaan koreksi sudah dikirim sebelumnya.',
-                'Tidak ada perubahan data yang perlu dikoreksi.' => 'Tidak ada perubahan data. Isi field yang ingin diperbaiki.',
-                default => 'Terjadi kesalahan saat mengirim koreksi.',
-            };
-        } finally {
-            $this->processing = false;
-        }
-    }
-
     public function resetSearch(): void
     {
         $this->step = 1;
@@ -283,18 +294,17 @@ class SelfAttendance extends Component
         $this->searchResults = [];
         $this->selectedPersonId = null;
         $this->selectedPersonName = null;
-        $this->selectedPersonHasBirthDate = false;
-        $this->selectedPersonBirthDateMasked = null;
         $this->birthDate = '';
         $this->birthDateVerified = false;
-        $this->verificationSkipped = false;
-        $this->correctionReason = '';
-        $this->correctionName = '';
+        $this->verificationFailed = false;
+        $this->showingCorrectionForm = false;
         $this->correctionBirthDate = '';
+        $this->correctionReason = '';
         $this->correctionSubmitted = false;
         $this->errorMessage = null;
         $this->attendanceDone = false;
         $this->attendanceAlreadyExists = false;
+        $this->processing = false;
     }
 
     public function render()

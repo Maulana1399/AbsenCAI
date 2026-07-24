@@ -1,9 +1,42 @@
 <div>
-    <div class="mb-4">
-        <flux:input wire:model.live="search" placeholder="Cari nama atau NIP..." />
+    <div class="space-y-3">
+        <flux:input wire:model.live="search" placeholder="Cari nama..." />
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <select wire:model.live="desaId"
+                    class="block w-full sm:w-48 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                <option value="">Semua Desa</option>
+                @foreach ($desas as $desa)
+                    <option value="{{ $desa->id }}">{{ $desa->desa_asal }}</option>
+                @endforeach
+            </select>
+
+            <select wire:model.live="kelompokId"
+                    class="block w-full sm:w-48 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                <option value="">Semua Kelompok</option>
+                @foreach ($kelompoks as $kelompok)
+                    <option value="{{ $kelompok->id }}">{{ $kelompok->kelompok_asal }}</option>
+                @endforeach
+            </select>
+
+            <select wire:model.live="jenisKelamin"
+                    class="block w-full sm:w-40 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                <option value="">Semua</option>
+                <option value="L">Laki-Laki</option>
+                <option value="P">Perempuan</option>
+            </select>
+
+            <flux:button wire:click="resetFilter" size="sm" variant="ghost">
+                Reset Filter
+            </flux:button>
+        </div>
     </div>
 
-    <div class="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+    <div class="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+        {{ $people->total() }} Person{{ $people->total() !== $totalPerson ? ' ditemukan' : '' }}
+    </div>
+
+    <div class="mt-3 rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-zinc-700 dark:text-zinc-300">
                 <thead class="text-xs uppercase bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">

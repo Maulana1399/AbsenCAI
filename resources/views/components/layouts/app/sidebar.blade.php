@@ -42,9 +42,6 @@
                     </flux:navlist.group>
                     @endcan
 
-                    <flux:navlist.group expandable heading="Event" class="grid">
-                        <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
-                    </flux:navlist.group>
                 </flux:navlist>
             @else
                 {{-- CAI / Default Navigation --}}
@@ -125,15 +122,34 @@
 
 
             @can('view-master-data')
+            @php
+                $isMasterDataActive = request()->routeIs('master-data.index')
+                    || request()->routeIs('person.index')
+                    || request()->routeIs('desa')
+                    || request()->routeIs('kelompok')
+                    || request()->routeIs('events.index')
+                    || request()->routeIs('correction-requests.index');
+            @endphp
             <flux:navlist variant="outline">
-                <flux:navlist.item
-                    icon="folder"
-                    :href="route('master-data.index')"
-                    :current="request()->routeIs('master-data.index') || request()->routeIs('person.index') || request()->routeIs('desa') || request()->routeIs('kelompok')"
-                    wire:navigate
-                >
-                    {{ __('Master Data') }}
-                </flux:navlist.item>
+                <div x-data="{ expanded: true }" class="block space-y-[2px]">
+                    <a href="{{ route('master-data.index') }}" wire:navigate
+                       @click="expanded = !expanded"
+                       class="w-full h-10 lg:h-8 flex items-center gap-3 rounded-lg px-3 my-px text-sm font-medium leading-none hover:bg-zinc-800/5 dark:hover:bg-white/[7%] text-zinc-500 hover:text-zinc-800 dark:text-white/80 dark:hover:text-white {{ $isMasterDataActive ? 'bg-zinc-800/[4%] dark:bg-white/[7%] text-zinc-800 dark:text-white border border-zinc-200 dark:border-transparent shadow-xs' : '' }}">
+                        <flux:icon.folder class="size-4!" />
+                        <span class="flex-1">{{ __('Master Data') }}</span>
+                        <span @click.prevent.stop="expanded = !expanded" class="flex items-center">
+                            <flux:icon.chevron-down x-show="expanded" class="size-3!" />
+                            <flux:icon.chevron-right x-show="!expanded" class="size-3!" />
+                        </span>
+                    </a>
+                    <div x-show="expanded" x-cloak class="ps-7 space-y-[2px]">
+                        <flux:navlist.item :href="route('person.index')" :current="request()->routeIs('person.index')" wire:navigate>{{ __('Person') }}</flux:navlist.item>
+                        <flux:navlist.item :href="route('desa')" :current="request()->routeIs('desa')" wire:navigate>{{ __('Desa') }}</flux:navlist.item>
+                        <flux:navlist.item :href="route('kelompok')" :current="request()->routeIs('kelompok')" wire:navigate>{{ __('Kelompok') }}</flux:navlist.item>
+                        <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Event') }}</flux:navlist.item>
+                        <flux:navlist.item :href="route('correction-requests.index')" :current="request()->routeIs('correction-requests.index')" wire:navigate>{{ __('Permintaan Perubahan') }}</flux:navlist.item>
+                    </div>
+                </div>
             </flux:navlist>
             @endcan
 

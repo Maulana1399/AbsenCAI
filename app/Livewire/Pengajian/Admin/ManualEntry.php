@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Pengajian\Admin;
 
-use App\Models\Event;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Services\Registration\ManualParticipantRegistrationService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -13,7 +13,6 @@ class ManualEntry extends Component
 {
     public bool $processing = false;
 
-    public string $eventId = '';
     public string $desaId = '';
     public string $nama = '';
     public string $jenisKelamin = '';
@@ -35,7 +34,6 @@ class ManualEntry extends Component
     public function rules(): array
     {
         return [
-            'eventId' => ['required', 'exists:events,id'],
             'desaId' => ['required', 'exists:desas,id'],
             'nama' => ['required', 'string', 'max:255'],
             'jenisKelamin' => ['required', 'in:L,P'],
@@ -45,8 +43,6 @@ class ManualEntry extends Component
     }
 
     protected $messages = [
-        'eventId.required' => 'Event harus dipilih.',
-        'eventId.exists' => 'Event tidak valid.',
         'desaId.required' => 'Desa harus dipilih.',
         'desaId.exists' => 'Desa tidak valid.',
         'nama.required' => 'Nama harus diisi.',
@@ -73,6 +69,14 @@ class ManualEntry extends Component
         $this->potentialMatches = [];
 
         try {
+            $event = app(ActiveEventContext::class)->current();
+
+            if ($event === null) {
+                $this->errorMessage = 'Tidak ada event aktif. Silakan pilih event terlebih dahulu.';
+                $this->processing = false;
+                return;
+            }
+
             $validated = $this->validate();
 
             $result = app(ManualParticipantRegistrationService::class)->register(
@@ -80,7 +84,7 @@ class ManualEntry extends Component
                 jenisKelamin: $validated['jenisKelamin'],
                 tanggalLahir: $validated['tanggalLahir'],
                 desaId: (int) $validated['desaId'],
-                eventId: (int) $validated['eventId'],
+                eventId: $event->id,
                 kelompokId: (int) $validated['kelompokId'],
             );
 
@@ -110,6 +114,14 @@ class ManualEntry extends Component
         $this->successMessage = '';
 
         try {
+            $event = app(ActiveEventContext::class)->current();
+
+            if ($event === null) {
+                $this->errorMessage = 'Tidak ada event aktif.';
+                $this->processing = false;
+                return;
+            }
+
             $validated = $this->validate();
 
             $result = app(ManualParticipantRegistrationService::class)->register(
@@ -117,7 +129,7 @@ class ManualEntry extends Component
                 jenisKelamin: $validated['jenisKelamin'],
                 tanggalLahir: $validated['tanggalLahir'],
                 desaId: (int) $validated['desaId'],
-                eventId: (int) $validated['eventId'],
+                eventId: $event->id,
                 kelompokId: (int) $validated['kelompokId'],
                 forcePersonId: $personId,
             );
@@ -145,6 +157,14 @@ class ManualEntry extends Component
         $this->successMessage = '';
 
         try {
+            $event = app(ActiveEventContext::class)->current();
+
+            if ($event === null) {
+                $this->errorMessage = 'Tidak ada event aktif.';
+                $this->processing = false;
+                return;
+            }
+
             $validated = $this->validate();
 
             $result = app(ManualParticipantRegistrationService::class)->register(
@@ -152,7 +172,7 @@ class ManualEntry extends Component
                 jenisKelamin: $validated['jenisKelamin'],
                 tanggalLahir: $validated['tanggalLahir'],
                 desaId: (int) $validated['desaId'],
-                eventId: (int) $validated['eventId'],
+                eventId: $event->id,
                 kelompokId: (int) $validated['kelompokId'],
                 forceCreateNew: true,
             );
@@ -185,12 +205,14 @@ class ManualEntry extends Component
 
     public function render()
     {
+        $event = app(ActiveEventContext::class)->current();
+
         $kelompoks = $this->desaId
             ? kelompok::where('desa_id', $this->desaId)->orderBy('kelompok_asal')->get()
             : collect();
 
         return view('livewire.pengajian.admin.manual-entry', [
-            'events' => Event::orderBy('name')->get(['id', 'name']),
+            'activeEvent' => $event,
             'desas' => desa::orderBy('desa_asal')->get(['id', 'desa_asal']),
             'kelompoks' => $kelompoks,
         ]);

@@ -1,6 +1,12 @@
 <div class="flex flex-col gap-6">
-    @if ($errorMessage && $step !== 5)
+    @if ($errorMessage && $step !== 5 && ! $correctionSubmitted)
         <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+            {{ $errorMessage }}
+        </div>
+    @endif
+
+    @if ($correctionSubmitted && $errorMessage)
+        <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
             {{ $errorMessage }}
         </div>
     @endif
@@ -68,8 +74,8 @@
         </div>
     @endif
 
-    {{-- STEP 3: Birth date verification --}}
-    @if ($step === 3 && $selectedPersonName)
+    {{-- STEP 3: Mandatory Birth Date Verification --}}
+    @if ($step === 3 && $selectedPersonName && ! $attendanceDone && ! $showingCorrectionForm)
         <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 Verifikasi Tanggal Lahir
@@ -79,134 +85,117 @@
                 {{ $selectedPersonName }}
             </p>
 
-            <p class="mt-1 text-xs text-zinc-400">
-                Masukkan tanggal lahir Anda untuk verifikasi (format: YYYY-MM-DD).
-            </p>
-
-            <div class="mt-4 flex gap-2">
+            <div class="mt-4">
                 <flux:input
                     wire:model="birthDate"
-                    placeholder="Contoh: 2000-01-15"
-                    class="flex-1"
+                    placeholder="YYYY-MM-DD"
+                    class="w-full"
                     autocomplete="off"
+                    :disabled="$attendanceDone"
                 />
-                <flux:button
-                    wire:click="verifyBirthDate"
-                    variant="primary"
-                    :loading="$processing"
-                >
-                    Verifikasi
-                </flux:button>
+                <p class="mt-1 text-xs text-zinc-400">
+                    Format: YYYY-MM-DD — Contoh: 2000-01-15
+                </p>
             </div>
 
-            <div class="mt-3 flex gap-2">
-                <button
-                    wire:click="proceedWithoutBirthDate"
-                    type="button"
-                    class="text-xs text-zinc-400 underline hover:text-zinc-600 dark:hover:text-zinc-300"
+            @if (! $verificationFailed)
+                <div class="mt-4">
+                    <flux:button
+                        wire:click="verifyBirthDate"
+                        variant="primary"
+                        class="w-full"
+                        :loading="$processing"
+                    >
+                        Verifikasi
+                    </flux:button>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- Verification Failed --}}
+    @if ($verificationFailed && ! $showingCorrectionForm && ! $attendanceDone)
+        <div class="rounded-xl border border-red-200 bg-red-50 p-5 shadow-sm dark:border-red-800 dark:bg-red-950">
+            <p class="text-sm font-medium text-red-700 dark:text-red-300">
+                Tanggal lahir tidak sesuai.
+            </p>
+
+            <div class="mt-4 flex flex-col gap-2">
+                <flux:button
+                    wire:click="retryVerification"
+                    variant="primary"
+                    class="w-full"
                 >
-                    Data tanggal lahir tidak sesuai? Lanjutkan tanpa verifikasi
-                </button>
+                    Input Ulang
+                </flux:button>
+
+                <flux:button
+                    wire:click="showCorrectionForm"
+                    variant="ghost"
+                    class="w-full"
+                >
+                    Ajukan Perubahan Data
+                </flux:button>
             </div>
         </div>
     @endif
 
-    {{-- STEP 4: Confirmation --}}
-    @if ($step === 4 && $selectedPersonName)
+    {{-- Correction Form --}}
+    @if ($showingCorrectionForm && ! $attendanceDone)
         <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                Konfirmasi Data
+                Ajukan Perubahan Data
             </h2>
 
-            <div class="mt-4 space-y-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-zinc-500 dark:text-zinc-400">Nama</span>
-                    <span class="font-medium text-zinc-900 dark:text-white">{{ $selectedPersonName }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-zinc-500 dark:text-zinc-400">Desa</span>
-                    <span class="font-medium text-zinc-900 dark:text-white">{{ $desaName }}</span>
-                </div>
-                @if ($selectedPersonHasBirthDate && $birthDateVerified)
-                    <div class="flex justify-between">
-                        <span class="text-zinc-500 dark:text-zinc-400">Tanggal Lahir</span>
-                        <span class="inline-flex items-center gap-1 text-emerald-600">
-                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
-                            Terverifikasi
-                        </span>
-                    </div>
-                @elseif ($verificationSkipped)
-                    <div class="flex justify-between">
-                        <span class="text-zinc-500 dark:text-zinc-400">Verifikasi</span>
-                        <span class="text-xs text-zinc-400">Dilewati</span>
-                    </div>
-                @endif
-            </div>
+            <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                {{ $selectedPersonName }}
+            </p>
 
-            <div class="mt-6 flex flex-col gap-3">
-                <flux:button
-                    wire:click="confirmAttendance"
-                    variant="primary"
-                    class="w-full"
-                    :loading="$processing"
-                >
-                    Hadir
-                </flux:button>
-
-                <button
-                    wire:click="resetSearch"
-                    type="button"
-                    class="text-sm text-zinc-400 underline hover:text-zinc-600 dark:hover:text-zinc-300"
-                >
-                    Bukan saya? Cari ulang
-                </button>
-            </div>
-        </div>
-
-        {{-- Correction --}}
-        @if (! $correctionSubmitted)
-            <div class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900/50">
-                <h3 class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Data saya tidak sesuai
-                </h3>
-                <p class="mt-1 text-xs text-zinc-400">
-                    Isi data yang ingin diperbaiki. Biarkan kosong jika tidak ada perubahan.
-                </p>
-
-                <div class="mt-3 space-y-3">
-                    <flux:input
-                        wire:model="correctionName"
-                        placeholder="Nama yang benar"
-                        autocomplete="off"
-                    />
-
+            <div class="mt-4 space-y-4">
+                <div>
                     <flux:input
                         wire:model="correctionBirthDate"
-                        placeholder="Tanggal lahir yang benar (2000-01-15)"
+                        placeholder="YYYY-MM-DD"
+                        class="w-full"
                         autocomplete="off"
                     />
+                    <p class="mt-1 text-xs text-zinc-400">
+                        Tanggal lahir yang benar — Format: YYYY-MM-DD
+                    </p>
+                </div>
 
-                    <flux:input
+                <div>
+                    <textarea
                         wire:model="correctionReason"
-                        placeholder="Alasan koreksi (opsional)"
-                        autocomplete="off"
-                    />
+                        placeholder="Alasan perubahan"
+                        rows="3"
+                        class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                    ></textarea>
+                    <p class="mt-1 text-xs text-zinc-400">
+                        Alasan perubahan wajib diisi.
+                    </p>
+                </div>
 
+                <div class="flex flex-col gap-2">
                     <flux:button
                         wire:click="submitCorrection"
-                        variant="ghost"
+                        variant="primary"
+                        class="w-full"
                         :loading="$processing"
+                    >
+                        Kirim Pengajuan
+                    </flux:button>
+
+                    <flux:button
+                        wire:click="retryVerification"
+                        variant="ghost"
                         class="w-full"
                     >
-                        Ajukan Koreksi
+                        Kembali
                     </flux:button>
                 </div>
             </div>
-        @else
-            <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
-                Pengajuan koreksi berhasil dikirim untuk ditinjau.
-            </div>
-        @endif
+        </div>
     @endif
 
     {{-- STEP 5: Result --}}

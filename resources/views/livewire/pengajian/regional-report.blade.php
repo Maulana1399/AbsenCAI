@@ -28,6 +28,10 @@
                 <p class="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400">{{ $summary['sudah_hadir'] }}</p>
                 <p class="text-xs text-emerald-600 dark:text-emerald-500 mt-1">Sudah Hadir</p>
             </div>
+            <div class="rounded-xl border border-blue-200 bg-blue-50 p-3 sm:p-4 text-center shadow-sm dark:border-blue-900 dark:bg-blue-950">
+                <p class="text-xl sm:text-2xl font-bold text-blue-700 dark:text-blue-400">{{ $summary['izin'] ?? 0 }}</p>
+                <p class="text-xs text-blue-600 dark:text-blue-500 mt-1">Izin</p>
+            </div>
             <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 sm:p-4 text-center shadow-sm dark:border-amber-900 dark:bg-amber-950">
                 <p class="text-xl sm:text-2xl font-bold text-amber-700 dark:text-amber-400">{{ $summary['belum_hadir'] }}</p>
                 <p class="text-xs text-amber-600 dark:text-amber-500 mt-1">Belum Hadir</p>
@@ -150,6 +154,7 @@
                     >
                         <option value="">Semua Status</option>
                         <option value="hadir">Hadir</option>
+                        <option value="izin">Izin</option>
                         <option value="belum">Belum Hadir</option>
                     </select>
 
@@ -170,7 +175,7 @@
                     <div class="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-700">
                         <div class="min-w-0 flex-1 mr-2">
                             <p class="text-sm font-medium text-zinc-900 dark:text-white truncate">{{ $item['nama'] }}</p>
-                            @if ($item['hadir'])
+                            @if ($item['hadir'] || $item['izin'])
                                 <p class="text-xs text-zinc-400">
                                     {{ $item['attended_at'] }}
                                     &middot;
@@ -183,6 +188,10 @@
                         @if ($item['hadir'])
                             <span class="shrink-0 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
                                 Hadir
+                            </span>
+                        @elseif ($item['izin'])
+                            <span class="shrink-0 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                                Izin
                             </span>
                         @else
                             <span class="shrink-0 inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">

@@ -459,14 +459,132 @@ test('existing application works without selecting an event', function () {
     $this->get('/rekap-absensi')->assertStatus(200);
 });
 
-test('admin can access all operational and master data routes', function () {
+test('admin can access all operational routes without master data', function () {
     $user = EventFoundation_makeUser();
     $this->actingAs($user);
 
     $this->get('/sesi-absensi')->assertOk();
     $this->get('/database')->assertOk();
-    $this->get('/desa')->assertOk();
-    $this->get('/kelompok')->assertOk();
     $this->get('/regu')->assertOk();
     $this->get('/qr-label')->assertOk();
+    $this->get('/desa')->assertForbidden();
+    $this->get('/kelompok')->assertForbidden();
+});
+
+// ---------------------------------------------------------------------------
+// PGM.24 — Event Hard Delete
+// ---------------------------------------------------------------------------
+
+test('empty event can be deleted', function () {
+    $event = EventFoundation_makeEvent();
+    $user = EventFoundation_makeUser();
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Event\Index::class)
+        ->call('confirmDelete', $event->id)
+        ->assertSet('deleteEventId', $event->id)
+        ->call('delete')
+        ->assertSet('deleteEventId', null);
+
+    expect(Event::find($event->id))->toBeNull();
+});
+
+test('event with participation cannot be deleted', function () {
+    $event = EventFoundation_makeEvent();
+    $desa = \App\Models\desa::create(['desa_asal' => 'Del Test Desa']);
+    $person = \App\Models\Person::create(['nama' => 'Del Person', 'jenis_kelamin' => 'L']);
+    $user = EventFoundation_makeUser();
+
+    \App\Models\Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Event\Index::class)
+        ->call('confirmDelete', $event->id)
+        ->call('delete');
+
+    expect(Event::find($event->id))->not->toBeNull();
+});
+
+test('event with desa access grant cannot be deleted', function () {
+    $event = EventFoundation_makeEvent();
+    $desa = \App\Models\desa::create(['desa_asal' => 'Del Desa Grant']);
+    $user = EventFoundation_makeUser();
+
+    \App\Models\DesaAccessGrant::create([
+        'event_id' => $event->id,
+        'desa_id' => $desa->id,
+        'token_hash' => 'hash',
+        'token_prefix' => 'prefix123456789',
+        'valid_from' => now(),
+        'valid_until' => now()->addDay(),
+        'nonce' => str()->random(32),
+        'nonce_expires_at' => now()->addDay(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Event\Index::class)
+        ->call('confirmDelete', $event->id)
+        ->call('delete');
+
+    expect(Event::find($event->id))->not->toBeNull();
+});
+
+test('archive still works after delete feature added', function () {
+    $event = EventFoundation_makeEvent();
+    $user = EventFoundation_makeUser();
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Event\Index::class)
+        ->call('archive', $event->id);
+
+    expect(Event::find($event->id)->status)->toBe('archived');
+});
+
+test('activate still works after delete feature added', function () {
+    $event = EventFoundation_makeEvent(['status' => 'archived']);
+    $user = EventFoundation_makeUser();
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Event\Index::class)
+        ->call('activate', $event->id);
+
+    expect(Event::find($event->id)->status)->toBe('active');
+});
+
+test('hasRuntimeDependencies returns false for empty event', function () {
+    $event = EventFoundation_makeEvent();
+
+    expect($event->hasRuntimeDependencies())->toBeFalse();
+});
+
+test('hasRuntimeDependencies returns true for event with participation', function () {
+    $event = EventFoundation_makeEvent();
+    $desa = \App\Models\desa::create(['desa_asal' => 'Dep Test Desa']);
+    $person = \App\Models\Person::create(['nama' => 'Dep Person', 'jenis_kelamin' => 'L']);
+
+    \App\Models\Participation::create([
+        'person_id' => $person->id,
+        'event_id' => $event->id,
+        'jenis_peserta' => 'Wajib',
+    ]);
+
+    expect($event->fresh()->hasRuntimeDependencies())->toBeTrue();
+});
+
+test('cancel delete clears confirmation state', function () {
+    $event = EventFoundation_makeEvent();
+    $user = EventFoundation_makeUser();
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\Event\Index::class)
+        ->call('confirmDelete', $event->id)
+        ->assertSet('deleteEventId', $event->id)
+        ->call('cancelDelete')
+        ->assertSet('deleteEventId', null);
+
+    expect(Event::find($event->id))->not->toBeNull();
 });

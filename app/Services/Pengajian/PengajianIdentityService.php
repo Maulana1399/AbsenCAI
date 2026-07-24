@@ -3,6 +3,7 @@
 namespace App\Services\Pengajian;
 
 use App\Models\DesaAccessGrant;
+use App\Models\EventAttendance;
 use App\Models\IdentityCorrectionRequest;
 use App\Models\Person;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,6 +53,7 @@ class PengajianIdentityService
                 'people.desa_id',
                 'participations.participant_number',
                 'event_attendances.id as attendance_id',
+                'event_attendances.status as attendance_status',
                 'event_attendances.method as attendance_method',
                 'event_attendances.attended_at',
                 'kelompoks.kelompok_asal',
@@ -127,14 +129,17 @@ class PengajianIdentityService
 
     private function toSearchResult($row, bool $includeIdentifiers): array
     {
-        $hadir = $row->attendance_id !== null;
-        $method = $hadir ? $row->attendance_method : null;
-        $attendedAt = $hadir && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null;
+        $status = $row->attendance_status ?? null;
+        $hadir = $status === EventAttendance::STATUS_HADIR;
+        $izin = $status === EventAttendance::STATUS_IZIN;
+        $method = ($hadir || $izin) ? $row->attendance_method : null;
+        $attendedAt = ($hadir || $izin) && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null;
 
         $result = [
             'id' => $row->id,
             'nama' => $row->nama,
             'hadir' => $hadir,
+            'izin' => $izin,
             'attended_at' => $attendedAt,
             'method' => $method,
             'birth_date_masked' => $row->tanggal_lahir?->format(self::BIRTH_DATE_FORMAT_MASKED),

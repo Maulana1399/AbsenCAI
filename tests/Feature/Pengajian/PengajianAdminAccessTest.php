@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Pengajian\Admin\AccessIndex;
+use App\Models\ActivityLog;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Enums\Role;
@@ -8,7 +9,9 @@ use App\Models\User;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 // ---------------------------------------------------------------------------
@@ -175,33 +178,24 @@ test('grant list shows status badges correctly', function () {
 // ---------------------------------------------------------------------------
 
 test('create grant requires all fields', function () {
-    Livewire::actingAs(pgm13_user())
-        ->test(AccessIndex::class)
-        ->call('toggleCreateForm')
-        ->call('create')
-        ->assertHasErrors(['eventId', 'desaId']);
-});
+    $event = pgm13_event();
+    pgm13_setActiveEvent($event);
 
-test('create grant validates event exists', function () {
     Livewire::actingAs(pgm13_user())
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', 99999)
-        ->set('desaId', pgm13_desa()->id)
-        ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
-        ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
         ->call('create')
-        ->assertHasErrors(['eventId']);
+        ->assertHasErrors(['desaId']);
 });
 
 test('create grant validates validUntil after validFrom', function () {
     $event = pgm13_event();
     $desa = pgm13_desa();
+    pgm13_setActiveEvent($event);
 
     Livewire::actingAs(pgm13_user())
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->addDay()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->format('Y-m-d\TH:i'))
@@ -213,11 +207,11 @@ test('create grant succeeds and dispatches raw token', function () {
     $event = pgm13_event();
     $desa = pgm13_desa();
     $user = pgm13_user();
+    pgm13_setActiveEvent($event);
 
     Livewire::actingAs($user)
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
@@ -236,11 +230,11 @@ test('create grant stores created_by as authenticated user', function () {
     $event = pgm13_event();
     $desa = pgm13_desa();
     $user = pgm13_user();
+    pgm13_setActiveEvent($event);
 
     Livewire::actingAs($user)
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
@@ -253,12 +247,12 @@ test('create grant stores created_by as authenticated user', function () {
 test('create grant hides form on success', function () {
     $event = pgm13_event();
     $desa = pgm13_desa();
+    pgm13_setActiveEvent($event);
 
     Livewire::actingAs(pgm13_user())
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
         ->assertSet('showCreateForm', true)
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
@@ -280,11 +274,11 @@ test('raw token is dispatched as browser event not stored in Livewire state', fu
     $event = pgm13_event();
     $desa = pgm13_desa();
     $user = pgm13_user();
+    pgm13_setActiveEvent($event);
 
     Livewire::actingAs($user)
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
@@ -296,11 +290,11 @@ test('raw token not stored in database', function () {
     $event = pgm13_event();
     $desa = pgm13_desa();
     $user = pgm13_user();
+    pgm13_setActiveEvent($event);
 
     Livewire::actingAs($user)
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
@@ -551,6 +545,7 @@ test('raw token one-time modal closes and clears state', function () {
     $event = pgm13_event();
     $desa = pgm13_desa();
     $user = pgm13_user();
+    pgm13_setActiveEvent($event);
 
     // The Alpine.js rawToken state is cleared via closeModal() which sets rawToken = null
     // This is verified by the x-data definition in the view:
@@ -559,7 +554,6 @@ test('raw token one-time modal closes and clears state', function () {
     Livewire::actingAs($user)
         ->test(AccessIndex::class)
         ->call('toggleCreateForm')
-        ->set('eventId', $event->id)
         ->set('desaId', $desa->id)
         ->set('validFrom', Carbon::now()->format('Y-m-d\TH:i'))
         ->set('validUntil', Carbon::now()->addHour()->format('Y-m-d\TH:i'))
@@ -744,4 +738,272 @@ test('authorized admin can delete revoked grant in own event context', function 
         ->call('delete');
 
     expect(DesaAccessGrant::find($grantId))->toBeNull();
+});
+
+// ---------------------------------------------------------------------------
+// PGM.22 — Access Token View Enhancement (Hybrid Hash + Encrypted Token)
+// ---------------------------------------------------------------------------
+
+test('create grant stores encrypted_token alongside token_hash', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    $grant = DesaAccessGrant::find($result['grant']->id);
+
+    expect($grant->token_hash)->not->toBeEmpty();
+    expect($grant->encrypted_token)->not->toBeNull();
+    expect($grant->encrypted_token)->not->toBe($result['raw_token']);
+});
+
+test('encrypted_token can be decrypted to original raw token', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    $grant = DesaAccessGrant::find($result['grant']->id);
+
+    $decrypted = Crypt::decryptString($grant->encrypted_token);
+    expect($decrypted)->toBe($result['raw_token']);
+});
+
+test('authentication still uses token_hash not encrypted_token', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    $grant = DesaAccessGrant::find($result['grant']->id);
+
+    $found = app(DesaAccessService::class)->validateToken($result['raw_token'], $event->id);
+    expect($found)->not->toBeNull();
+    expect($found->id)->toBe($grant->id);
+
+    $shouldNotMatch = app(DesaAccessService::class)->validateToken($grant->encrypted_token, $event->id);
+    expect($shouldNotMatch)->toBeNull();
+});
+
+test('view token dispatches event with decrypted token', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    pgm13_setActiveEvent($event);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('viewToken', $result['grant']->id)
+        ->assertDispatched('pengajian-view-token', function ($eventName, $params) use ($result) {
+            return $params['token'] === $result['raw_token'];
+        });
+});
+
+test('old grant without encrypted_token does not error and shows fallback', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+
+    $legacyGrant = DesaAccessGrant::create([
+        'event_id' => $event->id,
+        'desa_id' => $desa->id,
+        'token_hash' => Hash::make('legacy-token'),
+        'token_prefix' => 'legacy-token-12',
+        'valid_from' => Carbon::now()->subHour(),
+        'valid_until' => Carbon::now()->addHour(),
+        'nonce' => Str::random(32),
+        'nonce_expires_at' => Carbon::now()->addDay(),
+        'created_by' => $user->id,
+    ]);
+
+    pgm13_setActiveEvent($event);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('viewToken', $legacyGrant->id)
+        ->assertDispatched('pengajian-view-token-fallback');
+});
+
+test('old grant without encrypted_token can still authenticate', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+
+    $rawToken = 'legacy-auth-token-1234567890abcdef';
+
+    DesaAccessGrant::create([
+        'event_id' => $event->id,
+        'desa_id' => $desa->id,
+        'token_hash' => Hash::make($rawToken),
+        'token_prefix' => substr($rawToken, 0, 16),
+        'valid_from' => Carbon::now()->subHour(),
+        'valid_until' => Carbon::now()->addHour(),
+        'nonce' => Str::random(32),
+        'nonce_expires_at' => Carbon::now()->addDay(),
+    ]);
+
+    $found = app(DesaAccessService::class)->validateToken($rawToken, $event->id);
+    expect($found)->not->toBeNull();
+});
+
+test('unauthorized user cannot view token', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    pgm13_setActiveEvent($event);
+
+    $unauthorizedUser = User::factory()->create(['role' => Role::OperatorRegistrasi]);
+
+    Livewire::actingAs($unauthorizedUser)
+        ->test(AccessIndex::class)
+        ->call('viewToken', $result['grant']->id)
+        ->assertForbidden();
+});
+
+test('view token on non-existent grant shows error', function () {
+    $user = pgm13_user();
+
+    pgm13_setActiveEvent(pgm13_event());
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('viewToken', 99999)
+        ->assertSee('Grant tidak ditemukan atau tidak berada dalam event aktif.');
+});
+
+test('view token on grant from different event is rejected', function () {
+    $eventA = pgm13_event(['name' => 'Event A']);
+    $eventB = pgm13_event(['name' => 'Event B']);
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($eventA, $desa, $user);
+
+    pgm13_setActiveEvent($eventB);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('viewToken', $result['grant']->id)
+        ->assertSee('Grant tidak ditemukan atau tidak berada dalam event aktif.');
+});
+
+test('revoke still works with encrypted_token column present', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+    $grantId = $result['grant']->id;
+
+    pgm13_setActiveEvent($event);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('revoke', $grantId);
+
+    $grant = DesaAccessGrant::find($grantId);
+    expect($grant->revoked_at)->not->toBeNull();
+});
+
+test('delete still works with encrypted_token column present', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+    $grantId = $result['grant']->id;
+
+    pgm13_setActiveEvent($event);
+    app(DesaAccessService::class)->revokeGrant($result['grant']);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('confirmDelete', $grantId)
+        ->call('delete');
+
+    expect(DesaAccessGrant::find($grantId))->toBeNull();
+});
+
+test('encrypted_token is not exposed in grant list', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->assertDontSee($result['grant']->encrypted_token);
+});
+
+test('view token creates activity log entry', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    pgm13_setActiveEvent($event);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('viewToken', $result['grant']->id);
+
+    $log = App\Models\ActivityLog::where('action', 'viewed')
+        ->where('module', 'pengajian_access')
+        ->first();
+
+    expect($log)->not->toBeNull();
+    expect($log->subject_id)->toBe($result['grant']->id);
+    expect($log->user_id)->toBe($user->id);
+});
+
+test('getDecryptedToken returns null for tampered encrypted_token', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    $grant = DesaAccessGrant::find($result['grant']->id);
+
+    $grant->update(['encrypted_token' => 'tampered-data-that-cannot-be-decrypted']);
+
+    $token = app(DesaAccessService::class)->getDecryptedToken($grant);
+    expect($token)->toBeNull();
+});
+
+test('view token with tampered encrypted_token shows error not crash', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+    $user = pgm13_user();
+    $result = pgm13_createGrant($event, $desa, $user);
+
+    pgm13_setActiveEvent($event);
+
+    $grant = DesaAccessGrant::find($result['grant']->id);
+    $grant->update(['encrypted_token' => 'tampered-data-that-cannot-be-decrypted']);
+
+    Livewire::actingAs($user)
+        ->test(AccessIndex::class)
+        ->call('viewToken', $grant->id)
+        ->assertSee('Gagal mendekripsi token.')
+        ->assertNotDispatched('pengajian-view-token')
+        ->assertNotDispatched('pengajian-view-token-fallback');
+});
+
+test('getDecryptedToken returns null for null encrypted_token', function () {
+    $event = pgm13_event();
+    $desa = pgm13_desa();
+
+    $grant = DesaAccessGrant::create([
+        'event_id' => $event->id,
+        'desa_id' => $desa->id,
+        'token_hash' => Hash::make('some-token'),
+        'token_prefix' => 'some-token-12345',
+        'valid_from' => Carbon::now()->subHour(),
+        'valid_until' => Carbon::now()->addHour(),
+        'nonce' => Str::random(32),
+        'nonce_expires_at' => Carbon::now()->addDay(),
+    ]);
+
+    $token = app(DesaAccessService::class)->getDecryptedToken($grant);
+    expect($token)->toBeNull();
 });

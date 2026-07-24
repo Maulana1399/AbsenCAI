@@ -71,9 +71,9 @@ class IdentityCorrectionService
         ]);
     }
 
-    public function approve(IdentityCorrectionRequest $request, User $reviewer): void
+    public function approve(IdentityCorrectionRequest $request, User $reviewer, ?string $operatorNotes = null): void
     {
-        DB::transaction(function () use ($request, $reviewer) {
+        DB::transaction(function () use ($request, $reviewer, $operatorNotes) {
             $locked = IdentityCorrectionRequest::query()
                 ->lockForUpdate()
                 ->findOrFail($request->id);
@@ -108,6 +108,7 @@ class IdentityCorrectionService
                 'status' => IdentityCorrectionRequest::STATUS_APPROVED,
                 'reviewed_by' => $reviewer->id,
                 'reviewed_at' => now(),
+                'operator_notes' => $operatorNotes,
             ]);
         });
     }
@@ -116,8 +117,9 @@ class IdentityCorrectionService
         IdentityCorrectionRequest $request,
         User $reviewer,
         ?string $reason = null,
+        ?string $operatorNotes = null,
     ): void {
-        DB::transaction(function () use ($request, $reviewer, $reason) {
+        DB::transaction(function () use ($request, $reviewer, $reason, $operatorNotes) {
             $locked = IdentityCorrectionRequest::query()
                 ->lockForUpdate()
                 ->findOrFail($request->id);
@@ -133,6 +135,7 @@ class IdentityCorrectionService
                 'reviewed_by' => $reviewer->id,
                 'reviewed_at' => now(),
                 'reason' => $reason ?? $locked->reason,
+                'operator_notes' => $operatorNotes,
             ]);
         });
     }

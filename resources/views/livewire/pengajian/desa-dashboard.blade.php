@@ -121,18 +121,28 @@
                     @endif
                 </div>
 
-                @if (!$selectedPersonHadir)
-                    <div class="mt-4 flex gap-2">
+                @if (!$selectedPersonHadir && !$selectedPersonIzin)
+                    <div class="mt-4 flex flex-col gap-2 sm:flex-row">
                         <flux:button
                             wire:click="confirmOperatorAttendance"
                             :loading="$processing"
+                            class="flex-1"
                         >
-                            Tandai Hadir
+                            Hadir
+                        </flux:button>
+
+                        <flux:button
+                            wire:click="confirmOperatorIzin"
+                            :loading="$processing"
+                            class="flex-1"
+                        >
+                            Izin
                         </flux:button>
 
                         <flux:button
                             wire:click="resetSelection"
                             variant="ghost"
+                            class="flex-1"
                         >
                             Batal
                         </flux:button>
@@ -174,7 +184,7 @@
                         @foreach ($searchResults as $result)
                             <button
                                 type="button"
-                                wire:click="selectPerson({{ $result['id'] }}, '{{ $result['participant_number'] }}', '{{ $result['kelompok'] }}', {{ $result['hadir'] ? 'true' : 'false' }})"
+                                wire:click="selectPerson({{ $result['id'] }}, '{{ $result['participant_number'] }}', '{{ $result['kelompok'] }}', {{ $result['hadir'] ? 'true' : 'false' }}, {{ ($result['izin'] ?? false) ? 'true' : 'false' }})"
                                 class="w-full rounded-lg border border-zinc-200 px-4 py-3 text-left text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
                             >
                                 <div class="flex items-center justify-between">
@@ -252,7 +262,7 @@
                     <div class="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-700">
                         <div class="min-w-0 flex-1 mr-2">
                             <p class="text-sm font-medium text-zinc-900 dark:text-white truncate">{{ $item['nama'] }}</p>
-                            @if ($item['hadir'])
+                            @if ($item['hadir'] || $item['izin'])
                                 <p class="text-xs text-zinc-400">
                                     {{ $item['attended_at'] }}
                                     &middot;
@@ -265,6 +275,10 @@
                         @if ($item['hadir'])
                             <span class="shrink-0 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
                                 Hadir
+                            </span>
+                        @elseif ($item['izin'])
+                            <span class="shrink-0 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                                Izin
                             </span>
                         @else
                             <span class="shrink-0 inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">

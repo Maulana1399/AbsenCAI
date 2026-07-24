@@ -5,17 +5,20 @@ namespace App\Livewire\Pengajian\Admin;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\desa;
+use App\Services\Audit\ActivityLogService;
 use App\Services\Pengajian\DesaAccessService;
 use App\Support\ActiveEventContext;
 use Carbon\Carbon;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class AccessIndex extends Component
 {
     public bool $showCreateForm = false;
 
-    public string $eventId = '';
     public string $desaId = '';
     public string $validFrom = '';
     public string $validUntil = '';
@@ -26,20 +29,20 @@ class AccessIndex extends Component
 
     public function render()
     {
-        $activeEventId = app(ActiveEventContext::class)->id();
+        $activeEvent = app(ActiveEventContext::class)->current();
 
         $grantsQuery = DesaAccessGrant::with('event', 'desa', 'creator')
             ->orderBy('created_at', 'desc');
 
-        if ($activeEventId !== null) {
-            $grantsQuery->where('event_id', $activeEventId);
+        if ($activeEvent !== null) {
+            $grantsQuery->where('event_id', $activeEvent->id);
         }
 
         $grants = $grantsQuery->get()->map(fn ($g) => $this->safeGrant($g));
 
         return view('livewire.pengajian.admin.access-index', [
             'grants' => $grants,
-            'events' => Event::orderBy('name')->get(['id', 'name']),
+            'activeEvent' => $activeEvent,
             'desas' => desa::orderBy('desa_asal')->get(['id', 'desa_asal']),
         ]);
     }
@@ -65,18 +68,24 @@ class AccessIndex extends Component
         $this->processing = true;
 
         try {
+            $activeEvent = app(ActiveEventContext::class)->current();
+
+            if ($activeEvent === null) {
+                session()->flash('error', 'Tidak ada event aktif.');
+
+                return;
+            }
+
             $this->validate([
-                'eventId' => 'required|exists:events,id',
                 'desaId' => 'required|exists:desas,id',
                 'validFrom' => 'required|date',
                 'validUntil' => 'required|date|after:validFrom',
             ]);
 
-            $event = Event::findOrFail($this->eventId);
             $desa = desa::findOrFail($this->desaId);
 
             $result = app(DesaAccessService::class)->createGrant(
-                event: $event,
+                event: $activeEvent,
                 desa: $desa,
                 validFrom: Carbon::parse($this->validFrom),
                 validUntil: Carbon::parse($this->validUntil),
@@ -167,6 +176,45 @@ class AccessIndex extends Component
         }
     }
 
+    public function viewToken(int $grantId): void
+    {
+        Gate::authorize('manage-pengajian');
+
+        $grant = DesaAccessGrant::find($grantId);
+
+        if (! $grant || ! $this->grantBelongsToActiveEvent($grant)) {
+            session()->flash('error', 'Grant tidak ditemukan atau tidak berada dalam event aktif.');
+
+            return;
+        }
+
+        if ($grant->encrypted_token === null) {
+            $this->dispatch('pengajian-view-token-fallback');
+
+            return;
+        }
+
+        try {
+            $token = Crypt::decryptString($grant->encrypted_token);
+
+            $this->dispatch('pengajian-view-token', token: $token);
+
+            app(ActivityLogService::class)->log(
+                action: 'viewed',
+                module: 'pengajian_access',
+                description: 'Melihat access token grant #'.$grant->id,
+                subject: $grant,
+            );
+        } catch (DecryptException $e) {
+            Log::warning('Gagal mendekripsi encrypted_token di viewToken', [
+                'grant_id' => $grant->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            session()->flash('error', 'Gagal mendekripsi token.');
+        }
+    }
+
     private function grantBelongsToActiveEvent(DesaAccessGrant $grant): bool
     {
         $activeEventId = app(ActiveEventContext::class)->id();
@@ -180,7 +228,7 @@ class AccessIndex extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['eventId', 'desaId', 'validFrom', 'validUntil']);
+        $this->reset(['desaId', 'validFrom', 'validUntil']);
         $this->resetErrorBag();
     }
 

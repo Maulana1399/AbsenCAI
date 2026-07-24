@@ -40,6 +40,7 @@ class DesaDashboard extends Component
     public ?string $selectedPersonNumber = null;
     public ?string $selectedPersonKelompok = null;
     public bool $selectedPersonHadir = false;
+    public bool $selectedPersonIzin = false;
 
     public ?string $successMessage = null;
     public ?string $errorMessage = null;
@@ -138,7 +139,7 @@ class DesaDashboard extends Component
         }
     }
 
-    public function selectPerson(int $personId, ?string $participantNumber = null, ?string $kelompok = null, bool $hadir = false): void
+    public function selectPerson(int $personId, ?string $participantNumber = null, ?string $kelompok = null, bool $hadir = false, bool $izin = false): void
     {
         if ($this->grant === null) {
             return;
@@ -162,7 +163,72 @@ class DesaDashboard extends Component
         $this->selectedPersonNumber = $participantNumber;
         $this->selectedPersonKelompok = $kelompok;
         $this->selectedPersonHadir = $hadir;
+        $this->selectedPersonIzin = $izin;
         $this->showingConfirmation = true;
+    }
+
+    public function confirmOperatorIzin(): void
+    {
+        if ($this->grant === null || $this->selectedPersonId === null) {
+            $this->errorMessage = 'Sesi tidak valid. Silakan refresh halaman.';
+            return;
+        }
+
+        $this->processing = true;
+        $this->errorMessage = null;
+        $this->successMessage = null;
+
+        if ($this->selectedPersonHadir) {
+            $this->errorMessage = 'Peserta sudah tercatat hadir.';
+            $this->processing = false;
+            return;
+        }
+
+        if ($this->selectedPersonIzin) {
+            $this->errorMessage = 'Peserta sudah tercatat izin.';
+            $this->processing = false;
+            return;
+        }
+
+        $person = app(PengajianIdentityService::class)
+            ->findPersonInDesa($this->selectedPersonId, $this->grant->desa_id);
+
+        if ($person === null) {
+            $this->errorMessage = 'Data peserta tidak valid.';
+            $this->processing = false;
+            return;
+        }
+
+        try {
+            app(PengajianAttendanceService::class)->attendPersonOperatorContext(
+                $person,
+                $this->grant,
+                recordedBy: auth()->user(),
+                status: \App\Models\EventAttendance::STATUS_IZIN,
+            );
+
+            $this->successMessage = 'Izin berhasil dicatat.';
+            $this->showingConfirmation = false;
+            $this->selectedPersonId = null;
+            $this->selectedPersonName = null;
+            $this->selectedPersonNumber = null;
+            $this->selectedPersonKelompok = null;
+            $this->selectedPersonHadir = false;
+            $this->query = '';
+            $this->searchResults = [];
+            $this->loadSummary();
+        } catch (\RuntimeException $e) {
+            $this->errorMessage = match ($e->getMessage()) {
+                'Person tidak memiliki desa assignment.' => 'Peserta belum memiliki desa.',
+                'Person tidak terdaftar di desa ini.' => 'Peserta tidak terdaftar di desa ini.',
+                'Peserta sudah tercatat hadir.' => 'Peserta sudah tercatat hadir.',
+                default => 'Peserta tidak dapat diproses.',
+            };
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Peserta tidak dapat diproses.';
+        } finally {
+            $this->processing = false;
+        }
     }
 
     public function confirmOperatorAttendance(): void
@@ -178,6 +244,12 @@ class DesaDashboard extends Component
 
         if ($this->selectedPersonHadir) {
             $this->errorMessage = 'Peserta sudah tercatat hadir.';
+            $this->processing = false;
+            return;
+        }
+
+        if ($this->selectedPersonIzin) {
+            $this->errorMessage = 'Peserta sudah tercatat izin.';
             $this->processing = false;
             return;
         }
@@ -229,6 +301,7 @@ class DesaDashboard extends Component
         $this->selectedPersonNumber = null;
         $this->selectedPersonKelompok = null;
         $this->selectedPersonHadir = false;
+        $this->selectedPersonIzin = false;
         $this->errorMessage = null;
         $this->successMessage = null;
     }

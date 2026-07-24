@@ -42,6 +42,14 @@
                     </p>
 
                     <div class="mt-4">
+                        <a href="{{ route('pengajian.import-massal.template') }}" download>
+                            <flux:button type="button" variant="ghost" icon-trailing="arrow-down-tray">
+                                Download Template
+                            </flux:button>
+                        </a>
+                    </div>
+
+                    <div class="mt-4">
                         <input
                             type="file"
                             wire:model="file"

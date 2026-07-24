@@ -637,6 +637,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('can:view-master-data')
         ->name('person.index');
 
+    Route::get('correction-requests', App\Livewire\MasterData\CorrectionRequest\IndexCorrectionRequest::class)
+        ->middleware('can:view-master-data')
+        ->name('correction-requests.index');
+
     Route::get('users', IndexUser::class)
         ->middleware('can:manage-users')
         ->name('users.index');
@@ -669,6 +673,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'pengajian/admin/import-massal',
         App\Livewire\Pengajian\Admin\ImportMassal::class
     )->middleware('can:manage-pengajian')->name('pengajian.import-massal');
+
+    Route::get(
+        'pengajian/admin/import-massal/template',
+        function () {
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\PersonImportTemplateExport,
+                'template_import_person.xlsx',
+            );
+        }
+    )->middleware('can:manage-pengajian')->name('pengajian.import-massal.template');
 });
 
 Route::prefix('pengajian')->group(function () {

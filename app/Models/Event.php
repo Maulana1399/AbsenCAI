@@ -100,6 +100,26 @@ class Event extends Model
         return $this->hasMany(EventCommitteeAssignment::class);
     }
 
+    public function desaAccessGrants()
+    {
+        return $this->hasMany(DesaAccessGrant::class);
+    }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class);
+    }
+
+    public function hasRuntimeDependencies(): bool
+    {
+        return $this->participations()->exists()
+            || $this->sesiAbsensis()->exists()
+            || $this->eventAttendances()->exists()
+            || $this->eventRoles()->exists()
+            || $this->committeeAssignments()->exists()
+            || $this->desaAccessGrants()->exists();
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Event $event) {

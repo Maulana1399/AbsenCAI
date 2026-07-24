@@ -10,7 +10,7 @@ use App\Support\ActiveEventContext;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->create(['role' => Role::Admin]));
+    $this->actingAs(User::factory()->create(['role' => Role::SuperAdmin]));
     app(ActiveEventContext::class)->set(Event::create(['name' => 'Default Event', 'slug' => 'default-event', 'status' => 'active']));
 });
 

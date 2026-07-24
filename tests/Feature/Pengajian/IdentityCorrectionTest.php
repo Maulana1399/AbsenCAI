@@ -708,6 +708,175 @@ test('Authenticated user dapat mengakses review UI', function () {
     $response->assertStatus(200);
 });
 
+// ---------------------------------------------------------------------------
+// PGM.25H — Master Data Correction Request Workflow
+// ---------------------------------------------------------------------------
+
+test('correction request page requires view-master-data', function () {
+    $user = User::factory()->create(['role' => 'operator_scan']);
+
+    $this->actingAs($user)
+        ->get(route('correction-requests.index', absolute: false))
+        ->assertForbidden();
+});
+
+test('correction request page accessible by super admin', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+
+    $this->actingAs($user)
+        ->get(route('correction-requests.index', absolute: false))
+        ->assertOk();
+});
+
+test('pending request appears in list', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('Pending Test', 'L', $desa->id, '2000-01-15');
+
+    app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1995-06-20', 'reason' => 'Test'],
+    );
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\MasterData\CorrectionRequest\IndexCorrectionRequest::class)
+        ->assertSee('Pending Test');
+});
+
+test('filter status works', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('Filter Test', 'L', $desa->id, '2000-01-15');
+    $reviewer = pgm8_user();
+
+    $request = app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1995-06-20', 'reason' => 'Test'],
+    );
+    app(IdentityCorrectionService::class)->approve($request, $reviewer);
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\MasterData\CorrectionRequest\IndexCorrectionRequest::class)
+        ->set('filterStatus', 'approved')
+        ->assertSee('Filter Test');
+});
+
+test('approve updates person data', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('Approve Person Test', 'L', $desa->id, '2000-01-15');
+    $reviewer = pgm8_user();
+
+    $request = app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1990-05-10', 'reason' => 'Koreksi'],
+    );
+
+    app(IdentityCorrectionService::class)->approve($request, $reviewer, operatorNotes: 'Disetujui');
+
+    expect($person->fresh()->tanggal_lahir?->format('Y-m-d'))->toBe('1990-05-10');
+});
+
+test('approve updates request status', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('Approve Status', 'L', $desa->id, '2000-01-15');
+    $reviewer = pgm8_user();
+
+    $request = app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1990-05-10', 'reason' => 'Koreksi'],
+    );
+
+    app(IdentityCorrectionService::class)->approve($request, $reviewer, operatorNotes: 'OK');
+
+    expect($request->fresh()->status)->toBe(\App\Models\IdentityCorrectionRequest::STATUS_APPROVED);
+    expect($request->fresh()->operator_notes)->toBe('OK');
+});
+
+test('reject does not change person', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('Reject Person', 'L', $desa->id, '2000-01-15');
+    $reviewer = pgm8_user();
+
+    $request = app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1990-05-10', 'reason' => 'Koreksi'],
+    );
+
+    app(IdentityCorrectionService::class)->reject($request, $reviewer, operatorNotes: 'Data sudah benar');
+
+    expect($person->fresh()->tanggal_lahir?->format('Y-m-d'))->toBe('2000-01-15');
+    expect($request->fresh()->status)->toBe(\App\Models\IdentityCorrectionRequest::STATUS_REJECTED);
+});
+
+test('reject without notes still works', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('Reject No Notes', 'L', $desa->id, '2000-01-15');
+    $reviewer = pgm8_user();
+
+    $request = app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1990-05-10', 'reason' => 'Koreksi'],
+    );
+
+    app(IdentityCorrectionService::class)->reject($request, $reviewer);
+
+    expect($request->fresh()->status)->toBe(\App\Models\IdentityCorrectionRequest::STATUS_REJECTED);
+});
+
+test('history request retained after approve', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('History Test', 'L', $desa->id, '2000-01-15');
+    $reviewer = pgm8_user();
+
+    $request = app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1990-05-10', 'reason' => 'Koreksi'],
+    );
+    $requestId = $request->id;
+
+    app(IdentityCorrectionService::class)->approve($request, $reviewer);
+
+    expect(IdentityCorrectionRequest::find($requestId))->not->toBeNull();
+    expect(IdentityCorrectionRequest::find($requestId)->status)->toBe('approved');
+});
+
+test('search nama in correction requests', function () {
+    $user = User::factory()->create(['role' => \App\Enums\Role::SuperAdmin]);
+    $event = pgm8_event();
+    $desa = pgm8_desa();
+    $grant = pgm8_grant($event, $desa);
+    $person = pgm8_person('UniqueSearch123', 'L', $desa->id, '2000-01-15');
+
+    app(IdentityCorrectionService::class)->submitFromPublicContext(
+        $person, $grant,
+        ['requested_birth_date' => '1995-06-20', 'reason' => 'Test'],
+    );
+
+    Livewire::actingAs($user)
+        ->test(\App\Livewire\MasterData\CorrectionRequest\IndexCorrectionRequest::class)
+        ->set('search', 'UniqueSearch123')
+        ->assertSee('UniqueSearch123');
+});
+
 test('listPending mengembalikan hanya pending', function () {
     $event = pgm8_event();
     $desa = pgm8_desa();

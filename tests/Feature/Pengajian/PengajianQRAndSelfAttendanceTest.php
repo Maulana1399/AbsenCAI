@@ -641,7 +641,7 @@ test('wrong birth date rejected', function () {
     expect($verified)->toBeFalse();
 });
 
-test('Person tanpa tanggal_lahir mengikuti fallback contract', function () {
+test('Person tanpa tanggal_lahir masuk ke verifikasi step', function () {
     $event = pgm6_event();
     $desa = pgm6_desa();
     $result = pgm6_grant($event, $desa);
@@ -654,7 +654,7 @@ test('Person tanpa tanggal_lahir mengikuti fallback contract', function () {
         ->call('search')
         ->call('selectPerson', $person->id);
 
-    $component->assertSet('step', 4);
+    $component->assertSet('step', 3);
     $component->assertSet('selectedPersonId', $person->id);
 });
 
@@ -768,10 +768,6 @@ test('duplicate submit via Livewire SelfAttendance component shows duplicate mes
         ->call('selectPerson', $person->id)
         ->set('birthDate', '2000-01-15')
         ->call('verifyBirthDate');
-
-    $component->assertSet('step', 4);
-
-    $component->call('confirmAttendance');
 
     $component->assertSet('step', 5);
     $component->assertSet('attendanceAlreadyExists', true);
@@ -974,4 +970,165 @@ test('Person Desa NULL tidak diassign dari public QR scope', function () {
     expect(fn () => app(PengajianAttendanceService::class)
         ->attendPersonPublicContext($person, $grant))
         ->toThrow(\RuntimeException::class, 'tidak memiliki desa');
+});
+
+// ===========================================================================
+// PGM.25G — Attendance Verification & Izin Flow
+// ===========================================================================
+
+test('birth date benar membuat attendance via Livewire', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Budi Test', 'L', $desa->id, '2000-06-15');
+
+    Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce])
+        ->set('query', 'Budi Test')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-06-15')
+        ->call('verifyBirthDate');
+
+    expect(EventAttendance::wherehas('participation', fn ($q) => $q->where('person_id', $person->id))->count())->toBe(1);
+});
+
+test('birth date salah tidak membuat attendance', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Cici Test', 'P', $desa->id, '1999-03-10');
+
+    $component = Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce])
+        ->set('query', 'Cici Test')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-01-01')
+        ->call('verifyBirthDate');
+
+    expect($component->verificationFailed)->toBeTrue();
+    expect(EventAttendance::count())->toBe(0);
+});
+
+test('retry verification clears birth date field', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Dedi Test', 'L', $desa->id, '1998-12-25');
+
+    $component = Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce])
+        ->set('query', 'Dedi Test')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-01-01')
+        ->call('verifyBirthDate');
+
+    expect($component->verificationFailed)->toBeTrue();
+
+    $component->call('retryVerification');
+
+    expect($component->birthDate)->toBe('');
+    expect($component->verificationFailed)->toBeFalse();
+});
+
+test('correction without reason fails', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Eka Test', 'P', $desa->id, '1997-08-20');
+
+    $component = Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce])
+        ->set('query', 'Eka Test')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-01-01')
+        ->call('verifyBirthDate')
+        ->call('showCorrectionForm')
+        ->set('correctionBirthDate', '1997-08-20')
+        ->set('correctionReason', '')
+        ->call('submitCorrection');
+
+    expect($component->errorMessage)->not->toBeNull();
+});
+
+test('correction without birth date fails', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Fani Test', 'P', $desa->id, '1996-05-14');
+
+    $component = Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce])
+        ->set('query', 'Fani Test')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-01-01')
+        ->call('verifyBirthDate')
+        ->call('showCorrectionForm')
+        ->set('correctionBirthDate', '')
+        ->set('correctionReason', 'Data saya salah')
+        ->call('submitCorrection');
+
+    expect($component->errorMessage)->not->toBeNull();
+});
+
+test('correction with valid data creates pending request', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Gita Test', 'P', $desa->id, '1995-11-30');
+
+    $component = Livewire::test(SelfAttendance::class, ['nonce' => $grant->nonce])
+        ->set('query', 'Gita Test')
+        ->call('search')
+        ->call('selectPerson', $person->id)
+        ->set('birthDate', '2000-01-01')
+        ->call('verifyBirthDate')
+        ->call('showCorrectionForm')
+        ->set('correctionBirthDate', '1994-10-20')
+        ->set('correctionReason', 'Salah input tanggal lahir')
+        ->call('submitCorrection');
+
+    expect(\App\Models\IdentityCorrectionRequest::where('person_id', $person->id)->count())->toBe(1);
+});
+
+test('operator can record izin', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $person = pgm6_person('Hadi Test', 'L', $desa->id, '1994-07-22');
+
+    $attendance = app(PengajianAttendanceService::class)
+        ->attendPersonOperatorContext(
+            $person,
+            $grant,
+            status: \App\Models\EventAttendance::STATUS_IZIN,
+        );
+
+    expect($attendance->status)->toBe(\App\Models\EventAttendance::STATUS_IZIN);
+});
+
+test('attendance statistik membedakan hadir dan izin', function () {
+    $event = pgm6_event();
+    $desa = pgm6_desa();
+    $result = pgm6_grant($event, $desa);
+    $grant = $result['grant'];
+    $personHadir = pgm6_person('Hadir Test', 'L', $desa->id, '1993-04-10');
+    $personIzin = pgm6_person('Izin Test', 'P', $desa->id, '1992-09-15');
+
+    app(PengajianAttendanceService::class)
+        ->attendPersonOperatorContext($personHadir, $grant);
+    app(PengajianAttendanceService::class)
+        ->attendPersonOperatorContext($personIzin, $grant, status: \App\Models\EventAttendance::STATUS_IZIN);
+
+    $summary = app(\App\Services\Pengajian\PengajianDesaReportService::class)
+        ->summary($grant);
+
+    expect($summary['sudah_hadir'])->toBe(1);
+    expect($summary['izin'])->toBe(1);
 });

@@ -63,12 +63,14 @@ class PengajianAttendanceService
         ?int $desaId,
         string $method = 'offline',
         ?int $recordedBy = null,
+        ?string $status = null,
         ?array $metadata = null,
     ): EventAttendance {
         return EventAttendance::create([
             'participation_id' => $participation->id,
             'event_id' => $eventId,
             'desa_id' => $desaId,
+            'status' => $status ?? EventAttendance::STATUS_HADIR,
             'attended_at' => now(),
             'method' => $method,
             'recorded_by' => $recordedBy,
@@ -107,10 +109,20 @@ class PengajianAttendanceService
 
         $existing = EventAttendance::query()
             ->where('participation_id', $participation->id)
+            ->where('status', EventAttendance::STATUS_HADIR)
             ->first();
 
         if ($existing) {
             throw new \RuntimeException('Peserta sudah tercatat hadir.');
+        }
+
+        $existingIzin = EventAttendance::query()
+            ->where('participation_id', $participation->id)
+            ->where('status', EventAttendance::STATUS_IZIN)
+            ->first();
+
+        if ($existingIzin) {
+            throw new \RuntimeException('Peserta sudah tercatat izin.');
         }
 
         return $this->recordAttendance(
@@ -124,6 +136,7 @@ class PengajianAttendanceService
         Person $person,
         DesaAccessGrant $grant,
         ?User $recordedBy = null,
+        ?string $status = null,
     ): EventAttendance {
         if (! $grant->isValid()) {
             throw new \RuntimeException('Sesi akses tidak valid. Silakan hubungi Operator Daerah.');
@@ -142,18 +155,29 @@ class PengajianAttendanceService
             allowDesaAutoAssign: false,
         );
 
-        $existing = EventAttendance::query()
+        $existingHadir = EventAttendance::query()
             ->where('participation_id', $participation->id)
+            ->where('status', EventAttendance::STATUS_HADIR)
             ->first();
 
-        if ($existing) {
+        if ($existingHadir) {
             throw new \RuntimeException('Peserta sudah tercatat hadir.');
+        }
+
+        $existingIzin = EventAttendance::query()
+            ->where('participation_id', $participation->id)
+            ->where('status', EventAttendance::STATUS_IZIN)
+            ->first();
+
+        if ($existingIzin) {
+            throw new \RuntimeException('Peserta sudah tercatat izin.');
         }
 
         return $this->recordAttendance(
             $participation, $grant->event_id, $grant->desa_id,
             method: 'operator',
             recordedBy: $recordedBy?->id,
+            status: $status,
         );
     }
 }

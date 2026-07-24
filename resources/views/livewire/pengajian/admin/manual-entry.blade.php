@@ -11,20 +11,12 @@
             @endif
 
             <form wire:submit="submit" class="flex flex-col gap-4">
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Event</label>
-                    <select
-                        wire:model="eventId"
-                        class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
-                        required
-                    >
-                        <option value="">-- Pilih Event --</option>
-                        @foreach ($events as $event)
-                            <option value="{{ $event->id }}">{{ $event->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('eventId') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
+                @if ($activeEvent)
+                    <div class="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-800">
+                        <span class="font-medium text-zinc-500">Event Aktif:</span>
+                        <span class="font-semibold text-zinc-900 dark:text-white">{{ $activeEvent->name }}</span>
+                    </div>
+                @endif
 
                 <div class="flex flex-col gap-2">
                     <label class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Desa</label>

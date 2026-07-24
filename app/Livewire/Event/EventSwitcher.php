@@ -18,6 +18,15 @@ class EventSwitcher extends Component
     {
         $current = $context->current();
 
+        if ($current === null) {
+            $fallback = Event::active()->orderBy('event_type', 'desc')->first();
+
+            if ($fallback !== null) {
+                $context->set($fallback);
+                $current = $fallback;
+            }
+        }
+
         if ($current) {
             $this->currentEventName = $current->name;
             $this->currentEventId = $current->id;

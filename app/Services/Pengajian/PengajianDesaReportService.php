@@ -26,7 +26,20 @@ class PengajianDesaReportService
                     ->from('participations')
                     ->join('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
                     ->whereColumn('participations.person_id', 'people.id')
-                    ->where('participations.event_id', $eventId);
+                    ->where('participations.event_id', $eventId)
+                    ->where('event_attendances.status', EventAttendance::STATUS_HADIR);
+            })
+            ->count();
+
+        $izinCount = Person::query()
+            ->where('people.desa_id', $desaId)
+            ->whereExists(function ($q) use ($eventId) {
+                $q->selectRaw('1')
+                    ->from('participations')
+                    ->join('event_attendances', 'event_attendances.participation_id', '=', 'participations.id')
+                    ->whereColumn('participations.person_id', 'people.id')
+                    ->where('participations.event_id', $eventId)
+                    ->where('event_attendances.status', EventAttendance::STATUS_IZIN);
             })
             ->count();
 
@@ -55,7 +68,8 @@ class PengajianDesaReportService
         return [
             'total_warga' => $totalWarga,
             'sudah_hadir' => $sudahHadir,
-            'belum_hadir' => $totalWarga - $sudahHadir,
+            'izin' => $izinCount,
+            'belum_hadir' => $totalWarga - $sudahHadir - $izinCount,
             'self' => $selfCount,
             'operator' => $operatorCount,
         ];
@@ -76,6 +90,7 @@ class PengajianDesaReportService
                 'people.nama',
                 'participations.participant_number',
                 'event_attendances.id as attendance_id',
+                'event_attendances.status as attendance_status',
                 'event_attendances.method as attendance_method',
                 'event_attendances.attended_at',
             ])
@@ -95,11 +110,13 @@ class PengajianDesaReportService
         }
 
         if ($status === 'hadir') {
-            $query->whereNotNull('event_attendances.id');
+            $query->where('event_attendances.status', EventAttendance::STATUS_HADIR);
 
             if ($method !== null && $method !== '') {
                 $query->where('event_attendances.method', $method);
             }
+        } elseif ($status === 'izin') {
+            $query->where('event_attendances.status', EventAttendance::STATUS_IZIN);
         } elseif ($status === 'belum') {
             $query->whereNull('event_attendances.id');
         } else {
@@ -112,15 +129,19 @@ class PengajianDesaReportService
         $rows = $query->orderBy('people.nama')->get();
 
         return $rows->map(function ($row) {
-            $hadir = $row->attendance_id !== null;
+            $status = $row->attendance_status;
+
+            $hadir = $status === EventAttendance::STATUS_HADIR;
+            $izin = $status === EventAttendance::STATUS_IZIN;
 
             return [
                 'id' => $row->id,
                 'nama' => $row->nama,
                 'participant_number' => $row->participant_number,
                 'hadir' => $hadir,
-                'attended_at' => $hadir && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null,
-                'method' => $hadir ? $row->attendance_method : null,
+                'izin' => $izin,
+                'attended_at' => ($hadir || $izin) && $row->attended_at ? Carbon::parse($row->attended_at)->format('d M Y H:i') : null,
+                'method' => ($hadir || $izin) ? $row->attendance_method : null,
             ];
         })->all();
     }

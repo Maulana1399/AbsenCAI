@@ -121,8 +121,8 @@ test('Admin has administrative permissions', function () {
     $user = rbac_user(['role' => 'admin']);
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
-    expect(Gate::forUser($user)->allows('view-master-data'))->toBeTrue();
-    expect(Gate::forUser($user)->allows('manage-master-data'))->toBeTrue();
+    expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
+    expect(Gate::forUser($user)->denies('manage-master-data'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-events'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-registration'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-participants'))->toBeTrue();
@@ -145,8 +145,8 @@ test('Sekretariat has operational permissions', function () {
     $user = rbac_user(['role' => 'sekretariat']);
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
-    expect(Gate::forUser($user)->allows('view-master-data'))->toBeTrue();
-    expect(Gate::forUser($user)->allows('manage-master-data'))->toBeTrue();
+    expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
+    expect(Gate::forUser($user)->denies('manage-master-data'))->toBeTrue();
     expect(Gate::forUser($user)->denies('manage-events'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-registration'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-participants'))->toBeTrue();

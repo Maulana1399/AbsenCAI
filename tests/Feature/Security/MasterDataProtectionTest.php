@@ -48,7 +48,7 @@ $masterDataRoutes = [
     '/kelompok',
 ];
 
-$authorizedRoles = ['super_admin', 'admin', 'sekretariat'];
+$authorizedRoles = ['super_admin'];
 $unauthorizedRoles = [
     'ketua_event', 'pj_divisi', 'operator_registrasi',
     'operator_scan', 'juri', 'viewer',
@@ -77,19 +77,19 @@ test('super_admin can access master data routes', function () {
     }
 });
 
-test('admin can access master data routes', function () {
+test('admin cannot access master data routes', function () {
     $user = s2_user('admin');
     $this->actingAs($user);
     foreach (['/master-data', '/person', '/desa', '/kelompok'] as $route) {
-        $this->get($route)->assertOk();
+        $this->get($route)->assertForbidden();
     }
 });
 
-test('sekretariat can access master data routes', function () {
+test('sekretariat cannot access master data routes', function () {
     $user = s2_user('sekretariat');
     $this->actingAs($user);
     foreach (['/master-data', '/person', '/desa', '/kelompok'] as $route) {
-        $this->get($route)->assertOk();
+        $this->get($route)->assertForbidden();
     }
 });
 
@@ -157,13 +157,25 @@ test('null role cannot access master data routes', function () {
 // B. Sidebar visibility
 // ---------------------------------------------------------------------------
 
-test('authorized roles see Master Data in sidebar', function () {
-    foreach (['super_admin', 'admin', 'sekretariat'] as $role) {
-        $user = s2_user($role);
-        $this->actingAs($user);
-        $response = $this->get('/dashboard');
-        $response->assertSee('Master Data');
-    }
+test('super admin sees Master Data in sidebar', function () {
+    $user = s2_user('super_admin');
+    $this->actingAs($user);
+    $response = $this->get('/dashboard');
+    $response->assertSee('Master Data');
+});
+
+test('admin does not see Master Data in sidebar', function () {
+    $user = s2_user('admin');
+    $this->actingAs($user);
+    $response = $this->get('/dashboard');
+    $response->assertDontSee('Master Data');
+});
+
+test('sekretariat does not see Master Data in sidebar', function () {
+    $user = s2_user('sekretariat');
+    $this->actingAs($user);
+    $response = $this->get('/dashboard');
+    $response->assertDontSee('Master Data');
 });
 
 test('unauthorized roles do not see Master Data in sidebar', function () {
@@ -339,19 +351,18 @@ test('unauthorized user cannot import kelompok via Livewire', function () {
 // D. Authorized mutations still work
 // ---------------------------------------------------------------------------
 
-test('admin can create person', function () {
+test('admin cannot create person (master data super_admin only)', function () {
     $user = s2_user('admin');
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\MasterData\Person\CreatePerson::class)
-        ->set('nama', 'Admin Created Person')
+        ->set('nama', 'Admin Rejected Person')
         ->set('jenis_kelamin', 'L')
-        ->call('simpan');
-
-    $this->assertDatabaseHas('people', ['nama' => 'Admin Created Person']);
+        ->call('simpan')
+        ->assertForbidden();
 });
 
-test('sekretariat can edit desa', function () {
+test('sekretariat cannot edit desa (master data super_admin only)', function () {
     $user = s2_user('sekretariat');
     $desa = \App\Models\desa::create(['desa_asal' => 'Edit Me']);
     $this->actingAs($user);
@@ -359,9 +370,8 @@ test('sekretariat can edit desa', function () {
     Livewire::test(\App\Livewire\Database\Desa\EditDesa::class)
         ->dispatch('editDesa', id: $desa->id)
         ->set('desa', 'Edited By Sekre')
-        ->call('update');
-
-    $this->assertDatabaseHas('desas', ['id' => $desa->id, 'desa_asal' => 'Edited By Sekre']);
+        ->call('update')
+        ->assertForbidden();
 });
 
 test('super_admin can delete kelompok', function () {
@@ -407,8 +417,8 @@ test('null role can access regu', function () {
 // E. Regression — Person-Legacy sync
 // ---------------------------------------------------------------------------
 
-test('person legacy sync still works for authorized user', function () {
-    $user = s2_user('admin');
+test('person legacy sync still works for super admin', function () {
+    $user = s2_user('super_admin');
     $event = s2_event();
     $regu = \App\Models\regu::create(['regu' => 'Sync Regu', 'jenis_kelamin' => 'Laki - Laki']);
 
@@ -442,8 +452,8 @@ test('person legacy sync still works for authorized user', function () {
 // E. Regression — ActiveEventContext
 // ---------------------------------------------------------------------------
 
-test('master data still works without active event', function () {
-    $user = s2_user('admin');
+test('master data still works without active event for super admin', function () {
+    $user = s2_user('super_admin');
     $this->actingAs($user);
 
     expect(app(ActiveEventContext::class)->current())->toBeNull();
@@ -453,8 +463,8 @@ test('master data still works without active event', function () {
     $this->get('/kelompok')->assertOk();
 });
 
-test('visiting master data does not change ActiveEventContext', function () {
-    $user = s2_user('admin');
+test('visiting master data does not change ActiveEventContext for super admin', function () {
+    $user = s2_user('super_admin');
     $event = s2_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
@@ -462,6 +472,17 @@ test('visiting master data does not change ActiveEventContext', function () {
     $this->get('/master-data')->assertOk();
 
     expect(app(ActiveEventContext::class)->id())->toBe($event->id);
+});
+
+test('admin cannot access master data without active event', function () {
+    $user = s2_user('admin');
+    $this->actingAs($user);
+
+    expect(app(ActiveEventContext::class)->current())->toBeNull();
+    $this->get('/master-data')->assertForbidden();
+    $this->get('/person')->assertForbidden();
+    $this->get('/desa')->assertForbidden();
+    $this->get('/kelompok')->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -478,8 +499,8 @@ test('pengajian public flow unchanged by S2', function () {
 
 test('S1 gate definitions still correct for master data', function () {
     $admin = s2_user('admin');
-    expect(\Illuminate\Support\Facades\Gate::forUser($admin)->allows('view-master-data'))->toBeTrue();
-    expect(\Illuminate\Support\Facades\Gate::forUser($admin)->allows('manage-master-data'))->toBeTrue();
+    expect(\Illuminate\Support\Facades\Gate::forUser($admin)->denies('view-master-data'))->toBeTrue();
+    expect(\Illuminate\Support\Facades\Gate::forUser($admin)->denies('manage-master-data'))->toBeTrue();
 
     $scan = s2_user('operator_scan');
     expect(\Illuminate\Support\Facades\Gate::forUser($scan)->denies('view-master-data'))->toBeTrue();
@@ -509,7 +530,7 @@ test('super admin sees all CAI sidebar menus', function () {
     $response->assertSee('Master Data');
 });
 
-test('admin sees all CAI sidebar menus', function () {
+test('admin sees all CAI sidebar menus without Master Data', function () {
     $event = s2_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s2_user('admin'));
@@ -525,10 +546,10 @@ test('admin sees all CAI sidebar menus', function () {
     $response->assertSee('Event');
     $response->assertSee('Surat Izin');
     $response->assertSee('Activity Log');
-    $response->assertSee('Master Data');
+    $response->assertDontSee('Master Data');
 });
 
-test('sekretariat sees all CAI sidebar menus', function () {
+test('sekretariat sees all CAI sidebar menus without Master Data', function () {
     $event = s2_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s2_user('sekretariat'));
@@ -539,7 +560,7 @@ test('sekretariat sees all CAI sidebar menus', function () {
     $response->assertSee('Laporan');
     $response->assertSee('Surat Izin');
     $response->assertSee('Activity Log');
-    $response->assertSee('Master Data');
+    $response->assertDontSee('Master Data');
 });
 
 test('operator registrasi only sees registration menus', function () {

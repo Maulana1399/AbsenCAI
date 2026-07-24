@@ -46,11 +46,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-master-data', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Sekretariat,
+            Role::SuperAdmin,
         ));
 
         Gate::define('manage-master-data', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Sekretariat,
+            Role::SuperAdmin,
         ));
 
         Gate::define('manage-events', fn (User $user) => $user->hasAnyRole(

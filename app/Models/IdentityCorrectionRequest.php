@@ -18,6 +18,7 @@ class IdentityCorrectionRequest extends Model
         'requested_birth_date',
         'requested_desa_id',
         'reason',
+        'operator_notes',
         'status',
         'submitted_at',
         'reviewed_at',

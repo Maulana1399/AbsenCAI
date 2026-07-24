@@ -7,7 +7,10 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\desa;
 use Carbon\Carbon;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DesaAccessService
@@ -30,6 +33,7 @@ class DesaAccessService
             'event_id' => $event->id,
             'desa_id' => $desa->id,
             'token_hash' => $tokenHash,
+            'encrypted_token' => Crypt::encryptString($rawToken),
             'token_prefix' => $tokenPrefix,
             'valid_from' => $validFrom,
             'valid_until' => $validUntil,
@@ -176,6 +180,23 @@ class DesaAccessService
     public function rotateNonce(DesaAccessGrant $grant): string
     {
         return $this->exchangeForNonce($grant);
+    }
+
+    public function getDecryptedToken(DesaAccessGrant $grant): ?string
+    {
+        if ($grant->encrypted_token === null) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($grant->encrypted_token);
+        } catch (DecryptException $e) {
+            Log::warning('Gagal mendekripsi encrypted_token', [
+                'grant_id' => $grant->id,
+            ]);
+
+            return null;
+        }
     }
 
     private function generateRawToken(): string
