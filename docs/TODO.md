@@ -45,11 +45,10 @@
 ### Next (Priority Order)
 - [x] **Master Data Landing Page** — `/master-data` dengan Person, Desa, Kelompok cards.
 - [x] **Person CRUD** — Implemented: index, create, edit, delete with safety guard. Lihat `/person`.
-- [x] **Person → Legacy sync** — Implemented: `PersonLegacySyncService` syncs identity fields (nama, jenis_kelamin, desa_id, kelompok_id) from Person to mapped legacy peserta. NIP locked for mapped Persons.
+- [x] **Person → Legacy sync** — Implemented: `PersonLegacySyncService` syncs identity fields (nama, jenis_kelamin, desa_id, kelompok_id) from Person to mapped legacy peserta.
 - [ ] **Venue CRUD** — Venue is event-scoped (has event_id). Needs CRUD UI for event configuration.
 - [ ] **CategoryDefinition CRUD** — Category is event-scoped (has event_id). Needs CRUD UI for event configuration.
 - [ ] **RBAC for Master Data** — Currently all authenticated users see Master Data. Need role-based access.
-- [ ] **Person search/page** — Landing page for Person master data
 
 ---
 
@@ -209,7 +208,6 @@ These features are not currently required for CAI operational use and do not blo
 ## Sprint 2.5 (Attendance Identity Transition)
 
 - [x] Lookup attendance by attendance_code first
-- [x] Keep legacy NIP fallback
 - [x] Preserve duplicate attendance prevention
 - [x] Preserve session validation
 - [x] Add Livewire attendance orchestration coverage
@@ -221,17 +219,15 @@ These features are not currently required for CAI operational use and do not blo
 
 ## Sprint 2.4 (Registration Identity Transition)
 
-- [ ] Generate participant_number on new registration
-- [ ] Generate attendance_code on new registration
-- [ ] Keep legacy nip flow for backward compatibility
-- [ ] Verify unique participant_number and attendance_code
+- [x] Generate participant_number on new registration
+- [x] Generate attendance_code on new registration
+- [x] Verify unique participant_number and attendance_code
 
 ---
 
 ## Sprint 2.3 (Participant Number Foundation)
 
 - [x] Generate participant_number with KL/KP prefix
-- [x] Keep legacy nip wrapper for backward compatibility
 - [x] Prepare participant number transition docs
 - [x] Verify deterministic running sequence
 
@@ -265,11 +261,9 @@ Status: VERIFIED.
 
 ## Sprint 2.2 (Identity Foundation)
 
-- [ ] Add participant_number column
-- [ ] Add attendance_code column
-- [ ] Keep legacy nip compatibility
-- [ ] Prepare identity transition docs
-- [ ] Defer identity cleanup to S04
+- [x] Add participant_number column
+- [x] Add attendance_code column
+- [ ] Prepare identity transition docs (completed via S3 architecture)
 
 ---
 
@@ -423,9 +417,9 @@ Status: COMPLETE / VERIFIED
 - [x] Tests — schema, creation, nullable fields, belongs-to relationships, inverse relationships, UNIQUE constraints, restrictOnDelete (all 4 parents), cascade-free guarantee
 
 #### S3.5C Safe Backfill Engine ✅
-- [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, NIP matching, identity signal validation, conflict detection, dry-run projection, transactional writes
+- [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, identity signal validation, conflict detection, dry-run projection, transactional writes
 - [x] `BackfillLegacyPeserta` Artisan command — `--dry-run` (default), `--execute`, `--event`, mutual exclusion validation, event validation (exists + active)
-- [x] 37+ dedicated tests: command contract, dry-run, execute, NIP matching, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
+- [x] 37+ dedicated tests: command contract, dry-run, execute, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
 
 #### S3.5D Copy Database Execute Verification ✅
 - [x] Isolated test on `database.s3.5d-test.sqlite` copy
@@ -603,7 +597,7 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 
 - [x] Create `people` migration + Person model
 - [x] Person model with desa() relationship and jenis_kelamin_label accessor
-- [x] Tests: person creation, schema, NIP uniqueness, desa FK, jenis_kelamin L/P format
+- [x] Tests: person creation, schema, desa FK, jenis_kelamin L/P format
 - [ ] Design deduplication matching strategy (deferred to S3.5 backfill)
 
 ### S3.3 Participation Foundation ✅
@@ -641,9 +635,9 @@ Deliverable: `docs/SPRINT3_MULTI_EVENT_AUDIT.md`
 - [x] Tests — schema, creation, nullable fields, belongs-to relationships, inverse relationships, UNIQUE constraints, restrictOnDelete (all 4 parents), cascade-free guarantee
 
 #### S3.5C Safe Backfill Engine ✅
-- [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, NIP matching, identity signal validation, conflict detection, dry-run projection, transactional writes
+- [x] `LegacyPesertaBackfillService` — execute(), per-peserta analysis, identity signal validation, conflict detection, dry-run projection, transactional writes
 - [x] `BackfillLegacyPeserta` Artisan command — `--dry-run` (default), `--execute`, `--event`, mutual exclusion validation, event validation (exists + active)
-- [x] 37+ dedicated tests: command contract, dry-run, execute, NIP matching, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
+- [x] 37+ dedicated tests: command contract, dry-run, execute, conflict detection, participation resolution, idempotency, bulk determinism, domain safety
 
 #### S3.5D Copy Database Execute Verification ✅
 - [x] Isolated test on `database.s3.5d-test.sqlite` copy

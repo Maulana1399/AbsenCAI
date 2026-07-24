@@ -151,7 +151,7 @@ Features
 * Create Person (modal form, global identity only, no Participation created)
 * Edit Person (modal form, preserves relationships)
 * Delete Person (safety-guarded: blocks if has Participations/LegacyPesertaMapping)
-* Search by name or NIP
+* Search by name
 * Pagination
 * Person sidebar menu in Master Data group
 * Import Excel (via RegistrationService)

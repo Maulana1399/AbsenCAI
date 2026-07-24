@@ -634,6 +634,9 @@ PGM.18 **fully complete**:
 Final baseline: **1508 passed / 3624 assertions / 0 failures**
 Design C: **problem_total = 0**
 
+**PGM.19 Sprint 8A + 8B ✅ COMPLETE** — Regu retirement: runtime dependency eliminated, column dropped. Final baseline: **1581 passed / 3774 assertions / 0 failures**.
+**PGM.20 Legacy NIP Retirement ✅ COMPLETE** — All 4 phases done. NIP retired from Person/Participation/attendance/QR. `people.nip` and `pesertas.nip` columns dropped. `legacyNextNip()` removed.
+
 ---
 
 ### PGM.19 Sprint 8A — Legacy Regu Dependency Elimination ✅
@@ -674,6 +677,49 @@ regu::peserta() — REMOVED ✓
 regu dual-write — STOPPED ✓
 global regu fallback — REMOVED ✓
 ```
+
+### PGM.20 Legacy NIP Retirement ✅
+
+**Status:** ✅ COMPLETE / VERIFIED (all 4 phases)
+
+Retired NIP (Nomor Induk Peserta) as canonical identifier from the entire system:
+
+**Phase 1 — NIP Audit & Assessment:**
+- Audited all NIP usage across codebase (models, services, controllers, Livewire components, tests, Blade templates, routes, config)
+- Classified findings into Person (4), Participation (2), Attendance (5), QR (2), Reports (2), Config/Services (3)
+- Confirmed NIP is NOT used as a hard FK in any table (no cascade risk)
+- Recommended full retirement
+
+**Phase 2 — Runtime NIP Elimination:**
+- `RegistrationService::createParticipant()` — removed `legacyNextNip()` call, `resolveNip()` from RegistrationRequest
+- `RegistrationService::updateParticipant()` — removed NIP enforcement/assignment
+- `PersonLegacySyncService` — removed NIP lock enforcement, removed NIP from sync boundary
+- `PlacementService` — removed NIP generation responsibility
+- `Person` model — removed `legacyNextNip()`, `scopeWithNip()`, `nip` from casts/append
+- `peserta` model — removed `legacyNextNip()`, `nextAutoNip()`, `nip` from casts
+- `Scan.php` — removed NIP fallback in QR scan path
+- `AttendanceService` — removed NIP fallback in `recordAttendance()`, `findParticipant()`, attendance lookup no longer reads NIP
+- `Absensi` model — removed `pesertaByNip()` scope, NIP attendance lookup
+- `PesertaExport` — removed NIP column from export
+- `RekapPeserta` — removed NIP from display
+- 13 service/model files, 6 Livewire components, 2 test files, 4 config/routes/blade files — all NIP references removed
+- 11 deployment checkpoints verified: zero NIP references remain in runtime code
+
+**Phase 3 — NIP Removal from Person CRUD UI:**
+- `CreatePerson` form — removed NIP field
+- `EditPerson` form — removed NIP field
+- `IndexPerson` table — removed NIP column from table and search
+- `PersonController` import — removed NIP column from import
+- `PersonImport` — removed NIP column mapping
+
+**Phase 4 — Physical Column Drop:**
+- **Migration**: `people.nip` column dropped
+- **Migration**: `pesertas.nip` column dropped
+- Both tables cleaned via SQLite-compatible rebuild migration
+- `legacyNextNip()` method permanently removed from codebase
+- All model casts, fillable arrays, and form requests cleaned
+
+**Final baseline: 1574 passed / 3745 assertions / 0 failures**
 
 ---
 
@@ -1157,8 +1203,10 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 8. **S01–S04 Foundation** ✅ Complete
 9. **PGM.18 Sprint 2** ✅ COMPLETE — Mapping contract refactored, fully verified (1499/3592/0)
 10. **PGM.18 Sprint 3** ✅ COMPLETE — Physical mapping cleanup: columns dropped, relationships removed, tested (1508/3624/0)
-11. **Competition** (future sprint)
-12. **Commercial** (future sprint)
+11. **PGM.19 Sprint 8A + 8B** ✅ COMPLETE — Physical Regu Retirement: `pesertas.regu_id` dropped, regu dual-write stopped, PlacementService requires eventId
+12. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired from Person/Participation/attendance/QR. `people.nip` and `pesertas.nip` columns physically dropped. `legacyNextNip()` removed.
+13. **Competition** (future sprint)
+14. **Commercial** (future sprint)
 ```
 
 ---

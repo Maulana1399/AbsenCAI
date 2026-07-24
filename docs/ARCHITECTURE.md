@@ -67,6 +67,50 @@ Storage (Nextcloud / TrueNAS)
 
 ---
 
+## Current Sprint Status
+
+After PGM.19 (Physical Regu Retirement) and PGM.20 (Legacy NIP Retirement):
+
+```
+✅ PGM.12–PGM.17 Pengajian Desa MVP — COMPLETE
+✅ PGM.18 Physical Mapping Cleanup — COMPLETE
+✅ PGM.19 Physical Regu Retirement — COMPLETE
+✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) — COMPLETE
+✅ S01–S04 Foundation — COMPLETE
+✅ S3.0–S3.10 Multi Event — COMPLETE
+✅ RBAC S1–S7 — COMPLETE
+```
+
+## Canonical Data Architecture
+
+```
+Person (master identity)
+├── nama
+├── desa
+├── kelompok
+├── tanggal_lahir
+│
+└── Participation (event-scoped membership)
+        ├── event
+        ├── regu (CAI only, nullable)
+        ├── participant_number
+        ├── attendance_code
+        │
+        ├── EventAttendance (canonical attendance)
+        │       ├── status (hadir/izin)
+        │       └── method (scan/manual/surat_izin)
+        │
+        └── ActivityRegistration (optional)
+```
+
+**Retired components:**
+- `pesertas.regu_id` — physical column removed (Sprint 8B)
+- `pesertas.nip` — physical column removed (PGM.20)
+- `people.nip` — physical column removed (PGM.20)
+- NIP — retired as canonical identity, lookup, fallback, display, and generation
+- Regu dual-write — stopped
+- Legacy Absensi dual-write — stopped (absensi table retained for historical reads)
+
 ## Authentication
 
 Login

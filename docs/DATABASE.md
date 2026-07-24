@@ -34,23 +34,23 @@ Desa
 | `tanggal_lahir` | date nullable | Added PGM.14.5 |
 | `desa_id` | FK → desas nullable | `nullOnDelete` |
 | `kelompok_id` | FK → kelompoks nullable | Added PGM.16, `nullOnDelete` |
-| `nip` | integer nullable unique | Legacy compatibility |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
 
-Current participant identity columns:
-- `id`
-- `nip`
-- `participant_number` (active, nullable)
-- `attendance_code` (active, nullable)
+**Catatan:** `people.nip` sudah dihapus secara fisik di PGM.20 Phase 4B.
+NIP sudah diretire penuh dari canonical architecture.
 
-Identity transition status:
-- `nip` adalah legacy operational identifier untuk backward compatibility
-- `nip` laki-laki menggunakan range `1001+`
-- `nip` perempuan menggunakan range `2001+`
-- `participant_number` adalah identitas peserta yang human-readable dengan format `KL001` / `KP001`
-- `attendance_code` adalah primary QR attendance identifier dengan format `KJA-XXXXXXXX`
-- Lookup attendance mengutamakan `attendance_code` lalu temporary fallback ke `nip`
+Current participant identity columns:
+- `person.id` (Person internal ID)
+- `participations.id` (Participation internal ID)
+- `participant_number` (human-facing, format `KL001` / `KP001`)
+- `attendance_code` (QR/attendance, format `KJA-XXXXXXXX`)
+
+Identity rules:
+- Canonical participant identity adalah **Person → Participation**
+- `participant_number` adalah identitas human-readable dalam satu event
+- `attendance_code` adalah primary QR attendance identifier
+- **NIP sudah tidak digunakan** sebagai canonical identity, lookup, fallback, atau display
 
 ---
 

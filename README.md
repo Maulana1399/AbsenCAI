@@ -22,7 +22,9 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | User Management | ✅ COMPLETE — Super Admin only, Master Data card |
 | S05 RBAC (Remaining Security Protection) | ✅ COMPLETE — all routes + mutations protected |
 | S06 RBAC (Sidebar Visibility) | ✅ COMPLETE — all menus gated with @can() directives |
-| Pilot Readiness | ✅ Feature-complete — full suite 1570 passed / 3803 assertions |
+| PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` dropped, regu dual-write stopped |
+| PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture, `people.nip` and `pesertas.nip` dropped |
+| Test Baseline | ✅ 1574 passed / 3745 assertions / 0 failures — Design C problem_total = 0 |
 
 ---
 

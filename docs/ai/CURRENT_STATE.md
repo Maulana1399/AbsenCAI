@@ -32,6 +32,7 @@ MVP Development + Pilot
 
 Sprint 3 — Multi Event Architecture + Pengajian Desa MVP (COMPLETE)
 PGM.19 Sprint 8A + 8B — Legacy Regu Retirement (COMPLETE)
+PGM.20 Legacy NIP Retirement (COMPLETE)
 
 Status:
 
@@ -41,6 +42,8 @@ Status:
 ✅ UI Bug Fix Sprint — COMPLETE
 ✅ PGM.19 Sprint 8A — Legacy Regu Dependency Elimination COMPLETE
 ✅ PGM.19 Sprint 8B — Physical Regu Retirement COMPLETE / VERIFIED
+✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) COMPLETE / VERIFIED
+✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) COMPLETE / VERIFIED
 
 Target: August 2026 pilot release.
 
@@ -222,10 +225,10 @@ Completed foundation work:
 Priority saat ini:
 
 1. **PGM.19 Sprint 8A + 8B ✅ COMPLETE** — Legacy regu retirement: runtime dependency eliminated + physical column dropped. Final baseline: **1581 passed / 3774 assertions / 0 failures**. Design C: problem_total = 0.
-2. **PGM.17 — Pilot Release** ✅ COMPLETE.
-3. **PGM.18 Sprint 1–3 ✅ COMPLETE** — Legacy tooling removal, mapping refactor, physical cleanup.
-4. **PGM.18 CLOSED** — All 3 sprints complete.
-5. **PGM.20** — Next: Legacy NIP Retirement Audit (read-only complete, implementation pending).
+2. **PGM.20 Legacy NIP Retirement ✅ COMPLETE** — All 4 phases: audit, runtime elimination, Person CRUD cleanup, physical column drop. Final baseline: **1574 passed / 3745 assertions / 0 failures**.
+3. **PGM.17 — Pilot Release** ✅ COMPLETE.
+4. **PGM.18 Sprint 1–3 ✅ COMPLETE** — Legacy tooling removal, mapping refactor, physical cleanup.
+5. **PGM.18 CLOSED** — All 3 sprints complete.
 
 ## Database V2 Part 5 Closure
 
@@ -305,7 +308,7 @@ Database: SQLite
 
 - Legacy `pesertas` table remains operational — intentional compatibility bridge
 - `RegistrationService` still creates legacy `peserta` records alongside Person/Participation
-- `PlacementService` has mixed responsibilities (legacy NIP + participant_number generation)
+- `PlacementService` has mixed responsibilities (participant_number generation, regu placement)
 - Two parallel identity correction paths (PengajianIdentityService vs IdentityCorrectionService)
 - Sidebar is static Blade — doesn't live-render on event switch (page navigation resolves)
 - RBAC implemented S1–S7 — no known gaps in CAI Operational routes
@@ -318,11 +321,16 @@ Database: SQLite
 - `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
 - **Regu retired from peserta** — `pesertas.regu_id` column dropped, `peserta::regu()` removed, `regu::peserta()` removed, dual-write stopped, global fallback eliminated ✅
 - **Regu on Participation** — canonical event-scoped regu path via `participations.regu_id` ✅
-- Test suite: **1581 passed, 3774 assertions, 0 failures** (post-PGM.19 Sprint 8B). Increase from PGM.18 Sprint 3: +73 tests, +150 assertions (Sprint 8A + 8B regression + contract tests).
+- **NIP retired** — `people.nip` and `pesertas.nip` columns dropped, `legacyNextNip()` removed, NIP removed from all runtime code (QR scan, attendance, registration, reports, exports, Person CRUD) ✅
+- Test suite: **1574 passed, 3745 assertions, 0 failures** (post-PGM.20). Reflects NIP removal: -7 tests, -29 assertions from PGM.19 baseline (NIP-specific tests removed).
 
 ---
 
 # Next Work
+
+**PGM.21 — (future sprint TBD)**
+
+PGM.18–PGM.20 fully complete. Next priorities: Competition and Commercial modules (see ROADMAP.md).
 
 **PGM.18 — Database V2 Part 6: Legacy Dependency Remediation + CAI Participant Architecture**
 
