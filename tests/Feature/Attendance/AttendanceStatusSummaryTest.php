@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Dashboard\Dashboard;
+use App\Livewire\Event\Dashboard as EventDashboard;
 use App\Livewire\Rekap\Absensi\RekapAbsensi;
 use App\Models\Absensi;
 use App\Models\Event;
@@ -14,6 +14,8 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Models\User;
+use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Livewire\Livewire;
 
@@ -106,36 +108,39 @@ it('canonical-first still shows all mapped participants', function () {
 });
 
 it('dashboard counts active event participants', function () {
+    $user = User::factory()->create(['role' => Role::Admin]);
     $event = Event::create(['name' => 'Dashboard Event', 'slug' => 'dashboard-event', 'status' => 'active']);
     app(ActiveEventContext::class)->set($event);
 
     $person = Person::create(['nama' => 'Dashboard Person', 'nip' => 7001, 'jenis_kelamin' => 'L']);
     Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL701', 'attendance_code' => 'KJA-DASH701', 'jenis_peserta' => 'Wajib']);
 
-    Livewire::test(Dashboard::class)
+    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $event])
         ->assertSet('totalPeserta', 1)
         ->assertSee('Total Peserta');
 });
 
 it('dashboard excludes participations from other events', function () {
+    $user = User::factory()->create(['role' => Role::Admin]);
     $eventA = Event::create(['name' => 'Dashboard Event A', 'slug' => 'dashboard-event-a', 'status' => 'active']);
     $eventB = Event::create(['name' => 'Dashboard Event B', 'slug' => 'dashboard-event-b', 'status' => 'active']);
 
     $person = Person::create(['nama' => 'Shared Person', 'nip' => 7002, 'jenis_kelamin' => 'P']);
-    Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KP701', 'attendance_code' => 'KJA-DASHA1', 'jenis_peserta' => 'Wajib']);
+    Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'participant_number' => 'KP701', 'attendance_code' => 'KJA-DASH701', 'jenis_peserta' => 'Wajib']);
     Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KP702', 'attendance_code' => 'KJA-DASHB1', 'jenis_peserta' => 'Wajib']);
 
     app(ActiveEventContext::class)->set($eventA);
-    Livewire::test(Dashboard::class)->assertSet('totalPeserta', 1);
+    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventA])->assertSet('totalPeserta', 1);
 
     app(ActiveEventContext::class)->set($eventB);
-    Livewire::test(Dashboard::class)->assertSet('totalPeserta', 1);
+    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventB])->assertSet('totalPeserta', 1);
 });
 
 it('dashboard counts remain safe without active event', function () {
-    app(ActiveEventContext::class)->clear();
+    $user = User::factory()->create(['role' => Role::Admin]);
+    $event = Event::create(['name' => 'Dashboard Event', 'slug' => 'dashboard-event-safe', 'status' => 'active']);
 
-    Livewire::test(Dashboard::class)
+    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $event])
         ->assertSee('Total Peserta')
         ->assertSee('0')
         ->assertSee('Hadir')

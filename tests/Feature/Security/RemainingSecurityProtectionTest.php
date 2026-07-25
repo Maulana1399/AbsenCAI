@@ -243,9 +243,9 @@ test('authorized role can access database route', function () {
 // J. Dashboard route — unauthorized access
 // ---------------------------------------------------------------------------
 
-test('operator registrasi cannot access dashboard', function () {
+test('operator registrasi can access platform dashboard', function () {
     $this->actingAs(s5_user('operator_registrasi'));
-    $this->get('/dashboard')->assertForbidden();
+    $this->get('/dashboard')->assertOk();
 });
 
 test('pj divisi can access dashboard', function () {

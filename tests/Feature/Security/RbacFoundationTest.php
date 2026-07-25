@@ -359,7 +359,9 @@ test('null role cannot access S3 operational routes', function () {
     $user = rbac_user(['role' => null]);
     $this->actingAs($user);
 
-    $protected = ['/dashboard', '/sesi-absensi', '/rekap-peserta',
+    $this->get('/dashboard')->assertOk('Null role should access platform dashboard');
+
+    $protected = ['/sesi-absensi', '/rekap-peserta',
                   '/rekap-absensi', '/surat-izin', '/activity-log'];
 
     foreach ($protected as $route) {

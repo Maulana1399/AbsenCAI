@@ -1,3 +1,3 @@
-<x-layouts.app :title="__('Dashboard')">
-    <livewire:dashboard.dashboard />
-</x-layouts.app>
+<x-layouts.dashboard :title="__('Dashboard')">
+    <livewire:dashboard.platform-dashboard />
+</x-layouts.dashboard>

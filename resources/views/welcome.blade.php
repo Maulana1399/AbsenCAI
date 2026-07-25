@@ -33,35 +33,7 @@
             Platform Manajemen Event Multi-Event
         </h2>
 
-        @auth
-
-            {{-- Authenticated: KJA Global Home --}}
-            <p class="mt-8 text-xl">
-                Selamat datang, {{ auth()->user()->name }}
-            </p>
-
-            <p class="mt-3 text-slate-300 max-w-3xl mx-auto">
-                Pilih event untuk memulai, atau kelola pengaturan sistem.
-            </p>
-
-            <div class="mt-10 flex flex-wrap justify-center gap-4">
-                <a href="{{ route('dashboard') }}"
-                    class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
-                    Buka Dashboard Event
-                </a>
-
-                <a href="{{ route('events.index') }}"
-                    class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
-                    Kelola Event
-                </a>
-
-                <a href="{{ route('pengajian.enter-token') }}"
-                    class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
-                    Akses Pengajian Desa
-                </a>
-            </div>
-
-        @else
+        @guest
 
             {{-- Unauthenticated: Welcome --}}
             <p class="mt-8 text-xl">
@@ -104,7 +76,7 @@
 
             </div>
 
-        @endauth
+        @endguest
 
     </div>
 

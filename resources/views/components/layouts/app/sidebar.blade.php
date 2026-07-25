@@ -9,6 +9,9 @@
             $isPengajian = $activeEvent?->isPengajian();
             $user = auth()->user();
             $can = fn ($a) => $user?->can($a) ?? false;
+            $dashboardRoute = $activeEvent
+                ? route('events.dashboard', $activeEvent, absolute: false)
+                : route('dashboard', absolute: false);
         @endphp
         <flux:sidebar sticky stashable @class([
             'border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900',
@@ -16,7 +19,7 @@
         ])>
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
             </a>
 
@@ -48,7 +51,7 @@
                 <flux:navlist variant="outline">
                     @can('view-dashboard')
                     <flux:navlist.group :heading="__('Platform')" class="grid">
-                        <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                        <flux:navlist.item icon="home" :href="$dashboardRoute" :current="request()->routeIs('dashboard') || request()->routeIs('events.dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                     </flux:navlist.group>
                     @endcan
 
@@ -103,9 +106,11 @@
                     </flux:navlist.group>
                     @endcan
 
+                    @can('manage-events')
                     <flux:navlist.group expandable heading="Event" class="grid">
                         <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
                     @canany(['manage-secretariat', 'view-activity-log'])
                     <flux:navlist.group expandable heading="Sekretariat" class="grid">

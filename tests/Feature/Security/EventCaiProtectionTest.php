@@ -380,9 +380,9 @@ test('viewer can access dashboard', function () {
     $this->get('/dashboard')->assertOk();
 });
 
-test('null role cannot access dashboard', function () {
+test('null role can access platform dashboard', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/dashboard')->assertForbidden();
+    $this->get('/dashboard')->assertOk();
 });
 
 // ---------------------------------------------------------------------------

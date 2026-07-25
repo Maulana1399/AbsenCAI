@@ -68,16 +68,14 @@ test('welcome page title uses KJA Event Manager', function () {
     ]);
 });
 
-test('authenticated user sees global KJA home on welcome page', function () {
+test('authenticated user sees platform dashboard instead of welcome page', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
-    $response = $this->actingAs($user)->get('/');
+    $response = $this->actingAs($user)->get('/dashboard');
 
     $response->assertStatus(200);
-    $response->assertSee('KJA Event Manager');
     $response->assertSee('Selamat datang');
-    $response->assertSee('Buka Dashboard Event');
     $response->assertSee('Kelola Event');
-    $response->assertSee('Akses Pengajian Desa');
+    $response->assertSee('Event Saya');
 });
 
 // ---------------------------------------------------------------------------

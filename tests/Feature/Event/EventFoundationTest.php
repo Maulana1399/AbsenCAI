@@ -355,7 +355,7 @@ test('activating a session for one event does not deactivate another event', fun
 
     app(ActiveEventContext::class)->set($eventA);
 
-    Livewire::test(\App\Livewire\Dashboard\Dashboard::class)
+    Livewire::test(\App\Livewire\Event\Dashboard::class, ['event' => $eventA])
         ->call('activateSesi', $sessionA2->id);
 
     expect($sessionA1->fresh()->aktif)->toBeFalse()
@@ -396,7 +396,7 @@ test('event switcher redirects to CAI dashboard when switching to CAI event', fu
 
     Livewire::test(\App\Livewire\Event\EventSwitcher::class)
         ->call('switchTo', $eventB->id)
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('events.dashboard', $eventB));
 });
 
 test('event switcher redirects to Pengajian report when switching to Pengajian event', function () {

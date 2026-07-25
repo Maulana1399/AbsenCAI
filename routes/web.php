@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\Audit\ActivityLogIndex;
+use App\Livewire\Dashboard\PlatformDashboard;
+use App\Livewire\Event\Dashboard as EventDashboard;
 use App\Livewire\Event\Index as EventIndex;
 use App\Livewire\MasterData\User\IndexUser;
 use App\Livewire\Settings\Appearance;
@@ -19,12 +21,19 @@ use App\Services\QR\QRService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified', 'can:view-dashboard'])
+Route::get('dashboard', PlatformDashboard::class)
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('events/{event}/dashboard', EventDashboard::class)
+    ->middleware(['auth', 'verified', 'can:view-dashboard'])
+    ->name('events.dashboard');
 
 Route::view('registrasi', 'registrasi.peserta')
     ->middleware(['auth', 'verified', 'can:manage-registration'])

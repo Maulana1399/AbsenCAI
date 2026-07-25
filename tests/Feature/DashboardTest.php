@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Dashboard\Dashboard;
+use App\Livewire\Event\Dashboard as EventDashboard;
 use App\Models\Event;
 use App\Models\SesiAbsensi;
 use App\Models\Participation;
@@ -140,7 +140,7 @@ test('dashboard shows Alfa count when session is active and no one attended', fu
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
-        ->test(Dashboard::class)
+        ->test(EventDashboard::class, ['event' => $event])
         ->assertSet('totalPeserta', 1)
         ->assertViewHas('belumAbsenCount', 1)
         ->assertViewHas('sudahAbsenCount', 0)
@@ -173,7 +173,7 @@ test('dashboard Alfa count decreases when participant attends', function () {
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
-        ->test(Dashboard::class)
+        ->test(EventDashboard::class, ['event' => $event])
         ->assertSet('totalPeserta', 2)
         ->assertViewHas('sudahAbsenCount', 1)
         ->assertViewHas('belumAbsenCount', 1);
@@ -202,7 +202,7 @@ test('dashboard Alfa shows 0 when all participants attended', function () {
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
-        ->test(Dashboard::class)
+        ->test(EventDashboard::class, ['event' => $event])
         ->assertViewHas('belumAbsenCount', 0)
         ->assertViewHas('sudahAbsenCount', 1);
 });
@@ -221,7 +221,7 @@ test('dashboard Belum Absen table shows correct names', function () {
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
-        ->test(Dashboard::class)
+        ->test(EventDashboard::class, ['event' => $event])
         ->assertSee($person->nama);
 });
 
@@ -251,7 +251,7 @@ test('dashboard attendance from other session does not affect Alfa count', funct
 
     // Person should still show as belum absen because they're not in the active session
     Livewire::actingAs($user)
-        ->test(Dashboard::class)
+        ->test(EventDashboard::class, ['event' => $event])
         ->assertViewHas('belumAbsenCount', 1)
         ->assertViewHas('sudahAbsenCount', 0);
 });

@@ -42,9 +42,11 @@
 
                 <flux:menu.separator />
 
+                @can('manage-events')
                 <flux:menu.item icon="cog" href="{{ route('events.index') }}" wire:navigate>
                     Kelola Event
                 </flux:menu.item>
+                @endcan
             </flux:menu>
         </flux:dropdown>
     @else
@@ -72,9 +74,11 @@
 
                 <flux:menu.separator />
 
+                @can('manage-events')
                 <flux:menu.item icon="cog" href="{{ route('events.index') }}" wire:navigate>
                     Kelola Event
                 </flux:menu.item>
+                @endcan
             </flux:menu>
         </flux:dropdown>
     @endif

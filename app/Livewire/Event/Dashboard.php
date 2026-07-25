@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Livewire\Dashboard;
+namespace App\Livewire\Event;
 
+use App\Models\Event;
 use App\Models\Participation;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceReadService;
+use App\Services\Event\EventAccessService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -19,11 +21,21 @@ class Dashboard extends Component
     public $totalKelompok;
     public $totalRegu;
     public $regu_id = '';
+    public $eventName;
 
-    public function mount()
+    public function mount(Event $event)
     {
-        $event = app(ActiveEventContext::class)->current();
-        $this->totalPeserta = $event ? Participation::where('event_id', $event->id)->count() : 0;
+        abort_unless($event->isActive(), 404);
+
+        abort_unless(
+            app(EventAccessService::class)->canAccess(auth()->user(), $event),
+            403
+        );
+
+        app(ActiveEventContext::class)->set($event);
+
+        $this->eventName = $event->name;
+        $this->totalPeserta = $event->participations()->count();
         $this->totalDesa = desa::count();
         $this->totalKelompok = kelompok::count();
         $this->totalRegu = regu::count();
@@ -62,7 +74,7 @@ class Dashboard extends Component
                 ->values();
         }
 
-        return view('livewire.dashboard.dashboard', [
+        return view('livewire.event.dashboard', [
             'sesiAktif' => $sesiAktif,
             'attendance' => $attendance,
             'pesertaBelumAbsen' => $pesertaBelumAbsen,
@@ -74,28 +86,27 @@ class Dashboard extends Component
             'selectedReguId' => $this->regu_id,
             'totalPesertaFiltered' => $totalPesertaFiltered,
             'daftarSesi' => SesiAbsensi::orderBy('tanggal', 'asc')->get(),
+            'eventName' => $this->eventName,
         ]);
     }
 
-
     public function updatedReguId()
-{
-    logger('REGU FILTER: '.$this->regu_id);
-}
-
+    {
+        logger('REGU FILTER: '.$this->regu_id);
+    }
 
     public function activateSesi($id)
-{
-    Gate::authorize('manage-sessions');
+    {
+        Gate::authorize('manage-sessions');
 
-    $event = app(ActiveEventContext::class)->requireCurrent();
+        $event = app(ActiveEventContext::class)->requireCurrent();
 
-    SesiAbsensi::where('event_id', $event->id)->update([
-        'aktif' => false
-    ]);
+        SesiAbsensi::where('event_id', $event->id)->update([
+            'aktif' => false
+        ]);
 
-    SesiAbsensi::where('event_id', $event->id)->where('id', $id)->update([
-        'aktif' => true
-    ]);
-}
+        SesiAbsensi::where('event_id', $event->id)->where('id', $id)->update([
+            'aktif' => true
+        ]);
+    }
 }

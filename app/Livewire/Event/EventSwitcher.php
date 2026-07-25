@@ -53,7 +53,7 @@ class EventSwitcher extends Component
 
             $route = $event->isPengajian()
                 ? route('pengajian.report', absolute: false)
-                : route('dashboard', absolute: false);
+                : route('events.dashboard', $event, absolute: false);
 
             $this->redirect($route, navigate: true);
         }
