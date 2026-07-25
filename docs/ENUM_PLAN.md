@@ -164,33 +164,31 @@ GUEST
 
 ---
 
-# UserRole
+# UserRole (Role enum)
 
 Status
 
-High Priority
+🟢 COMPLETE — `app/Enums/Role.php`
 
 Cases
 
-SUPER_ADMIN
+`super_admin`
 
-ADMIN
+`admin`
 
-SECRETARIAT
+`ketua_event`
 
-EVENT_LEADER
+`sekretariat`
 
-DIVISION_LEADER
+`pj_divisi`
 
-SCAN_OPERATOR
+`operator_registrasi`
 
-REGISTRATION_OPERATOR
+`operator_scan`
 
-JUDGE
+`juri`
 
-VIEWER
-
-PUBLIC
+`viewer`
 
 ---
 

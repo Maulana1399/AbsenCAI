@@ -60,7 +60,7 @@ Catatan: Role `Peserta` tidak memiliki akun login terpisah. Peserta menggunakan 
 
 # S1 Gate Abilities
 
-Berikut Gate abilities yang telah didefinisikan di `AppServiceProvider`. **Belum dipasang ke route/sidebar/Livewire** — akan diimplementasikan di S2–S7.
+Berikut Gate abilities yang telah didefinisikan di `AppServiceProvider`. **Sudah dipasang ke route/sidebar/Livewire** — S2–S7 telah complete.
 
 | Ability              | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
 | -------------------- | :---------: | :---: | :---: | :---------: | :-------: | :--------: | :--: | :--: | :----: |

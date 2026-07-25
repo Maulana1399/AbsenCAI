@@ -60,6 +60,10 @@ Status implementasi:
 - S1 RBAC Foundation ✅ — Role enum, User column, Gate definitions, Artisan command
 - S2 Master Data Protection ✅ — Route protection, Livewire authorization, Sidebar visibility
 - S3 Operational Protection ✅ — Event/CAI route & Livewire protection
+- S4 Pengajian Admin Protection ✅ — Pengajian admin route & Livewire protection
+- S5 CAI Module Permissions ✅ — Import routes & Livewire protection
+- S6 Sidebar Visibility ✅ — All menu items gated with @can()
+- S7 Event-Scoped Authorization ✅ — KetuaEvent event-scoped gates + EventSwitcher filtering
 
 Tidak diperbolehkan:
 

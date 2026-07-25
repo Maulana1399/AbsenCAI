@@ -482,7 +482,9 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 - 🟢 S2 Master Data Protection: ✅ Complete
 - 🟢 S3 Operational Protection: ✅ Complete
 - 🟢 **S4 Pengajian Admin Protection: ✅ Complete**
-- 🟡 S5–S7: Not yet started
+- 🟢 S5 CAI Module Permissions: ✅ Complete
+- 🟢 S6 Sidebar Visibility: ✅ Complete
+- 🟢 S7 Event-Scoped Authorization: ✅ Complete
 
 ### Remaining (S6–S7)
 - S6 — Sidebar Visibility (`@can()` directives for all menu items)
@@ -510,13 +512,14 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 - 🟢 S1 RBAC Foundation: ✅ Complete
 - 🟢 S2 Master Data Protection: ✅ Complete
 - 🟢 S3 Operational Protection: ✅ Complete
-- 🟢 S4 Pengajian Admin Protection: ✅ Complete
+- 🟢 **S4 Pengajian Admin Protection: ✅ Complete**
 - 🟢 **S5 CAI Module Permissions: ✅ Complete**
 - 🟢 **S6 Sidebar Visibility: ✅ Complete**
-- 🟡 S7: Not yet started
+- 🟢 S7 Event-Scoped Authorization: ✅ Complete
 
-### Remaining (S7)
-- S7 — Full permission test matrix
+### Remaining (Non-Blocking)
+- Assignment role edit UI (delete+recreate workaround exists)
+- EventRole edit/delete UI
 
 ---
 
@@ -543,10 +546,11 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 - 🟢 S4 Pengajian Admin Protection: ✅ Complete
 - 🟢 S5 CAI Module Permissions: ✅ Complete
 - 🟢 **S6 Sidebar Visibility: ✅ Complete**
-- 🟡 S7: Not yet started
+- 🟢 S7 Event-Scoped Authorization: ✅ Complete
 
-### Remaining (S7)
-- Full permission test matrix (role × module × allowed/denied)
+### Remaining (Non-Blocking)
+- Assignment role edit UI (delete+recreate workaround exists)
+- EventRole edit/delete UI
 
 ---
 

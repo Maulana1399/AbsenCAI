@@ -119,7 +119,6 @@ Dipicu saat Person diedit melalui Master Data CRUD dan memiliki LegacyPesertaMap
 | `jenis_kelamin` | Person (L/P) → peserta (Laki - Laki/Perempuan) | ✅ via `PlacementService::normalizePersonGender()` |
 | `desa_id` | Person → peserta | ✅ |
 | `kelompok_id` | Person → peserta | ✅ |
-| `nip` | — | ❌ Immutable untuk mapped Person |
 | `regu_id`, `participant_number`, `attendance_code` | — | ❌ Event-scoped, tidak disinkronkan |
 
 ### peserta → Person (via RegistrationService::updateParticipant())
@@ -159,6 +158,9 @@ Participant Number
 
 Human-readable participant identifier, format `KL001` / `KP001`
 
-NIP
+~~NIP~~ (RETIRED)
 
-Legacy operational identifier. Laki-laki `1001+`, perempuan `2001+`.
+Legacy operational identifier. **Sudah diretire penuh di PGM.20.**
+Kolom `people.nip` dan `pesertas.nip` sudah dihapus.
+`legacyNextNip()` sudah dihapus.
+NIP sudah tidak digunakan di attendance scan, registration, reports, exports, atau Person CRUD.

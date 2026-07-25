@@ -23,23 +23,25 @@
 
 ## Current Sprint
 
-PGM.19 Sprint 8A + 8B — Physical Regu Retirement ✅ COMPLETE
-PGM.20 Legacy NIP Retirement (Phase 1–4B) ✅ COMPLETE
-
-S01–S04 Foundation COMPLETE 100%.
-PGM.12–PGM.20 COMPLETE. S3.0–S3.10 all COMPLETE/VERIFIED.
+✅ ALL PGM SPRINTS COMPLETE (PGM.12–PGM.20)
+✅ S01–S04 Foundation COMPLETE 100%
+✅ S3.0–S3.10 Multi Event COMPLETE/VERIFIED
+✅ RBAC S1–S7 COMPLETE
+✅ UI Bug Fix Sprint COMPLETE
+✅ UI Standardization COMPLETE
 
 ---
 
 ## Current Priority
 
-1. UI Bug Fix Sprint ✅ COMPLETE
-2. PGM.17 Pilot Release ✅ COMPLETE
-3. PGM.18 Sprint 1–3 ✅ COMPLETE
-4. PGM.19 Sprint 8A + 8B ✅ COMPLETE
-5. PGM.20 Legacy NIP Retirement ✅ COMPLETE
-6. Competition (future sprint)
-7. Commercial (future sprint)
+1. PGM.12–PGM.20 ✅ ALL COMPLETE
+2. RBAC S1–S7 ✅ ALL COMPLETE
+3. UI Bug Fix Sprint ✅ COMPLETE
+4. UI Standardization ✅ COMPLETE
+5. Venue CRUD 🔜 Pending (model & migration exist)
+6. CategoryDefinition CRUD 🔜 Pending (model & migration exist)
+7. Competition (future sprint)
+8. Commercial (future sprint)
 
 ---
 
@@ -56,14 +58,14 @@ PGM.12–PGM.20 COMPLETE. S3.0–S3.10 all COMPLETE/VERIFIED.
 | FEATURE.md | Feature catalog | Updated |
 | INDEX.md | Document index | Updated |
 | DATABASE.md | Database design | Updated (PGM.20 — NIP removed) |
-| ARCHITECTURE.md | System architecture | Updated (canonical architecture added) |
-| TERMINOLOGY.md | Glossary | Unchanged (valid) |
-| SECURITY.md | Security standard | Unchanged (valid) |
-| PERMISSION.md | Role & Permission matrix | Unchanged (valid) |
-| AI_WORKFLOW.md | AI development workflow | Unchanged (valid) |
-| AGENTS.md | AI development guide | Unchanged (valid) |
-| CONTEXT.md | AI context | Unchanged (valid) |
-| UI_DESIGN_SYSTEM.md | UI Design System (actual standard) | Updated |
+| ARCHITECTURE.md | System architecture | Updated (canonical architecture) |
+| TERMINOLOGY.md | Glossary | Valid |
+| SECURITY.md | Security standard | Updated (S4–S7) |
+| PERMISSION.md | Role & Permission matrix | Valid |
+| AI_WORKFLOW.md | AI development workflow | Valid |
+| AGENTS.md | AI development guide | Valid |
+| CONTEXT.md | AI context | Valid |
+| UI_DESIGN_SYSTEM.md | UI Design System | Updated |
 
 ---
 

@@ -29,13 +29,13 @@ Feature
 Notes:
 - Regu dikeluarkan dari Master Data (Legacy CAI Operational — route `/regu` tetap ada)
 - Master Data accessible without active event context
-- Appears for all authenticated users (no RBAC yet)
+- Protected with `can:view-master-data` / `can:manage-master-data` (S2 RBAC)
+- Appears for roles with `view-master-data` ability (super_admin, admin, sekretariat)
 
 Future
 
 - Venue CRUD
 - CategoryDefinition CRUD
-- RBAC for Master Data
 
 ---
 
@@ -725,18 +725,17 @@ Tidak diperbolehkan membuat fitur baru tanpa memperbarui FEATURE.md terlebih dah
 
 # Current Development Focus
 
-**UI Bug Fix Sprint** — 9 active bugs (Branding, Navigation, Access Token, Filters, Responsive)
+**Pengajian Desa MVP (PGM.12–PGM.20)** — ALL COMPLETE
 
-Prioritas tertinggi saat ini:
-
-1. Perbaikan branding CAI → KJA Event Manager (landing page + login page)
-2. Perbaikan navigasi default KJA logo (event-aware routing)
-3. Hard-delete untuk revoked access token
-4. Audit/masking raw token di modal creation
-5. Verifikasi filter Regional Report
-6. Menu "Pengajian" hanya muncul di event Pengajian
-
-Semua fitur di luar Sprint aktif masuk ke Backlog hingga Sprint berjalan selesai.
+Semua sprint utama sudah selesai:
+1. PGM.12–PGM.17 Pengajian Desa MVP ✅ COMPLETE
+2. PGM.18 Physical Mapping Cleanup ✅ COMPLETE
+3. PGM.19 Physical Regu Retirement ✅ COMPLETE
+4. PGM.20 Legacy NIP Retirement ✅ COMPLETE
+5. RBAC S1–S7 ✅ COMPLETE
+6. User Management ✅ COMPLETE
+7. UI Bug Fix Sprint ✅ COMPLETE
+8. UI Standardization ✅ COMPLETE
 
 ---
 

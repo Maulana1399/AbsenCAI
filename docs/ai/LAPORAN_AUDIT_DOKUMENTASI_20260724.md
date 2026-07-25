@@ -33,7 +33,6 @@ Person → Participation → EventAttendance
 
 **Framework:** Laravel 12 + Livewire 3 + Flux UI
 **Database:** SQLite (dev/test), MariaDB (target production)
-**PHP:** 8.3.32 (via /tmp/php wrapper)
 
 ---
 
@@ -47,7 +46,7 @@ Total file Markdown project: **59 file**
 |:-----------|:------:|------------|
 | **ACTIVE** | 15 | Dokumentasi utama yang masih relevan |
 | **HISTORICAL** | 35 | PGM/sprint report, audit report — berguna sebagai history |
-| **UPDATED** | 7 | Diperbarui dalam audit ini |
+| **UPDATED** | 16 | Diperbarui dalam audit ini |
 | **DUPLICATE** | 2 | `README.md` (root) dan `docs/README.md` |
 | **OBSOLETE** | 0 | Tidak ada yang dihapus |
 
@@ -55,15 +54,23 @@ Total file Markdown project: **59 file**
 
 ## 3. Dokumentasi yang Diubah
 
-| File | Masalah | Perubahan |
-|------|---------|-----------|
-| `README.md` | Baseline test outdated, PGM.19-20 belum tercantum | Update test baseline ke 1574/3745/0, tambah PGM.19-20 |
-| `docs/ARCHITECTURE.md` | Belum mencantumkan canonical architecture | Tambah canonical data flow + retired components |
-| `docs/DATABASE.md` | `people.nip` masih tercantum sebagai kolom aktif, NIP masih disebut sebagai fallback | Hapus `nip` dari schema people, update identity rules, NIP retired |
-| `docs/INDEX.md` | Status document list outdated untuk DATABASE & ARCHITECTURE | Update status menjadi "Updated" |
-| `docs/FEATURE.md` | "Search by name or NIP" masih tercantum | Hapus "or NIP" |
-| `docs/HANDOFF.md` | Korupsi file (0 bytes) akibat sed error | Buat ulang dengan informasi current architecture + NIP retirement |
-| `docs/ai/CURRENT_STATE.md` | PGM.20 belum tercantum di status | Tambah PGM.20, update test baseline |
+| # | File | Masalah | Perubahan |
+|---|------|---------|-----------|
+| 1 | `README.md` | UI Bug Fix Batch 4 masih "in progress", UI Standardization blm tercantum | Update status, tambah UI Standardization |
+| 2 | `docs/ROADMAP.md` | S4–S7 masih "Not yet implemented" di beberapa tempat; "Authorization Gap" masih bilang RBAC blm diimplementasi | Update ke S4–S7 COMPLETE; hapus Authorization Gap |
+| 3 | `docs/DATABASE.md` | Sync strategy masih referensi NIP; NIP section masih aktif | Hapus nip dari sync table, NIP → RETIRED |
+| 4 | `docs/FEATURE.md` | Master Data notes masih "no RBAC yet"; Current Development Focus masih referensi UI Bug Sprint | Update RBAC status; ganti focus ke PGM completed |
+| 5 | `docs/PERMISSION.md` | "Belum dipasang ke route/sidebar/Livewire" — sudah semua terpasang | Update text ke "Sudah dipasang" |
+| 6 | `docs/SECURITY.md` | Status implementasi hanya S1–S3, blm ada S4–S7 | Tambah S4–S7 |
+| 7 | `docs/TODO.md` | Batch 4 masih "dalam progress"; bug #10–#12 masih NEEDS VERIFICATION | Update ke RESOLVED VERIFIED |
+| 8 | `docs/INDEX.md` | Current Sprint/Priority outdated | Update ke all complete + pending items |
+| 9 | `docs/DATAFLOW.md` | Sync section masih referensi nip | Hapus nip dari NOT synced |
+| 10 | `docs/MODULES.md` | "Future: RBAC untuk Master Data" | Update dengan RBAC yang sudah aktif |
+| 11 | `docs/SERVICE_PLAN.md` | AttendanceService/RegistrationService/PlacementService/QRService/AuditService masih "High Priority" status | Update ke 🟢 COMPLETE dengan path file |
+| 12 | `docs/ENUM_PLAN.md` | UserRole masih "High Priority" dengan cases lama | Update ke 🟢 COMPLETE — Role.php dengan 9 cases |
+| 13 | `docs/ai/CURRENT_STATE.md` | Multiple "S7: Not yet started"; S5–S7 di beberapa section | Update ke S7 COMPLETE di semua section |
+| 14 | `docs/ai/AGENTS.md` | (no changes needed) | — |
+| 15 | `docs/HANDOFF.md` | Test baseline valid | — |
 
 ---
 
@@ -89,6 +96,9 @@ Beberapa file memiliki informasi yang sebagian outdated tetapi tidak diubah kare
 - `docs/SPRINT3_MULTI_EVENT_AUDIT.md` — masih relevan sebagai arsitektur multi event
 - `docs/DATABASE_V2.md` — masih relevan sebagai rencana transisi database
 - `docs/PENGAJIAN_MVP_OPERATIONAL.md` — masih relevan untuk pengajian module
+- `docs/REFACTOR_PLAN.md` — historical planning document
+- `docs/IDENTITY_REFACTOR_PLAN.md` — historical design document
+- `docs/EXTRACTION_PLAN.md` — historical extraction plan
 
 ---
 
@@ -96,11 +106,17 @@ Beberapa file memiliki informasi yang sebagian outdated tetapi tidak diubah kare
 
 | Dokumen | Isi | Actual | Status |
 |---------|-----|--------|--------|
-| DATABASE.md:37 | `people.nip` sebagai kolom | Kolom sudah dihapus | ✅ Fixed |
-| DATABASE.md:47-53 | NIP sebagai legacy identifier dengan fallback | NIP sudah diretire total | ✅ Fixed |
-| FEATURE.md:154 | Search by name or NIP | NIP search sudah dihapus | ✅ Fixed |
-| HANDOFF.md:122-123 | Person memiliki nip, peserta auto-generate nip | NIP sudah diretire | ✅ Fixed |
-| ARCHITECTURE.md | Belum ada canonical data flow | Ada canonical architecture | ✅ Fixed |
+| ROADMAP.md:191 | S4–S7: Not yet implemented | S4–S7 ALL COMPLETE | ✅ Fixed |
+| ROADMAP.md:1168 | RBAC not implemented yet | RBAC S1–S7 complete | ✅ Fixed |
+| FEATURE.md:32 | Appears for all auth users (no RBAC yet) | RBAC applied S2 | ✅ Fixed |
+| PERMISSION.md:63 | Belum dipasang ke route/sidebar/Livewire | Sudah dipasang S2–S7 | ✅ Fixed |
+| SECURITY.md:59-62 | Hanya S1–S3 disebut | S4–S7 juga complete | ✅ Fixed |
+| TODO.md:309 | Batch 4 masih progress | All resolved verified | ✅ Fixed |
+| DATAFLOW.md:17-18 | nip immutable for mapped Person | NIP retired total | ✅ Fixed |
+| CURRENT_STATE.md:484,516,546 | S7: Not yet started | S7 complete | ✅ Fixed |
+| DATABASE.md:122-123 | nip sync column + immutable | NIP retired | ✅ Fixed |
+| INDEX.md:26-41 | Current sprint/priority outdated | Updated | ✅ Fixed |
+| ENUM_PLAN.md:167-195 | UserRole with old naming + "High Priority" | Role.php complete | ✅ Fixed |
 
 ---
 
@@ -111,7 +127,7 @@ Person (master identity)
 ├── nama, jenis_kelamin, desa_id, kelompok_id, tanggal_lahir
 │
 └── Participation (event-scoped membership)
-    ├── person_id, event_id, participant_number, attendance_code, regu_id
+    ├── person_id, event_id, participant_number, attendance_code, regu_id, status_registrasi
     │
     ├── EventAttendance (canonical attendance)
     │   └── participation_id, sesi_absensi_id, status, method
@@ -140,6 +156,8 @@ Person (master identity)
 | RBAC S1–S7 | ✅ COMPLETE |
 | Person CRUD | ✅ COMPLETE |
 | User Management | ✅ COMPLETE |
+| UI Bug Fix Sprint | ✅ COMPLETE |
+| UI Standardization Phases 2–6 | ✅ COMPLETE |
 | **Venue CRUD** | 🔜 **Pending** |
 | **CategoryDefinition CRUD** | 🔜 **Pending** |
 | Competition Module | 🔮 Future |
@@ -165,7 +183,6 @@ Person (master identity)
 - Model `Venue` dan migration sudah ada (S3.9C)
 - Perlu Livewire component: Index, Create, Edit, Delete
 - Event-scoped, perlu ActiveEventContext
-- Tidak ada dependency ke PGM lain
 
 **Prioritas 2: CategoryDefinition CRUD**
 - Model `CategoryDefinition` dan migration sudah ada (S3.9B)
@@ -174,6 +191,8 @@ Person (master identity)
 **Prioritas 3 (Deferred):**
 - Absensi table retirement — setelah tidak ada dependency read
 - legacy_nip snapshot columns — bisa dihapus kapan saja
+- EventRole edit/delete UI
+- Assignment role edit UI
 
 ---
 
@@ -181,29 +200,32 @@ Person (master identity)
 
 | Check | Result |
 |-------|--------|
-| Full test suite | **1574 passed, 3745 assertions, 0 failures** |
-| Design C diagnostic | **problem_total = 0** |
-| migrate:fresh | PASS |
+| Dokumentasi utama sinkron | ✅ |
+| RBAC status konsisten di semua doc | ✅ |
+| NIP retired konsisten di semua doc | ✅ |
+| Regu retirement konsisten di semua doc | ✅ |
+| Test baseline konsisten | ✅ 1574 passed / 3745 assertions / 0 failures |
+| Design C diagnostic | problem_total = 0 |
 
 ---
 
-## 12. Git Diff Summary
-
-### File diubah:
+## 12. Files Changed Summary
 
 | File | Perubahan |
 |------|-----------|
-| `README.md` | Update test baseline, tambah PGM.19-20 |
-| `docs/ARCHITECTURE.md` | Tambah canonical architecture + retired components |
-| `docs/DATABASE.md` | Hapus `people.nip`, update identity rules |
-| `docs/INDEX.md` | Update document status |
-| `docs/FEATURE.md` | Hapus "or NIP" dari search description |
-| `docs/HANDOFF.md` | **Buat ulang** (korupsi file) |
-| `docs/ai/CURRENT_STATE.md` | Update PGM.20 status, test baseline |
-
-### File tidak diubah:
-
-Seluruh PGM report, audit report, sprint report di `docs/ai/` dipertahankan sebagai historical record.
+| `README.md` | Update UI Bug Sprint + tambah UI Standardization |
+| `docs/ROADMAP.md` | S4–S7 → COMPLETE; Authorization Gap dihapus |
+| `docs/DATABASE.md` | Hapus nip dari sync strategy; NIP → RETIRED |
+| `docs/FEATURE.md` | RBAC status; Current Development Focus update |
+| `docs/PERMISSION.md` | "Belum dipasang" → "Sudah dipasang" |
+| `docs/SECURITY.md` | Tambah S4–S7 status implementasi |
+| `docs/TODO.md` | Batch 4 resolved; bug #10–#12 verified |
+| `docs/INDEX.md` | Current sprint/priority update |
+| `docs/DATAFLOW.md` | Hapus nip dari NOT synced |
+| `docs/MODULES.md` | RBAC Master Data status |
+| `docs/SERVICE_PLAN.md` | Service status → COMPLETE dengan path |
+| `docs/ENUM_PLAN.md` | UserRole → Role.php complete |
+| `docs/ai/CURRENT_STATE.md` | Semua S7 references → COMPLETE |
 
 ---
 

@@ -17,7 +17,8 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Person Master Data CRUD | ✅ COMPLETE |
 | User Management | ✅ COMPLETE — Super Admin only |
 | Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete |
-| UI Bug Fix Sprint | ✅ Batch 1–3 VERIFIED. Batch 4 (#10, #11, #12) in progress |
+| UI Bug Fix Sprint | ✅ Batch 1–4 VERIFIED. All resolved |
+| UI Standardization | ✅ Phases 2–6 COMPLETE |
 | PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` retired |
 | PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture |
 | Database V2 / Design C | ✅ problem_total = 0 |

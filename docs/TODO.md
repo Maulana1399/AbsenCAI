@@ -306,7 +306,7 @@ Status: 🟢 Operational Stable — remaining features **DEFERRED to 2027**
 
 ## UI Bug Fix Sprint
 
-Status: ✅ COMPLETE (Batch 1–3 resolved). Batch 4 bugs #10, #11, #12 masih dalam progress.
+Status: ✅ COMPLETE (Batch 1–4 resolved). All bugs resolved and verified.
 
 Priority: Critical/High
 
@@ -327,9 +327,9 @@ Berdasarkan audit dokumentasi dan codebase pada 2026-07-20, teridentifikasi 11 a
 | 7 | Security | Raw token display di modal | High | `access-index.blade.php` | **SECURITY AUDIT COMPLETE** ✅ DB hanya hash, one-time reveal |
 | 8 | Access Token UI | Token overflow/UI kurang rapi | Medium | `access-index.blade.php` | **RESOLVED — VERIFIED** ✅ |
 | 9 | Filter/Regional Report | Filter kombinasi Regional Report | Medium | `RegionalReport.php` | **RESOLVED — VERIFIED** ✅ |
-| 10 | Dark Mode | Heading/text gelap di dark mode | Medium | Multiple files | **IMPLEMENTED — NEEDS VISUAL VERIFICATION** ⏳ |
-| 11 | Responsive | Layout Pengajian sempit di desktop | High | `pengajian.blade.php` | **IMPLEMENTED — NEEDS VISUAL VERIFICATION** ⏳ |
-| 12 | Event Isolation | Access Desa lihat grant event lain | High | `AccessIndex.php` | **IMPLEMENTED — NEEDS TEST VERIFICATION** ⏳ |
+| 10 | Dark Mode | Heading/text gelap di dark mode | Medium | Multiple files | **RESOLVED — VERIFIED** ✅ |
+| 11 | Responsive | Layout Pengajian sempit di desktop | High | `pengajian.blade.php` | **RESOLVED — VERIFIED** ✅ |
+| 12 | Event Isolation | Access Desa lihat grant event lain | High | `AccessIndex.php` | **RESOLVED — VERIFIED** ✅ |
 
 ---
 

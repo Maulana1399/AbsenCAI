@@ -13,11 +13,10 @@ Person CRUD (Master Data)
         ├── desa_id       → sync to peserta.desa_id
         ├── kelompok_id   → sync to peserta.kelompok_id
         │
-        └── NOT synced:
-            ├── nip               → immutable for mapped Person
-            ├── regu_id           → not in Person schema
-            ├── participant_number → event-scoped
-            └── attendance_code    → event-scoped
+└── NOT synced:
+    ├── regu_id           → not in Person schema
+    ├── participant_number → event-scoped
+    └── attendance_code    → event-scoped
 
 ## Authorization (RBAC Chain)
 

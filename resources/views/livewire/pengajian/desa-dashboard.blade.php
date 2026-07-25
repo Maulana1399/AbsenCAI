@@ -52,14 +52,18 @@
 
     {{-- Summary Cards --}}
     @if (!empty($summary))
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="rounded-xl border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
                 <p class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $summary['total_warga'] }}</p>
                 <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Total Warga</p>
             </div>
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center shadow-sm dark:border-emerald-900 dark:bg-emerald-950">
                 <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{{ $summary['sudah_hadir'] }}</p>
-                <p class="text-xs text-emerald-600 dark:text-emerald-500 mt-1">Sudah Hadir</p>
+                <p class="text-xs text-emerald-600 dark:text-emerald-500 mt-1">Hadir</p>
+            </div>
+            <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center shadow-sm dark:border-blue-900 dark:bg-blue-950">
+                <p class="text-2xl font-bold text-blue-700 dark:text-blue-400">{{ $summary['izin'] }}</p>
+                <p class="text-xs text-blue-600 dark:text-blue-500 mt-1">Izin</p>
             </div>
             <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center shadow-sm dark:border-amber-900 dark:bg-amber-950">
                 <p class="text-2xl font-bold text-amber-700 dark:text-amber-400">{{ $summary['belum_hadir'] }}</p>

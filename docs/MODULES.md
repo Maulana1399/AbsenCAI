@@ -43,8 +43,10 @@ Notes:
 - Regu sudah dikeluarkan dari Master Data — reklasifikasi sebagai Legacy CAI Operational
 - Venue dan CategoryDefinition bersifat event-scoped — tidak masuk Master Data
 
-Future:
-- RBAC untuk Master Data
+RBAC:
+- Route protection S2: `can:view-master-data` / `can:manage-master-data`
+- Sidebar: `@can('view-master-data')`
+- Hanya super_admin, admin, sekretariat
 
 ---
 

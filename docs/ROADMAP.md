@@ -188,7 +188,7 @@ Notes:
 
 🟢 **S1 RBAC Foundation**: Complete. Role enum, users.role migration, Gate definitions, Artisan command `user:set-role`.
 ✅ **S3**: Complete — Event Management & CAI Operational Protection.
-🟡 **S4–S7**: Not yet implemented.
+✅ **S4–S7**: ALL COMPLETE.
 
 ## Goal
 
@@ -218,17 +218,19 @@ Menerapkan Role-Based Access Control (RBAC) di seluruh aplikasi sesuai permissio
 ### S3 — Livewire Action Authorization ✅
 - [x] Authorize Livewire mutations per component (16 components, 25+ mutation methods)
 
-### S4 — Pengajian Admin Protection 🔲
-- [ ] Separate admin Pengajian routes from role-based access
+### S4 — Pengajian Admin Protection ✅
+- [x] Separate admin Pengajian routes from role-based access
 
-### S5 — CAI Module Permissions 🔲
-- [ ] Registration, attendance, QR, session, import permissions
+### S5 — CAI Module Permissions ✅
+- [x] Registration, attendance, QR, session, import permissions
 
 ### S6 — Sidebar Visibility ✅
 - [x] `@can()` directives for all menu items
 
-### S7 — Security Regression Tests 🔲
-- [ ] Full role × module × allowed/denied test matrix
+### S7 — Event-Scoped Authorization ✅
+- [x] User↔Person Foundation + IDOR fixes
+- [x] Event-scoped gates for KetuaEvent + EventSwitcher filtering
+- [x] Assignment management UI + EventRole UI
 
 ---
 
@@ -1163,8 +1165,8 @@ Master Data is a single sidebar link pointing to the landing page at `/master-da
 
 Master Data appears in sidebar for all authenticated users regardless of event context (CAI, Pengajian, or no active event).
 
-## Authorization Gap
-Master Data is currently visible to all authenticated users. RBAC has not been implemented yet. See `docs/PERMISSION.md` for the planned permission matrix.
+## Authorization
+Master Data is protected with `can:view-master-data` (route + sidebar) and `can:manage-master-data` (Livewire mutations). Only super_admin, admin, and sekretariat have access. RBAC S2 complete.
 
 ---
 
@@ -1249,7 +1251,7 @@ Previously tracked as:
 - 🟢 **S4 Pengajian Admin Protection: ✅ Complete**
 - 🟢 **S5 CAI Module Permissions: ✅ Complete**
 - 🟢 **S6 Sidebar Visibility: ✅ Complete**
-- 🟡 S7: Not yet implemented
+- 🟢 **S7 Event-Scoped Authorization: ✅ Complete**
 
 ### S5 — CAI Module Permissions ✅ COMPLETE (2026-07-21)
 
@@ -1272,4 +1274,4 @@ Previously tracked as:
 - 🟢 S4 Pengajian Admin Protection: ✅ Complete
 - 🟢 **S5 CAI Module Permissions: ✅ Complete**
 - 🟢 **S6 Sidebar Visibility: ✅ Complete**
-- 🟡 S7: Not yet implemented
+- 🟢 **S7 Event-Scoped Authorization: ✅ Complete**
