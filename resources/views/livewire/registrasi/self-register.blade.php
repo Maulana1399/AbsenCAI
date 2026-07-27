@@ -42,7 +42,7 @@
 
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Desa</label>
-            <select wire:model="desa_id" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
+            <select wire:model.live="desa_id" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
                 <option value="">-- Pilih Desa --</option>
                 @foreach ($daftarDesa as $desa)
                     <option value="{{ $desa->id }}">{{ $desa->desa_asal }}</option>

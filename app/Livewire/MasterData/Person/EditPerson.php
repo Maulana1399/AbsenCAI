@@ -5,6 +5,7 @@ namespace App\Livewire\MasterData\Person;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Person\PersonLegacySyncService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -13,6 +14,8 @@ use Flux\Flux;
 
 class EditPerson extends Component
 {
+    use HasCascadingKelompok;
+
     public ?int $person_id = null;
     public string $nama = '';
     public string $jenis_kelamin = '';
@@ -84,7 +87,9 @@ class EditPerson extends Component
     {
         return view('livewire.master-data.person.edit-person', [
             'daftarDesa' => desa::orderBy('desa_asal')->get(),
-            'daftarKelompok' => kelompok::orderBy('kelompok_asal')->get(),
+            'daftarKelompok' => $this->resolveDesaId()
+                ? kelompok::where('desa_id', $this->resolveDesaId())->orderBy('kelompok_asal')->get()
+                : kelompok::orderBy('kelompok_asal')->get(),
         ]);
     }
 }

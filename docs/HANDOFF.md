@@ -49,6 +49,23 @@ Legacy compatibility (masih ada, tidak boleh dijadikan canonical):
 
 ---
 
+## New Documentation Files
+
+The following documentation has been added as part of Project Audit:
+
+| Document | Description |
+|----------|-------------|
+| `PROJECT_STRUCTURE.md` | Full project architecture mapping |
+| `FEATURE_INVENTORY.md` | Actual implemented features (code-based) |
+| `CAPABILITY_MATRIX.md` | Undocumented capabilities |
+| `ROLE_MATRIX.md` | Role & permission audit matrix |
+| `WORKFLOW.md` | Complete workflow flowcharts |
+| `HIDDEN_FEATURES.md` | Hidden/unused features |
+| `DEAD_CODE.md` | Dead code report |
+| `PROGRESS.md` | Implementation progress vs roadmap |
+
+---
+
 ## Current Test Baseline
 
 ```

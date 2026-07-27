@@ -122,7 +122,7 @@
                 <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Desa</label>
 
                 <select
-                    wire:model="editDesa"
+                    wire:model.live="editDesa"
                     class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">
 
                     @foreach($daftarDesa as $d)

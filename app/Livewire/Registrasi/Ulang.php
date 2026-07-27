@@ -7,6 +7,7 @@ use App\Models\peserta;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
@@ -15,6 +16,7 @@ use Livewire\Component;
 
 class Ulang extends Component
 {
+    use HasCascadingKelompok;
     public string $search = '';
 
     public $showEditModal = false;
@@ -147,7 +149,9 @@ class Ulang extends Component
         return view('livewire.registrasi.ulang', [
             'daftarPeserta' => $daftarPeserta,
             'daftarDesa' => desa::all(),
-            'daftarKelompok' => kelompok::all(),
+            'daftarKelompok' => $this->editDesa
+                ? kelompok::where('desa_id', $this->editDesa)->orderBy('kelompok_asal')->get()
+                : kelompok::orderBy('kelompok_asal')->get(),
             'daftarRegu' => regu::all(),
         ]);
     }

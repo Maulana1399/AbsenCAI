@@ -6,6 +6,7 @@ use App\Models\CaiParticipantReplacement;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Services\Cai\CaiParticipantReplacementService;
+use App\Services\Placement\PlacementService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Flux\Flux;

@@ -17,7 +17,7 @@
 
         <flux:input wire:model="tanggal_lahir" type="date" label="Tanggal Lahir" />
 
-        <flux:select wire:model="desa_id" label="Desa" placeholder="Pilih desa">
+        <flux:select wire:model.live="desa_id" label="Desa" placeholder="Pilih desa">
             @foreach ($daftarDesa as $desa)
                 <flux:select.option value="{{ $desa->id }}">{{ $desa->desa_asal }}</flux:select.option>
             @endforeach

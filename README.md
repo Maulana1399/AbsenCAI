@@ -94,12 +94,20 @@ See `docs/` directory for full documentation.
 
 | Document | Description |
 |----------|-------------|
+| `PROJECT_STRUCTURE.md` | Complete project architecture, module, and component mapping |
+| `FEATURE_INVENTORY.md` | All implemented features based on code |
+| `CAPABILITY_MATRIX.md` | Undocumented capabilities in the codebase |
+| `ROLE_MATRIX.md` | Role & permission audit matrix |
+| `WORKFLOW.md` | Complete workflow flowcharts |
 | `ROADMAP.md` | Product roadmap and sprint plan |
 | `TODO.md` | Active task list + Bug Backlog |
 | `HANDOFF.md` | Non-technical project overview |
 | `PENGAJIAN_MVP_OPERATIONAL.md` | Pengajian module operational guide |
 | `ai/CURRENT_STATE.md` | Current development snapshot |
 | `ai/LAPORAN_STATUS_PROYEK_FINAL_20260724.md` | Final project status report |
+| `DEAD_CODE.md` | Dead code report |
+| `HIDDEN_FEATURES.md` | Hidden/unused features |
+| `PROGRESS.md` | Implementation progress vs roadmap |
 
 ---
 

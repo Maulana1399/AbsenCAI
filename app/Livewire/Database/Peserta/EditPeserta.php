@@ -10,6 +10,7 @@ use Flux\Flux;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\regu;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Person\PersonLegacySyncService;
 use App\Support\ActiveEventContext;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Gate;
 
 class EditPeserta extends Component
 {
+    use HasCascadingKelompok;
 
     public $peserta;
     public $nama;
@@ -36,7 +38,7 @@ class EditPeserta extends Component
     public function mount()
     {
         $this->daftarDesa = desa::all();
-        $this->daftarKelompok = kelompok::with('desa')->get();
+        $this->loadKelompokByDesa('daftarKelompok');
         $this->daftarRegu = regu::all();
     }
 

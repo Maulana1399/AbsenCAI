@@ -199,18 +199,13 @@ test('approve skips and reports session where peserta already hadir', function (
         'method'           => 'scan',
     ]);
 
-    $surat = makeSurat($peserta, $user, [
+    expect(fn () => makeSurat($peserta, $user, [
         'tanggal_mulai'   => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
-    ]);
-    $surat->update(['status' => 'pending']);
-
-    $result = app(SuratIzinService::class)->approve($surat->fresh(), $approver);
-
-    expect($result['skipped_hadir'])->toHaveCount(1)
-        ->and($result['created'])->toHaveCount(0);
-
-    expect(IzinAbsensi::where('peserta_id', $peserta->id)->count())->toBe(0);
+    ]))->toThrow(
+        \Illuminate\Validation\ValidationException::class,
+        'Peserta sudah melakukan absensi sehingga surat izin tidak dapat dibuat.',
+    );
 });
 
 test('approve skips and reports session where peserta already izin', function () {

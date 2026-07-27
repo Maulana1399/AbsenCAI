@@ -8,6 +8,7 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Person\PersonDuplicateDetectionService;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
@@ -19,6 +20,7 @@ use Livewire\Component;
 
 class TambahPeserta extends Component
 {
+    use HasCascadingKelompok;
     public bool $processing = false;
 
     public string $mode = 'baru';
@@ -50,7 +52,7 @@ class TambahPeserta extends Component
     public function mount()
     {
         $this->daftarDesa = desa::all();
-        $this->daftarKelompok = kelompok::all();
+        $this->loadKelompokByDesa('daftarKelompok');
         $this->setDefaultDesaKelompok();
         $this->generateAutoFields();
     }
@@ -59,6 +61,7 @@ class TambahPeserta extends Component
     {
         $firstDesa = $this->daftarDesa->first();
         $this->desa_id = $firstDesa?->id;
+        $this->loadKelompokByDesa('daftarKelompok');
 
         if ($firstDesa) {
             $firstKelompok = $this->daftarKelompok->firstWhere('desa_id', $firstDesa->id)
@@ -278,7 +281,7 @@ class TambahPeserta extends Component
 
         if ($mode === 'baru') {
             $this->daftarDesa = desa::all();
-            $this->daftarKelompok = kelompok::all();
+            $this->loadKelompokByDesa('daftarKelompok');
             $this->setDefaultDesaKelompok();
             $this->generateAutoFields();
         }

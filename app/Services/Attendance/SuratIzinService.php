@@ -2,6 +2,7 @@
 
 namespace App\Services\Attendance;
 
+use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
@@ -25,10 +26,23 @@ class SuratIzinService
         $peserta = \App\Models\peserta::find($data['peserta_id']);
         $participationId = null;
 
+        $mulai = Carbon::parse($data['tanggal_mulai'])->toDateString();
+        $selesai = Carbon::parse($data['tanggal_selesai'])->toDateString();
+
         if ($peserta && $eventId) {
             $participation = app(ParticipationResolver::class)->resolveByPeserta($peserta, $eventId);
             if ($participation) {
                 $participationId = $participation->id;
+
+                $hasAttendance = EventAttendance::where('participation_id', $participationId)
+                    ->whereHas('sesiAbsensi', fn ($q) => $q->whereBetween('tanggal', [$mulai, $selesai]))
+                    ->exists();
+
+                if ($hasAttendance) {
+                    throw ValidationException::withMessages([
+                        'peserta_id' => 'Peserta sudah melakukan absensi sehingga surat izin tidak dapat dibuat.',
+                    ]);
+                }
             }
         }
 

@@ -19,7 +19,7 @@
         <div class="mb-6">
 
             <div class="mx-auto h-24 w-24 rounded-full bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-3xl font-bold shadow-xl">
-                KJ
+                K
             </div>
 
         </div>

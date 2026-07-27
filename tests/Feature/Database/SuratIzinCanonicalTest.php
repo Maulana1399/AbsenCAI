@@ -310,20 +310,14 @@ test('existing hadir cannot be overwritten by surat izin', function () {
     $user = User::factory()->create(['role' => 'super_admin']);
     $this->actingAs($user);
 
-    $surat = app(SuratIzinService::class)->create([
+    app(SuratIzinService::class)->create([
         'peserta_id' => $m->peserta->id,
         'alasan' => 'Test alasan panjang',
         'jenis_izin' => 'pulang',
         'tanggal_mulai' => '2026-08-15',
         'tanggal_selesai' => '2026-08-15',
     ], $user->id);
-
-    app(SuratIzinService::class)->submit($surat);
-    $result = app(SuratIzinService::class)->approve($surat->fresh(), $user);
-
-    expect($result['skipped_hadir'])->toHaveCount(1)
-        ->and($result['created'])->toHaveCount(0);
-});
+})->throws(\Illuminate\Validation\ValidationException::class, 'Peserta sudah melakukan absensi sehingga surat izin tidak dapat dibuat.');
 
 test('existing izin cannot be duplicated', function () {
     $event = si_event();

@@ -5,6 +5,7 @@ namespace App\Livewire\QRLabel;
 use App\Models\Event;
 use App\Models\Participation;
 use App\Models\peserta;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\BatchQRExportService;
@@ -19,6 +20,7 @@ use Livewire\Component;
 
 class Index extends Component
 {
+    use HasCascadingKelompok;
     public string $search = '';
     public string $mode = 'individual';
     public ?int $selectedParticipantId = null;
@@ -43,7 +45,7 @@ class Index extends Component
     public function mount(): void
     {
         $this->daftarDesa = \App\Models\desa::orderBy('desa_asal')->get();
-        $this->daftarKelompok = \App\Models\kelompok::with('desa')->orderBy('kelompok_asal')->get();
+        $this->loadKelompokByDesa('daftarKelompok');
         $this->daftarRegu = \App\Models\regu::orderBy('regu')->get();
         $this->refreshBatchAndLabelPreview();
     }
@@ -233,7 +235,8 @@ class Index extends Component
         }
 
         $query = Participation::with(['person.desa', 'event'])
-            ->where('event_id', $event->id);
+            ->where('event_id', $event->id)
+            ->whereNotNull('attendance_code');
 
         if ($this->filterDesa !== '') {
             $query->whereHas('person', fn ($builder) => $builder->where('desa_id', $this->filterDesa));
@@ -274,20 +277,22 @@ class Index extends Component
         Gate::authorize('manage-qr-labels');
 
         $participant = $this->requireSelectedParticipant();
-        return response($this->printHtmlForParticipants(collect([$participant])))->header('Content-Type', 'text/html');
+        return redirect()->route('qr-label.print.selected', ['participant' => $participant->id]);
     }
 
     public function printAllFiltered()
     {
         Gate::authorize('manage-qr-labels');
 
-        $participants = $this->filteredParticipations()->map(fn (Participation $participation) => $participation->person)->filter();
+        $query = array_filter([
+            'desa' => $this->filterDesa ?: null,
+            'kelompok' => $this->filterKelompok ?: null,
+            'regu' => $this->filterRegu ?: null,
+            'gender' => $this->filterGender ?: null,
+            'keyword' => $this->filterKeyword ?: null,
+        ]);
 
-        if ($participants->isEmpty()) {
-            abort(404);
-        }
-
-        return response($this->printHtmlForParticipants($participants))->header('Content-Type', 'text/html');
+        return redirect()->route('qr-label.print.filtered', $query);
     }
 
     private function printHtmlForParticipants(Collection $participants): string

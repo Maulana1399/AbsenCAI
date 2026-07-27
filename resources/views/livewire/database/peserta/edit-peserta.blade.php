@@ -13,7 +13,7 @@
             <flux:select.option value="Person">Person</flux:select.option>
         </flux:select>
 
-        <flux:select wire:model="desa_id" label="Pilih Desa" placeholder="-- Pilih Desa --">
+        <flux:select wire:model.live="desa_id" label="Pilih Desa" placeholder="-- Pilih Desa --">
             @foreach($daftarDesa as $desa)
                 <flux:select.option value="{{ $desa->id }}">{{ $desa->desa_asal }}</flux:select.option>
             @endforeach

@@ -7,6 +7,7 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\regu;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Audit\ActivityLogService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
@@ -15,6 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RekapPeserta extends Component
 {
+    use HasCascadingKelompok;
     public $regu_id = '';
     public $kelompok_id = '';
     public $desa_id = '';
@@ -28,7 +30,7 @@ class RekapPeserta extends Component
     public function mount()
     {
         $this->daftarRegu = regu::all();
-        $this->daftarKelompok = kelompok::with('desa')->get();
+        $this->loadKelompokByDesa('daftarKelompok');
         $this->daftarDesa = desa::all();
     }
 

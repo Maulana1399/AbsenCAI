@@ -78,12 +78,14 @@ class Create extends Component
             if ($person && $event) {
                 $participation = $resolver->resolveByPersonAndEvent($person->id, $event->id);
 
-                $selectedPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
-                if ($selectedPeserta) {
-                    $this->selectedPesertaId = $selectedPeserta->id;
-                    $this->selectedPesertaNama = $person->nama;
-                    $this->searchPeserta = '';
-                    return;
+                if ($participation) {
+                    $selectedPeserta = $resolver->resolvePesertaByParticipation($participation->id, $event->id);
+                    if ($selectedPeserta) {
+                        $this->selectedPesertaId = $selectedPeserta->id;
+                        $this->selectedPesertaNama = $person->nama;
+                        $this->searchPeserta = '';
+                        return;
+                    }
                 }
             }
         }
@@ -130,6 +132,13 @@ class Create extends Component
             $this->resetForm();
             session()->flash('success', 'Surat izin berhasil dibuat sebagai draft.');
             $this->dispatch('suratIzinSaved');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->errors();
+            if (isset($errors['peserta_id'])) {
+                $errors['selectedPesertaId'] = $errors['peserta_id'];
+                unset($errors['peserta_id']);
+            }
+            $this->setErrorBag($errors);
         } finally {
             $this->processing = false;
         }
@@ -159,7 +168,12 @@ class Create extends Component
             session()->flash('success', 'Surat izin berhasil dibuat dan disubmit.');
             $this->dispatch('suratIzinSaved');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->setErrorBag($e->errors());
+            $errors = $e->errors();
+            if (isset($errors['peserta_id'])) {
+                $errors['selectedPesertaId'] = $errors['peserta_id'];
+                unset($errors['peserta_id']);
+            }
+            $this->setErrorBag($errors);
         } finally {
             $this->processing = false;
         }

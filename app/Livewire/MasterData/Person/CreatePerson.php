@@ -5,12 +5,15 @@ namespace App\Livewire\MasterData\Person;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
+use App\Livewire\Traits\HasCascadingKelompok;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Flux\Flux;
 
 class CreatePerson extends Component
 {
+    use HasCascadingKelompok;
+
     public bool $processing = false;
 
     public string $nama = '';
@@ -23,7 +26,9 @@ class CreatePerson extends Component
     {
         return view('livewire.master-data.person.create-person', [
             'daftarDesa' => desa::orderBy('desa_asal')->get(),
-            'daftarKelompok' => kelompok::orderBy('kelompok_asal')->get(),
+            'daftarKelompok' => $this->resolveDesaId()
+                ? kelompok::where('desa_id', $this->resolveDesaId())->orderBy('kelompok_asal')->get()
+                : kelompok::orderBy('kelompok_asal')->get(),
         ]);
     }
 

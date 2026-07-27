@@ -7,6 +7,7 @@ use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
@@ -19,6 +20,8 @@ use Livewire\Component;
 #[Layout('components.layouts.auth.simple')]
 class SelfRegister extends Component
 {
+    use HasCascadingKelompok;
+
     public bool $processing = false;
 
     public string $nama = '';
@@ -42,7 +45,7 @@ class SelfRegister extends Component
     public function mount(): void
     {
         $this->daftarDesa = desa::orderBy('desa_asal')->get();
-        $this->daftarKelompok = kelompok::with('desa')->orderBy('kelompok_asal')->get();
+        $this->loadKelompokByDesa('daftarKelompok');
         $this->fillReguPlacement();
     }
 
