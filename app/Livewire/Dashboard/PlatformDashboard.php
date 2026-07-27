@@ -6,8 +6,10 @@ use App\Models\Event;
 use App\Enums\Role;
 use App\Services\Event\EventAccessService;
 use App\Support\ActiveEventContext;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('components.layouts.platform')]
 class PlatformDashboard extends Component
 {
     public function getEventsProperty()

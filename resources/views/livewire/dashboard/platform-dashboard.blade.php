@@ -206,8 +206,4 @@
         </div>
     </section>
 
-    {{-- Footer --}}
-    <footer class="border-t border-zinc-200 pt-6 text-center text-xs text-zinc-400 dark:border-zinc-700 dark:text-zinc-500">
-        Powered by KJA Techno
-    </footer>
 </div>

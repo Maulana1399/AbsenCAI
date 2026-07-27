@@ -53,7 +53,7 @@ test('welcome page uses KJA Event Manager branding', function () {
 
     $response->assertSee('KJA Event Manager');
     $response->assertSee('Platform Manajemen Event Multi-Event');
-    $response->assertSee('Login Admin');
+    $response->assertSee('Masuk Admin');
     $response->assertDontSee('CINTA ALAM');
     $response->assertDontSee('INDONESIA 2025');
     $response->assertDontSee('Platform Registrasi & Absensi Peserta');

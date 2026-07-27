@@ -159,8 +159,11 @@ test('null role cannot access master data routes', function () {
 
 test('super admin sees Master Data in sidebar', function () {
     $user = s2_user('super_admin');
+    $event = s2_event();
+    app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
+    $response->assertOk();
     $response->assertSee('Master Data');
 });
 
@@ -516,7 +519,8 @@ test('super admin sees all CAI sidebar menus', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s2_user('super_admin'));
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
+    $response->assertOk();
     $response->assertSee('Dashboard');
     $response->assertSee('Scan Absensi');
     $response->assertSee('Sesi Absensi');
@@ -535,7 +539,8 @@ test('admin sees all CAI sidebar menus without Master Data', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s2_user('admin'));
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
+    $response->assertOk();
     $response->assertSee('Dashboard');
     $response->assertSee('Scan Absensi');
     $response->assertSee('Sesi Absensi');
@@ -554,7 +559,8 @@ test('sekretariat sees all CAI sidebar menus without Master Data', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s2_user('sekretariat'));
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
+    $response->assertOk();
     $response->assertSee('Dashboard');
     $response->assertSee('Daftar Peserta');
     $response->assertSee('Laporan');

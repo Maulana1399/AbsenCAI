@@ -97,7 +97,7 @@ test('visiting master-data does not change ActiveEventContext', function () {
 
     $this->get('/master-data')->assertOk();
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
     $response->assertSee('Master Data');
 });
@@ -160,18 +160,21 @@ test('regu is accessible via sidebar not master-data navigation', function () {
 
 test('sidebar shows Master Data link', function () {
     $user = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = md_event();
+    app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
     $response->assertSee('Master Data');
 });
 
 test('sidebar Master Data link visible when no active event', function () {
     $user = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = md_event();
     $this->actingAs($user);
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
     $response->assertSee('Master Data');
 });
@@ -182,7 +185,7 @@ test('sidebar Master Data link visible in CAI event context', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
     $response->assertSee('Master Data');
 });
@@ -193,7 +196,7 @@ test('sidebar Master Data link visible in Pengajian event context', function () 
     app(ActiveEventContext::class)->set($event);
     $this->actingAs($user);
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
     $response->assertSee('Master Data');
 });

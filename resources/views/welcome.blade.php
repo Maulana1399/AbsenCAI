@@ -45,12 +45,29 @@
                 operasional event lainnya dalam satu sistem terintegrasi.
             </p>
 
-            {{-- Login Button --}}
-            <div class="mt-10">
-                <a href="{{ route('login') }}"
-                    class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
-                    Login Admin
-                </a>
+            {{-- CTA Buttons --}}
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur transition-all duration-300 font-bold text-lg shadow-2xl hover:scale-105">
+                        Masuk Admin
+                    </a>
+                    <span class="mt-2 text-xs text-slate-400 max-w-48 text-center leading-relaxed">
+                        Kelola seluruh event dan pengaturan platform.
+                    </span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <a href="{{ route('pengajian.enter-token') }}"
+                        class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl border border-white/30 hover:bg-white/10 backdrop-blur transition-all duration-300 font-semibold text-lg shadow-lg hover:scale-105">
+                        Absensi Pengajian
+                    </a>
+                    <span class="mt-2 text-xs text-slate-400 max-w-48 text-center leading-relaxed">
+                        Akses cepat untuk operator desa melakukan absensi pengajian.
+                    </span>
+                </div>
+
             </div>
 
             {{-- Feature --}}

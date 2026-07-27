@@ -76,7 +76,7 @@ test('person page does not change ActiveEventContext', function () {
 
     $this->get('/person')->assertOk();
 
-    $response = $this->get('/dashboard');
+    $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
     $response->assertSee('Master Data');
 });
