@@ -50,4 +50,9 @@ class Participation extends Model
     {
         return $this->hasMany(EventAttendance::class);
     }
+
+    public function competitionRegistrations()
+    {
+        return $this->hasMany(CompetitionRegistration::class);
+    }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Event extends Model
 {
+    /** @use HasFactory<\Database\Factories\EventFactory> */
+    use HasFactory;
     protected $fillable = [
         'name',
         'slug',
@@ -50,6 +53,21 @@ class Event extends Model
         return $this->event_type === 'pengajian';
     }
 
+    public function isCompetition(): bool
+    {
+        return $this->event_type === 'competition';
+    }
+
+    public function typeLabel(): string
+    {
+        return match ($this->event_type) {
+            'cai' => 'CAI',
+            'pengajian' => 'Pengajian',
+            'competition' => 'Competition',
+            default => ucfirst($this->event_type),
+        };
+    }
+
     public function scopeCai($query)
     {
         return $query->where('event_type', 'cai');
@@ -58,6 +76,11 @@ class Event extends Model
     public function scopePengajian($query)
     {
         return $query->where('event_type', 'pengajian');
+    }
+
+    public function scopeCompetition($query)
+    {
+        return $query->where('event_type', 'competition');
     }
 
     public function participations()
@@ -108,6 +131,21 @@ class Event extends Model
     public function eventAttendances()
     {
         return $this->hasMany(EventAttendance::class);
+    }
+
+    public function competitionCategories()
+    {
+        return $this->hasMany(CompetitionCategory::class);
+    }
+
+    public function competitionClasses()
+    {
+        return $this->hasMany(CompetitionClass::class);
+    }
+
+    public function competitionAnnouncements()
+    {
+        return $this->hasMany(CompetitionAnnouncement::class);
     }
 
     public function hasRuntimeDependencies(): bool

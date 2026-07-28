@@ -19,14 +19,18 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Person Master Data CRUD | ✅ COMPLETE |
 | User Management | ✅ COMPLETE — Super Admin only |
 | Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete |
+| Competition V1 | ✅ COMPLETE — Sprint 1-5.5 |
+| Reporting | ✅ COMPLETE — Summary, Registration, Schedule, Outcome, Statistics |
+| Export | ✅ CSV — Registration, Schedule, Outcome |
 | UI Bug Fix Sprint | ✅ Batch 1–4 VERIFIED. All resolved |
 | UI Standardization | ✅ Phases 2–6 COMPLETE |
 | PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` retired |
 | PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture |
 | Database V2 / Design C | ✅ problem_total = 0 |
-| Test Baseline | ✅ 1574 passed / 3745 assertions / 0 failures |
+| Test Baseline | ✅ **1712 passed / 4062 assertions / 0 failures** |
 | **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
-| **Roadmap V2** (Event Operating System) | 📋 **Planned** — 10 engine/module items |
+| **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — Foundation, Structure, Operation, Outcome, Experience, Reporting |
+| **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Scoring Engine, Certificate Engine, Public API, Mobile |
 
 ---
 

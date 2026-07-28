@@ -49,7 +49,7 @@ class Index extends Component
             $this->validate([
                 'newName' => 'required|string|max:255',
                 'newSlug' => 'required|string|max:255|unique:events,slug|regex:/^[a-z0-9-]+$/',
-                'newEventType' => 'required|in:cai,pengajian',
+                'newEventType' => 'required|in:cai,pengajian,competition',
                 'newDescription' => 'nullable|string',
                 'newStartDate' => 'nullable|date',
                 'newEndDate' => 'nullable|date|after_or_equal:newStartDate',

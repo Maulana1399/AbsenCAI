@@ -122,6 +122,6 @@ class HapusPeserta extends Component
 
     public function render()
     {
-        return view('livewire..database.peserta.hapus-peserta');
+        return view('livewire.database.peserta.hapus-peserta');
     }
 }

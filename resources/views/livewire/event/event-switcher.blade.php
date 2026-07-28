@@ -29,11 +29,13 @@
                                 <span class="inline-flex h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
                             @endif
                             <span>{{ $event->name }}</span>
-                            @if ($event->event_type === 'pengajian')
-                                <span class="ml-auto text-xs text-emerald-600 dark:text-emerald-400">Pengajian</span>
-                            @else
-                                <span class="ml-auto text-xs text-blue-600 dark:text-blue-400">CAI</span>
-                            @endif
+                            @php $label = $event->typeLabel(); @endphp
+                            <span @class([
+                                'ml-auto text-xs',
+                                'text-emerald-600 dark:text-emerald-400' => $event->isPengajian(),
+                                'text-blue-600 dark:text-blue-400' => $event->isCai(),
+                                'text-purple-600 dark:text-purple-400' => $event->isCompetition(),
+                            ])>{{ $label }}</span>
                         </div>
                     </flux:menu.item>
                 @empty
@@ -61,11 +63,13 @@
                         <div class="flex items-center gap-2">
                             <span class="inline-flex h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
                             <span>{{ $event->name }}</span>
-                            @if ($event->event_type === 'pengajian')
-                                <span class="ml-auto text-xs text-emerald-600 dark:text-emerald-400">Pengajian</span>
-                            @else
-                                <span class="ml-auto text-xs text-blue-600 dark:text-blue-400">CAI</span>
-                            @endif
+                            @php $label = $event->typeLabel(); @endphp
+                            <span @class([
+                                'ml-auto text-xs',
+                                'text-emerald-600 dark:text-emerald-400' => $event->isPengajian(),
+                                'text-blue-600 dark:text-blue-400' => $event->isCai(),
+                                'text-purple-600 dark:text-purple-400' => $event->isCompetition(),
+                            ])>{{ $label }}</span>
                         </div>
                     </flux:menu.item>
                 @empty

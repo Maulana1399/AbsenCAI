@@ -36,6 +36,6 @@ class HapusKelompok extends Component
     }
     public function render()
     {
-        return view('livewire..database.kelompok.hapus-kelompok');
+        return view('livewire.database.kelompok.hapus-kelompok');
     }
 }

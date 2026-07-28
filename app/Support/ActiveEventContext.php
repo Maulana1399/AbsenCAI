@@ -95,4 +95,9 @@ class ActiveEventContext
     {
         return $this->current()?->isPengajian() ?? false;
     }
+
+    public function isCurrentCompetition(): bool
+    {
+        return $this->current()?->isCompetition() ?? false;
+    }
 }

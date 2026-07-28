@@ -42,6 +42,7 @@
                     <flux:select wire:model="newEventType" placeholder="Pilih tipe event">
                         <flux:select.option value="cai">CAI</flux:select.option>
                         <flux:select.option value="pengajian">Pengajian Desa</flux:select.option>
+                        <flux:select.option value="competition">Competition</flux:select.option>
                     </flux:select>
                     @error('newEventType') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
@@ -90,7 +91,9 @@
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
                         <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-white">{{ $event->name }}</td>
                         <td class="whitespace-nowrap px-4 py-3 text-sm">
-                            @if ($event->isPengajian())
+                            @if ($event->isCompetition())
+                                <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">Competition</span>
+                            @elseif ($event->isPengajian())
                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Pengajian</span>
                             @else
                                 <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">CAI</span>

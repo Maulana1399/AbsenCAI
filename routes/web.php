@@ -723,4 +723,69 @@ Route::prefix('pengajian')->group(function () {
         ->name('pengajian.hadir');
 });
 
+Route::get(
+    'events/{event}/competition-dashboard',
+    App\Livewire\Competition\Dashboard::class
+)->middleware(['auth', 'verified', 'can:view-dashboard'])->name('competition.dashboard');
+
+Route::prefix('competition')->middleware(['auth', 'verified'])->group(function () {
+    Route::get(
+        'registration',
+        App\Livewire\Competition\Registration::class
+    )->middleware('can:manage-registration')->name('competition.registration');
+
+    Route::get(
+        'categories',
+        App\Livewire\Competition\Category\Index::class
+    )->middleware('can:manage-events')->name('competition.category.index');
+
+    Route::get(
+        'classes',
+        App\Livewire\Competition\Class\Index::class
+    )->middleware('can:manage-events')->name('competition.class.index');
+
+    Route::get(
+        'venues',
+        App\Livewire\Competition\Venue\Index::class
+    )->middleware('can:manage-events')->name('competition.venue.index');
+
+    Route::get(
+        'participants',
+        App\Livewire\Competition\ParticipantList::class
+    )->name('competition.participants');
+
+    Route::get(
+        'schedules',
+        App\Livewire\Competition\Schedule\Index::class
+    )->middleware('can:manage-events')->name('competition.schedule.index');
+
+    Route::get(
+        'operator-dashboard',
+        App\Livewire\Competition\OperatorDashboard::class
+    )->middleware('can:manage-events')->name('competition.operator-dashboard');
+
+    Route::get(
+        'schedules/{schedule}/outcomes',
+        App\Livewire\Competition\Schedule\OutcomeManager::class
+    )->middleware('can:manage-events')->name('competition.schedule.outcomes');
+
+    Route::get(
+        'schedules/{schedule}/entries',
+        App\Livewire\Competition\Schedule\EntryManager::class
+    )->middleware('can:manage-events')->name('competition.schedule.entries');
+
+    Route::prefix('reports')->middleware('can:view-reports')->group(function () {
+        Route::get('summary', App\Livewire\Competition\Report\Summary::class)->name('competition.report.summary');
+        Route::get('registration', App\Livewire\Competition\Report\Registration::class)->name('competition.report.registration');
+        Route::get('schedule', App\Livewire\Competition\Report\Schedule::class)->name('competition.report.schedule');
+        Route::get('outcome', App\Livewire\Competition\Report\Outcome::class)->name('competition.report.outcome');
+        Route::get('statistics', App\Livewire\Competition\Report\Statistics::class)->name('competition.report.statistics');
+    });
+});
+
+Route::get(
+    'events/{event}/viewer/{venue?}',
+    App\Livewire\Competition\Viewer::class
+)->name('competition.viewer');
+
 require __DIR__.'/auth.php';

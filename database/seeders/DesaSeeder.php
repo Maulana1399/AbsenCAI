@@ -11,7 +11,7 @@ class DesaSeeder extends Seeder
     {
         $desas = [
             'Batam',
-            'Ring Road',
+            'Ringroad',
             'Sepinggan',
             'Timur Raya',
         ];

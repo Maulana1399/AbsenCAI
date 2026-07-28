@@ -28,4 +28,9 @@ class Venue extends Model
     {
         return $this->hasMany(EventCommitteeAssignment::class);
     }
+
+    public function competitionSchedules()
+    {
+        return $this->hasMany(CompetitionSchedule::class);
+    }
 }
