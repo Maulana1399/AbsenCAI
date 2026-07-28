@@ -68,6 +68,9 @@
 
                     <flux:navlist.group expandable heading="Operasional" class="grid">
                         <flux:navlist.item :href="route('competition.schedule.index')" :current="request()->routeIs('competition.schedule.index')" wire:navigate>{{ __('Jadwal') }}</flux:navlist.item>
+                        @can('manage-matches')
+                        <flux:navlist.item :href="route('competition.match-center')" :current="request()->routeIs('competition.match-center')" wire:navigate>{{ __('Match Center') }}</flux:navlist.item>
+                        @endcan
                         <flux:navlist.item :href="route('competition.operator-dashboard')" :current="request()->routeIs('competition.operator-dashboard')" wire:navigate>{{ __('Operator') }}</flux:navlist.item>
                     </flux:navlist.group>
 

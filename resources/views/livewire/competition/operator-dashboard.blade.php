@@ -70,16 +70,21 @@
         </div>
     @endif
 
-    {{-- NOW PLAYING --}}
+    {{-- PLAYING --}}
     @if ($nowPlaying->isNotEmpty())
         <div class="rounded-xl border border-green-300 bg-green-50 p-4 dark:border-green-700 dark:bg-green-950">
-            <h2 class="mb-3 text-lg font-bold text-green-800 dark:text-green-200">Now Playing</h2>
+            <h2 class="mb-3 text-lg font-bold text-green-800 dark:text-green-200">Playing</h2>
             <div class="grid gap-3">
                 @foreach ($nowPlaying as $schedule)
+                    @php
+                        $pc = $schedule->participants_count ?? 0;
+                        $rp = $schedule->required_participants ?? 1;
+                    @endphp
                     <div class="flex items-center justify-between rounded-lg border border-green-200 bg-white p-4 dark:border-green-800 dark:bg-zinc-900">
                         <div>
                             <div class="font-semibold text-zinc-900 dark:text-white">{{ $schedule->competitionClass?->competitionCategory?->name }} / {{ $schedule->competitionClass?->name }}</div>
                             <div class="text-sm text-zinc-500">{{ $schedule->venue?->name ?? '-' }} &middot; {{ $schedule->start_at ? \Carbon\Carbon::parse($schedule->start_at)->format('H:i') : '-' }} - {{ $schedule->end_at ? \Carbon\Carbon::parse($schedule->end_at)->format('H:i') : '-' }}</div>
+                            <div class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Peserta: {{ $pc }} / {{ $rp }}</div>
                         </div>
                         <div class="flex gap-2">
                             <flux:button wire:click="advanceStatus({{ $schedule->id }})" size="sm" variant="primary">Selesai</flux:button>
@@ -97,16 +102,25 @@
             <h2 class="mb-3 text-lg font-bold text-blue-800 dark:text-blue-200">Ready</h2>
             <div class="grid gap-3">
                 @foreach ($ready as $schedule)
+                    @php
+                        $pc = $schedule->participants_count ?? 0;
+                        $rp = $schedule->required_participants ?? 1;
+                    @endphp
                     <div class="flex items-center justify-between rounded-lg border border-blue-200 bg-white p-4 dark:border-blue-800 dark:bg-zinc-900">
                         <div>
                             <div class="font-semibold text-zinc-900 dark:text-white">{{ $schedule->competitionClass?->competitionCategory?->name }} / {{ $schedule->competitionClass?->name }}</div>
                             <div class="text-sm text-zinc-500">{{ $schedule->venue?->name ?? '-' }} &middot; {{ $schedule->notes ?: '' }}</div>
+                            <div class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">Peserta: {{ $pc }} / {{ $rp }}</div>
                             @if ($schedule->is_future)
                                 <div class="mt-1 text-xs text-amber-600">⚠️ Jadwal ini belum dimulai.</div>
                             @endif
                         </div>
                         <div class="flex gap-2">
-                            <flux:button wire:click="advanceStatus({{ $schedule->id }})" size="sm" variant="primary">Mulai</flux:button>
+                            @if ($pc >= $rp)
+                                <flux:button wire:click="advanceStatus({{ $schedule->id }})" size="sm" variant="primary">Mulai</flux:button>
+                            @else
+                                <flux:button :href="route('competition.schedule.entries', $schedule->id)" size="sm" variant="primary">Atur Peserta</flux:button>
+                            @endif
                             <flux:button wire:click="resetStatus({{ $schedule->id }})" size="sm" variant="ghost">Reset</flux:button>
                         </div>
                     </div>
@@ -121,16 +135,31 @@
             <h2 class="mb-3 text-lg font-bold text-zinc-800 dark:text-zinc-200">Scheduled</h2>
             <div class="grid gap-3">
                 @foreach ($scheduled as $schedule)
+                    @php
+                        $pc = $schedule->participants_count ?? 0;
+                        $rp = $schedule->required_participants ?? 1;
+                    @endphp
                     <div class="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900">
                         <div>
                             <div class="font-semibold text-zinc-900 dark:text-white">{{ $schedule->competitionClass?->competitionCategory?->name }} / {{ $schedule->competitionClass?->name }}</div>
                             <div class="text-sm text-zinc-500">{{ $schedule->venue?->name ?? '-' }} &middot; {{ $schedule->start_at ? \Carbon\Carbon::parse($schedule->start_at)->format('d/m/Y H:i') : '-' }}</div>
-                            @if ($schedule->is_future)
-                                <div class="mt-1 text-xs text-amber-600">⚠️ Jadwal ini belum dimulai.</div>
-                            @endif
+                            <div class="mt-1 flex items-center gap-2">
+                                <span @class([
+                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                                    'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' => $pc >= $rp,
+                                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' => $pc < $rp,
+                                ])>{{ $pc }} / {{ $rp }}</span>
+                                @if ($schedule->is_future)
+                                    <span class="text-xs text-amber-600">⚠️ Belum dimulai</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="flex gap-2">
-                            <flux:button wire:click="advanceStatus({{ $schedule->id }})" size="sm" variant="primary">Siapkan</flux:button>
+                            @if ($pc >= $rp)
+                                <flux:button wire:click="advanceStatus({{ $schedule->id }})" size="sm" variant="primary">Siapkan</flux:button>
+                            @else
+                                <flux:button :href="route('competition.schedule.entries', $schedule->id)" size="sm" variant="primary">Atur Peserta</flux:button>
+                            @endif
                             <flux:button wire:click="resetStatus({{ $schedule->id }})" size="sm" variant="ghost">Reset</flux:button>
                         </div>
                     </div>

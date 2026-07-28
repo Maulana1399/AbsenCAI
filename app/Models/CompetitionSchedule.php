@@ -12,6 +12,7 @@ class CompetitionSchedule extends Model
         'start_at',
         'end_at',
         'status',
+        'required_participants',
         'notes',
         'sort_order',
     ];
@@ -21,6 +22,7 @@ class CompetitionSchedule extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'required_participants' => 'integer',
         ];
     }
 
@@ -37,5 +39,41 @@ class CompetitionSchedule extends Model
     public function scheduleEntries()
     {
         return $this->hasMany(CompetitionScheduleEntry::class);
+    }
+
+    public function isReadyForStart(): bool
+    {
+        if ($this->status !== 'Ready') {
+            return false;
+        }
+        return $this->scheduleEntries()->count() >= $this->required_participants;
+    }
+
+    public function canAutoReady(): bool
+    {
+        if ($this->status !== 'Scheduled') {
+            return false;
+        }
+        return $this->scheduleEntries()->count() >= $this->required_participants;
+    }
+
+    public function scopeWherePlaying($query)
+    {
+        return $query->where('status', 'Playing');
+    }
+
+    public function scopeWhereReady($query)
+    {
+        return $query->where('status', 'Ready');
+    }
+
+    public function scopeWhereScheduled($query)
+    {
+        return $query->where('status', 'Scheduled');
+    }
+
+    public function scopeWhereFinished($query)
+    {
+        return $query->where('status', 'Finished');
     }
 }

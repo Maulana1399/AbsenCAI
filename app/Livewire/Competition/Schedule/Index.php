@@ -9,11 +9,17 @@ use App\Models\Venue;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use WithPagination;
+
+    public string $search = '';
     public string $filterCategoryId = '';
     public string $filterClassId = '';
+    public string $filterVenueId = '';
+    public string $filterStatus = '';
 
     public bool $showCreateForm = false;
     public string $newCompetitionClassId = '';
@@ -21,6 +27,7 @@ class Index extends Component
     public string $newStartAt = '';
     public string $newEndAt = '';
     public string $newStatus = 'Scheduled';
+    public string $newRequiredParticipants = '1';
     public string $newNotes = '';
     public string $newSortOrder = '';
 
@@ -30,10 +37,19 @@ class Index extends Component
     public string $editStartAt = '';
     public string $editEndAt = '';
     public string $editStatus = '';
+    public string $editRequiredParticipants = '1';
     public string $editNotes = '';
     public string $editSortOrder = '';
 
     public bool $processing = false;
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filterCategoryId' => ['except' => ''],
+        'filterClassId' => ['except' => ''],
+        'filterVenueId' => ['except' => ''],
+        'filterStatus' => ['except' => ''],
+    ];
 
     public function mount(): void
     {
@@ -43,8 +59,9 @@ class Index extends Component
     public function toggleCreateForm(): void
     {
         $this->showCreateForm = !$this->showCreateForm;
-        $this->reset(['newCompetitionClassId', 'newVenueId', 'newStartAt', 'newEndAt', 'newStatus', 'newNotes', 'newSortOrder']);
+        $this->reset(['newCompetitionClassId', 'newVenueId', 'newStartAt', 'newEndAt', 'newStatus', 'newRequiredParticipants', 'newNotes', 'newSortOrder']);
         $this->newStatus = 'Scheduled';
+        $this->newRequiredParticipants = '1';
         $this->resetErrorBag();
     }
 
@@ -61,7 +78,8 @@ class Index extends Component
                 'newVenueId' => 'nullable|exists:venues,id',
                 'newStartAt' => 'nullable|date',
                 'newEndAt' => 'nullable|date|after_or_equal:newStartAt',
-                'newStatus' => 'required|in:Scheduled,Ready,NowPlaying,Finished',
+                'newStatus' => 'required|in:Scheduled,Ready,Playing,Finished',
+                'newRequiredParticipants' => 'required|integer|min:1|max:99',
                 'newNotes' => 'nullable|string|max:1000',
                 'newSortOrder' => 'nullable|integer|min:0',
             ]);
@@ -72,6 +90,7 @@ class Index extends Component
                 'start_at' => $this->newStartAt ?: null,
                 'end_at' => $this->newEndAt ?: null,
                 'status' => $this->newStatus,
+                'required_participants' => (int) $this->newRequiredParticipants,
                 'notes' => $this->newNotes ?: null,
                 'sort_order' => $this->newSortOrder !== '' ? (int) $this->newSortOrder : null,
             ]);
@@ -79,6 +98,7 @@ class Index extends Component
             $this->showCreateForm = false;
             $this->reset(['newCompetitionClassId', 'newVenueId', 'newStartAt', 'newEndAt', 'newNotes', 'newSortOrder']);
             $this->newStatus = 'Scheduled';
+            $this->newRequiredParticipants = '1';
             session()->flash('success', 'Jadwal berhasil dibuat.');
         } finally {
             $this->processing = false;
@@ -94,6 +114,7 @@ class Index extends Component
         $this->editStartAt = $schedule->start_at?->format('Y-m-d\TH:i') ?? '';
         $this->editEndAt = $schedule->end_at?->format('Y-m-d\TH:i') ?? '';
         $this->editStatus = $schedule->status;
+        $this->editRequiredParticipants = (string) ($schedule->required_participants ?? 1);
         $this->editNotes = $schedule->notes ?? '';
         $this->editSortOrder = (string) ($schedule->sort_order ?? '');
     }
@@ -107,29 +128,37 @@ class Index extends Component
             'editVenueId' => 'nullable|exists:venues,id',
             'editStartAt' => 'nullable|date',
             'editEndAt' => 'nullable|date|after_or_equal:editStartAt',
-            'editStatus' => 'required|in:Scheduled,Ready,NowPlaying,Finished',
+            'editStatus' => 'required|in:Scheduled,Ready,Playing,Finished',
+            'editRequiredParticipants' => 'required|integer|min:1|max:99',
             'editNotes' => 'nullable|string|max:1000',
             'editSortOrder' => 'nullable|integer|min:0',
         ]);
 
-        $schedule = CompetitionSchedule::findOrFail($this->editId);
+        $schedule = CompetitionSchedule::withCount('scheduleEntries as participants_count')->findOrFail($this->editId);
+
+        if (in_array($this->editStatus, ['Ready', 'Playing']) && ($schedule->participants_count ?? 0) < (int) $this->editRequiredParticipants) {
+            session()->flash('error', 'Tidak dapat mengubah status: peserta belum lengkap (' . ($schedule->participants_count ?? 0) . ' / ' . $this->editRequiredParticipants . ').');
+            return;
+        }
+
         $schedule->update([
             'competition_class_id' => $this->editCompetitionClassId,
             'venue_id' => $this->editVenueId ?: null,
             'start_at' => $this->editStartAt ?: null,
             'end_at' => $this->editEndAt ?: null,
             'status' => $this->editStatus,
+            'required_participants' => (int) $this->editRequiredParticipants,
             'notes' => $this->editNotes ?: null,
             'sort_order' => $this->editSortOrder !== '' ? (int) $this->editSortOrder : null,
         ]);
 
-        $this->reset(['editId', 'editCompetitionClassId', 'editVenueId', 'editStartAt', 'editEndAt', 'editStatus', 'editNotes', 'editSortOrder']);
+        $this->reset(['editId', 'editCompetitionClassId', 'editVenueId', 'editStartAt', 'editEndAt', 'editStatus', 'editRequiredParticipants', 'editNotes', 'editSortOrder']);
         session()->flash('success', 'Jadwal berhasil diperbarui.');
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['editId', 'editCompetitionClassId', 'editVenueId', 'editStartAt', 'editEndAt', 'editStatus', 'editNotes', 'editSortOrder']);
+        $this->reset(['editId', 'editCompetitionClassId', 'editVenueId', 'editStartAt', 'editEndAt', 'editStatus', 'editRequiredParticipants', 'editNotes', 'editSortOrder']);
     }
 
     public function delete(int $id): void
@@ -142,9 +171,25 @@ class Index extends Component
         session()->flash('success', 'Jadwal berhasil dihapus.');
     }
 
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function updatedFilterCategoryId(): void
     {
         $this->filterClassId = '';
+        $this->resetPage();
+    }
+
+    public function updatedFilterVenueId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterStatus(): void
+    {
+        $this->resetPage();
     }
 
     public function render()
@@ -155,11 +200,26 @@ class Index extends Component
             ->withCount('scheduleEntries as participants_count')
             ->whereIn('competition_class_id', CompetitionClass::where('event_id', $event?->id)->pluck('id'));
 
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->whereHas('competitionClass', fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+                  ->orWhereHas('venue', fn($q) => $q->where('name', 'like', "%{$this->search}%"));
+            });
+        }
+
         if ($this->filterClassId) {
             $query->where('competition_class_id', $this->filterClassId);
         }
 
-        $schedules = $query->orderBy('sort_order')->orderBy('start_at')->get();
+        if ($this->filterVenueId) {
+            $query->where('venue_id', $this->filterVenueId);
+        }
+
+        if ($this->filterStatus) {
+            $query->where('status', $this->filterStatus);
+        }
+
+        $schedules = $query->orderBy('sort_order')->orderBy('start_at')->paginate(12);
 
         return view('livewire.competition.schedule.index', [
             'schedules' => $schedules,
@@ -172,6 +232,7 @@ class Index extends Component
             'allClasses' => CompetitionClass::where('event_id', $event?->id)
                 ->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'venues' => Venue::where('event_id', $event?->id)->orderBy('sort_order')->orderBy('name')->get(),
+            'allVenues' => Venue::where('event_id', $event?->id)->orderBy('sort_order')->orderBy('name')->get(),
         ]);
     }
 }

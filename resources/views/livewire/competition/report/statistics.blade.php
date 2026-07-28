@@ -17,7 +17,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Total Jadwal</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Finished</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Ready</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Now Playing</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Playing</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -27,7 +27,7 @@
                             <td class="px-4 py-3 text-sm text-zinc-500">{{ $stat->total_schedules }}</td>
                             <td class="px-4 py-3 text-sm text-zinc-500">{{ $stat->finished }}</td>
                             <td class="px-4 py-3 text-sm text-zinc-500">{{ $stat->ready }}</td>
-                            <td class="px-4 py-3 text-sm text-zinc-500">{{ $stat->now_playing }}</td>
+                            <td class="px-4 py-3 text-sm text-zinc-500">{{ $stat->playing }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="px-4 py-8 text-center text-sm text-zinc-500">Belum ada venue.</td></tr>

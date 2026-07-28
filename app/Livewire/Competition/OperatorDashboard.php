@@ -22,7 +22,7 @@ class OperatorDashboard extends Component
     {
         Gate::authorize('manage-events');
 
-        $schedule = CompetitionSchedule::findOrFail($scheduleId);
+        $schedule = CompetitionSchedule::withCount('scheduleEntries as participants_count')->findOrFail($scheduleId);
 
         if ($schedule->start_at && Carbon::parse($schedule->start_at)->isFuture()) {
             $user = auth()->user();
@@ -32,10 +32,20 @@ class OperatorDashboard extends Component
             }
         }
 
+        if ($schedule->status === 'Scheduled' && !$schedule->canAutoReady()) {
+            session()->flash('error', 'Tidak dapat mengubah ke Ready: peserta belum lengkap.');
+            return;
+        }
+
+        if ($schedule->status === 'Ready' && !$schedule->isReadyForStart()) {
+            session()->flash('error', 'Tidak dapat memulai pertandingan: peserta belum lengkap.');
+            return;
+        }
+
         $next = match ($schedule->status) {
             'Scheduled' => 'Ready',
-            'Ready' => 'NowPlaying',
-            'NowPlaying' => 'Finished',
+            'Ready' => 'Playing',
+            'Playing' => 'Finished',
             default => null,
         };
 
@@ -96,6 +106,7 @@ class OperatorDashboard extends Component
 
         $schedules = CompetitionSchedule::with(['competitionClass.competitionCategory', 'venue'])
             ->whereIn('competition_class_id', CompetitionClass::where('event_id', $event?->id)->pluck('id'))
+            ->withCount('scheduleEntries as participants_count')
             ->orderBy('sort_order')
             ->orderBy('start_at')
             ->get()
@@ -107,7 +118,7 @@ class OperatorDashboard extends Component
                 return $schedule;
             });
 
-        $nowPlaying = $schedules->where('status', 'NowPlaying');
+        $nowPlaying = $schedules->where('status', 'Playing');
         $ready = $schedules->where('status', 'Ready');
         $scheduled = $schedules->where('status', 'Scheduled')->sortBy('start_at');
         $finished = $schedules->where('status', 'Finished');

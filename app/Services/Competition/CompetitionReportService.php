@@ -33,7 +33,7 @@ class CompetitionReportService
             'total_schedules' => $schedules->count(),
             'scheduled' => $schedules->where('status', 'Scheduled')->count(),
             'ready' => $schedules->where('status', 'Ready')->count(),
-            'now_playing' => $schedules->where('status', 'NowPlaying')->count(),
+            'playing' => $schedules->where('status', 'Playing')->count(),
             'finished' => $schedules->where('status', 'Finished')->count(),
             'active_announcements' => $activeCount,
             'categories' => $categories,
@@ -129,7 +129,7 @@ class CompetitionReportService
                 'total_schedules' => $schedules->count(),
                 'finished' => $schedules->where('status', 'Finished')->count(),
                 'ready' => $schedules->where('status', 'Ready')->count(),
-                'now_playing' => $schedules->where('status', 'NowPlaying')->count(),
+                'playing' => $schedules->where('status', 'Playing')->count(),
             ];
         });
     }

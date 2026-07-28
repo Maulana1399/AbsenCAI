@@ -69,6 +69,7 @@ class EntryManager extends Component
         ]);
 
         $this->loadLists();
+        $this->checkAutoReady();
     }
 
     public function unassign(int $registrationId): void
@@ -80,6 +81,25 @@ class EntryManager extends Component
             ->delete();
 
         $this->loadLists();
+        $this->checkAutoReady();
+    }
+
+    private function checkAutoReady(): void
+    {
+        $this->schedule->refresh();
+
+        if ($this->schedule->status === 'Scheduled' && $this->schedule->canAutoReady()) {
+            $this->schedule->update(['status' => 'Ready']);
+            session()->flash('success', 'Peserta lengkap. Status berubah menjadi Ready.');
+        } elseif (in_array($this->schedule->status, ['Ready', 'Scheduled']) && !$this->schedule->canAutoReady()) {
+            $assignedCount = count($this->assigned);
+            if ($assignedCount < $this->schedule->required_participants) {
+                $this->schedule->update(['status' => 'Scheduled']);
+                session()->flash('info', 'Peserta dikurangi. Status kembali ke Scheduled.');
+            }
+        }
+
+        $this->schedule->refresh();
     }
 
     public function moveUp(int $registrationId): void

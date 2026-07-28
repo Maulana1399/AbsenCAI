@@ -67,16 +67,16 @@ class Viewer extends Component
 
         $schedules = $query->orderBy('sort_order')->orderBy('start_at')->get();
 
-        $nowPlaying = $schedules->where('status', 'NowPlaying')->values();
+        $playing = $schedules->where('status', 'Playing')->values();
         $ready = $schedules->where('status', 'Ready')->values();
-        $next = $schedules->where('status', 'Scheduled')->sortBy('start_at')->take(5)->values();
+        $scheduled = $schedules->where('status', 'Scheduled')->sortBy('start_at')->take(5)->values();
 
         $currentTime = Carbon::now()->format('H:i:s');
 
         return view('livewire.competition.viewer', [
-            'nowPlaying' => $nowPlaying,
+            'playing' => $playing,
             'ready' => $ready,
-            'next' => $next,
+            'scheduled' => $scheduled,
             'venues' => Venue::where('event_id', $this->event->id)->orderBy('sort_order')->orderBy('name')->get(),
             'currentTime' => $currentTime,
             'selectedVenue' => $venueModel,

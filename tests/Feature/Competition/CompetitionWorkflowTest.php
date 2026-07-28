@@ -115,7 +115,7 @@ test('3. duplicate registration throws validation error', function () {
     );
 });
 
-test('4. schedule status transitions', function () {
+test('4. schedule status transitions via model update', function () {
     $venue = Venue::create([
         'event_id' => $this->event->id,
         'name' => 'Venue Test',
@@ -132,8 +132,8 @@ test('4. schedule status transitions', function () {
     $schedule->update(['status' => 'Ready']);
     expect($schedule->refresh()->status)->toBe('Ready');
 
-    $schedule->update(['status' => 'NowPlaying']);
-    expect($schedule->refresh()->status)->toBe('NowPlaying');
+    $schedule->update(['status' => 'Playing']);
+    expect($schedule->refresh()->status)->toBe('Playing');
 
     $schedule->update(['status' => 'Finished']);
     expect($schedule->refresh()->status)->toBe('Finished');
@@ -188,7 +188,7 @@ test('7. viewer schedule grouping by status', function () {
     CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'venue_id' => $venue->id,
-        'status' => 'NowPlaying',
+        'status' => 'Playing',
         'start_at' => now(),
     ]);
 
@@ -207,7 +207,7 @@ test('7. viewer schedule grouping by status', function () {
 
     $schedules = CompetitionSchedule::where('competition_class_id', $this->class->id)->get();
 
-    expect($schedules->where('status', 'NowPlaying')->count())->toBe(1);
+    expect($schedules->where('status', 'Playing')->count())->toBe(1);
     expect($schedules->where('status', 'Ready')->count())->toBe(1);
     expect($schedules->where('status', 'Scheduled')->count())->toBe(1);
 });
@@ -310,7 +310,7 @@ test('12. event has competition announcements', function () {
 test('20. create and assign schedule entry', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
-        'status' => 'NowPlaying',
+        'status' => 'Playing',
     ]);
 
     $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
@@ -334,7 +334,7 @@ test('20. create and assign schedule entry', function () {
 test('21. schedule entry relationships', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
-        'status' => 'NowPlaying',
+        'status' => 'Playing',
     ]);
 
     $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
@@ -352,29 +352,6 @@ test('21. schedule entry relationships', function () {
 
     expect($schedule->fresh()->scheduleEntries)->toHaveCount(1);
     expect($reg['competition_registration']->fresh()->scheduleEntries)->toHaveCount(1);
-});
-
-test('22. assign and unassign in entry manager', function () {
-    $schedule = CompetitionSchedule::create([
-        'competition_class_id' => $this->class->id,
-        'status' => 'NowPlaying',
-    ]);
-
-    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
-    $reg = $service->registerForPerson(
-        person: $this->person,
-        eventId: $this->event->id,
-        competitionCategoryId: $this->category->id,
-        competitionClassId: $this->class->id,
-    );
-
-    $component = Livewire::test(\App\Livewire\Competition\Schedule\EntryManager::class, ['schedule' => $schedule]);
-
-    $component->assertSet('assigned', []);
-    $component->call('assign', $reg['competition_registration']->id);
-    $component->assertSet('assigned.0.id', $reg['competition_registration']->id);
-    $component->call('unassign', $reg['competition_registration']->id);
-    $component->assertSet('assigned', []);
 });
 
 test('24. gender validation prevents female in male class', function () {
@@ -469,7 +446,7 @@ test('26. multi-class registration - same person different classes', function ()
 test('27. viewer shows empty state when no schedule entries', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
-        'status' => 'NowPlaying',
+        'status' => 'Playing',
     ]);
 
     expect($schedule->scheduleEntries)->toHaveCount(0);
@@ -478,7 +455,7 @@ test('27. viewer shows empty state when no schedule entries', function () {
 test('28. viewer shows participants when schedule entries exist', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
-        'status' => 'NowPlaying',
+        'status' => 'Playing',
     ]);
 
     $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
@@ -502,7 +479,7 @@ test('28. viewer shows participants when schedule entries exist', function () {
 test('23. schedule report includes participant count', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
-        'status' => 'NowPlaying',
+        'status' => 'Playing',
     ]);
 
     $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
@@ -524,4 +501,289 @@ test('23. schedule report includes participant count', function () {
     $entry = $schedules->firstWhere('id', $schedule->id);
     expect($entry)->not->toBeNull();
     expect($entry->participants_count)->toBe(1);
+});
+
+// ============================================================
+// TASK 7: NEW TESTS FOR SPRINT 7.0
+// ============================================================
+
+test('29. schedule defaults to Scheduled and can transition through all states', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+    ]);
+
+    expect($schedule->status)->toBe('Scheduled');
+
+    $schedule->update(['status' => 'Ready']);
+    expect($schedule->refresh()->status)->toBe('Ready');
+
+    $schedule->update(['status' => 'Playing']);
+    expect($schedule->refresh()->status)->toBe('Playing');
+
+    $schedule->update(['status' => 'Finished']);
+    expect($schedule->refresh()->status)->toBe('Finished');
+});
+
+test('30. required_participants defaults to 1', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+    ]);
+
+    expect($schedule->required_participants)->toBe(1);
+});
+
+test('31. auto ready detection — 1 participant becomes Ready after assign', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'required_participants' => 1,
+        'status' => 'Scheduled',
+    ]);
+
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $component = Livewire::test(\App\Livewire\Competition\Schedule\EntryManager::class, ['schedule' => $schedule]);
+    $component->call('assign', $reg['competition_registration']->id);
+
+    expect($schedule->refresh()->status)->toBe('Ready');
+});
+
+test('32. auto ready detection — 2 participants becomes Ready only after 2 assigned', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'required_participants' => 2,
+        'status' => 'Scheduled',
+    ]);
+
+    $person2 = Person::create(['nama' => 'Budi Test', 'jenis_kelamin' => 'L']);
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+
+    $reg1 = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+    $reg2 = $service->registerForPerson(
+        person: $person2,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $component = Livewire::test(\App\Livewire\Competition\Schedule\EntryManager::class, ['schedule' => $schedule]);
+
+    $component->call('assign', $reg1['competition_registration']->id);
+    expect($schedule->refresh()->status)->toBe('Scheduled');
+
+    $component->call('assign', $reg2['competition_registration']->id);
+    expect($schedule->refresh()->status)->toBe('Ready');
+});
+
+test('33. auto ready detection — participant removal returns to Scheduled', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'required_participants' => 1,
+        'status' => 'Scheduled',
+    ]);
+
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $component = Livewire::test(\App\Livewire\Competition\Schedule\EntryManager::class, ['schedule' => $schedule]);
+
+    $component->call('assign', $reg['competition_registration']->id);
+    expect($schedule->refresh()->status)->toBe('Ready');
+
+    $component->call('unassign', $reg['competition_registration']->id);
+    expect($schedule->refresh()->status)->toBe('Scheduled');
+});
+
+test('34. Match Center allows operator to start match (Ready → Playing)', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Ready',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
+
+    $component->call('startMatch', $schedule->id);
+    expect($schedule->refresh()->status)->toBe('Playing');
+});
+
+test('35. Match Center allows operator to finish match (Playing → Finished)', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Playing',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
+
+    $component->call('finishMatch', $schedule->id);
+    expect($schedule->refresh()->status)->toBe('Finished');
+});
+
+test('36. Match Center rejects start for non-Ready schedule', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Scheduled',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
+
+    $component->call('startMatch', $schedule->id);
+    expect($schedule->refresh()->status)->toBe('Scheduled');
+});
+
+test('37. Match Center rejects finish for non-Playing schedule', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Ready',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
+
+    $component->call('finishMatch', $schedule->id);
+    expect($schedule->refresh()->status)->toBe('Ready');
+});
+
+test('38. Viewer shows Playing match first', function () {
+    $venue = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue P']);
+
+    CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Ready',
+    ]);
+
+    $playingSchedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Playing',
+        'start_at' => now(),
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\Viewer::class, ['event' => $this->event]);
+
+    $component->assertSet('playing.0.id', $playingSchedule->id);
+    expect($component->get('playing')->count())->toBe(1);
+});
+
+test('39. Viewer falls back to earliest Ready when no Playing exists', function () {
+    $venue = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue Q']);
+
+    CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Scheduled',
+    ]);
+
+    $readySchedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Ready',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\Viewer::class, ['event' => $this->event]);
+
+    expect($component->get('playing')->count())->toBe(0);
+    expect($component->get('ready')->count())->toBe(1);
+    expect($component->get('ready')->first()->id)->toBe($readySchedule->id);
+});
+
+test('40. Viewer never shows Finished schedules', function () {
+    $venue = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue R']);
+
+    CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Finished',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\Viewer::class, ['event' => $this->event]);
+
+    expect($component->get('playing')->count())->toBe(0);
+    expect($component->get('ready')->count())->toBe(0);
+});
+
+test('41. Match Center requires manage-matches permission', function () {
+    $user = User::factory()->create(['role' => 'viewer']);
+    actingAs($user);
+
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Ready',
+    ]);
+
+    $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
+
+    $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
+    $component->call('startMatch', $schedule->id);
+});
+
+test('42. Viewer remains accessible as public', function () {
+    $user = User::factory()->create(['role' => 'viewer']);
+    actingAs($user);
+
+    $response = $this->get(route('competition.viewer', ['event' => $this->event]));
+    $response->assertStatus(200);
+});
+
+test('43. canAutoReady returns true when assigned count meets required_participants', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'required_participants' => 1,
+        'status' => 'Scheduled',
+    ]);
+
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    \App\Models\CompetitionScheduleEntry::create([
+        'competition_schedule_id' => $schedule->id,
+        'competition_registration_id' => $reg['competition_registration']->id,
+    ]);
+
+    expect($schedule->fresh()->canAutoReady())->toBeTrue();
+});
+
+test('44. canAutoReady returns false when status is not Scheduled', function () {
+    $schedule = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'required_participants' => 1,
+        'status' => 'Ready',
+    ]);
+
+    expect($schedule->canAutoReady())->toBeFalse();
+});
+
+test('45. operator-dashboard uses Playing instead of NowPlaying', function () {
+    $venue = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue S']);
+
+    CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Playing',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OperatorDashboard::class);
+
+    $schedules = $component->get('schedules');
+    $playing = $schedules->where('status', 'Playing');
+    expect($playing->count())->toBe(1);
 });

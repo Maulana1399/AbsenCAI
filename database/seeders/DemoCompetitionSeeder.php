@@ -319,7 +319,7 @@ class DemoCompetitionSeeder extends Seeder
             $status = match (true) {
                 $roll <= 20 => 'Scheduled',
                 $roll <= 35 => 'Ready',
-                $roll <= 40 => 'NowPlaying',
+                $roll <= 40 => 'Playing',
                 default => 'Finished',
             };
 

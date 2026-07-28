@@ -13,7 +13,7 @@
         <flux:select wire:model.live="filterStatus" placeholder="Semua Status">
             <flux:select.option value="Scheduled">Scheduled</flux:select.option>
             <flux:select.option value="Ready">Ready</flux:select.option>
-            <flux:select.option value="NowPlaying">Now Playing</flux:select.option>
+            <flux:select.option value="Playing">Playing</flux:select.option>
             <flux:select.option value="Finished">Finished</flux:select.option>
         </flux:select>
     </div>
@@ -45,8 +45,8 @@
                                 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
                                 'bg-zinc-100 text-zinc-800' => $schedule->status === 'Scheduled',
                                 'bg-blue-100 text-blue-800' => $schedule->status === 'Ready',
-                                'bg-green-100 text-green-800' => $schedule->status === 'NowPlaying',
-                                'bg-purple-100 text-purple-800' => $schedule->status === 'Finished',
+                                'bg-green-100 text-green-800' => $schedule->status === 'Playing',
+                                'bg-zinc-800 text-white' => $schedule->status === 'Finished',
                             ])>{{ $schedule->status }}</span>
                         </td>
                     </tr>

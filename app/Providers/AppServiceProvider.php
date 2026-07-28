@@ -119,6 +119,10 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        Gate::define('manage-matches', fn (User $user) => $user->hasAnyRole(
+            Role::SuperAdmin, Role::Admin,
+        ));
+
         Gate::define('manage-pengajian', fn (User $user) => $user->hasAnyRole(
             Role::SuperAdmin, Role::Admin, Role::Sekretariat,
         ));

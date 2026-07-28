@@ -37,12 +37,12 @@
             <div class="mt-1 text-2xl font-bold text-blue-800 dark:text-blue-200">{{ $ready }}</div>
         </div>
         <div class="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
-            <div class="text-sm text-green-600 dark:text-green-400">Now Playing</div>
-            <div class="mt-1 text-2xl font-bold text-green-800 dark:text-green-200">{{ $now_playing }}</div>
+            <div class="text-sm text-green-600 dark:text-green-400">Playing</div>
+            <div class="mt-1 text-2xl font-bold text-green-800 dark:text-green-200">{{ $playing }}</div>
         </div>
-        <div class="rounded-xl border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-950">
-            <div class="text-sm text-purple-600 dark:text-purple-400">Finished</div>
-            <div class="mt-1 text-2xl font-bold text-purple-800 dark:text-purple-200">{{ $finished }}</div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="text-sm text-zinc-600 dark:text-zinc-400">Finished</div>
+            <div class="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">{{ $finished }}</div>
         </div>
     </div>
 

@@ -765,6 +765,11 @@ Route::prefix('competition')->middleware(['auth', 'verified'])->group(function (
     )->middleware('can:manage-events')->name('competition.operator-dashboard');
 
     Route::get(
+        'match-center',
+        App\Livewire\Competition\MatchCenter::class
+    )->middleware('can:manage-matches')->name('competition.match-center');
+
+    Route::get(
         'schedules/{schedule}/outcomes',
         App\Livewire\Competition\Schedule\OutcomeManager::class
     )->middleware('can:manage-events')->name('competition.schedule.outcomes');

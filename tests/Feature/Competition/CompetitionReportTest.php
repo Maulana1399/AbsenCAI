@@ -132,7 +132,7 @@ test('6. schedule report filtered by status', function () {
     $result = $service->scheduleReport($this->event, ['status' => 'Scheduled']);
     expect($result)->toHaveCount(1);
 
-    $result = $service->scheduleReport($this->event, ['status' => 'NowPlaying']);
+    $result = $service->scheduleReport($this->event, ['status' => 'Playing']);
     expect($result)->toHaveCount(0);
 });
 

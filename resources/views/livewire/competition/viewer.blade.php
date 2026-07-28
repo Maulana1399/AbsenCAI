@@ -40,19 +40,24 @@
                         @endforeach
                     </div>
                 @endif
-                @if ($nowPlaying->isNotEmpty())
+
+                {{-- PLAYING --}}
+                @if ($playing->isNotEmpty())
                     <div class="rounded-2xl border-4 border-green-500 bg-green-950 p-8">
-                        <h2 class="mb-6 text-center text-4xl font-bold text-green-400 uppercase tracking-widest">Now Playing</h2>
+                        <h2 class="mb-6 text-center text-4xl font-bold text-green-400 uppercase tracking-widest">Playing</h2>
                         <div class="grid gap-6">
-                            @foreach ($nowPlaying as $schedule)
+                            @foreach ($playing as $schedule)
                                 <div class="rounded-xl border-2 border-green-700 bg-green-900/50 p-6">
                                     <div class="text-2xl font-bold text-white">{{ $schedule->competitionClass?->competitionCategory?->name }}</div>
                                     <div class="mt-1 text-4xl font-bold text-green-300">{{ $schedule->competitionClass?->name }}</div>
                                     @php $participants = $schedule->scheduleEntries->map(fn($e) => $e->competitionRegistration?->participation?->person?->nama)->filter(); @endphp
                                     @if ($participants->isNotEmpty())
                                         <div class="mt-4 flex flex-wrap items-center gap-4 text-2xl text-white">
-                                            @foreach ($participants as $name)
+                                            @foreach ($participants as $i => $name)
                                                 <span class="rounded-lg border border-green-600 bg-green-800/50 px-4 py-1">{{ $name }}</span>
+                                                @if ($i === 0 && $participants->count() > 1)
+                                                    <span class="text-2xl font-bold text-zinc-400">VS</span>
+                                                @endif
                                             @endforeach
                                         </div>
                                     @else
@@ -66,8 +71,34 @@
                             @endforeach
                         </div>
                     </div>
+                @elseif ($ready->isNotEmpty())
+                    {{-- No Playing match: show earliest Ready as featured --}}
+                    <div class="rounded-2xl border-4 border-blue-500 bg-blue-950 p-8">
+                        <h2 class="mb-6 text-center text-4xl font-bold text-blue-400 uppercase tracking-widest">Up Next</h2>
+                        <div class="grid gap-6">
+                            @php $firstReady = $ready->first(); @endphp
+                            <div class="rounded-xl border-2 border-blue-700 bg-blue-900/50 p-6">
+                                <div class="text-2xl font-bold text-white">{{ $firstReady->competitionClass?->competitionCategory?->name }}</div>
+                                <div class="mt-1 text-4xl font-bold text-blue-300">{{ $firstReady->competitionClass?->name }}</div>
+                                @php $participants = $firstReady->scheduleEntries->map(fn($e) => $e->competitionRegistration?->participation?->person?->nama)->filter(); @endphp
+                                @if ($participants->isNotEmpty())
+                                    <div class="mt-4 flex flex-wrap items-center gap-4 text-2xl text-white">
+                                        @foreach ($participants as $i => $name)
+                                            <span class="rounded-lg border border-blue-600 bg-blue-800/50 px-4 py-1">{{ $name }}</span>
+                                            @if ($i === 0 && $participants->count() > 1)
+                                                <span class="text-2xl font-bold text-zinc-400">VS</span>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if ($firstReady->venue)<div class="mt-4 text-xl text-zinc-300">{{ $firstReady->venue->name }}</div>@endif
+                            </div>
+                        </div>
+                    </div>
                 @endif
-                @if ($ready->isNotEmpty())
+
+                {{-- Ready list (only show if Playing exists, since fallback is already shown) --}}
+                @if ($playing->isNotEmpty() && $ready->isNotEmpty())
                     <div class="rounded-2xl border-4 border-blue-500 bg-blue-950 p-8">
                         <h2 class="mb-6 text-center text-4xl font-bold text-blue-400 uppercase tracking-widest">Ready</h2>
                         <div class="grid gap-4 md:grid-cols-2">
@@ -81,11 +112,13 @@
                         </div>
                     </div>
                 @endif
-                @if ($next->isNotEmpty())
+
+                {{-- Scheduled / Next --}}
+                @if ($scheduled->isNotEmpty())
                     <div class="rounded-2xl border-2 border-zinc-700 bg-zinc-800 p-6">
                         <h2 class="mb-4 text-center text-2xl font-bold text-zinc-400 uppercase tracking-widest">Next</h2>
                         <div class="grid gap-4 md:grid-cols-3">
-                            @foreach ($next as $schedule)
+                            @foreach ($scheduled as $schedule)
                                 <div class="rounded-lg border border-zinc-600 bg-zinc-900 p-4">
                                     <div class="text-base font-semibold text-white">{{ $schedule->competitionClass?->competitionCategory?->name }}</div>
                                     <div class="text-lg font-bold text-zinc-300">{{ $schedule->competitionClass?->name }}</div>
@@ -96,7 +129,8 @@
                         </div>
                     </div>
                 @endif
-                @if ($nowPlaying->isEmpty() && $ready->isEmpty() && $next->isEmpty())
+
+                @if ($playing->isEmpty() && $ready->isEmpty() && $scheduled->isEmpty())
                     <div class="flex flex-1 items-center justify-center"><p class="text-2xl text-zinc-500">Belum ada jadwal.</p></div>
                 @endif
             </div>
@@ -135,7 +169,7 @@
                 </div>
             @endif
 
-            {{-- TV Helper (not in TV mode) --}}
+            {{-- TV Helper --}}
             <div class="mb-4 rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-center text-xs text-zinc-400">
                 📺 Tambahkan <strong class="text-zinc-200">?display=tv</strong> untuk mode TV &middot; Auto-refresh 5 detik &middot; <a href="{{ request()->fullUrlWithQuery(['display' => 'tv']) }}" class="text-blue-400 hover:text-blue-300 underline">Buka TV Mode</a>
             </div>
@@ -149,20 +183,23 @@
                 </div>
             @endif
 
-            {{-- NOW PLAYING --}}
-            @if ($nowPlaying->isNotEmpty())
+            {{-- PLAYING --}}
+            @if ($playing->isNotEmpty())
                 <div class="mb-4 rounded-xl border-2 border-green-500 bg-green-950 p-4">
-                    <h2 class="mb-3 text-center text-lg font-bold text-green-400 uppercase tracking-widest sm:text-2xl">Now Playing</h2>
+                    <h2 class="mb-3 text-center text-lg font-bold text-green-400 uppercase tracking-widest sm:text-2xl">Playing</h2>
                     <div class="grid gap-3">
-                        @foreach ($nowPlaying as $schedule)
+                        @foreach ($playing as $schedule)
                             <div class="rounded-lg border border-green-700 bg-green-900/50 p-4">
                                 <div class="font-bold text-white sm:text-lg">{{ $schedule->competitionClass?->competitionCategory?->name }}</div>
                                 <div class="text-lg font-bold text-green-300 sm:text-2xl">{{ $schedule->competitionClass?->name }}</div>
                                 @php $participants = $schedule->scheduleEntries->map(fn($e) => $e->competitionRegistration?->participation?->person?->nama)->filter(); @endphp
                                 @if ($participants->isNotEmpty())
-                                    <div class="mt-2 flex flex-wrap gap-2">
-                                        @foreach ($participants as $name)
+                                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                                        @foreach ($participants as $i => $name)
                                             <span class="rounded-md border border-green-600 bg-green-800/50 px-2 py-0.5 text-xs font-semibold text-white sm:text-sm">{{ $name }}</span>
+                                            @if ($i === 0 && $participants->count() > 1)
+                                                <span class="text-sm font-bold text-zinc-400">VS</span>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @else
@@ -177,10 +214,32 @@
                         @endforeach
                     </div>
                 </div>
+            @elseif ($ready->isNotEmpty())
+                {{-- No Playing match: show earliest Ready as featured --}}
+                @php $firstReady = $ready->first(); @endphp
+                <div class="mb-4 rounded-xl border-2 border-blue-500 bg-blue-950 p-4">
+                    <h2 class="mb-3 text-center text-lg font-bold text-blue-400 uppercase tracking-widest sm:text-2xl">Up Next</h2>
+                    <div class="rounded-lg border border-blue-700 bg-blue-900/50 p-4">
+                        <div class="font-bold text-white sm:text-lg">{{ $firstReady->competitionClass?->competitionCategory?->name }}</div>
+                        <div class="text-lg font-bold text-blue-300 sm:text-2xl">{{ $firstReady->competitionClass?->name }}</div>
+                        @php $participants = $firstReady->scheduleEntries->map(fn($e) => $e->competitionRegistration?->participation?->person?->nama)->filter(); @endphp
+                        @if ($participants->isNotEmpty())
+                            <div class="mt-2 flex flex-wrap items-center gap-2">
+                                @foreach ($participants as $i => $name)
+                                    <span class="rounded-md border border-blue-600 bg-blue-800/50 px-2 py-0.5 text-xs font-semibold text-white sm:text-sm">{{ $name }}</span>
+                                    @if ($i === 0 && $participants->count() > 1)
+                                        <span class="text-sm font-bold text-zinc-400">VS</span>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+                        @if ($firstReady->venue)<div class="mt-1 text-xs text-zinc-300 sm:text-sm">{{ $firstReady->venue->name }}</div>@endif
+                    </div>
+                </div>
             @endif
 
-            {{-- READY --}}
-            @if ($ready->isNotEmpty())
+            {{-- READY (only shows if Playing already exists) --}}
+            @if ($playing->isNotEmpty() && $ready->isNotEmpty())
                 <div class="mb-4 rounded-xl border-2 border-blue-500 bg-blue-950 p-4">
                     <h2 class="mb-3 text-center text-lg font-bold text-blue-400 uppercase tracking-widest sm:text-2xl">Ready</h2>
                     <div class="grid gap-3 sm:grid-cols-2">
@@ -196,11 +255,11 @@
             @endif
 
             {{-- NEXT --}}
-            @if ($next->isNotEmpty())
+            @if ($scheduled->isNotEmpty())
                 <div class="rounded-xl border border-zinc-700 bg-zinc-800 p-4">
                     <h2 class="mb-3 text-center text-sm font-bold text-zinc-400 uppercase tracking-widest sm:text-xl">Next</h2>
                     <div class="grid gap-2 sm:grid-cols-3">
-                        @foreach ($next as $schedule)
+                        @foreach ($scheduled as $schedule)
                             <div class="rounded-lg border border-zinc-600 bg-zinc-900 p-3">
                                 <div class="text-xs font-semibold text-white sm:text-sm">{{ $schedule->competitionClass?->competitionCategory?->name }}</div>
                                 <div class="text-sm font-bold text-zinc-300 sm:text-base">{{ $schedule->competitionClass?->name }}</div>
@@ -211,7 +270,7 @@
                 </div>
             @endif
 
-            @if ($nowPlaying->isEmpty() && $ready->isEmpty() && $next->isEmpty())
+            @if ($playing->isEmpty() && $ready->isEmpty() && $scheduled->isEmpty())
                 <div class="rounded-xl border border-dashed border-zinc-700 p-10 text-center">
                     <p class="text-zinc-500">Belum ada jadwal.</p>
                 </div>
