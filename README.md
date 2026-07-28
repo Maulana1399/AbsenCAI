@@ -1,6 +1,8 @@
-# KJA Event Manager
+# KJA Event Manager — Event Operating System
 
 Platform Event Management berbasis web — modular, multi-event, dan scalable.
+
+KJA Event Manager adalah **Event Operating System**: sebuah platform yang dapat mengelola semua jenis event melalui **Competition Engine**, **Scoring Engine**, dan **Blueprint Event**, tanpa perlu membuat modul khusus untuk setiap cabang event.
 
 Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Event Management umum yang mendukung berbagai jenis event.
 
@@ -23,6 +25,8 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture |
 | Database V2 / Design C | ✅ problem_total = 0 |
 | Test Baseline | ✅ 1574 passed / 3745 assertions / 0 failures |
+| **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
+| **Roadmap V2** (Event Operating System) | 📋 **Planned** — 10 engine/module items |
 
 ---
 
@@ -46,6 +50,17 @@ Event (type: cai | pengajian)
   → Participation (event-scoped enrollment)
   → DesaAccessGrant (token-based desa access)
 
+V2 Direction (Event Operating System):
+```
+Person (canonical identity)
+  → Participation (event-scoped membership)
+    → EventAttendance (canonical attendance fact)
+    → Competition (via Competition Engine)
+    → Scoring (via Scoring Engine)
+```
+
+Build Engine, Not Module. Lihat `docs/VISION_V2.md`.
+
 peserta (legacy compatibility only)
   → LegacyPesertaMapping (bridge peserta↔Person)
   → LegacyParticipationMapping (bridge peserta↔Participation)
@@ -62,9 +77,28 @@ Sidebar is event-type-aware with global Master Data:
 
 ---
 
-## Modules
+## Roadmap V1 — Completed
 
-### CAI Operational
+Semua pengembangan foundation, Multi Event, RBAC, CAI Operational, Pengajian Desa MVP, dan Documentation telah selesai 100%.
+
+## Roadmap V2 — Event Operating System (Planned)
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Blueprint Event | 📋 Planned |
+| 2 | Competition Engine | 📋 Planned |
+| 3 | Scoring Engine | 📋 Planned |
+| 4 | Venue Management | 📋 Planned |
+| 5 | Live Schedule Engine | 📋 Planned |
+| 6 | Public Dashboard | 📋 Planned |
+| 7 | Announcement Engine | 📋 Planned |
+| 8 | Certificate Engine | 📋 Planned |
+| 9 | Mobile | 📋 Planned |
+| 10 | Public API | 📋 Planned |
+
+---
+
+## Modules
 - Attendance (QR scan via EventAttendance, no legacy dual-write)
 - Participant registration and import (canonical Person→Participation flow)
 - Reports and exports (event-scoped)
@@ -108,6 +142,7 @@ See `docs/` directory for full documentation.
 | `DEAD_CODE.md` | Dead code report |
 | `HIDDEN_FEATURES.md` | Hidden/unused features |
 | `PROGRESS.md` | Implementation progress vs roadmap |
+| `VISION_V2.md` | Event Operating System — V2 product vision |
 
 ---
 

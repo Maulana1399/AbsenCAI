@@ -1,14 +1,20 @@
 # KJA Event Manager Modules
 
+**Roadmap V1** = ✅ **100% COMPLETE** — Semua modul bertanda 🟢 adalah V1.
+
+**Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`. Competition, Certificate, dan Scoring masuk V2.
+
 Status Legend
 
-🟢 Stable
+🟢 Stable (V1 — Complete)
 
 🟡 Development
 
-🔴 Planned
+🔴 Planned (V1 deferred)
 
-⚪ Future
+📋 Planned (V2)
+
+⚪ Future (Beyond V2)
 
 ---
 
@@ -81,9 +87,12 @@ Notes:
 - Activity Group / Activity
 - Activity Registration
 
-Future
+Future (V2 Roadmap)
 
-- Competition
+- Blueprint Event (V2)
+- Competition Engine (V2)
+- Scoring Engine (V2)
+- Venue Management (V2)
 - Event Template
 - Event Archive
 
@@ -191,35 +200,25 @@ Future
 
 ---
 
-# Scoring
+# Scoring (V2 — Scoring Engine)
 
-🔴
+📋
 
-- Master Point
-
-- Bonus
-
-- Penalty
-
-- Leaderboard
+- Scoring Engine — generic (Versus, Score, Time, Distance, Ranking, Pass/Fail)
+- Template Penilaian dapat dibuat tanpa coding
+- Multiple komponen dengan bobot berbeda
 
 ---
 
-# Competition
+# Competition (V2 — Competition Engine)
 
-⚪
+📋
 
-- Jadwal
+- Competition Engine — generic engine untuk semua format kompetisi
+- Scoring Engine — generic scoring (Versus, Score, Time, Distance, Ranking, Pass/Fail)
+- Blueprint Event — konfigurasi awal event
 
-- Bracket
-
-- Arena
-
-- Match
-
-- Judge
-
-- Winner
+V2 tidak akan membuat modul khusus per jenis lomba. Semua dikonfigurasi melalui engine.
 
 ---
 
@@ -242,15 +241,13 @@ Future
 
 ---
 
-# Certificate
+# Certificate (V2 — Certificate Engine)
 
-⚪
+📋
 
-- Generate
-
-- Verification QR
-
-- Print
+- Generate sertifikat otomatis berdasarkan hasil kompetisi
+- QR Verification
+- Template dapat dikonfigurasi
 
 ---
 
@@ -318,13 +315,35 @@ iOS
 
 ---
 
-# Planned Add-on
+# V2 Roadmap (Planned)
+
+> Lihat `VISION_V2.md` untuk detail.
+
+Blueprint Event
+
+Competition Engine
+
+Scoring Engine
+
+Venue Management
+
+Live Schedule Engine
+
+Public Dashboard
+
+Announcement Engine
+
+Certificate Engine
+
+Mobile App
+
+Public API
+
+---
+
+# Future Add-on (Beyond V2)
 
 Attendance Plus
-
-Competition
-
-Certificate
 
 Finance
 

@@ -139,21 +139,29 @@ Excel / PDF
 
 ---
 
-## Future Competition
+## V2 — Competition Engine (Planned)
 
-Registration
+> Lihat `VISION_V2.md` untuk detail arsitektur V2.
 
-↓
-
-Competition
+Registration / Participation
 
 ↓
 
-Judge
+Competition Engine
+├── Bracket
+├── League
+├── Round Robin
+└── Double Elimination
 
 ↓
 
-Score
+Scoring Engine
+├── Versus
+├── Score
+├── Time
+├── Distance
+├── Ranking
+└── Pass/Fail
 
 ↓
 

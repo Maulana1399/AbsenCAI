@@ -22,6 +22,16 @@ One Platform for Every Event.
 
 ---
 
+# Product Vision (Updated)
+
+KJA Event Manager tidak lagi diposisikan sebagai aplikasi absensi.
+
+**KJA Event Manager adalah Event Operating System.**
+
+Filosofi: **Build Engine, Not Module** — jangan membuat modul khusus untuk setiap jenis event (Silat, Voli, MTQ, PAUD). Sebagai gantinya, bangun **Competition Engine**, **Scoring Engine**, dan **Blueprint Event** yang bersifat generic dan dapat dikonfigurasi.
+
+---
+
 # Vision
 
 Membangun platform Event Management yang sederhana, modular, scalable, dan dapat digunakan oleh berbagai organisasi tanpa harus membuat sistem baru untuk setiap event.
@@ -396,23 +406,38 @@ Production
 # Product Roadmap
 
 ```text id="v1dw0y"
-AbsenCAI
+AbsenCAI (v1.0)
 
 ↓
 
-CAI Operational
+CAI Operational (v1.5)
 
 ↓
 
-KJA Event Manager
+KJA Event Manager Foundation (V1 — COMPLETED)
+├── Multi Event
+├── RBAC
+├── CAI Operational
+├── Pengajian Desa MVP
+└── Documentation
 
 ↓
 
-Competition Platform
+Event Operating System (V2 — PLANNED)
+├── Blueprint Event
+├── Competition Engine
+├── Scoring Engine
+├── Venue Management
+├── Live Schedule Engine
+├── Public Dashboard
+├── Announcement Engine
+├── Certificate Engine
+├── Mobile
+└── Public API
 
 ↓
 
-Commercial Platform
+Commercial Platform (Future)
 ```
 
 ---
@@ -449,4 +474,10 @@ Jika sebuah fitur tidak memberikan manfaat nyata terhadap operasional event, mak
 
 KJA Event Manager bukan sekadar aplikasi absensi.
 
-KJA Event Manager adalah platform Event Management yang dibangun untuk membantu organisasi mengelola peserta, panitia, kompetisi, dan seluruh operasional event secara terintegrasi, dengan tujuan menjadi solusi yang dapat digunakan lintas organisasi dan berkembang menjadi produk komersial di masa depan.
+KJA Event Manager adalah **Event Operating System**.
+
+Sebuah platform yang dapat mengelola semua jenis event melalui **Competition Engine**, **Scoring Engine**, dan **Blueprint Event** — tanpa perlu membuat modul khusus untuk setiap cabang event.
+
+Dibangun di atas fondasi V1 yang solid (Multi Event, RBAC, CAI Operational, Pengajian Desa MVP) dan bertransformasi menjadi platform Event Management generik yang dapat dikonfigurasi, scalable, dan siap menjadi produk komersial.
+
+Lihat `docs/VISION_V2.md` untuk detail Roadmap V2.

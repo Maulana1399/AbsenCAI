@@ -2,7 +2,11 @@
 
 ## Vision
 
-KJA Event Manager adalah platform Event Management berbasis Web yang dapat digunakan oleh banyak organisasi.
+KJA Event Manager adalah **Event Operating System** — platform Event Management berbasis Web yang dapat digunakan oleh banyak organisasi.
+
+Filosofi: **Build Engine, Not Module**. Semua jenis event dikonfigurasi melalui Competition Engine, Scoring Engine, dan Blueprint Event — bukan melalui modul khusus.
+
+Lihat `docs/VISION_V2.md` untuk detail arsitektur V2.
 
 ---
 

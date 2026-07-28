@@ -2,6 +2,9 @@
 
 > Actual implementation progress vs roadmap.
 > Based on code, not plans.
+>
+> **Roadmap V1** = ✅ **100% COMPLETE**
+> **Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`
 
 ---
 
@@ -238,7 +241,26 @@ Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
 
 ---
 
-## Future / Not Started
+## Roadmap V2 — Event Operating System (Planned)
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0%
+```
+
+| # | Item | Progress | Notes |
+|---|------|----------|-------|
+| 1 | Blueprint Event | 0% | 📋 Planned |
+| 2 | Competition Engine | 0% | 📋 Planned — replaces old Competition Module concept |
+| 3 | Scoring Engine | 0% | 📋 Planned — generic, not hardcoded |
+| 4 | Venue Management | 0% | 📋 Planned — reusable venue hierarchy |
+| 5 | Live Schedule Engine | 0% | 📋 Planned — realtime schedule |
+| 6 | Public Dashboard | 0% | 📋 Planned — no login required |
+| 7 | Announcement Engine | 0% | 📋 Planned |
+| 8 | Certificate Engine | 0% | 📋 Planned |
+| 9 | Mobile | 0% | 📋 Planned |
+| 10 | Public API | 0% | 📋 Planned |
+
+## Deferred / Non-V2
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0%
@@ -246,20 +268,15 @@ Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
 
 | Area | Progress | Notes |
 |------|----------|-------|
-| Competition Module | 0% | Future sprint |
-| Certificate Module | 0% | Deferred |
-| Scoring | 0% | Deferred to 2027 |
 | Riwayat Izin | 0% | Deferred to 2027 |
 | Storage (Nextcloud/TrueNAS) | 0% | Deferred to 2027 |
-| API | 0% | Not started |
-| Mobile App | 0% | Not started |
 | Commercial Platform | 0% | Long-term vision |
 | Offline Mode | 0% | Future |
 | White Label | 0% | Future |
 
 ---
 
-## Overall Progress Summary
+## Overall Progress — Roadmap V1 (COMPLETED 100%)
 
 | Area | Progress | Status |
 |------|----------|--------|
@@ -277,11 +294,20 @@ Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
 | User Management | 100% | ✅ |
 | Activity Log | 100% | ✅ |
 | UI/UX | 100% | ✅ |
-| Competition | 0% | 🔴 |
-| Certificate | 0% | 🔴 |
-| Scoring | 0% | 🔴 |
-| API | 0% | 🔴 |
-| Mobile App | 0% | 🔴 |
-| Commercial | 0% | 🔴 |
+
+## Overall Progress — Roadmap V2 (PLANNED 0%)
+
+| Area | Progress | Status |
+|------|----------|--------|
+| Blueprint Event | 0% | 📋 Planned |
+| Competition Engine | 0% | 📋 Planned |
+| Scoring Engine | 0% | 📋 Planned |
+| Venue Management | 0% | 📋 Planned |
+| Live Schedule Engine | 0% | 📋 Planned |
+| Public Dashboard | 0% | 📋 Planned |
+| Announcement Engine | 0% | 📋 Planned |
+| Certificate Engine | 0% | 📋 Planned |
+| Mobile | 0% | 📋 Planned |
+| Public API | 0% | 📋 Planned |
 
 **Current test baseline: 1574 passed / 3745 assertions / 0 failures**

@@ -1,6 +1,9 @@
 # FEATURE
 
 > Feature Catalog for KJA Event Manager
+>
+> **Roadmap V1** = ✅ **100% COMPLETE**
+> **Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`
 
 ---
 
@@ -331,30 +334,29 @@ Known Limitation:
 
 ---
 
-## Scoring
+## Scoring (V2 — Scoring Engine)
+
+> Scoring Engine adalah bagian dari Roadmap V2 — Event Operating System.
+> Bersifat generic, tidak hardcode jenis penilaian.
 
 Status
 
-🔵 Planned
+📋 Planned (V2)
 
 Priority
 
-P1
+P2
 
-Sprint
+Roadmap V2
 
-2
+3
 
 Features
 
-* Bonus
-* Penalty
-* Leaderboard
-* Ranking
-
-Future
-
-* Achievement
+* Generic Scoring Engine — Versus, Score, Time, Distance, Ranking, Pass/Fail
+* Template Penilaian dapat dibuat dan diedit tanpa coding
+* Multiple komponen penilaian dengan bobot berbeda
+* Leaderboard dan Ranking otomatis
 
 ---
 
@@ -393,49 +395,58 @@ Notes:
 
 ---
 
-## Competition
+## Competition (V2)
+
+> Competition Engine adalah bagian dari Roadmap V2 — Event Operating System.
+> Tidak akan ada modul khusus per jenis lomba. Semua dikonfigurasi melalui engine generic.
 
 Status
 
-⚪ Future
+📋 Planned (V2)
 
 Priority
 
-P3
+P2
 
-Sprint
+Roadmap V2
 
-4
+1
 
-Features
+Features (V2 Scope — Competition Engine)
 
-* Jadwal
-* Bracket
-* Penilaian
-* Juara
-* Sertifikat
+* Generic Competition Engine — Bracket, League, Round Robin, Double Elimination
+* Scoring Engine — Versus, Score, Time, Distance, Ranking, Pass/Fail
+* Template Penilaian dapat dibuat tanpa coding
+* Blueprint Event sebagai konfigurasi awal
+
+Lihat `docs/VISION_V2.md` untuk detail.
 
 ---
 
-## Certificate
+## Certificate (V2 — Certificate Engine)
+
+> Certificate Engine adalah bagian dari Roadmap V2 — Event Operating System.
 
 Status
 
-⚪ Future
+📋 Planned (V2)
 
 Priority
 
 P3
 
-Sprint
+Roadmap V2
 
-5
+8
 
 Features
 
-* Auto Generate
+* Auto Generate berdasarkan hasil kompetisi
 * QR Verification
 * Download
+* Template sertifikat dapat dikonfigurasi
+
+Lihat `docs/VISION_V2.md` untuk detail.
 
 ---
 
@@ -492,6 +503,8 @@ Features
 
 ## Venue
 
+### V1 Scope (Existing — Stable)
+
 Status
 
 🟢 Stable (Venue + Rundown + RundownItem)
@@ -511,10 +524,27 @@ Features
 * Time validation (ends_at > starts_at)
 * Parallel activities support
 
-Future
+### V2 Scope (Planned — Venue Management)
 
-* Venue Dashboard
-* Schedule conflict detection
+> Venue Management adalah bagian dari Roadmap V2 — Event Operating System.
+
+Status
+
+📋 Planned (V2)
+
+Roadmap V2
+
+4
+
+Fitur baru V2:
+
+* Master Venue — data venue global reusable
+* Event Venue — penggunaan Master Venue pada event tertentu
+* Arena / Room — sub-lokasi dalam venue
+* Satu venue dapat digunakan banyak event
+* Data venue tidak hilang setelah event selesai
+
+Lihat `docs/VISION_V2.md` untuk detail.
 
 ---
 
@@ -662,15 +692,21 @@ Target MVP (CAI Operational + Pengajian Desa)
 
 ---
 
-# Future Product
+# V2 Target — Event Operating System
 
-Target KJA Event Manager
+Target KJA Event Manager V2
 
-* Universal Person Database
-* Multi Event
-* Multi Venue
-* Competition Module
-* Certificate Module
+* Universal Person Database ✅ (V1 Complete)
+* Multi Event ✅ (V1 Complete)
+* Multi Venue ✅ (V1 foundation, V2 reusable)
+* Competition Engine (V2 — replaces old Competition Module concept)
+* Scoring Engine (V2)
+* Blueprint Event (V2)
+* Certificate Engine (V2)
+* Venue Management (V2)
+
+# Future (Beyond V2)
+
 * Commercial Platform
 
 ---

@@ -1,6 +1,9 @@
-# KJA Event Manager
+# KJA Event Manager — Event Operating System
 
 > Modern Event Management Platform built with Laravel & Livewire.
+
+> **Roadmap V1** = ✅ **100% COMPLETE**
+> **Roadmap V2** = 📋 **Planned** — Event Operating System
 
 ---
 
@@ -22,7 +25,19 @@ Contoh penggunaan:
 
 ---
 
-# Vision
+# Vision (Updated)
+
+KJA Event Manager tidak lagi diposisikan sebagai aplikasi absensi.
+
+**KJA Event Manager adalah Event Operating System.**
+
+Filosofi: **Build Engine, Not Module** — jangan membuat modul khusus per jenis event. Bangun Competition Engine + Scoring Engine + Blueprint Event yang bersifat generic.
+
+Lihat `VISION_V2.md` untuk detail.
+
+---
+
+# Vision (Original)
 
 Membangun platform Event Management yang dapat digunakan oleh berbagai organisasi tanpa harus menginput ulang data peserta setiap kali mengadakan kegiatan.
 
@@ -71,19 +86,28 @@ Report
 
 ---
 
-## Planned
+## Planned (V1 — Now Completed)
 
-- Universal Person Database
-- Attendance Code
-- Internal QR Generator
-- Multi Event
-- Multi Venue
-- Multi Category
-- Competition Module
-- Scoring
-- Certificate
-- Dashboard Division
-- Nextcloud Integration
+- Universal Person Database ✅
+- Attendance Code ✅
+- Internal QR Generator ✅
+- Multi Event ✅
+- Multi Venue ✅
+- Multi Category ✅
+- Dashboard Division ✅
+
+## V2 — Event Operating System (Planned)
+
+- Blueprint Event
+- Competition Engine
+- Scoring Engine
+- Venue Management (Reusable)
+- Live Schedule Engine
+- Public Dashboard
+- Announcement Engine
+- Certificate Engine
+- Mobile App
+- Public API
 
 ---
 
@@ -128,12 +152,13 @@ Cloudflare Tunnel
 Read documentation in this order:
 
 1. INDEX.md
-2. AGENTS.md
-3. ROADMAP.md
-4. FEATURE.md
-5. DATABASE.md
-6. RULES.md
-7. MODULES.md
+2. VISION_V2.md — V2 product vision
+3. AGENTS.md
+4. ROADMAP.md
+5. FEATURE.md
+6. DATABASE.md
+7. RULES.md
+8. MODULES.md
 
 ---
 
@@ -187,15 +212,17 @@ Every feature must be documented before implementation.
 
 Current
 
-v1.0 (AbsenCAI)
+v1.5 (CAI Operational — V1 Foundation COMPLETE)
 
 Target
 
-v1.5 (CAI Operational)
+Roadmap V1: ✅ 100% COMPLETE
 
-Future
+Roadmap V2: 📋 Planned — Event Operating System
 
-v2.0 (KJA Event Manager)
+Next
+
+v2.0 (Event Operating System)
 
 ---
 

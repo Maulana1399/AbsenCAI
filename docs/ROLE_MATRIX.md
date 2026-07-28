@@ -15,7 +15,7 @@
 | PJ Divisi | `pj_divisi` | Attendance monitoring only | Global |
 | Operator Registrasi | `operator_registrasi` | Participant registration | Global |
 | Operator Scan | `operator_scan` | QR scan + attendance | Global |
-| Juri | `juri` | Scoring (future) | — |
+| Juri | `juri` | Scoring (V2 — Scoring Engine) | — |
 | Viewer | `viewer` | Read-only reports + dashboard | Global |
 
 ---

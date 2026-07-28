@@ -76,7 +76,7 @@ Age Category.
 
 ## Competition
 
-Cabang lomba.
+Cabang lomba. (V2 — akan ditangani oleh Competition Engine)
 
 ---
 

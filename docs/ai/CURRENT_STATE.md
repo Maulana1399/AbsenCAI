@@ -1,6 +1,9 @@
 # CURRENT STATE
 
 > Current Development Status
+>
+> **Roadmap V1** = ✅ **100% COMPLETE**
+> **Roadmap V2** = 📋 **Planned** — Lihat `docs/VISION_V2.md`
 
 ---
 
@@ -333,23 +336,34 @@ Database: SQLite
 
 # Next Work
 
-**UI Bug Fix Sprint — Batch 4 Remaining Items** 🔄:
+## V1 Cleanup Items
 
-1. **#10 Dark Mode** — RE-OPENED — PENDING RUNTIME VERIFICATION
-   - File: Multiple files (access-index, event/index)
-   - Fix: `dark:text-zinc-100` → `dark:text-white` di select, textarea, heading
+1. **Venue CRUD UI** — Event-scoped venue management (model & migration sudah ada)
+2. **CategoryDefinition CRUD UI** — Event-scoped category management (model & migration sudah ada)
+3. **Absensi table retirement** — Deferred: table masih ada untuk historical reads
 
-2. **#11 Responsive Pengajian Layout** — IMPLEMENTED — PENDING RUNTIME VERIFICATION
-   - File: `resources/views/components/layouts/pengajian.blade.php` (BARU)
-   - Fix: Layout baru dengan `max-w-4xl`, tidak restrictif seperti `simple.blade.php`
+## Roadmap V2 — Event Operating System (Planned)
 
-3. **#12 Event Isolation Access Desa** — OPEN — LOGIC GAP FOUND
-   - File: `app/Livewire/Pengajian/Admin/AccessIndex.php`
-   - Fix: Query `render()` sekarang filter `where('event_id', $activeEventId)`
+**Roadmap V1 sudah 100% COMPLETE.** Pengembangan selanjutnya adalah **Roadmap V2**.
 
-**PGM.21 — (future sprint TBD)**
+Filosofi: **Build Engine, Not Module** — Jangan buat modul khusus per jenis event. Bangun Competition Engine, Scoring Engine, dan Blueprint Event.
 
-PGM.18–PGM.20 fully complete. Next priorities: Competition and Commercial modules (see ROADMAP.md).
+| # | Item | Status | Deskripsi |
+|---|------|--------|-----------|
+| 1 | Blueprint Event | 📋 Planned | Konfigurasi awal event — dapat diubah panitia |
+| 2 | Competition Engine | 📋 Planned | Generic — bracket, league, round robin, double elimination |
+| 3 | Scoring Engine | 📋 Planned | Generic — Versus, Score, Time, Distance, Ranking, Pass/Fail |
+| 4 | Venue Management | 📋 Planned | Master Venue → Event Venue → Arena/Room |
+| 5 | Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi |
+| 6 | Public Dashboard | 📋 Planned | Portal publik tanpa login |
+| 7 | Announcement Engine | 📋 Planned | Pengumuman resmi panitia |
+| 8 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
+| 9 | Mobile | 📋 Planned | Aplikasi mobile |
+| 10 | Public API | 📋 Planned | REST API |
+
+**Semua masih Planned. Belum ada yang diimplementasikan.**
+
+Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap Roadmap V2.
 
 **PGM.18 — Database V2 Part 6: Legacy Dependency Remediation + CAI Participant Architecture**
 

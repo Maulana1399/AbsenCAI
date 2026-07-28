@@ -2,30 +2,34 @@
 
 > Complete index of all documentation files.
 
+> **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) = ✅ **100% COMPLETE**
+> **Roadmap V2** (Event Operating System) = 📋 **Planned** — Lihat `VISION_V2.md`
+
 ---
 
 ## Read Order (Recommended)
 
 1. `README.md` — Project overview
-2. `PROJECT_STRUCTURE.md` — Complete architecture mapping
-3. `ROADMAP.md` — Product roadmap & sprint plan
-4. `FEATURE.md` — Feature catalog
-5. `FEATURE_INVENTORY.md` — Actual implemented features
-6. `CAPABILITY_MATRIX.md` — Undocumented capabilities
-7. `ROLE_MATRIX.md` — Role & permission matrix
-8. `PERMISSION.md` — Detailed permission documentation
-9. `WORKFLOW.md` — Workflow flowcharts
-10. `HIDDEN_FEATURES.md` — Hidden/unused features
-11. `DEAD_CODE.md` — Dead code report
-12. `PROGRESS.md` — Implementation progress
-13. `DATABASE.md` — Database design
-14. `MODULES.md` — Module overview
-15. `ARCHITECTURE.md` — System architecture
-16. `SECURITY.md` — Security standards
-17. `CHANGELOG.md` — Release history
-18. `TODO.md` — Active task list
-19. `HANDOFF.md` — Non-technical overview
-20. `PENGAJIAN_MVP_OPERATIONAL.md` — Pengajian operational guide
+2. `VISION_V2.md` — V2 product vision & roadmap (Event Operating System)
+3. `PROJECT_STRUCTURE.md` — Complete architecture mapping
+4. `ROADMAP.md` — Product roadmap & sprint plan
+5. `FEATURE.md` — Feature catalog
+6. `FEATURE_INVENTORY.md` — Actual implemented features
+7. `CAPABILITY_MATRIX.md` — Undocumented capabilities
+8. `ROLE_MATRIX.md` — Role & permission matrix
+9. `PERMISSION.md` — Detailed permission documentation
+10. `WORKFLOW.md` — Workflow flowcharts
+11. `HIDDEN_FEATURES.md` — Hidden/unused features
+12. `DEAD_CODE.md` — Dead code report
+13. `PROGRESS.md` — Implementation progress
+14. `DATABASE.md` — Database design
+15. `MODULES.md` — Module overview
+16. `ARCHITECTURE.md` — System architecture
+17. `SECURITY.md` — Security standards
+18. `CHANGELOG.md` — Release history
+19. `TODO.md` — Active task list
+20. `HANDOFF.md` — Non-technical overview
+21. `PENGAJIAN_MVP_OPERATIONAL.md` — Pengajian operational guide
 
 ---
 
@@ -46,6 +50,8 @@
 | Legacy NIP Retirement | ✅ PGM.20 COMPLETE |
 | Database V2 / Design C | ✅ problem_total = 0 |
 | Test Baseline | ✅ 1574 passed / 3745 assertions / 0 failures |
+| **Roadmap V1** (All Foundation) | ✅ **100% COMPLETE** |
+| **Roadmap V2** (Event Operating System) | 📋 **Planned** |
 
 ---
 
@@ -67,6 +73,7 @@
 | **PROGRESS.md** | Implementation progress vs roadmap | ✅ NEW |
 | **HANDOFF.md** | Non-technical project overview | ✅ Updated |
 | **CHANGELOG.md** | Release history | ✅ Updated |
+| **VISION_V2.md** | V2 product vision — Event Operating System | ✅ NEW |
 
 ### Technical Documentation
 | Document | Description | Status |
@@ -189,6 +196,7 @@
 | Architecture | `PROJECT_STRUCTURE.md`, `ARCHITECTURE.md` |
 | Features (planned) | `FEATURE.md`, `ROADMAP.md` |
 | Features (actual) | `FEATURE_INVENTORY.md` |
+| V2 Vision & Roadmap | `VISION_V2.md` |
 | Capabilities | `CAPABILITY_MATRIX.md` |
 | Database | `DATABASE.md` |
 | Roles & Permissions | `ROLE_MATRIX.md`, `PERMISSION.md` |

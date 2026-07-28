@@ -1,6 +1,9 @@
 # HANDOFF
 
 > Non-Technical Project Overview untuk developer/AI baru.
+>
+> **Roadmap V1** = ✅ **100% COMPLETE**
+> **Roadmap V2** = 📋 **Planned** — Event Operating System
 
 ---
 
@@ -63,6 +66,7 @@ The following documentation has been added as part of Project Audit:
 | `HIDDEN_FEATURES.md` | Hidden/unused features |
 | `DEAD_CODE.md` | Dead code report |
 | `PROGRESS.md` | Implementation progress vs roadmap |
+| `VISION_V2.md` | V2 product vision — Event Operating System |
 
 ---
 
@@ -75,11 +79,44 @@ Design C:   problem_total = 0
 
 ---
 
-## Pending Work (Immediate)
+## Product Vision
+
+KJA Event Manager tidak lagi diposisikan sebagai aplikasi absensi.
+
+**KJA Event Manager adalah Event Operating System.**
+
+Filosofi: **Build Engine, Not Module** — jangan buat modul Silat, Voli, MTQ, PAUD. Sebagai gantinya, bangun Competition Engine + Scoring Engine + Blueprint Event yang bersifat generic.
+
+---
+
+## Roadmap V2 — Event Operating System (Planned)
+
+| # | Item | Deskripsi |
+|---|------|-----------|
+| 1 | Blueprint Event | Konfigurasi awal event (Pengajian, Silat, Olahraga, Festival, Seminar, Custom) |
+| 2 | Competition Engine | Generic competition engine — bracket, league, round robin, double elimination |
+| 3 | Scoring Engine | Generic scoring — Versus, Score, Time, Distance, Ranking, Pass/Fail |
+| 4 | Venue Management | Master Venue → Event Venue → Arena/Room (reusable) |
+| 5 | Live Schedule Engine | Jadwal realtime mengikuti kondisi pertandingan |
+| 6 | Public Dashboard | Portal publik tanpa login — jadwal, bracket, hasil, pengumuman |
+| 7 | Announcement Engine | Pengumuman resmi panitia |
+| 8 | Certificate Engine | Generate sertifikat otomatis berdasarkan hasil |
+| 9 | Mobile | Aplikasi mobile |
+| 10 | Public API | REST API untuk integrasi pihak ketiga |
+
+Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap.
+
+---
+
+## Pending Work (Immediate — V1 Scope)
 
 1. **Venue CRUD** — Event-scoped venue management UI (model & migration sudah ada)
 2. **CategoryDefinition CRUD** — Event-scoped category management UI (model & migration sudah ada)
 3. **Absensi table retirement** — Deferred: table masih ada untuk historical reads, tidak lagi ditulisi
+
+## Pending Work (V2 — Future)
+
+Semua item Roadmap V2 masih Planned. Belum ada yang diimplementasikan. Lihat `docs/VISION_V2.md`.
 
 ---
 

@@ -1,6 +1,9 @@
 # FEATURE INVENTORY
 
 > Complete inventory of all implemented features based on actual code. Not based on roadmap.
+>
+> **Roadmap V1** = ✅ **100% COMPLETE** — Semua fitur di bawah adalah V1.
+> **Roadmap V2** = 📋 **Planned** — Lihat bagian "V2 Planned Features" di bawah.
 
 ---
 
@@ -226,6 +229,27 @@
 | Modal Close Controls | ✅ | All modals | PGM.17 fix |
 | User Management UI | ✅ | 5 components | Super Admin only |
 | Master Data Landing | ✅ | Navigation cards | Person, Desa, Kelompok |
+
+## V2 Planned Features (Event Operating System)
+
+Fitur berikut adalah bagian dari **Roadmap V2**. Semua masih **Planned**, belum diimplementasikan.
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Blueprint Event | 📋 Planned | Konfigurasi awal event — Pengajian, Silat, Olahraga, Festival, Seminar, Custom |
+| Competition Engine | 📋 Planned | Generic — Bracket, League, Round Robin, Double Elimination |
+| Scoring Engine | 📋 Planned | Generic — Versus, Score, Time, Distance, Ranking, Pass/Fail |
+| Venue Management (Reusable) | 📋 Planned | Master Venue → Event Venue → Arena/Room |
+| Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi pertandingan |
+| Public Dashboard | 📋 Planned | Portal publik tanpa login |
+| Announcement Engine | 📋 Planned | Pengumuman resmi panitia |
+| Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
+| Mobile App | 📋 Planned | Android/iOS |
+| Public API | 📋 Planned | REST API untuk integrasi |
+
+Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap.
+
+---
 
 ## Console Commands
 

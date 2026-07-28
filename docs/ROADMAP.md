@@ -4,6 +4,30 @@
 
 ---
 
+# Product Evolution
+
+```
+AbsenCAI (v1.0)
+     │
+     ▼
+CAI Operational (v1.5)
+     │
+     ▼
+KJA Event Manager Foundation (V1 — COMPLETED)
+     │
+     ▼
+Event Operating System (V2 — PLANNED)
+     │
+     ▼
+Commercial Platform (Future)
+```
+
+**Roadmap V1** = ✅ **100% COMPLETE** — Foundation, Multi Event, RBAC, CAI, Pengajian, Documentation.
+
+**Roadmap V2** = 📋 **PLANNED** — Event Operating System. Lihat `VISION_V2.md` untuk detail.
+
+---
+
 # Vision
 
 Membangun platform **Event Management** yang modular, scalable, dan dapat digunakan oleh berbagai organisasi.
@@ -11,6 +35,10 @@ Membangun platform **Event Management** yang modular, scalable, dan dapat diguna
 KJA Event Manager dikembangkan secara bertahap.
 
 Target pertama adalah menyelesaikan seluruh kebutuhan operasional **CAI**, kemudian dikembangkan menjadi platform Event Management yang mendukung berbagai jenis event dan akhirnya menjadi produk komersial.
+
+**Visi baru:** KJA Event Manager tidak lagi diposisikan sebagai aplikasi absensi. KJA Event Manager adalah **Event Operating System** — platform yang dapat mengelola semua jenis event melalui engine generic, bukan modul khusus.
+
+Lihat `docs/VISION_V2.md` untuk detail.
 
 ---
 
@@ -36,10 +64,10 @@ AbsenCAI
 CAI Operational
      │
      ▼
-KJA Event Manager
+KJA Event Manager (V1 Foundation — COMPLETED)
      │
      ▼
-Competition Module
+Event Operating System (V2 — PLANNED)
      │
      ▼
 Commercial Platform
@@ -1016,25 +1044,15 @@ Notes:
 
 ## v2.0
 
-KJA Event Manager
+KJA Event Manager — Event Operating System
 
 Status:
 
-Planning
+📋 Planned
 
 Target:
 
-Platform Event Management Multi Event.
-
----
-
-## v2.5
-
-Competition Module
-
-Status:
-
-Planning
+Event Operating System dengan Competition Engine, Scoring Engine, dan Blueprint Event.
 
 ---
 
@@ -1275,3 +1293,69 @@ Previously tracked as:
 - 🟢 **S5 CAI Module Permissions: ✅ Complete**
 - 🟢 **S6 Sidebar Visibility: ✅ Complete**
 - 🟢 **S7 Event-Scoped Authorization: ✅ Complete**
+
+---
+
+# Roadmap V2 — Event Operating System
+
+## Status
+
+📋 **Planned** — Belum ada yang diimplementasikan.
+
+## Filosofi
+
+**Build Engine, Not Module.**
+
+Jangan membuat modul khusus untuk setiap jenis event (Silat, Voli, MTQ, PAUD).
+
+Sebagai gantinya, bangun **Competition Engine** + **Scoring Engine** + **Blueprint Event** yang bersifat generic dan dapat dikonfigurasi.
+
+## Urutan Pengembangan
+
+| # | Item | Status | Deskripsi |
+|---|------|--------|-----------|
+| 1 | Blueprint Event | 📋 Planned | Konfigurasi awal event (Pengajian, Silat, Olahraga, Festival, Seminar, Custom) |
+| 2 | Competition Engine | 📋 Planned | Generic competition engine — bracket, league, round robin, double elimination |
+| 3 | Scoring Engine | 📋 Planned | Generic scoring — Versus, Score, Time, Distance, Ranking, Pass/Fail |
+| 4 | Venue Management | 📋 Planned | Master Venue → Event Venue → Arena/Room (reusable) |
+| 5 | Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi pertandingan |
+| 6 | Public Dashboard | 📋 Planned | Portal publik tanpa login — jadwal, bracket, hasil, pengumuman |
+| 7 | Announcement Engine | 📋 Planned | Pengumuman resmi panitia ke peserta dan publik |
+| 8 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis berdasarkan hasil |
+| 9 | Mobile | 📋 Planned | Aplikasi mobile untuk peserta dan panitia |
+| 10 | Public API | 📋 Planned | REST API untuk integrasi pihak ketiga |
+
+## Detail
+
+Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap Roadmap V2.
+
+---
+
+## Roadmap V2 vs V1
+
+```
+Roadmap V1 (COMPLETED)              Roadmap V2 (PLANNED)
+══════════════════════              ══════════════════════
+Foundation Platform                 Blueprint Event
+Multi Event Architecture            Competition Engine
+RBAC                                Scoring Engine
+CAI Operational                     Venue Management
+Pengajian Desa MVP                  Live Schedule Engine
+Documentation                       Public Dashboard
+                                    Announcement Engine
+                                    Certificate Engine
+                                    Mobile
+                                    Public API
+```
+
+V1 adalah fondasi. V2 adalah transformasi menjadi Event Operating System.
+
+---
+
+# Product Vision (Updated)
+
+KJA Event Manager tidak lagi diposisikan sebagai aplikasi absensi.
+
+**KJA Event Manager adalah Event Operating System.**
+
+Sebuah platform yang dapat mengelola semua jenis event tanpa perlu membuat modul khusus untuk setiap cabang event. Semua event dikonfigurasi melalui **Competition Engine**, **Scoring Engine**, dan **Blueprint Event** yang bersifat generic dan dapat digunakan ulang.

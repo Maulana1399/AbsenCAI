@@ -247,7 +247,7 @@ Minimal aktivitas berikut harus dicatat:
 * Export
 * Generate QR
 * Print
-* Generate Certificate
+* Generate Certificate (V2 — Certificate Engine)
 
 Audit Log tidak boleh dapat diubah oleh user biasa.
 

@@ -780,20 +780,35 @@ Status: PGM.12–PGM.17 COMPLETE. Pilot end-to-end functional, UI remediated.
 
 ---
 
-## Sprint 4
+## Roadmap V1 — COMPLETED ✅
 
-- [ ] Competition Module
-- [ ] Jadwal
-- [ ] Bracket
-- [ ] Penilaian
-- [ ] Sertifikat
+Semua item Sprint 4 dan sebelumnya sudah **100% COMPLETE**.
+
+- [x] CAI Operational — COMPLETE
+- [x] Multi Event (S3.0–S3.10) — COMPLETE
+- [x] RBAC (S1–S7) — COMPLETE
+- [x] Pengajian Desa MVP — COMPLETE
+- [x] Documentation — COMPLETE
 
 ---
 
-## Future
+## Roadmap V2 — Event Operating System (Planned 📋)
 
-- [ ] Mobile App
-- [ ] API
+**Semua masih Planned. Belum ada yang diimplementasikan.**
+
+- [ ] **1. Blueprint Event** — Konfigurasi awal event (Pengajian, Silat, Olahraga, Festival, Seminar, Custom)
+- [ ] **2. Competition Engine** — Generic competition engine (Bracket, League, Round Robin, Double Elimination)
+- [ ] **3. Scoring Engine** — Generic scoring (Versus, Score, Time, Distance, Ranking, Pass/Fail)
+- [ ] **4. Venue Management** — Master Venue → Event Venue → Arena/Room (reusable)
+- [ ] **5. Live Schedule Engine** — Jadwal realtime mengikuti kondisi pertandingan
+- [ ] **6. Public Dashboard** — Portal publik tanpa login
+- [ ] **7. Announcement Engine** — Pengumuman resmi panitia
+- [ ] **8. Certificate Engine** — Generate sertifikat otomatis berdasarkan hasil
+- [ ] **9. Mobile** — Aplikasi mobile untuk peserta dan panitia
+- [ ] **10. Public API** — REST API untuk integrasi pihak ketiga
+
+## Future (Beyond V2)
+
 - [ ] SaaS
 - [ ] White Label
 - [ ] Offline Mode
