@@ -13,7 +13,7 @@
         
         {{-- Dropdown Desa --}}
         <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Desa</label>
+            <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">Pilih Desa</label>
             <select wire:model="desa_id" class="w-full px-3 py-2 border rounded">
                 <option value="">-- Pilih Desa --</option>
                 @foreach($daftarDesa as $desa)

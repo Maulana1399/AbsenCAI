@@ -172,10 +172,10 @@
                             <span @class([
                                 'ml-2 inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
                                 'bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200' => $schedule->status === 'Scheduled',
-                                'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' => $schedule->status === 'Ready',
-                                'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' => $schedule->status === 'Playing',
-                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200' => $schedule->status === 'Waiting Result',
-                                'bg-zinc-700 text-white' => $schedule->status === 'Finished',
+                                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' => $schedule->status === 'Ready',
+                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' => $schedule->status === 'Playing',
+                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' => $schedule->status === 'Waiting Result',
+                                'bg-zinc-800 text-white dark:bg-black dark:text-zinc-300' => $schedule->status === 'Finished',
                             ])>{{ $schedule->status }}</span>
                         </div>
                     @endforeach

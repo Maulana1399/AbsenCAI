@@ -12,7 +12,7 @@
         <flux:input wire:model="regu" label="Nama Regu" placeholder="Misalnya: Grup Biru" />
 
         <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Kelamin</label>
+            <label class="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">Jenis Kelamin</label>
             <select wire:model="jenis_kelamin" class="w-full px-3 py-2 border rounded">
                 <option value="">-- Pilih Jenis Kelamin --</option>
                 <option value="Laki - Laki">Laki - Laki</option>

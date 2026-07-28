@@ -115,7 +115,7 @@
 
     {{-- Schedule Cards --}}
     @if ($schedules->isEmpty())
-        <div class="rounded-xl border border-dashed border-zinc-200 p-12 text-center dark:border-zinc-700">
+        <div class="rounded-xl border border-dashed border-zinc-200 p-10 text-center dark:border-zinc-700">
             <p class="text-sm text-zinc-500 dark:text-zinc-400">Belum ada jadwal.</p>
         </div>
     @else

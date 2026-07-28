@@ -6,7 +6,7 @@
             <flux:button type="button" variant="filled" onclick="document.getElementById('fileInput-kelompok').click()">
                 Pilih File
             </flux:button>
-            <span class="ml-2 text-gray-700" id="fileName-kelompok">
+            <span class="ml-2 text-zinc-700" id="fileName-kelompok">
                 Belum ada file dipilih
             </span>
         </label>

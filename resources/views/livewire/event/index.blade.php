@@ -144,9 +144,7 @@
                     <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Event yang sudah dihapus tidak dapat dikembalikan. Semua data terkait event ini akan ikut terhapus. Lanjutkan?</p>
 
                     <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                        <button type="button"
-                                wire:click="cancelDelete"
-                                class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-5 py-3 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700">Batal</button>
+                        <flux:button wire:click="cancelDelete" variant="ghost" class="w-full sm:w-auto">Batal</flux:button>
                         <flux:button wire:click="delete" variant="danger" class="w-full sm:w-auto">Ya, Hapus</flux:button>
                     </div>
                 </div>

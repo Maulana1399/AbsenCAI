@@ -42,7 +42,7 @@
                         <td class="px-4 py-3 text-sm text-zinc-500">{{ $outcome->score ?? '-' }}</td>
                         <td class="px-4 py-3 text-sm">
                             @if ($outcome->status)
-                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">{{ $outcome->status }}</span>
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">{{ $outcome->status }}</span>
                             @else
                                 <span class="text-zinc-400">-</span>
                             @endif

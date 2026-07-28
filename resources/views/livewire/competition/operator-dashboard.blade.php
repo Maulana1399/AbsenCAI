@@ -208,7 +208,7 @@
 
     @if ($schedules->isEmpty())
         <div class="rounded-xl border border-dashed border-zinc-200 p-10 text-center dark:border-zinc-700">
-            <p class="text-sm text-zinc-500">Belum ada jadwal. Buat jadwal terlebih dahulu.</p>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">Belum ada jadwal. Buat jadwal terlebih dahulu.</p>
         </div>
     @endif
 </div>

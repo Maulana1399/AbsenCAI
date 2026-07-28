@@ -57,7 +57,7 @@
                             'bg-blue-100 text-blue-700' => $schedule->status === 'Ready',
                             'bg-green-100 text-green-700' => $schedule->status === 'Playing',
                             'bg-yellow-100 text-yellow-700' => $schedule->status === 'Waiting Result',
-                            'bg-zinc-700 text-white' => $schedule->status === 'Finished',
+                            'bg-zinc-800 text-white' => $schedule->status === 'Finished',
                         ])>{{ $schedule->status }}</span>
                     </div>
                 </div>
