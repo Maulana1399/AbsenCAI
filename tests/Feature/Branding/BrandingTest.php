@@ -52,20 +52,15 @@ test('welcome page uses KJA Event Manager branding', function () {
     $response->assertStatus(200);
 
     $response->assertSee('KJA Event Manager');
-    $response->assertSee('Platform Manajemen Event Multi-Event');
-    $response->assertSee('Masuk Admin');
+    $response->assertSee('Login');
     $response->assertDontSee('CINTA ALAM');
     $response->assertDontSee('INDONESIA 2025');
-    $response->assertDontSee('Platform Registrasi & Absensi Peserta');
 });
 
 test('welcome page title uses KJA Event Manager', function () {
     $response = $this->get('/');
 
-    $response->assertSeeInOrder([
-        'KJA Event Manager',
-        config('kjam.mvp_name'),
-    ]);
+    $response->assertSee('KJA Event Manager');
 });
 
 test('authenticated user sees platform dashboard instead of welcome page', function () {

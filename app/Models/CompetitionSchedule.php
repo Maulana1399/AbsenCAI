@@ -13,6 +13,11 @@ class CompetitionSchedule extends Model
         'end_at',
         'status',
         'required_participants',
+        'winner_registration_id',
+        'finish_reason',
+        'finish_notes',
+        'finished_at',
+        'finished_by',
         'notes',
         'sort_order',
     ];
@@ -23,6 +28,7 @@ class CompetitionSchedule extends Model
             'start_at' => 'datetime',
             'end_at' => 'datetime',
             'required_participants' => 'integer',
+            'finished_at' => 'datetime',
         ];
     }
 
@@ -39,6 +45,26 @@ class CompetitionSchedule extends Model
     public function scheduleEntries()
     {
         return $this->hasMany(CompetitionScheduleEntry::class);
+    }
+
+    public function winner()
+    {
+        return $this->belongsTo(CompetitionRegistration::class, 'winner_registration_id');
+    }
+
+    public function finishedBy()
+    {
+        return $this->belongsTo(User::class, 'finished_by');
+    }
+
+    public function matchOfficials()
+    {
+        return $this->hasMany(CompetitionMatchOfficial::class, 'competition_schedule_id');
+    }
+
+    public function bracketMatch()
+    {
+        return $this->hasOne(CompetitionBracketMatch::class, 'competition_schedule_id');
     }
 
     public function isReadyForStart(): bool
@@ -75,5 +101,10 @@ class CompetitionSchedule extends Model
     public function scopeWhereFinished($query)
     {
         return $query->where('status', 'Finished');
+    }
+
+    public function scopeWhereWaitingResult($query)
+    {
+        return $query->where('status', 'Waiting Result');
     }
 }

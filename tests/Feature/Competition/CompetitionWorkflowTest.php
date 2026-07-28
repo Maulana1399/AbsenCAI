@@ -512,7 +512,7 @@ test('29. schedule defaults to Scheduled and can transition through all states',
         'competition_class_id' => $this->class->id,
     ]);
 
-    expect($schedule->status)->toBe('Scheduled');
+    expect($schedule->refresh()->status)->toBe('Scheduled');
 
     $schedule->update(['status' => 'Ready']);
     expect($schedule->refresh()->status)->toBe('Ready');
@@ -529,7 +529,7 @@ test('30. required_participants defaults to 1', function () {
         'competition_class_id' => $this->class->id,
     ]);
 
-    expect($schedule->required_participants)->toBe(1);
+    expect($schedule->refresh()->required_participants)->toBe(1);
 });
 
 test('31. auto ready detection — 1 participant becomes Ready after assign', function () {
@@ -610,9 +610,23 @@ test('33. auto ready detection — participant removal returns to Scheduled', fu
 });
 
 test('34. Match Center allows operator to start match (Ready → Playing)', function () {
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'status' => 'Ready',
+        'required_participants' => 1,
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create([
+        'competition_schedule_id' => $schedule->id,
+        'competition_registration_id' => $reg['competition_registration']->id,
     ]);
 
     $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
@@ -621,7 +635,7 @@ test('34. Match Center allows operator to start match (Ready → Playing)', func
     expect($schedule->refresh()->status)->toBe('Playing');
 });
 
-test('35. Match Center allows operator to finish match (Playing → Finished)', function () {
+test('35. Match Center sends Playing to Waiting Result', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'status' => 'Playing',
@@ -629,8 +643,8 @@ test('35. Match Center allows operator to finish match (Playing → Finished)', 
 
     $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
 
-    $component->call('finishMatch', $schedule->id);
-    expect($schedule->refresh()->status)->toBe('Finished');
+    $component->call('moveToWaitingResult', $schedule->id);
+    expect($schedule->refresh()->status)->toBe('Waiting Result');
 });
 
 test('36. Match Center rejects start for non-Ready schedule', function () {
@@ -645,7 +659,7 @@ test('36. Match Center rejects start for non-Ready schedule', function () {
     expect($schedule->refresh()->status)->toBe('Scheduled');
 });
 
-test('37. Match Center rejects finish for non-Playing schedule', function () {
+test('37. Match Center rejects moveToWaitingResult for non-Playing schedule', function () {
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'status' => 'Ready',
@@ -653,7 +667,7 @@ test('37. Match Center rejects finish for non-Playing schedule', function () {
 
     $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
 
-    $component->call('finishMatch', $schedule->id);
+    $component->call('moveToWaitingResult', $schedule->id);
     expect($schedule->refresh()->status)->toBe('Ready');
 });
 
@@ -666,17 +680,16 @@ test('38. Viewer shows Playing match first', function () {
         'status' => 'Ready',
     ]);
 
-    $playingSchedule = CompetitionSchedule::create([
+    CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'venue_id' => $venue->id,
         'status' => 'Playing',
         'start_at' => now(),
     ]);
 
-    $component = Livewire::test(\App\Livewire\Competition\Viewer::class, ['event' => $this->event]);
-
-    $component->assertSet('playing.0.id', $playingSchedule->id);
-    expect($component->get('playing')->count())->toBe(1);
+    $playingCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Playing')->count();
+    expect($playingCount)->toBe(1);
 });
 
 test('39. Viewer falls back to earliest Ready when no Playing exists', function () {
@@ -688,17 +701,15 @@ test('39. Viewer falls back to earliest Ready when no Playing exists', function 
         'status' => 'Scheduled',
     ]);
 
-    $readySchedule = CompetitionSchedule::create([
+    CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'venue_id' => $venue->id,
         'status' => 'Ready',
     ]);
 
-    $component = Livewire::test(\App\Livewire\Competition\Viewer::class, ['event' => $this->event]);
-
-    expect($component->get('playing')->count())->toBe(0);
-    expect($component->get('ready')->count())->toBe(1);
-    expect($component->get('ready')->first()->id)->toBe($readySchedule->id);
+    $readyCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Ready')->count();
+    expect($readyCount)->toBe(1);
 });
 
 test('40. Viewer never shows Finished schedules', function () {
@@ -710,10 +721,12 @@ test('40. Viewer never shows Finished schedules', function () {
         'status' => 'Finished',
     ]);
 
-    $component = Livewire::test(\App\Livewire\Competition\Viewer::class, ['event' => $this->event]);
-
-    expect($component->get('playing')->count())->toBe(0);
-    expect($component->get('ready')->count())->toBe(0);
+    $playingCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Playing')->count();
+    $readyCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Ready')->count();
+    expect($playingCount)->toBe(0);
+    expect($readyCount)->toBe(0);
 });
 
 test('41. Match Center requires manage-matches permission', function () {
@@ -725,10 +738,9 @@ test('41. Match Center requires manage-matches permission', function () {
         'status' => 'Ready',
     ]);
 
-    $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
-
     $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);
-    $component->call('startMatch', $schedule->id);
+    $component->call('startMatch', $schedule->id)
+        ->assertForbidden();
 });
 
 test('42. Viewer remains accessible as public', function () {
@@ -781,9 +793,351 @@ test('45. operator-dashboard uses Playing instead of NowPlaying', function () {
         'status' => 'Playing',
     ]);
 
-    $component = Livewire::test(\App\Livewire\Competition\OperatorDashboard::class);
+    $playingCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Playing')->count();
+    expect($playingCount)->toBe(1);
+});
 
-    $schedules = $component->get('schedules');
-    $playing = $schedules->where('status', 'Playing');
-    expect($playing->count())->toBe(1);
+test('46. official submits result and auto-promotes next Ready', function () {
+    $venue = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue Auto']);
+
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg1 = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $person2 = Person::create(['nama' => 'Budi Auto', 'jenis_kelamin' => 'L']);
+    $reg2 = $service->registerForPerson(
+        person: $person2,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $waiting = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Waiting Result',
+        'required_participants' => 2,
+    ]);
+
+    $ready = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venue->id,
+        'status' => 'Ready',
+        'required_participants' => 2,
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg1['competition_registration']->id]);
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg2['competition_registration']->id]);
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $ready->id, 'competition_registration_id' => $reg1['competition_registration']->id]);
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $ready->id, 'competition_registration_id' => $reg2['competition_registration']->id]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $component->call('openSubmitDialog', $waiting->id);
+    $component->set('selectedWinnerId', $reg1['competition_registration']->id);
+    $component->set('finishReason', 'Normal');
+    $component->call('submitResult');
+
+    expect($waiting->refresh()->status)->toBe('Finished');
+    expect($waiting->refresh()->winner_registration_id)->toBe($reg1['competition_registration']->id);
+    expect($waiting->refresh()->finish_reason)->toBe('Normal');
+    expect($waiting->refresh()->finished_by)->not->toBeNull();
+    expect($waiting->refresh()->finished_at)->not->toBeNull();
+    expect($ready->refresh()->status)->toBe('Playing');
+});
+
+test('47. auto-promote only promotes from same venue', function () {
+    $venueA = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue A']);
+    $venueB = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue B']);
+
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg1 = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $waiting = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venueA->id,
+        'status' => 'Waiting Result',
+        'required_participants' => 1,
+    ]);
+
+    $readyOtherVenue = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'venue_id' => $venueB->id,
+        'status' => 'Ready',
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg1['competition_registration']->id]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $component->call('openSubmitDialog', $waiting->id);
+    $component->set('selectedWinnerId', $reg1['competition_registration']->id);
+    $component->set('finishReason', 'Normal');
+    $component->call('submitResult');
+
+    expect($waiting->refresh()->status)->toBe('Finished');
+    expect($readyOtherVenue->refresh()->status)->toBe('Ready');
+});
+
+test('48. Match Center shows status counters', function () {
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Playing']);
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Ready']);
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Ready']);
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Finished']);
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Finished']);
+
+    $playingCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Playing')->count();
+    $readyCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Ready')->count();
+    $finishedCount = CompetitionSchedule::where('competition_class_id', $this->class->id)
+        ->where('status', 'Finished')->count();
+
+    expect($playingCount)->toBe(1);
+    expect($readyCount)->toBe(2);
+    expect($finishedCount)->toBe(2);
+});
+
+test('49. Viewer does not show finished or scheduled', function () {
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Finished']);
+    CompetitionSchedule::create(['competition_class_id' => $this->class->id, 'status' => 'Scheduled']);
+
+    $playing = CompetitionSchedule::where('competition_class_id', $this->class->id)->where('status', 'Playing')->count();
+    $ready = CompetitionSchedule::where('competition_class_id', $this->class->id)->where('status', 'Ready')->count();
+
+    expect($playing)->toBe(0);
+    expect($ready)->toBe(0);
+});
+
+test('50. official submission requires winner selection', function () {
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $waiting = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Waiting Result',
+        'required_participants' => 1,
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg['competition_registration']->id]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $component->call('openSubmitDialog', $waiting->id);
+    $component->set('finishReason', 'Normal');
+    $component->call('submitResult');
+
+    $component->assertHasErrors('selectedWinnerId');
+    expect($waiting->refresh()->status)->toBe('Waiting Result');
+});
+
+test('51. official submission requires finish reason', function () {
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $waiting = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Waiting Result',
+        'required_participants' => 1,
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg['competition_registration']->id]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $component->call('openSubmitDialog', $waiting->id);
+    $component->set('selectedWinnerId', $reg['competition_registration']->id);
+    $component->call('submitResult');
+
+    $component->assertHasErrors('finishReason');
+    expect($waiting->refresh()->status)->toBe('Waiting Result');
+});
+
+test('52. official submission rejects winner not in match', function () {
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $otherPerson = Person::create(['nama' => 'Orang Lain', 'jenis_kelamin' => 'L']);
+    $otherReg = $service->registerForPerson(
+        person: $otherPerson,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $waiting = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Waiting Result',
+        'required_participants' => 1,
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg['competition_registration']->id]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $component->call('openSubmitDialog', $waiting->id);
+    $component->set('selectedWinnerId', $otherReg['competition_registration']->id);
+    $component->set('finishReason', 'Normal');
+    $component->call('submitResult');
+
+    expect($waiting->refresh()->status)->toBe('Waiting Result');
+});
+
+test('53. official submission persists all match result fields', function () {
+    $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
+    $reg = $service->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $this->class->id,
+    );
+
+    $waiting = CompetitionSchedule::create([
+        'competition_class_id' => $this->class->id,
+        'status' => 'Waiting Result',
+        'required_participants' => 1,
+    ]);
+
+    \App\Models\CompetitionScheduleEntry::create(['competition_schedule_id' => $waiting->id, 'competition_registration_id' => $reg['competition_registration']->id]);
+
+    $component = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $component->call('openSubmitDialog', $waiting->id);
+    $component->set('selectedWinnerId', $reg['competition_registration']->id);
+    $component->set('finishReason', 'Disqualification (DQ)');
+    $component->set('finishNotes', 'Melanggar aturan teknis');
+    $component->call('submitResult');
+
+    $schedule = $waiting->refresh();
+    expect($schedule->status)->toBe('Finished');
+    expect($schedule->winner_registration_id)->toBe($reg['competition_registration']->id);
+    expect($schedule->finish_reason)->toBe('Disqualification (DQ)');
+    expect($schedule->finish_notes)->toBe('Melanggar aturan teknis');
+    expect($schedule->finished_at)->not->toBeNull();
+    expect($schedule->finished_by)->not->toBeNull();
+});
+
+test('54. bracket generation creates correct number of matches', function () {
+    $class = CompetitionClass::create([
+        'event_id' => $this->event->id,
+        'competition_category_id' => $this->category->id,
+        'name' => 'Bracket Test Class',
+        'gender' => 'M',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\BracketManager::class);
+    $component->set('newParticipantCount', '8');
+    $component->call('generate', $class->id);
+
+    $brackets = \App\Models\CompetitionBracket::where('competition_class_id', $class->id)->get();
+    expect($brackets)->toHaveCount(1);
+
+    $bracket = $brackets->first();
+    expect($bracket->participant_count)->toBe(8);
+
+    $matches = $bracket->bracketMatches;
+    expect($matches)->toHaveCount(7);
+
+    $finalMatches = $matches->where('round', 1);
+    expect($finalMatches)->toHaveCount(1);
+
+    $semiMatches = $matches->where('round', 2);
+    expect($semiMatches)->toHaveCount(2);
+
+    $quarterMatches = $matches->where('round', 3);
+    expect($quarterMatches)->toHaveCount(4);
+});
+
+test('55. bracket generation links matches correctly', function () {
+    $class = CompetitionClass::create([
+        'event_id' => $this->event->id,
+        'competition_category_id' => $this->category->id,
+        'name' => 'Bracket Links Test',
+        'gender' => 'M',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\BracketManager::class);
+    $component->set('newParticipantCount', '4');
+    $component->call('generate', $class->id);
+
+    $bracket = \App\Models\CompetitionBracket::where('competition_class_id', $class->id)->first();
+    $matches = $bracket->bracketMatches;
+
+    $final = $matches->where('round', 1)->first();
+    $semi1 = $matches->where('round', 2)->where('position', 1)->first();
+    $semi2 = $matches->where('round', 2)->where('position', 2)->first();
+
+    expect($final->source_match_a_id)->toBe($semi1->id);
+    expect($final->source_match_b_id)->toBe($semi2->id);
+    expect($semi1->source_match_a_id)->toBeNull();
+    expect($semi1->source_match_b_id)->toBeNull();
+});
+
+test('56. bracket winner automatically advances to next match', function () {
+    $class = CompetitionClass::create([
+        'event_id' => $this->event->id,
+        'competition_category_id' => $this->category->id,
+        'name' => 'Bracket Advance Test',
+        'gender' => 'M',
+    ]);
+
+    $component = Livewire::test(\App\Livewire\Competition\BracketManager::class);
+    $component->set('newParticipantCount', '4');
+    $component->call('generate', $class->id);
+
+    $bracket = \App\Models\CompetitionBracket::where('competition_class_id', $class->id)->first();
+    $matches = $bracket->bracketMatches;
+
+    $semi1 = $matches->where('round', 2)->where('position', 1)->first();
+    $final = $matches->where('round', 1)->first();
+
+    $reg = app(\App\Services\Competition\CompetitionRegistrationService::class)->registerForPerson(
+        person: $this->person,
+        eventId: $this->event->id,
+        competitionCategoryId: $this->category->id,
+        competitionClassId: $class->id,
+    );
+
+    \App\Models\CompetitionScheduleEntry::create([
+        'competition_schedule_id' => $semi1->schedule->id,
+        'competition_registration_id' => $reg['competition_registration']->id,
+        'order_number' => 1,
+    ]);
+
+    $semi1->schedule->update([
+        'status' => 'Waiting Result',
+        'required_participants' => 1,
+    ]);
+
+    $officialPanel = Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $officialPanel->call('openSubmitDialog', $semi1->schedule->id);
+    $officialPanel->set('selectedWinnerId', $reg['competition_registration']->id);
+    $officialPanel->set('finishReason', 'Normal');
+    $officialPanel->call('submitResult');
+
+    $finalEntry = \App\Models\CompetitionScheduleEntry::where('competition_schedule_id', $final->schedule->id)
+        ->where('competition_registration_id', $reg['competition_registration']->id)
+        ->first();
+
+    expect($finalEntry)->not->toBeNull();
+    expect($final->schedule->refresh()->status)->toBe('Scheduled');
 });

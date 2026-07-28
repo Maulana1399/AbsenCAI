@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublicEventController;
 use App\Livewire\Audit\ActivityLogIndex;
 use App\Livewire\Dashboard\PlatformDashboard;
 use App\Livewire\Event\Dashboard as EventDashboard;
@@ -20,12 +21,12 @@ use App\Services\Print\PrintEngine;
 use App\Services\QR\QRService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-    return view('welcome');
-})->name('home');
+Route::get('/', [PublicEventController::class, 'home'])->name('public.home');
+
+Route::get('events/{event}', [PublicEventController::class, 'event'])->name('public.event');
+Route::get('events/{event}/schedule', [PublicEventController::class, 'schedule'])->name('public.schedule');
+Route::get('events/{event}/brackets/{bracket?}', [PublicEventController::class, 'bracket'])->name('public.bracket');
+Route::get('events/{event}/announcements', [PublicEventController::class, 'announcements'])->name('public.announcements');
 
 Route::get('dashboard', PlatformDashboard::class)
     ->middleware(['auth', 'verified'])
@@ -768,6 +769,16 @@ Route::prefix('competition')->middleware(['auth', 'verified'])->group(function (
         'match-center',
         App\Livewire\Competition\MatchCenter::class
     )->middleware('can:manage-matches')->name('competition.match-center');
+
+    Route::get(
+        'official-panel',
+        App\Livewire\Competition\OfficialPanel::class
+    )->middleware('can:submit-result')->name('competition.official-panel');
+
+    Route::get(
+        'bracket-manager',
+        App\Livewire\Competition\BracketManager::class
+    )->middleware('can:manage-events')->name('competition.bracket-manager');
 
     Route::get(
         'schedules/{schedule}/outcomes',

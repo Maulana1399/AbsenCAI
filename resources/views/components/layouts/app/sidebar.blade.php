@@ -71,6 +71,12 @@
                         @can('manage-matches')
                         <flux:navlist.item :href="route('competition.match-center')" :current="request()->routeIs('competition.match-center')" wire:navigate>{{ __('Match Center') }}</flux:navlist.item>
                         @endcan
+                        @can('submit-result')
+                        <flux:navlist.item :href="route('competition.official-panel')" :current="request()->routeIs('competition.official-panel')" wire:navigate>{{ __('Official Panel') }}</flux:navlist.item>
+                        @endcan
+                        @can('manage-events')
+                        <flux:navlist.item :href="route('competition.bracket-manager')" :current="request()->routeIs('competition.bracket-manager')" wire:navigate>{{ __('Bracket') }}</flux:navlist.item>
+                        @endcan
                         <flux:navlist.item :href="route('competition.operator-dashboard')" :current="request()->routeIs('competition.operator-dashboard')" wire:navigate>{{ __('Operator') }}</flux:navlist.item>
                     </flux:navlist.group>
 

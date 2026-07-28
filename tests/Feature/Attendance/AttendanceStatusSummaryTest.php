@@ -142,8 +142,7 @@ it('dashboard counts remain safe without active event', function () {
 
     Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $event])
         ->assertSee('Total Peserta')
-        ->assertSee('0')
         ->assertSee('Hadir')
         ->assertSee('Izin')
-        ->assertSee('Alfa');
+        ->assertSee('Belum Absen');
 });

@@ -16,6 +16,26 @@
         <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">{{ session('info') }}</div>
     @endif
 
+    {{-- Status Summary --}}
+    <div class="grid grid-cols-4 gap-3">
+        <div class="rounded-xl border border-green-200 bg-green-50 p-4 text-center dark:border-green-800 dark:bg-green-950">
+            <div class="text-2xl font-bold text-green-700 dark:text-green-300">{{ $countPlaying }}</div>
+            <div class="text-xs font-medium uppercase tracking-wide text-green-600 dark:text-green-400">Playing</div>
+        </div>
+        <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-center dark:border-yellow-800 dark:bg-yellow-950">
+            <div class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{{ $countWaiting }}</div>
+            <div class="text-xs font-medium uppercase tracking-wide text-yellow-600 dark:text-yellow-400">Waiting</div>
+        </div>
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center dark:border-blue-800 dark:bg-blue-950">
+            <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $countReady }}</div>
+            <div class="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">Ready</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-center dark:border-zinc-700 dark:bg-zinc-900">
+            <div class="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{{ $countFinished }}</div>
+            <div class="text-xs font-medium uppercase tracking-wide text-zinc-600 dark:text-zinc-400">Finished</div>
+        </div>
+    </div>
+
     {{-- Venue Filter --}}
     @if ($venues->isNotEmpty())
         <div class="flex flex-wrap gap-2">
@@ -36,84 +56,92 @@
         </div>
     @endif
 
-    {{-- Match Cards --}}
-    @if ($schedules->isEmpty())
-        <div class="rounded-xl border border-dashed border-zinc-200 p-10 text-center dark:border-zinc-700">
-            <p class="text-sm text-zinc-500 dark:text-zinc-400">Tidak ada pertandingan Ready atau Playing.</p>
+    {{-- Playing Section --}}
+    @if ($playing->isNotEmpty())
+        <div>
+            <h2 class="mb-3 text-lg font-bold text-green-800 dark:text-green-200 flex items-center gap-2">
+                <span class="inline-block h-3 w-3 rounded-full bg-green-500"></span>
+                Playing
+            </h2>
+            <div class="grid gap-4">
+                @foreach ($playing as $schedule)
+                    @include('livewire.competition.match-card', ['schedule' => $schedule])
+                @endforeach
+            </div>
         </div>
     @else
-        <div class="grid gap-4">
-            @foreach ($schedules as $schedule)
-                @php
-                    $participants = $schedule->scheduleEntries->map(function ($e) {
-                        return $e->competitionRegistration?->participation?->person?->nama ?? '?';
-                    })->filter()->values();
-                    $participantsCount = $schedule->participants_count ?? 0;
-                    $required = $schedule->required_participants ?? 1;
-                    $participantsComplete = $participantsCount >= $required;
-                @endphp
-                <div @class([
-                    'rounded-xl border-2 bg-white p-5 dark:bg-zinc-950',
-                    'border-green-400 dark:border-green-600' => $schedule->status === 'Playing',
-                    'border-blue-300 dark:border-blue-700' => $schedule->status === 'Ready',
-                ])>
-                    <div class="flex flex-wrap items-start justify-between gap-4">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-3">
-                                <span @class([
-                                    'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider',
-                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' => $schedule->status === 'Playing',
-                                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' => $schedule->status === 'Ready',
-                                ])>{{ $schedule->status }}</span>
-                                @if ($schedule->venue)
-                                    <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ $schedule->venue->name }}</span>
-                                @endif
-                            </div>
-                            <div class="mt-2">
-                                <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ $schedule->competitionClass?->competitionCategory?->name ?? '' }}</span>
-                                <h3 class="text-xl font-bold text-zinc-900 dark:text-white truncate">{{ $schedule->competitionClass?->name ?? '-' }}</h3>
-                            </div>
-                            @if ($participants->isNotEmpty())
-                                <div class="mt-3 flex flex-wrap items-center gap-3">
-                                    @foreach ($participants as $i => $name)
-                                        <span class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold"
-                                              @class([
-                                                  'border-red-300 bg-red-100 text-red-800 dark:border-red-700 dark:bg-red-900/50 dark:text-red-200' => $i === 0,
-                                                  'border-blue-300 bg-blue-100 text-blue-800 dark:border-blue-700 dark:bg-blue-900/50 dark:text-blue-200' => $i === 1 && $participants->count() > 1,
-                                                  'border-zinc-300 bg-zinc-100 text-zinc-800 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200' => $i > 1,
-                                              ])>
-                                            @if ($i === 0)🔴 @elseif($i === 1)🔵 @endif
-                                            {{ $name }}
-                                        </span>
-                                        @if ($i === 0 && $participants->count() > 1)
-                                            <span class="text-lg font-bold text-zinc-400 dark:text-zinc-500">VS</span>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="mt-3 text-sm text-zinc-400 dark:text-zinc-500">Belum ada peserta.</div>
-                            @endif
-                        </div>
-                        <div class="flex flex-col gap-2 shrink-0">
-                            @if ($schedule->status === 'Ready' && $participantsComplete)
-                                <flux:button wire:click="startMatch({{ $schedule->id }})" variant="primary" class="whitespace-nowrap">
-                                    Start Match
-                                </flux:button>
-                            @endif
-                            @if ($schedule->status === 'Playing')
-                                <flux:button wire:click="finishMatch({{ $schedule->id }})" variant="danger" class="whitespace-nowrap">
-                                    Finish Match
-                                </flux:button>
-                            @endif
-                            <flux:button :href="route('competition.schedule.entries', $schedule->id)"
-                                         :variant="$schedule->status === 'Ready' && !$participantsComplete ? 'primary' : 'ghost'"
-                                         size="sm" class="whitespace-nowrap">
-                                Atur Peserta
-                            </flux:button>
-                        </div>
+        <div class="rounded-xl border border-dashed border-zinc-200 p-8 text-center dark:border-zinc-700">
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">Tidak ada pertandingan berlangsung.</p>
+        </div>
+    @endif
+
+    {{-- Waiting Result Section --}}
+    @if ($waitingResult->isNotEmpty())
+        <div>
+            <h2 class="mb-3 text-lg font-bold text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <span class="inline-block h-3 w-3 rounded-full bg-yellow-500"></span>
+                Waiting Result ({{ $waitingResult->count() }})
+            </h2>
+            <div class="grid gap-3">
+                @foreach ($waitingResult as $schedule)
+                    @include('livewire.competition.match-card', ['schedule' => $schedule])
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Ready Queue --}}
+    @if ($ready->isNotEmpty())
+        <div>
+            <h2 class="mb-3 text-lg font-bold text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                <span class="inline-block h-3 w-3 rounded-full bg-blue-500"></span>
+                Ready Queue ({{ $ready->count() }})
+            </h2>
+            <div class="grid gap-3">
+                @foreach ($ready as $schedule)
+                    @include('livewire.competition.match-card', ['schedule' => $schedule])
+                @endforeach
+            </div>
+        </div>
+    @else
+        <div class="rounded-xl border border-dashed border-zinc-200 p-8 text-center dark:border-zinc-700">
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">Tidak ada pertandingan siap dimainkan.</p>
+        </div>
+    @endif
+
+    {{-- Official Assignment Dialog --}}
+    @if ($showOfficialDialog)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div class="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+                <h2 class="text-lg font-bold text-zinc-900 dark:text-white">Atur Official</h2>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Tambah official untuk pertandingan ini.</p>
+
+                <div class="mt-4 space-y-4">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Official</label>
+                        <flux:select wire:model="newOfficialUserId" placeholder="Pilih official">
+                            @foreach ($availableOfficials as $official)
+                                <flux:select.option value="{{ $official->id }}">{{ $official->name }} ({{ $official->role }})</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        @error('newOfficialUserId') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Peran</label>
+                        <flux:select wire:model="newOfficialRole">
+                            <flux:select.option value="referee">Referee</flux:select.option>
+                            <flux:select.option value="judge">Judge</flux:select.option>
+                            <flux:select.option value="scorer">Scorer</flux:select.option>
+                            <flux:select.option value="supervisor">Supervisor</flux:select.option>
+                        </flux:select>
+                        @error('newOfficialRole') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <flux:button wire:click="closeOfficialDialog" variant="ghost">Tutup</flux:button>
+                        <flux:button wire:click="assignOfficial" variant="primary">Tambah</flux:button>
                     </div>
                 </div>
-            @endforeach
+            </div>
         </div>
     @endif
 </div>

@@ -42,6 +42,9 @@ class OperatorDashboard extends Component
             return;
         }
 
+        $wasPlaying = $schedule->status === 'Playing';
+        $venueId = $schedule->venue_id;
+
         $next = match ($schedule->status) {
             'Scheduled' => 'Ready',
             'Ready' => 'Playing',
@@ -51,6 +54,28 @@ class OperatorDashboard extends Component
 
         if ($next) {
             $schedule->update(['status' => $next]);
+        }
+
+        if ($wasPlaying) {
+            $this->promoteNextReady($venueId);
+        }
+    }
+
+    private function promoteNextReady(?int $venueId): void
+    {
+        $event = app(ActiveEventContext::class)->current();
+        $classIds = CompetitionClass::where('event_id', $event?->id)->pluck('id');
+
+        $nextReady = CompetitionSchedule::withCount('scheduleEntries as participants_count')
+            ->whereIn('competition_class_id', $classIds)
+            ->where('status', 'Ready')
+            ->where('venue_id', $venueId)
+            ->orderBy('sort_order')
+            ->orderBy('start_at')
+            ->first();
+
+        if ($nextReady) {
+            $nextReady->update(['status' => 'Playing']);
         }
     }
 
@@ -104,7 +129,7 @@ class OperatorDashboard extends Component
         $event = app(ActiveEventContext::class)->current();
         $user = auth()->user();
 
-        $schedules = CompetitionSchedule::with(['competitionClass.competitionCategory', 'venue'])
+        $schedules = CompetitionSchedule::with(['competitionClass.competitionCategory', 'venue', 'winner.participation.person', 'finishedBy'])
             ->whereIn('competition_class_id', CompetitionClass::where('event_id', $event?->id)->pluck('id'))
             ->withCount('scheduleEntries as participants_count')
             ->orderBy('sort_order')

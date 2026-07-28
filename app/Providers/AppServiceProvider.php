@@ -123,6 +123,14 @@ class AppServiceProvider extends ServiceProvider
             Role::SuperAdmin, Role::Admin,
         ));
 
+        Gate::define('manage-officials', fn (User $user) => $user->hasAnyRole(
+            Role::SuperAdmin, Role::Admin,
+        ));
+
+        Gate::define('submit-result', fn (User $user) => $user->hasAnyRole(
+            Role::SuperAdmin, Role::Admin, Role::Juri,
+        ));
+
         Gate::define('manage-pengajian', fn (User $user) => $user->hasAnyRole(
             Role::SuperAdmin, Role::Admin, Role::Sekretariat,
         ));

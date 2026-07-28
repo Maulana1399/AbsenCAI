@@ -175,10 +175,23 @@
             <div class="border-t border-zinc-200 p-4 dark:border-zinc-800">
                 <div class="grid gap-3">
                     @foreach ($finished as $schedule)
+                        @php
+                            $winnerName = $schedule->winner?->participation?->person?->nama ?? '-';
+                            $finishedTime = $schedule->finished_at ? \Carbon\Carbon::parse($schedule->finished_at)->format('H:i') : '-';
+                        @endphp
                         <div class="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900">
                             <div>
                                 <div class="font-semibold text-zinc-900 dark:text-white">{{ $schedule->competitionClass?->competitionCategory?->name }} / {{ $schedule->competitionClass?->name }}</div>
-                                <div class="text-sm text-zinc-500">{{ $schedule->venue?->name ?? '-' }}</div>
+                                <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                    <span>{{ $schedule->venue?->name ?? '-' }}</span>
+                                    @if ($schedule->winner_registration_id)
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 font-medium text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200">🏆 {{ $winnerName }}</span>
+                                    @endif
+                                    @if ($schedule->finish_reason)
+                                        <span class="rounded-full bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">{{ $schedule->finish_reason }}</span>
+                                    @endif
+                                    <span>Selesai {{ $finishedTime }}</span>
+                                </div>
                             </div>
                             <div class="flex gap-2">
                                 <flux:button :href="route('competition.schedule.outcomes', $schedule->id)" size="sm" icon-trailing="clipboard-document-list">
