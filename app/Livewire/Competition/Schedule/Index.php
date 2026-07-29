@@ -128,25 +128,18 @@ class Index extends Component
             'editVenueId' => 'nullable|exists:venues,id',
             'editStartAt' => 'nullable|date',
             'editEndAt' => 'nullable|date|after_or_equal:editStartAt',
-            'editStatus' => 'required|in:Scheduled,Ready,Playing,Finished',
             'editRequiredParticipants' => 'required|integer|min:1|max:99',
             'editNotes' => 'nullable|string|max:1000',
             'editSortOrder' => 'nullable|integer|min:0',
         ]);
 
-        $schedule = CompetitionSchedule::withCount('scheduleEntries as participants_count')->findOrFail($this->editId);
-
-        if (in_array($this->editStatus, ['Ready', 'Playing']) && ($schedule->participants_count ?? 0) < (int) $this->editRequiredParticipants) {
-            session()->flash('error', 'Tidak dapat mengubah status: peserta belum lengkap (' . ($schedule->participants_count ?? 0) . ' / ' . $this->editRequiredParticipants . ').');
-            return;
-        }
+        $schedule = CompetitionSchedule::findOrFail($this->editId);
 
         $schedule->update([
             'competition_class_id' => $this->editCompetitionClassId,
             'venue_id' => $this->editVenueId ?: null,
             'start_at' => $this->editStartAt ?: null,
             'end_at' => $this->editEndAt ?: null,
-            'status' => $this->editStatus,
             'required_participants' => (int) $this->editRequiredParticipants,
             'notes' => $this->editNotes ?: null,
             'sort_order' => $this->editSortOrder !== '' ? (int) $this->editSortOrder : null,

@@ -3,7 +3,8 @@
 > Current Development Status
 >
 > **Roadmap V1** = ✅ **100% COMPLETE**
-> **Roadmap V2** = 📋 **Planned** — Lihat `docs/VISION_V2.md`
+> **Roadmap V2 Competition V1** = ✅ **COMPLETE (Sprint 7–10)**
+> **Remaining V2** = 📋 **Planned** — Lihat `docs/VISION_V2.md`
 
 ---
 
@@ -15,7 +16,7 @@ KJA Event Manager
 
 Current MVP:
 
-CAI Operational + Pengajian Desa MVP
+CAI Operational + Pengajian Desa MVP + Competition V1
 
 ---
 
@@ -23,37 +24,39 @@ CAI Operational + Pengajian Desa MVP
 
 Version:
 
-v1.5
+v1.6
 
 Stage:
 
-MVP Development + Pilot
+Pre-UAT
 
 ---
 
 # Current Sprint
 
-Multi Event Architecture + Pengajian Desa MVP + UI Bug Fix Sprint (COMPLETE)
-
-Status: ✅ All major sprints complete. Remaining UI fixes (#10, #11, #12) pending runtime verification.
-PGM.19 Sprint 8A + 8B — Legacy Regu Retirement (COMPLETE)
-PGM.20 Legacy NIP Retirement (COMPLETE)
+Competition V2 — Sprint 7.0 through 10.0 (COMPLETE)
+Public Portal (Sprint 9.0) (COMPLETE)
+Event Dashboard (Sprint 10.0) (COMPLETE)
+Migration Stabilization (COMPLETE)
+UI Standardization Audit (COMPLETE)
 
 Status:
 
 ✅ PGM.12–PGM.17 COMPLETE
 ✅ S01–S04 Foundation COMPLETE 100%
 ✅ S3.0–S3.10 all COMPLETE/VERIFIED
-✅ UI Bug Fix Sprint — Batch 1–3 COMPLETE. Batch 4 (#10, #11, #12) in progress.
-✅ PGM.19 Sprint 8A — Legacy Regu Dependency Elimination COMPLETE
-✅ PGM.19 Sprint 8B — Physical Regu Retirement COMPLETE / VERIFIED
+✅ UI Bug Fix Sprint — Batch 1–4 COMPLETE
+✅ UI Standardization Phases 2–7 COMPLETE
+✅ PGM.19 Sprint 8A+8B — Legacy Regu Retirement COMPLETE / VERIFIED
 ✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) COMPLETE / VERIFIED
+✅ Competition V1 (Sprint 7.0–10.0) COMPLETE — Match Status, Ready Detection, Match Center, Viewer Integration, Match Result, Officials, Bracket
+✅ Public Portal (Sprint 9.0) COMPLETE — Public homepage, event detail, schedule, bracket, announcements
+✅ Event Dashboard (Sprint 10.0) COMPLETE — Overview cards, today's schedule, live competition, quick actions
+✅ Migration Audit COMPLETE — All race conditions fixed for migrate:fresh
+✅ UI Audit COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues
+✅ Full test suite: **1756 passed / 4148 assertions / 0 failures**
 
-Target: August 2026 pilot release.
-
-Focus:
-
-Multi Event Foundation completed and verified. S3.0–S3.10 all COMPLETE/VERIFIED.
+Target: UAT (immediate next).
 
 **Pengajian Desa MVP (PGM series)** implemented on top of S3 architecture:
 - PGM.12 Functional Fix ✅ COMPLETE
@@ -228,26 +231,18 @@ Completed foundation work:
 
 Priority saat ini:
 
-1. **PGM.19 Sprint 8A + 8B ✅ COMPLETE** — Legacy regu retirement: runtime dependency eliminated + physical column dropped. Final baseline: **1581 passed / 3774 assertions / 0 failures**. Design C: problem_total = 0.
-2. **PGM.20 Legacy NIP Retirement ✅ COMPLETE** — All 4 phases: audit, runtime elimination, Person CRUD cleanup, physical column drop. Final baseline: **1574 passed / 3745 assertions / 0 failures**.
-3. **PGM.17 — Pilot Release** ✅ COMPLETE.
-4. **PGM.18 Sprint 1–3 ✅ COMPLETE** — Legacy tooling removal, mapping refactor, physical cleanup.
-5. **PGM.18 CLOSED** — All 3 sprints complete.
-6. **UI Bug Fix Sprint — Batch 4 Remaining Items** 🔄:
-   - #10 Dark Mode: RE-OPENED — PENDING RUNTIME VERIFICATION
-   - #11 Responsive: IMPLEMENTED — PENDING RUNTIME VERIFICATION (layout `pengajian.blade.php`)
-   - #12 Event Isolation: OPEN — LOGIC GAP FOUND (AccessIndex query fixed)
-
-## Database V2 Part 5 Closure
-
-- 5A EditPeserta + Ulang: COMPLETE
-- 5B PesertaImport: COMPLETE
-- 5C CaiParticipantReplacement: COMPLETE
-- 5D HapusPeserta: COMPLETE
-- Final Design C: Person = global canonical identity; Participation = event-scoped membership; peserta = global legacy mirror; LegacyPesertaMapping = single global compatibility mapping (peserta↔Person only); LegacyParticipationMapping = event-aware compatibility bridge
-- Sprint 3 dropped `participation_id`, `event_id`, `backfill_batch_id` from `legacy_peserta_mappings` — deletion limitation resolved (column removed)
-- Technical debt remains: status_registrasi event-scoping, regu_id event-scoping, legacy Absensi/IzinAbsensi event ambiguity, legacy participant_number mirror dependency
-- Test delta note: exact historical -2 tests / +16 assertions cannot be reconstructed because relevant Part 5 tests were untracked during development; current semantic coverage audited and no known critical Design C coverage is missing
+1. **UAT (User Acceptance Testing)** 🔜 — The application is ready. All known issues resolved. Awaiting UAT sign-off.
+2. **Competition V1 Complete (Sprint 7–10)** ✅:
+   - Sprint 7.0 — Match Status, Ready Detection, Match Center, Viewer
+   - Sprint 7.1 — Live Queue, Auto Advance, Viewer Redesign
+   - Sprint 7.2 — Match Result Dialog, Winner Selection, Validation
+   - Sprint 7.3 — Match Officials, Official Panel, Permission Layer
+   - Sprint 8.0 — Single Elimination Bracket (4/8/16/32 participants)
+   - Sprint 9.0 — Public Event Portal (homepage, event detail, schedule, bracket, announcements)
+   - Sprint 10.0 — Event Dashboard (overview cards, today's schedule, live matches, quick actions)
+3. **Migration Stabilization** ✅ — 5 Sprint 7.0+ migration files renamed to correct timestamp order. `migrate:fresh` now works from empty database.
+4. **UI Audit & Standardization** ✅ — 19 view files fixed across 16 files. Status badges, typography, dark mode, empty states, buttons all standardized per documented design system.
+5. **Full test suite: 1756 passed / 4148 assertions / 0 failures**
 
 ---
 
@@ -255,23 +250,23 @@ Priority saat ini:
 
 ## Documentation
 
-🟢 Stable — updated for PGM.16
+🟢 Stable — updated for Competition V1 baseline (2026-07-28)
 
 ## Architecture
 
-🟢 Stable — Multi Event architecture complete with event_type discriminator
+🟢 Stable — Multi Event architecture complete. Competition module added on top of existing architecture (Sprint 7–10). Public Portal and Event Dashboard added.
 
 ## Database
 
-🟢 Stable — 2 new migrations in PGM.16 (kelompok_id on people, event_type on events)
+🟢 Stable — Competition tables: categories, classes, registrations, schedules, entries, outcomes, match_officials, brackets, bracket_matches. All migrations verified for `migrate:fresh`.
 
 ## Core Feature
 
-🟢 Stable — all CAI + Pengajian features operational
+🟢 Stable — CAI Operational + Pengajian Desa MVP + Competition V1 + Public Portal + Event Dashboard
 
 ## Security
 
-🟢 S1–S7 RBAC complete — Role enum, 15 Gate abilities, event-scoped KetuaEvent authorization, User↔Person↔Assignment chain, defense-in-depth
+🟢 S1–S7 RBAC complete — Role enum, 15 Gate abilities, event-scoped KetuaEvent authorization, User↔Person↔Assignment chain, defense-in-depth. Competition added: `manage-matches`, `manage-officials`, `submit-result` gates.
 
 ---
 
@@ -330,38 +325,40 @@ Database: SQLite
 - **Regu retired from peserta** — `pesertas.regu_id` column dropped, `peserta::regu()` removed, `regu::peserta()` removed, dual-write stopped, global fallback eliminated ✅
 - **Regu on Participation** — canonical event-scoped regu path via `participations.regu_id` ✅
 - **NIP retired** — `people.nip` and `pesertas.nip` columns dropped, `legacyNextNip()` removed, NIP removed from all runtime code (QR scan, attendance, registration, reports, exports, Person CRUD) ✅
-- Test suite: **1574 passed, 3745 assertions, 0 failures** (post-PGM.20). Reflects NIP removal: -7 tests, -29 assertions from PGM.19 baseline (NIP-specific tests removed).
+- Test suite: **1756 passed, 4148 assertions, 0 failures**. Post-Competition V1, including all Sprint 7–10 features.
 
 ---
 
 # Next Work
 
-## V1 Cleanup Items
+## Immediate (Pre-UAT)
+
+1. **UAT** — User Acceptance Testing untuk Competition V1, Public Portal, Event Dashboard
+2. **Documentation Sync** — All markdown synchronized with current implementation (IN PROGRESS)
+3. **Any UAT findings** — Bug fixes as discovered
+
+## Post-UAT
 
 1. **Venue CRUD UI** — Event-scoped venue management (model & migration sudah ada)
 2. **CategoryDefinition CRUD UI** — Event-scoped category management (model & migration sudah ada)
 3. **Absensi table retirement** — Deferred: table masih ada untuk historical reads
 
-## Roadmap V2 — Event Operating System (Planned)
+## Roadmap V2 — Event Operating System (Remaining)
 
-**Roadmap V1 sudah 100% COMPLETE.** Pengembangan selanjutnya adalah **Roadmap V2**.
+**Roadmap V1 sudah 100% COMPLETE.**
+**Competition V1 (Sprint 7–10) ✅ COMPLETE.**
 
-Filosofi: **Build Engine, Not Module** — Jangan buat modul khusus per jenis event. Bangun Competition Engine, Scoring Engine, dan Blueprint Event.
+Remaining V2 items:
 
 | # | Item | Status | Deskripsi |
 |---|------|--------|-----------|
 | 1 | Blueprint Event | 📋 Planned | Konfigurasi awal event — dapat diubah panitia |
-| 2 | Competition Engine | 📋 Planned | Generic — bracket, league, round robin, double elimination |
-| 3 | Scoring Engine | 📋 Planned | Generic — Versus, Score, Time, Distance, Ranking, Pass/Fail |
-| 4 | Venue Management | 📋 Planned | Master Venue → Event Venue → Arena/Room |
-| 5 | Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi |
-| 6 | Public Dashboard | 📋 Planned | Portal publik tanpa login |
-| 7 | Announcement Engine | 📋 Planned | Pengumuman resmi panitia |
-| 8 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
-| 9 | Mobile | 📋 Planned | Aplikasi mobile |
-| 10 | Public API | 📋 Planned | REST API |
-
-**Semua masih Planned. Belum ada yang diimplementasikan.**
+| 2 | Venue Management | 📋 Planned | Master Venue → Event Venue → Arena/Room |
+| 3 | Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi |
+| 4 | Announcement Engine | 📋 Planned | Pengumuman resmi panitia |
+| 5 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
+| 6 | Mobile | 📋 Planned | Aplikasi mobile |
+| 7 | Public API | 📋 Planned | REST API |
 
 Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap Roadmap V2.
 
@@ -619,11 +616,16 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 - No changes to business logic, database, or architecture
 
 ### Verification
-- Full test suite: **1574 passed** (3745 assertions)
-- Design C diagnostic: **problem_total = 0**
+- Full test suite: **1756 passed** (4148 assertions)
 
-### Not included (Phase 7 deferred)
-- Pengajian design language integration — akan direview terpisah dengan risiko lebih besar
+### Phase 7 — Competition UI Audit & Standardization
+- ✅ Status badge consistency across 16 files (Finished/Playing/Ready/Scheduled/Waiting Result standardized)
+- ✅ Dark mode on all status badges including report views
+- ✅ `text-gray-*` replaced with `text-zinc-*` in 8 legacy database views
+- ✅ Button consistency: raw `<button>` replaced with `flux:button variant="ghost"` in event delete modal
+- ✅ Flash message padding: `p-3` → `p-4` in committee and role manager views
+- ✅ Empty state padding standardized to `p-10`
+- ✅ Public bracket/schedule Finished badge styling
 
 ### Reference
 - Laporan lengkap: `docs/ai/UI_STANDARDIZATION_REPORT.md`

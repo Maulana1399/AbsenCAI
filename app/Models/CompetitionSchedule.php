@@ -107,4 +107,19 @@ class CompetitionSchedule extends Model
     {
         return $query->where('status', 'Waiting Result');
     }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $schedule) {
+            $entryIds = $schedule->scheduleEntries()->pluck('competition_registration_id');
+
+            CompetitionScheduleEntry::where('competition_schedule_id', $schedule->id)->delete();
+
+            if ($entryIds->isNotEmpty()) {
+                CompetitionOutcome::whereIn('competition_registration_id', $entryIds)->delete();
+            }
+
+            CompetitionBracketMatch::where('competition_schedule_id', $schedule->id)->delete();
+        });
+    }
 }

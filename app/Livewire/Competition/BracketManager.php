@@ -5,8 +5,8 @@ namespace App\Livewire\Competition;
 use App\Models\CompetitionBracket;
 use App\Models\CompetitionBracketMatch;
 use App\Models\CompetitionClass;
+use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
-use App\Models\Venue;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -21,6 +21,22 @@ class BracketManager extends Component
     public function mount(): void
     {
         app(ActiveEventContext::class)->requireCurrent();
+    }
+
+    public function updatedFilterClassId(): void
+    {
+        if (!$this->filterClassId) {
+            return;
+        }
+
+        $class = CompetitionClass::find($this->filterClassId);
+        if (!$class) {
+            return;
+        }
+
+        $this->newParticipantCount = (string) $this->suggestBracketSize(
+            CompetitionRegistration::where('competition_class_id', $class->id)->count()
+        );
     }
 
     public function selectBracket(int $bracketId): void
@@ -47,6 +63,20 @@ class BracketManager extends Component
         if ($existing) {
             session()->flash('error', 'An active bracket already exists for this class.');
             return;
+        }
+
+        $registrationCount = CompetitionRegistration::where('competition_class_id', $classId)->count();
+        $suggested = $this->suggestBracketSize($registrationCount);
+
+        if ($registrationCount > 0) {
+            if ($count < $suggested) {
+                session()->flash('error', "Bracket size {$count} is too small for {$registrationCount} participants. Minimum suggested size: {$suggested}.");
+                return;
+            }
+            if ($count > $suggested * 2) {
+                session()->flash('error', "Bracket size {$count} is too large for {$registrationCount} participants. Suggested size: {$suggested}.");
+                return;
+            }
         }
 
         $bracket = CompetitionBracket::create([
@@ -90,6 +120,63 @@ class BracketManager extends Component
         session()->flash('success', "Bracket generated with {$count} participants.");
     }
 
+    public function deleteBracket(int $bracketId): void
+    {
+        Gate::authorize('manage-events');
+
+        $bracket = CompetitionBracket::findOrFail($bracketId);
+
+        if ($this->bracketHasPlayedMatches($bracket)) {
+            session()->flash('error', 'Bracket tidak dapat dihapus karena sudah ada pertandingan yang dimainkan.');
+            return;
+        }
+
+        $bracket->delete();
+
+        $this->selectedBracketId = null;
+        session()->flash('success', 'Bracket berhasil dihapus.');
+    }
+
+    public function regenerateBracket(int $bracketId): void
+    {
+        Gate::authorize('manage-events');
+
+        $bracket = CompetitionBracket::findOrFail($bracketId);
+
+        if ($this->bracketHasPlayedMatches($bracket)) {
+            session()->flash('error', 'Bracket tidak dapat dibuat ulang karena sudah ada pertandingan yang dimainkan.');
+            return;
+        }
+
+        $classId = $bracket->competition_class_id;
+
+        $bracket->delete();
+
+        $this->filterClassId = (string) $classId;
+        $this->newParticipantCount = (string) $this->suggestBracketSize(
+            CompetitionRegistration::where('competition_class_id', $classId)->count()
+        );
+        $this->selectedBracketId = null;
+
+        session()->flash('success', 'Bracket lama dihapus. Silakan generate bracket baru.');
+    }
+
+    private function bracketHasPlayedMatches(CompetitionBracket $bracket): bool
+    {
+        $scheduleIds = $bracket->bracketMatches()->pluck('competition_schedule_id');
+        return CompetitionSchedule::whereIn('id', $scheduleIds)
+            ->where('status', '!=', 'Scheduled')
+            ->exists();
+    }
+
+    private function suggestBracketSize(int $participantCount): int
+    {
+        if ($participantCount <= 4) return 4;
+        if ($participantCount <= 8) return 8;
+        if ($participantCount <= 16) return 16;
+        return 32;
+    }
+
     private function findBracketMatch(int $bracketId, int $round, int $position): ?int
     {
         $match = CompetitionBracketMatch::where('competition_bracket_id', $bracketId)
@@ -116,6 +203,12 @@ class BracketManager extends Component
             ->where('is_active', true)
             ->orderBy('sort_order')->orderBy('name')
             ->get();
+
+        $classIdsWithBrackets = CompetitionBracket::whereIn('status', ['draft', 'active'])
+            ->whereIn('competition_class_id', $classes->pluck('id'))
+            ->pluck('competition_class_id')
+            ->unique()
+            ->toArray();
 
         $brackets = CompetitionBracket::with('competitionClass')
             ->whereIn('competition_class_id', $classes->pluck('id'))
@@ -149,6 +242,7 @@ class BracketManager extends Component
 
         return view('livewire.competition.bracket-manager', [
             'classes' => $classes,
+            'classIdsWithBrackets' => $classIdsWithBrackets,
             'brackets' => $brackets,
             'selectedBracket' => $selectedBracket,
             'bracketRounds' => $bracketRounds,

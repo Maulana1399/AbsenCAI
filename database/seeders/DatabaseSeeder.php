@@ -13,8 +13,8 @@ class DatabaseSeeder extends Seeder
             EventSeeder::class,
             DesaSeeder::class,
             KelompokSeeder::class,
-            // PersonSeeder::class,
             UserSeeder::class,
+            UatSeeder::class,
         ]);
     }
 }

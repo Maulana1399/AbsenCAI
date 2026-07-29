@@ -3,8 +3,8 @@
 namespace App\Livewire\Competition\Schedule;
 
 use App\Models\CompetitionOutcome;
-use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
+use App\Models\CompetitionScheduleEntry;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -23,16 +23,21 @@ class OutcomeManager extends Component
 
     public function loadParticipants(): void
     {
-        $registrations = CompetitionRegistration::with([
-            'participation.person.desa',
-            'participation.person.kelompok',
-            'outcome',
+        $entries = CompetitionScheduleEntry::with([
+            'competitionRegistration.participation.person.desa',
+            'competitionRegistration.participation.person.kelompok',
+            'competitionRegistration.outcome',
         ])
-            ->where('competition_class_id', $this->schedule->competition_class_id)
+            ->where('competition_schedule_id', $this->schedule->id)
+            ->orderBy('order_number')
             ->orderBy('id')
             ->get();
 
-        $this->outcomes = $registrations->map(function ($reg) {
+        $this->outcomes = $entries->map(function ($entry) {
+            $reg = $entry->competitionRegistration;
+            if (!$reg) {
+                return null;
+            }
             return [
                 'registration_id' => $reg->id,
                 'person_name' => $reg->participation?->person?->nama ?? '-',
@@ -44,7 +49,7 @@ class OutcomeManager extends Component
                 'score' => $reg->outcome?->score ?? '',
                 'remarks' => $reg->outcome?->remarks ?? '',
             ];
-        })->toArray();
+        })->filter()->values()->toArray();
     }
 
     public function saveOutcomes(): void

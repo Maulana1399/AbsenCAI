@@ -395,7 +395,29 @@ Notes:
 
 ---
 
-## Competition (V2)
+## Competition V1 (Sprint 7–10)
+
+> Implementasi competition module secara tradisional (per-module, bukan generic engine).
+> Ini adalah fondasi operasional untuk Competition V2 (generic engine) di masa depan.
+
+Status
+
+🟢 Stable
+
+Features
+
+* Match Status (Scheduled / Ready / Playing / Waiting Result / Finished)
+* Automatic Ready Detection (berdasarkan required_participants)
+* Match Center — kontrol pertandingan langsung (start, finish, official assignment)
+* Viewer — tampilan publik otomatis (Playing + Selanjutnya)
+* Match Result Dialog — winner selection, finish reason, notes
+* Match Officials — assign referee/judge/scorer/supervisor ke match
+* Official Panel — official submit hasil pertandingan
+* Single Elimination Bracket — 4, 8, 16, 32 participants, auto-advance
+* Public Portal — homepage, event detail, schedule, bracket, announcements
+* Event Dashboard — overview cards, live matches, today's schedule
+
+## Competition (V2 — Generic Engine)
 
 > Competition Engine adalah bagian dari Roadmap V2 — Event Operating System.
 > Tidak akan ada modul khusus per jenis lomba. Semua dikonfigurasi melalui engine generic.

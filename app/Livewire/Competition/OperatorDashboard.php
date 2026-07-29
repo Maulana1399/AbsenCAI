@@ -5,8 +5,8 @@ namespace App\Livewire\Competition;
 use App\Models\CompetitionAnnouncement;
 use App\Models\CompetitionClass;
 use App\Models\CompetitionOutcome;
-use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
+use App\Services\Competition\CompetitionWorkflowService;
 use App\Support\ActiveEventContext;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +17,11 @@ class OperatorDashboard extends Component
     public string $announcementMessage = '';
     public bool $showAnnouncementForm = false;
     public bool $processing = false;
+
+    private function workflow(): CompetitionWorkflowService
+    {
+        return app(CompetitionWorkflowService::class);
+    }
 
     public function advanceStatus(int $scheduleId): void
     {
@@ -32,58 +37,40 @@ class OperatorDashboard extends Component
             }
         }
 
-        if ($schedule->status === 'Scheduled' && !$schedule->canAutoReady()) {
-            session()->flash('error', 'Tidak dapat mengubah ke Ready: peserta belum lengkap.');
+        if ($schedule->status === 'Playing') {
+            $nextStatus = $this->workflow()->completeMatch($schedule);
+
+            if ($nextStatus === 'Waiting Result') {
+                session()->flash('info', 'Pertandingan menunggu hasil official.');
+                return;
+            }
+
+            if ($nextStatus !== 'Finished') {
+                session()->flash('error', 'Gagal menyelesaikan pertandingan.');
+            }
             return;
         }
 
-        if ($schedule->status === 'Ready' && !$schedule->isReadyForStart()) {
-            session()->flash('error', 'Tidak dapat memulai pertandingan: peserta belum lengkap.');
-            return;
-        }
-
-        $wasPlaying = $schedule->status === 'Playing';
-        $venueId = $schedule->venue_id;
-
-        $next = match ($schedule->status) {
-            'Scheduled' => 'Ready',
-            'Ready' => 'Playing',
-            'Playing' => 'Finished',
-            default => null,
+        $result = match ($schedule->status) {
+            'Scheduled' => $this->workflow()->prepareMatch($schedule),
+            'Ready' => $this->workflow()->startMatch($schedule),
+            default => false,
         };
 
-        if ($next) {
-            $schedule->update(['status' => $next]);
-        }
-
-        if ($wasPlaying) {
-            $this->promoteNextReady($venueId);
-        }
-    }
-
-    private function promoteNextReady(?int $venueId): void
-    {
-        $event = app(ActiveEventContext::class)->current();
-        $classIds = CompetitionClass::where('event_id', $event?->id)->pluck('id');
-
-        $nextReady = CompetitionSchedule::withCount('scheduleEntries as participants_count')
-            ->whereIn('competition_class_id', $classIds)
-            ->where('status', 'Ready')
-            ->where('venue_id', $venueId)
-            ->orderBy('sort_order')
-            ->orderBy('start_at')
-            ->first();
-
-        if ($nextReady) {
-            $nextReady->update(['status' => 'Playing']);
+        if (!$result && $schedule->status === 'Scheduled' && !$schedule->canAutoReady()) {
+            session()->flash('error', 'Tidak dapat mengubah ke Ready: peserta belum lengkap.');
+        } elseif (!$result && $schedule->status === 'Ready' && !$schedule->isReadyForStart()) {
+            session()->flash('error', 'Tidak dapat memulai pertandingan: peserta belum lengkap.');
         }
     }
 
     public function resetStatus(int $scheduleId): void
     {
         Gate::authorize('manage-events');
-        $schedule = CompetitionSchedule::findOrFail($scheduleId);
-        $schedule->update(['status' => 'Scheduled']);
+
+        $schedule = CompetitionSchedule::with('bracketMatch')->findOrFail($scheduleId);
+
+        $this->workflow()->resetMatch($schedule);
     }
 
     public function toggleAnnouncementForm(): void

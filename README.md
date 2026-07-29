@@ -23,14 +23,19 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Reporting | ✅ COMPLETE — Summary, Registration, Schedule, Outcome, Statistics |
 | Export | ✅ CSV — Registration, Schedule, Outcome |
 | UI Bug Fix Sprint | ✅ Batch 1–4 VERIFIED. All resolved |
-| UI Standardization | ✅ Phases 2–6 COMPLETE |
+| UI Standardization | ✅ Phases 2–7 COMPLETE |
 | PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` retired |
 | PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture |
 | Database V2 / Design C | ✅ problem_total = 0 |
-| Test Baseline | ✅ **1712 passed / 4062 assertions / 0 failures** |
+| Competition V1 (Sprint 7.0–10.0) | ✅ COMPLETE — Match Status, Ready Detection, Match Center, Viewer, Result Dialog, Officials, Bracket |
+| Public Portal (Sprint 9.0) | ✅ COMPLETE — Public homepage, event detail, schedule, bracket, announcements |
+| Event Dashboard (Sprint 10.0) | ✅ COMPLETE — Overview cards, live matches, today's schedule, quick actions |
+| Migration Stabilization | ✅ COMPLETE — All race conditions fixed for `migrate:fresh` |
+| UI Audit & Standardization | ✅ COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues |
+| Test Baseline | ✅ **1756 passed / 4148 assertions / 0 failures** |
 | **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
-| **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — Foundation, Structure, Operation, Outcome, Experience, Reporting |
-| **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Scoring Engine, Certificate Engine, Public API, Mobile |
+| **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — All 10 sprints |
+| **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Blueprint Event, Venue Management, Certificate Engine, Public API, Mobile |
 
 ---
 

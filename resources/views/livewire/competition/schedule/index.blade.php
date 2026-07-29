@@ -141,12 +141,10 @@
                                 <flux:input wire:model="editStartAt" type="datetime-local" size="sm" />
                                 <flux:input wire:model="editEndAt" type="datetime-local" size="sm" />
                             </div>
-                            <flux:select wire:model="editStatus" size="sm">
-                                <flux:select.option value="Scheduled">Scheduled</flux:select.option>
-                                <flux:select.option value="Ready">Ready</flux:select.option>
-                                <flux:select.option value="Playing">Playing</flux:select.option>
-                                <flux:select.option value="Finished">Finished</flux:select.option>
-                            </flux:select>
+                            <div class="text-sm">
+                                <span class="font-medium text-zinc-700 dark:text-zinc-300">Status: </span>
+                                <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{{ $editStatus }}</span>
+                            </div>
                             <flux:input wire:model="editRequiredParticipants" type="number" min="1" max="99" size="sm" label="Peserta Dibutuhkan" />
                             <flux:input wire:model="editSortOrder" type="number" size="sm" label="Urutan" />
                             <textarea wire:model="editNotes" placeholder="Catatan" rows="2" class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"></textarea>

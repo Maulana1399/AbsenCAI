@@ -44,4 +44,13 @@ class CompetitionRegistration extends Model
     {
         return $this->hasMany(CompetitionScheduleEntry::class);
     }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $registration) {
+            $registration->scheduleEntries()->delete();
+
+            $registration->outcome()?->delete();
+        });
+    }
 }

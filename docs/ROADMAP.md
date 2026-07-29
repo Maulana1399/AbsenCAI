@@ -24,7 +24,20 @@ Commercial Platform (Future)
 
 **Roadmap V1** = ✅ **100% COMPLETE** — Foundation, Multi Event, RBAC, CAI, Pengajian, Documentation.
 
-**Roadmap V2** = 📋 **PLANNED** — Event Operating System. Lihat `VISION_V2.md` untuk detail.
+**Roadmap V2 — Competition V1** = ✅ **COMPLETE** — Competition Management, Match Status, Ready Detection, Match Center, Viewer Integration, Match Result Dialog, Officials Assignment, Single Elimination Bracket, Public Portal, Event Dashboard.
+
+**Remaining Roadmap V2** = 📋 **PLANNED** — Blueprint Event, Venue Management, Certificate Engine, Public API, Mobile. Lihat `VISION_V2.md` untuk detail.
+
+---
+
+# Current Status
+
+| Item | Status |
+|------|--------|
+| Roadmap V1 (Foundation, CAI, Pengajian) | ✅ 100% COMPLETE |
+| Competition V1 (Sprint 7–10) | ✅ COMPLETE |
+| Test Baseline | ✅ **1756 passed / 4148 assertions / 0 failures** |
+| Stage | **Pre-UAT** |
 
 ---
 

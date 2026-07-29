@@ -6,6 +6,7 @@ use App\Models\CompetitionClass;
 use App\Models\CompetitionMatchOfficial;
 use App\Models\CompetitionSchedule;
 use App\Models\User;
+use App\Services\Competition\CompetitionWorkflowService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -42,25 +43,24 @@ class MatchCenter extends Component
         $this->filterVenueId = $id ? (string) $id : null;
     }
 
+    private function workflow(): CompetitionWorkflowService
+    {
+        return app(CompetitionWorkflowService::class);
+    }
+
     public function startMatch(int $scheduleId): void
     {
         Gate::authorize('manage-matches');
 
         $schedule = CompetitionSchedule::withCount('scheduleEntries as participants_count')->findOrFail($scheduleId);
 
-        if ($schedule->status !== 'Ready') {
-            session()->flash('error', 'Only Ready matches can be started.');
-            return;
-        }
-
-        if (!$schedule->isReadyForStart()) {
+        if (!$this->workflow()->startMatch($schedule)) {
             $required = $schedule->required_participants ?? 1;
             $current = $schedule->participants_count ?? 0;
             session()->flash('error', "Cannot start match: need {$required} participant(s), currently {$current} assigned.");
             return;
         }
 
-        $schedule->update(['status' => 'Playing']);
         session()->flash('success', 'Match started.');
     }
 
@@ -70,12 +70,13 @@ class MatchCenter extends Component
 
         $schedule = CompetitionSchedule::findOrFail($scheduleId);
 
-        if ($schedule->status !== 'Playing') {
+        $nextStatus = $this->workflow()->completeMatch($schedule);
+
+        if ($nextStatus !== 'Waiting Result') {
             session()->flash('error', 'Only Playing matches can be sent to Waiting Result.');
             return;
         }
 
-        $schedule->update(['status' => 'Waiting Result']);
         session()->flash('success', 'Match menunggu hasil dari official.');
     }
 
@@ -122,24 +123,6 @@ class MatchCenter extends Component
         $this->newOfficialUserId = '';
         $this->newOfficialRole = 'referee';
         $this->resetErrorBag();
-    }
-
-    private function promoteNextReady(?int $venueId): void
-    {
-        $event = app(ActiveEventContext::class)->current();
-        $classIds = CompetitionClass::where('event_id', $event?->id)->pluck('id');
-
-        $nextReady = CompetitionSchedule::withCount('scheduleEntries as participants_count')
-            ->whereIn('competition_class_id', $classIds)
-            ->where('status', 'Ready')
-            ->where('venue_id', $venueId)
-            ->orderBy('sort_order')
-            ->orderBy('start_at')
-            ->first();
-
-        if ($nextReady) {
-            $nextReady->update(['status' => 'Playing']);
-        }
     }
 
     public function render()

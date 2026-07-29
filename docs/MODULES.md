@@ -2,7 +2,7 @@
 
 **Roadmap V1** = ✅ **100% COMPLETE** — Semua modul bertanda 🟢 adalah V1.
 
-**Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`. Competition, Certificate, dan Scoring masuk V2.
+**Roadmap V2** = Competition V1 ✅ **COMPLETE** (Sprint 7–10). Competition Engine generic masih 📋 **Planned**. Lihat `VISION_V2.md`.
 
 Status Legend
 
@@ -87,10 +87,15 @@ Notes:
 - Activity Group / Activity
 - Activity Registration
 
-Future (V2 Roadmap)
+Current (V2 Roadmap Progress)
+
+- ✅ **Competition V1** (Sprint 7–10) — Module-based competition implementation (Match Status, Ready Detection, Match Center, Viewer, Result Dialog, Officials, Bracket)
+- ✅ **Public Portal** (Sprint 9.0) — Public homepage, event detail, schedule, bracket, announcements
+- ✅ **Event Dashboard** (Sprint 10.0) — Overview cards, live matches, today's schedule, quick actions
+
+Future (V2 Roadmap Remaining)
 
 - Blueprint Event (V2)
-- Competition Engine (V2)
 - Scoring Engine (V2)
 - Venue Management (V2)
 - Event Template
@@ -210,6 +215,22 @@ Future
 
 ---
 
+# Competition V1 (Sprint 7–10)
+
+🟢
+
+- Match Status (Scheduled / Ready / Playing / Waiting Result / Finished)
+- Automatic Ready Detection
+- Match Center — operator controls Start/Finish
+- Viewer — public display, auto shows Playing + Next Ready
+- Match Result Dialog — winner, reason, notes
+- Match Officials — assign officials, permission layer
+- Single Elimination Bracket — 4/8/16/32 participants, auto-advance
+- Public Portal — homepage, event detail, schedule, bracket, announcements
+- Event Dashboard — overview cards, live matches, quick actions
+
+---
+
 # Competition (V2 — Competition Engine)
 
 📋
@@ -321,7 +342,7 @@ iOS
 
 Blueprint Event
 
-Competition Engine
+✅ Competition V1 (Sprint 7–10) — Module-based competition implementation
 
 Scoring Engine
 
@@ -329,7 +350,7 @@ Venue Management
 
 Live Schedule Engine
 
-Public Dashboard
+✅ Public Dashboard (Sprint 9.0) — Public portal with event detail, schedule, bracket
 
 Announcement Engine
 

@@ -635,10 +635,24 @@ test('34. Match Center allows operator to start match (Ready → Playing)', func
     expect($schedule->refresh()->status)->toBe('Playing');
 });
 
-test('35. Match Center sends Playing to Waiting Result', function () {
+test('35. Match Center sends Playing to Waiting Result for bracket matches', function () {
+    $bracket = \App\Models\CompetitionBracket::create([
+        'competition_class_id' => $this->class->id,
+        'name' => 'Test',
+        'participant_count' => 4,
+        'status' => 'active',
+    ]);
+
     $schedule = CompetitionSchedule::create([
         'competition_class_id' => $this->class->id,
         'status' => 'Playing',
+    ]);
+
+    \App\Models\CompetitionBracketMatch::create([
+        'competition_bracket_id' => $bracket->id,
+        'competition_schedule_id' => $schedule->id,
+        'round' => 2,
+        'position' => 1,
     ]);
 
     $component = Livewire::test(\App\Livewire\Competition\MatchCenter::class);

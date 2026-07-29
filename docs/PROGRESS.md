@@ -4,7 +4,8 @@
 > Based on code, not plans.
 >
 > **Roadmap V1** = ✅ **100% COMPLETE**
-> **Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`
+> **Roadmap V2 — Competition V1** = ✅ **COMPLETE**
+> **Remaining Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`
 
 ---
 
@@ -310,4 +311,4 @@ Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
 | Mobile | 0% | 📋 Planned |
 | Public API | 0% | 📋 Planned |
 
-**Current test baseline: 1574 passed / 3745 assertions / 0 failures**
+**Current test baseline: 1756 passed / 4148 assertions / 0 failures**

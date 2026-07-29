@@ -20,11 +20,14 @@
         <div class="flex flex-wrap gap-3 items-end">
             <div class="flex-1 min-w-[200px]">
                 <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Kelas</label>
-                <flux:select wire:model="filterClassId" placeholder="Pilih kelas">
-                    @foreach ($classes as $class)
+                <flux:select wire:model.live="filterClassId" placeholder="Pilih kelas">
+                    @foreach ($classes->whereNotIn('id', $classIdsWithBrackets) as $class)
                         <flux:select.option value="{{ $class->id }}">{{ $class->name }}</flux:select.option>
                     @endforeach
                 </flux:select>
+                @if ($classes->every(fn ($c) => in_array($c->id, $classIdsWithBrackets)))
+                    <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Semua kelas sudah memiliki bracket.</p>
+                @endif
             </div>
             <div>
                 <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Peserta</label>
@@ -35,10 +38,20 @@
                     <flux:select.option value="32">32</flux:select.option>
                 </flux:select>
             </div>
+            @php
+                $selectedClass = $filterClassId ? $classes->firstWhere('id', (int) $filterClassId) : null;
+                $regCount = $selectedClass ? \App\Models\CompetitionRegistration::where('competition_class_id', $selectedClass->id)->count() : 0;
+                $suggestedSize = $regCount <= 4 ? 4 : ($regCount <= 8 ? 8 : ($regCount <= 16 ? 16 : 32));
+            @endphp
             <flux:button wire:click="generate({{ $filterClassId }})" variant="primary" :disabled="!$filterClassId">
                 Generate
             </flux:button>
         </div>
+        @if ($selectedClass && $regCount > 0)
+            <p class="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                {{ $regCount }} peserta terdaftar — ukuran bracket disarankan: {{ $suggestedSize }}
+            </p>
+        @endif
     </div>
     @endcan
 
@@ -58,6 +71,38 @@
         </div>
     @endif
 
+    {{-- Bracket Actions --}}
+    @can('manage-events')
+    @if ($selectedBracket)
+        @php
+            $scheduleIds = $selectedBracket->bracketMatches->pluck('competition_schedule_id');
+            $hasPlayed = \App\Models\CompetitionSchedule::whereIn('id', $scheduleIds)
+                ->where('status', '!=', 'Scheduled')
+                ->exists();
+        @endphp
+        <div class="flex flex-wrap items-center gap-3">
+            @if ($hasPlayed)
+                <span class="inline-flex items-center rounded-lg bg-zinc-100 px-3 py-2 text-sm text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 cursor-not-allowed" title="Tidak dapat menghapus karena sudah ada pertandingan yang dimainkan">
+                    <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Hapus
+                </span>
+                <span class="inline-flex items-center rounded-lg bg-zinc-100 px-3 py-2 text-sm text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 cursor-not-allowed" title="Tidak dapat membuat ulang karena sudah ada pertandingan yang dimainkan">
+                    <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Buat Ulang
+                </span>
+                <p class="text-xs text-zinc-400 dark:text-zinc-500">Bracket sudah memiliki pertandingan yang dimainkan dan tidak dapat dihapus.</p>
+            @else
+                <flux:button wire:click="deleteBracket({{ $selectedBracket->id }})" variant="danger" size="sm" wire:confirm="Hapus bracket ini?">
+                    Hapus
+                </flux:button>
+                <flux:button wire:click="regenerateBracket({{ $selectedBracket->id }})" variant="primary" size="sm">
+                    Buat Ulang
+                </flux:button>
+            @endif
+        </div>
+    @endif
+    @endcan
+
     {{-- Bracket Display --}}
     @if ($selectedBracket && $bracketRounds)
         <div class="overflow-x-auto pb-4">
@@ -75,7 +120,8 @@
                                 $participantB = $entries->skip(1)->first();
                                 $nameA = $participantA?->competitionRegistration?->participation?->person?->nama ?? 'TBD';
                                 $nameB = $participantB?->competitionRegistration?->participation?->person?->nama ?? 'TBD';
-                                $winner = $schedule?->winner;
+                                $isFinished = $schedule && $schedule->status === 'Finished';
+                                $winner = $isFinished ? $schedule?->winner : null;
                                 $winnerName = $winner?->participation?->person?->nama ?? null;
                             @endphp
                             <div @class([

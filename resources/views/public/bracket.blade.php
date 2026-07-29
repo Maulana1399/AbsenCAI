@@ -28,7 +28,8 @@
                                     $entries = $schedule?->scheduleEntries ?? collect();
                                     $nameA = $entries->first()?->competitionRegistration?->participation?->person?->nama ?? 'TBD';
                                     $nameB = $entries->skip(1)->first()?->competitionRegistration?->participation?->person?->nama ?? 'TBD';
-                                    $winnerName = $schedule?->winner?->participation?->person?->nama;
+                                    $isFinished = $schedule && $schedule->status === 'Finished';
+                                    $winnerName = $isFinished ? $schedule?->winner?->participation?->person?->nama : null;
                                 @endphp
                                 <div @class([
                                     'rounded-lg border-2 p-3 text-xs min-w-[180px]',
