@@ -144,25 +144,25 @@ test('super admin can edit user', function () {
         ->dispatch('editUser', id: $user->id)
         ->set('name', 'Updated Name')
         ->set('email', 'updated@example.com')
-        ->set('role', 'sekretariat')
+        ->set('role', 'admin')
         ->call('update');
 
     $user->refresh();
     expect($user->name)->toBe('Updated Name');
     expect($user->email)->toBe('updated@example.com');
-    expect($user->role)->toBe(Role::Sekretariat);
+    expect($user->role)->toBe(Role::Admin);
 });
 
 test('email uniqueness enforced on edit', function () {
     User::factory()->create(['email' => 'existing@example.com', 'role' => 'admin']);
-    $target = User::factory()->create(['email' => 'target@example.com', 'role' => 'sekretariat']);
+    $target = User::factory()->create(['email' => 'target@example.com', 'role' => 'admin']);
     $this->actingAs(um_user('super_admin'));
 
     Livewire::test(\App\Livewire\MasterData\User\EditUser::class)
         ->dispatch('editUser', id: $target->id)
         ->set('name', 'Test')
         ->set('email', 'existing@example.com')
-        ->set('role', 'sekretariat')
+        ->set('role', 'admin')
         ->call('update')
         ->assertHasErrors('email');
 });

@@ -34,7 +34,7 @@ class CreateUser extends Component
         }
 
         return view('livewire.master-data.user.create-user', [
-            'roles' => Role::cases(),
+            'roles' => Role::platformCases(),
             'personResults' => $personResults,
         ]);
     }
@@ -96,7 +96,7 @@ class CreateUser extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'passwordConfirmation' => 'required|string|same:password',
-            'role' => 'required|in:' . implode(',', Role::values()),
+            'role' => 'required|in:' . implode(',', Role::platformValues()),
             'person_id' => 'nullable|exists:people,id',
         ];
     }

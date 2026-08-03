@@ -176,7 +176,7 @@ test('role manager create sets code from template', function () {
     Livewire::test(\App\Livewire\Event\EventRoleManager::class)
         ->dispatch('manageEventRoles', id: $event->id)
         ->set('newName', 'Sekretaris Baru')
-        ->set('newCode', 'sekretariat')
+        ->set('newTemplate', 'sekretariat')
         ->call('create');
 
     $role = EventRole::where('event_id', $event->id)->where('name', 'Sekretaris Baru')->first();
@@ -194,9 +194,45 @@ test('role manager rejects unknown code via template validation', function () {
     Livewire::test(\App\Livewire\Event\EventRoleManager::class)
         ->dispatch('manageEventRoles', id: $event->id)
         ->set('newName', 'Role Aneh')
-        ->set('newCode', 'bukan_kode_valid')
+        ->set('newTemplate', 'bukan_kode_valid')
         ->call('create')
-        ->assertHasErrors('newCode');
+        ->assertHasErrors('newTemplate');
 
     expect(EventRole::where('event_id', $event->id)->where('name', 'Role Aneh')->exists())->toBeFalse();
+});
+
+test('role manager rejects missing template', function () {
+    $event = pdu_event();
+    $user = pdu_user(['role' => 'admin']);
+
+    $this->actingAs($user);
+
+    Livewire::test(\App\Livewire\Event\EventRoleManager::class)
+        ->dispatch('manageEventRoles', id: $event->id)
+        ->set('newName', 'Tanpa Template')
+        ->call('create')
+        ->assertHasErrors('newTemplate');
+
+    expect(EventRole::where('event_id', $event->id)->where('name', 'Tanpa Template')->exists())->toBeFalse();
+});
+
+test('selecting template fills code automatically', function () {
+    $event = pdu_event();
+    $user = pdu_user(['role' => 'admin']);
+    $this->actingAs($user);
+
+    $component = Livewire::test(\App\Livewire\Event\EventRoleManager::class)
+        ->dispatch('manageEventRoles', id: $event->id);
+
+    // Pilih template "Ketua Event" → newCode otomatis terisi
+    $component->set('newTemplate', 'ketua_event');
+    expect($component->get('newCode'))->toBe('ketua_event');
+
+    // Ganti template → newCode ikut berubah
+    $component->set('newTemplate', 'ketua_fosda');
+    expect($component->get('newCode'))->toBe('ketua_fosda');
+
+    // Kosongkan template → newCode null
+    $component->set('newTemplate', '');
+    expect($component->get('newCode'))->toBeNull();
 });

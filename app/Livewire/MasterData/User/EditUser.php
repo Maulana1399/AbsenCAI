@@ -3,7 +3,6 @@
 namespace App\Livewire\MasterData\User;
 
 use App\Enums\Role;
-use App\Models\Person;
 use App\Models\User;
 use App\Services\User\UserManagementService;
 use Flux\Flux;
@@ -17,7 +16,7 @@ class EditUser extends Component
 
     public ?int $userId = null;
     public string $name = '';
-    public string $email = '';
+    public ?string $email = null;
     public string $role = '';
     public ?int $person_id = null;
     public string $selectedPersonNama = '';
@@ -68,11 +67,14 @@ class EditUser extends Component
 
             $user = User::findOrFail($this->userId);
 
+            $email = trim((string) $this->email);
+            $email = $email === '' ? null : $email;
+
+            // Person TIDAK bisa diganti lewat update — identitas akun bersifat read-only.
             app(UserManagementService::class)->update($user, [
                 'name' => trim($this->name),
-                'email' => trim($this->email),
+                'email' => $email,
                 'role' => $this->role,
-                'person_id' => $this->person_id,
             ]);
 
             $this->dispatch('refreshUser');
@@ -89,22 +91,6 @@ class EditUser extends Component
         }
     }
 
-    public function selectPerson(int $id): void
-    {
-        $person = Person::find($id);
-        if ($person) {
-            $this->person_id = $person->id;
-            $this->selectedPersonNama = $person->nama;
-            $this->searchPerson = '';
-        }
-    }
-
-    public function removePerson(): void
-    {
-        $this->person_id = null;
-        $this->selectedPersonNama = '';
-    }
-
     protected function rules(): array
     {
         $uniqueRule = 'unique:users,email';
@@ -115,41 +101,23 @@ class EditUser extends Component
 
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|' . $uniqueRule,
-            'role' => 'required|in:' . implode(',', Role::values()),
-            'person_id' => 'nullable|exists:people,id',
+            'email' => 'nullable|email|max:255|' . $uniqueRule,
+            'role' => 'required|in:' . implode(',', Role::platformValues()),
         ];
     }
 
     protected $messages = [
         'name.required' => 'Nama wajib diisi.',
-        'email.required' => 'Email wajib diisi.',
         'email.email' => 'Format email tidak valid.',
         'email.unique' => 'Email sudah digunakan.',
         'role.required' => 'Role wajib dipilih.',
         'role.in' => 'Role tidak valid.',
-        'person_id.exists' => 'Person tidak ditemukan.',
     ];
 
     public function render()
     {
-        $personResults = [];
-        if (strlen($this->searchPerson) >= 2) {
-            $linkedIds = User::whereNotNull('person_id')
-                ->where('id', '!=', $this->userId)
-                ->pluck('person_id');
-            $personResults = Person::where(function ($q) use ($linkedIds) {
-                $q->whereNotIn('id', $linkedIds)
-                    ->where('nama', 'like', '%' . $this->searchPerson . '%');
-                if ($this->person_id !== null) {
-                    $q->orWhere('id', $this->person_id);
-                }
-            })->limit(10)->get();
-        }
-
         return view('livewire.master-data.user.edit-user', [
-            'roles' => Role::cases(),
-            'personResults' => $personResults,
+            'roles' => Role::platformCases(),
         ]);
     }
 }

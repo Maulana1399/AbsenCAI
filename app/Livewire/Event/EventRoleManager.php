@@ -19,10 +19,17 @@ class EventRoleManager extends Component
     public ?string $eventName = null;
 
     public string $newName = '';
+    public string $newTemplate = '';
     public ?string $newCode = null;
     public ?string $newDescription = null;
     public bool $newIsActive = true;
     public ?int $newSortOrder = null;
+
+    public ?int $editRoleId = null;
+    public string $editName = '';
+    public ?string $editCode = null;
+    public ?string $editDescription = null;
+    public ?array $editPermissions = null;
 
     /**
      * Pilihan template permission. Kunci = code (source of truth),
@@ -62,13 +69,18 @@ class EventRoleManager extends Component
         $this->processing = true;
 
         try {
+            // newCode diisi otomatis dari newTemplate via updatedNewTemplate().
             $this->validate([
                 'newName' => 'required|string|max:255',
-                'newCode' => ['required', 'string', 'max:100', Rule::in(array_keys($this->templateOptions))],
+                'newTemplate' => ['required', 'string', Rule::in(array_keys($this->templateOptions))],
                 'newDescription' => 'nullable|string',
                 'newIsActive' => 'boolean',
                 'newSortOrder' => 'nullable|integer|min:0',
             ]);
+
+            if (blank($this->newCode)) {
+                $this->newCode = $this->newTemplate;
+            }
 
             $event = Event::findOrFail($this->eventId);
 
@@ -94,6 +106,84 @@ class EventRoleManager extends Component
         }
     }
 
+    /**
+     * Template Permission dipilih → code otomatis mengikuti template.
+     * Admin tidak pernah mengisi code secara manual.
+     */
+    public function updatedNewTemplate(): void
+    {
+        $this->newCode = $this->newTemplate !== '' ? $this->newTemplate : null;
+    }
+
+    public function edit(int $roleId): void
+    {
+        Gate::authorize('manage-events');
+
+        $role = EventRole::where('id', $roleId)
+            ->where('event_id', $this->eventId)
+            ->firstOrFail();
+
+        $this->editRoleId = $role->id;
+        $this->editName = $role->name;
+        $this->editCode = $role->code;
+        $this->editDescription = $role->description;
+        $this->editPermissions = $role->permissions;
+        $this->resetErrorBag();
+
+        Flux::modal('edit-event-role')->show();
+    }
+
+    public function update(): void
+    {
+        Gate::authorize('manage-events');
+
+        if ($this->editRoleId === null) return;
+
+        $this->validate([
+            'editName' => 'required|string|max:255|unique:event_roles,name,' . $this->editRoleId . ',id,event_id,' . $this->eventId,
+            'editDescription' => 'nullable|string',
+        ]);
+
+        // Hanya name & description yang boleh diubah. Code & permissions
+        // (template) adalah identitas Permission Engine — tidak disentuh.
+        $role = EventRole::where('id', $this->editRoleId)
+            ->where('event_id', $this->eventId)
+            ->firstOrFail();
+
+        $role->update([
+            'name' => trim($this->editName),
+            'description' => $this->editDescription,
+        ]);
+
+        $this->resetEditForm();
+        Flux::modal('edit-event-role')->close();
+        session()->flash('success', 'Role berhasil diperbarui.');
+    }
+
+    public function delete(int $roleId): void
+    {
+        Gate::authorize('manage-events');
+
+        $role = EventRole::where('id', $roleId)
+            ->where('event_id', $this->eventId)
+            ->first();
+
+        if ($role === null) {
+            session()->flash('error', 'Role tidak ditemukan.');
+            return;
+        }
+
+        $assignmentCount = $role->committeeAssignments()->count();
+
+        if ($assignmentCount > 0) {
+            session()->flash('error', "Role masih digunakan oleh {$assignmentCount} panitia.");
+            return;
+        }
+
+        $role->delete();
+        session()->flash('success', 'Role berhasil dihapus.');
+    }
+
     #[On('refreshEventRoles')]
     public function refresh(): void
     {
@@ -101,15 +191,23 @@ class EventRoleManager extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['newName', 'newCode', 'newDescription', 'newSortOrder']);
+        $this->reset(['newName', 'newTemplate', 'newCode', 'newDescription', 'newSortOrder']);
         $this->newIsActive = true;
+        $this->resetErrorBag();
+    }
+
+    private function resetEditForm(): void
+    {
+        $this->reset(['editRoleId', 'editName', 'editCode', 'editDescription', 'editPermissions']);
         $this->resetErrorBag();
     }
 
     public function render()
     {
         $roles = $this->eventId
-            ? EventRole::where('event_id', $this->eventId)->orderBy('sort_order')->orderBy('name')->get()
+            ? EventRole::where('event_id', $this->eventId)
+                ->withCount('committeeAssignments')
+                ->orderBy('sort_order')->orderBy('name')->get()
             : collect();
 
         return view('livewire.event.event-role-manager', [

@@ -30,8 +30,9 @@
                 <tr>
                     <th class="px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Nama') }}</th>
                     <th class="hidden lg:table-cell px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</th>
-                    <th class="px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Role') }}</th>
-                    <th class="hidden lg:table-cell px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Dibuat') }}</th>
+                    <th class="px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Platform Role') }}</th>
+                    <th class="px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Event Role') }}</th>
+                    <th class="hidden lg:table-cell px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Status') }}</th>
                     <th class="px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">{{ __('Aksi') }}</th>
                 </tr>
             </thead>
@@ -41,15 +42,24 @@
                         <td class="px-4 py-3 font-medium">{{ $user->name }}</td>
                         <td class="hidden lg:table-cell px-4 py-3 text-zinc-600 dark:text-zinc-400">{{ $user->email }}</td>
                         <td class="px-4 py-3">
-                            @if ($user->role)
-                                <flux:badge color="{{ $user->role === App\Enums\Role::SuperAdmin ? 'red' : ($user->role === App\Enums\Role::Admin ? 'blue' : 'zinc') }}" size="sm">
+                            @if ($user->role && $user->role->isPlatformRole())
+                                <flux:badge color="{{ $user->role === App\Enums\Role::SuperAdmin ? 'red' : 'blue' }}" size="sm">
                                     {{ $user->role->label() }}
                                 </flux:badge>
                             @else
-                                <flux:badge color="zinc" size="sm" class="opacity-60">{{ __('Belum memiliki role') }}</flux:badge>
+                                <span class="text-zinc-400">—</span>
                             @endif
                         </td>
-                        <td class="hidden lg:table-cell px-4 py-3 text-zinc-500 dark:text-zinc-400">{{ $user->created_at->format('d M Y') }}</td>
+                        <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                            {{ $eventRoleLabels[$user->id] ?? '—' }}
+                        </td>
+                        <td class="hidden lg:table-cell px-4 py-3">
+                            @if ($user->is_active)
+                                <flux:badge color="green" size="sm">{{ __('Aktif') }}</flux:badge>
+                            @else
+                                <flux:badge color="zinc" size="sm">{{ __('Nonaktif') }}</flux:badge>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 whitespace-nowrap">
                             {{-- Desktop: visible action buttons --}}
                             <div class="hidden lg:flex items-center gap-1">
@@ -60,6 +70,15 @@
                                     {{ __('Reset') }}
                                 </flux:button>
                                 @if ($user->id !== auth()->id())
+                                    @if ($user->is_active)
+                                        <flux:button size="sm" icon="pause" wire:click="toggleActive({{ $user->id }})">
+                                            {{ __('Nonaktifkan') }}
+                                        </flux:button>
+                                    @else
+                                        <flux:button size="sm" icon="play" wire:click="toggleActive({{ $user->id }})">
+                                            {{ __('Aktifkan') }}
+                                        </flux:button>
+                                    @endif
                                     <flux:button size="sm" variant="danger" icon="trash" wire:click="$dispatch('deleteUser', { id: {{ $user->id }} })" data-testid="delete-user-{{ $user->id }}">
                                         {{ __('Hapus') }}
                                     </flux:button>
@@ -79,6 +98,15 @@
                                             {{ __('Reset') }}
                                         </flux:menu.item>
                                         @if ($user->id !== auth()->id())
+                                            @if ($user->is_active)
+                                                <flux:menu.item wire:click="toggleActive({{ $user->id }})" icon="pause">
+                                                    {{ __('Nonaktifkan') }}
+                                                </flux:menu.item>
+                                            @else
+                                                <flux:menu.item wire:click="toggleActive({{ $user->id }})" icon="play">
+                                                    {{ __('Aktifkan') }}
+                                                </flux:menu.item>
+                                            @endif
                                             <flux:menu.item wire:click="$dispatch('deleteUser', { id: {{ $user->id }} })" icon="trash" data-testid="delete-user-{{ $user->id }}" class="text-red-600 dark:text-red-400">
                                                 {{ __('Hapus') }}
                                             </flux:menu.item>
@@ -90,7 +118,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                        <td colspan="6" class="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
                             {{ __('Belum ada data User.') }}
                         </td>
                     </tr>

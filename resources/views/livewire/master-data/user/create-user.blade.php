@@ -17,7 +17,7 @@
 
             <flux:input wire:model="passwordConfirmation" type="password" label="{{ __('Konfirmasi Password') }}" placeholder="{{ __('Ulangi password') }}" />
 
-            <flux:select wire:model="role" label="{{ __('Role') }}" placeholder="{{ __('Pilih role') }}">
+            <flux:select wire:model="role" label="{{ __('Platform Role') }}" placeholder="{{ __('Pilih role') }}">
                 @foreach ($roles as $role)
                     <flux:select.option value="{{ $role->value }}">{{ $role->label() }}</flux:select.option>
                 @endforeach

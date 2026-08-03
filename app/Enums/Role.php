@@ -33,4 +33,26 @@ enum Role: string
     {
         return array_column(self::cases(), 'value');
     }
+
+    /**
+     * Role platform global (Super Admin / Admin) — satu-satunya role yang
+     * boleh dikelola di User Management. Role event berasal dari EventRole.
+     */
+    public static function platformCases(): array
+    {
+        return array_values(array_filter(
+            self::cases(),
+            fn (self $role) => $role->isPlatformRole(),
+        ));
+    }
+
+    public static function platformValues(): array
+    {
+        return array_map(fn (self $role) => $role->value, self::platformCases());
+    }
+
+    public function isPlatformRole(): bool
+    {
+        return in_array($this, [self::SuperAdmin, self::Admin], true);
+    }
 }
