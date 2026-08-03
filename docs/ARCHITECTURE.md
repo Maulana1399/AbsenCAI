@@ -73,9 +73,15 @@ Storage (Nextcloud / TrueNAS)
 
 ## Current Sprint Status
 
-After PGM.19 (Physical Regu Retirement) and PGM.20 (Legacy NIP Retirement):
+After PGM.19 (Physical Regu Retirement), PGM.20 (Legacy NIP Retirement), Competition V1 (Sprint 7–10), dan Sprint series 1–3.2:
 
 ```
+✅ Sprint 1 — Platform Consolidation — COMPLETE
+✅ Sprint 2 — RBAC & Permission Engine (Design C) — COMPLETE
+✅ Sprint 3.1 — Technical Debt Cleanup — COMPLETE
+✅ Sprint 3.2 — Architecture Hardening — COMPLETE
+🔲 Sprint 3.3 — NOT STARTED
+🔲 Sprint 4 — NOT STARTED
 ✅ PGM.12–PGM.17 Pengajian Desa MVP — COMPLETE
 ✅ PGM.18 Physical Mapping Cleanup — COMPLETE
 ✅ PGM.19 Physical Regu Retirement — COMPLETE
@@ -83,6 +89,9 @@ After PGM.19 (Physical Regu Retirement) and PGM.20 (Legacy NIP Retirement):
 ✅ S01–S04 Foundation — COMPLETE
 ✅ S3.0–S3.10 Multi Event — COMPLETE
 ✅ RBAC S1–S7 — COMPLETE
+✅ Competition V1 (Sprint 7–10) — COMPLETE
+✅ Public Portal (Sprint 9.0) — COMPLETE
+✅ Event Dashboard (Sprint 10.0) — COMPLETE
 ```
 
 ## Canonical Data Architecture
@@ -120,6 +129,8 @@ Person (master identity)
 Login
 
 Role Based Access
+
+Permission Engine (Design C): ability event-scoped di-resolve dari `User → Person → EventCommitteeAssignment → EventRole.permissions`. `users.role` hanya menentukan hak platform (SuperAdmin/Admin).
 
 Token Based Scan (Future)
 

@@ -7,6 +7,55 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## Documentation Sync (comprehensive audit — 2026-08-03)
+
+Audit menyeluruh dokumentasi vs source code. **Tidak ada perubahan code, business logic, permission, routing, database, maupun migration.**
+
+- **Baseline test** disinkronkan ke **1944 passed / 4648 assertions / 0 failures** di seluruh dokumen (sebelumnya bervariasi: 1756/4148, 1792/4219, 1574/3745, 459/1140).
+- **Gate count** diperbarui dari "15" ke **18** (4 platform + 14 event-scoped) di `PERMISSION.md`, `ROLE_MATRIX.md`, `SECURITY.md`, `README.md`, `PROGRESS.md`, `FEATURE_INVENTORY.md`, `ai/CURRENT_STATE.md`.
+- **Roadmap V2** dikoreksi dari "semua Planned" menjadi **Partial** — Competition V1, Public Portal (Sprint 9.0), Event Dashboard (Sprint 10.0) COMPLETE; Competition announcements / Venue CRUD / jadwal-match live; generic engine (Blueprint, Scoring, Certificate, Mobile, Public API) Planned.
+- **Sprint series** (Sprint 1, 2, 3.1, 3.2 COMPLETE; Sprint 3.3 & 4 NOT STARTED) didokumentasikan di `README.md`, `ROADMAP.md`, `HANDOFF.md`, `INDEX.md`, `PROGRESS.md`, `ai/CURRENT_STATE.md`, `ARCHITECTURE.md`, `FEATURE.md`, `TODO.md`.
+- **Koreksi status faktual:**
+  - `Venue CRUD` — sudah ada (`Livewire/Competition/Venue/Index.php`), tidak lagi "deferred".
+  - `CommitteeReport` / `RundownReport` — ditandai dihapus (Sprint 3.1 cleanup) di `FEATURE_INVENTORY.md` / `PROJECT_STRUCTURE.md`.
+  - `view-master-data` / `manage-master-data` — hanya SuperAdmin sejak Permission Engine (diperbarui di `PERMISSION.md`, `ROLE_MATRIX.md`, `MODULES.md`, `FEATURE.md`).
+  - `/import/peserta` & `/import/regu` — route memakai `can:manage-participants` (bukan `manage-import`) di kode aktual; didokumentasikan di `PERMISSION.md` (S5) & `ROLE_MATRIX.md`.
+  - Method Livewire aktual: `Scan::manualAttend()` / `scanPeserta()`, `QRLabel\Index::printSelectedLabel()` / `printAllFiltered()`, `Event\Dashboard::activateSesi()` — dikoreksi di `PERMISSION.md`, `SECURITY.md`, `FEATURE_INVENTORY.md`.
+  - Count arsitektur diperbarui: 84 migrations, 39 models, 10 seeders, 10 commands, 4 exports, 96 Livewire components, 134 views (`PROJECT_STRUCTURE.md`, `PROGRESS.md`).
+  - Nama command aktual (`pengajian:create-desa-grant`, `db:info`, `diagnose:design-c`, `app:reset-event-data`, `event-roles:audit`) di `FEATURE_INVENTORY.md` / `PROJECT_STRUCTURE.md`.
+- **Tabel competition** ditambahkan ke `DATABASE.md`; **Competition module map** ditambahkan ke `PROJECT_STRUCTURE.md`.
+- **Banner SUPERSEDED** ditambahkan ke `SPRINT3_MULTI_EVENT_AUDIT.md` dan `ARCHITECTURE_REVIEW_PHASE1.md` (dokumen historis pra-migrasi).
+- `ai/AGENTS.md` — database current: MariaDB (bukan SQLite); MVP: +Competition V1.
+- `docs/DEAD_CODE.md` — baseline 1944/4648; view yang sudah dihapus di Sprint 3.1 ditandai removed.
+
+## Hardening (Sprint 3.2 — architecture)
+
+Perubahan hanya hardening arsitektur, tanpa perubahan behavior, UI/UX, permission, routing, database, maupun API publik. Seluruh test tetap hijau (1944 passed, 4648 assertions).
+
+- **Dashboard (T1):** `Competition\Dashboard` kini memakai `DashboardPresenterFactory` (tidak lagi DI langsung ke `CompetitionDashboardPresenter`), sejalan dengan `Event\Dashboard`. Tetap menjadi compatibility wrapper tipis karena route `competition.dashboard` dipertahankan (deep-link navigasi/dashboardRoute).
+- **Ownership (T2):** Tambah `App\Support\EventOwnership::belongsToEvent()`; refactor idiom identik `(int) $x->event_id !== (int) $event->id` di 15 titik: `PublicEventController`, `Registrasi/Ulang`, `Database/Peserta/EditPeserta`, `HapusPeserta`, `Dashboard/Scan`, `Event/CommitteeManagement`, `Services/Activity/EventCommitteeService`. Caller tetap memakai failure-behavior masing-masing.
+- **PlacementService (T3):** Fix bug latent di `routes/console.php` (`kja:identity-backfill`) — `generateParticipantNumber()` kini event-scoped; command legacy `peserta` tidak punya event, sehingga nomor peserta event-scoped dihapus dari command (TypeError dulu ditandai FAILED). Backfill `attendance_code` (global) tetap jalan.
+- **Import (T4):** `ImportDataController::desa/kelompok/peserta` memakai helper privat `importFile()` (validasi+import+flash identik); `regu` dipertahankan (punya penanganan failure yang berbeda).
+- **Manual Entry (T5):** `handleResult()` yang identik di operator & admin ManualEntry dipindah ke trait `App\Livewire\Traits\HandlesManualEntryResult` (idiomatic untuk state Livewire; Service murni dilaporkan sebagai kandidat karena perlu plumb state component).
+
+## Cleanup (Sprint 3.1 — technical debt)
+
+Perubahan hanya cleanup, tidak ada perubahan business logic, permission, routing, database schema, maupun perilaku aplikasi. Seluruh test tetap hijau (1944 passed, 4648 assertions).
+
+- Hapus 31 `use` statement yang tidak terpakai di seluruh `app/` (dideteksi via parser AST).
+- Hapus dead code:
+  - `app/Contracts/MatchResultInterface.php` (tidak ada implementor/referensi)
+  - `app/Livewire/Rekap/Activity/CommitteeReport.php` dan `RundownReport.php` (tidak direferensikan; render view yang tidak ada)
+  - Private method orphan `QRLabel\Index::printHtmlForParticipants()` (tidak pernah dipanggil)
+- Hapus dead views (tidak direferensikan route/include/Livewire/test):
+  - `resources/views/welcome.blade.php`, `bkpwelcome.blade.php`
+  - `resources/views/components/footer.blade.php`, `placeholder-pattern.blade.php`
+  - `resources/views/components/layouts/app/header.blade.php`
+  - `resources/views/components/layouts/auth/card.blade.php`, `split.blade.php`
+  - `resources/views/flux/icon/book-open-text.blade.php`, `folder-git-2.blade.php`, `layout-grid.blade.php`
+- Bersihkan commented-out code dan komentar usang di Livewire Database (Desa/Kelompok/Regu), `Controller.php`, `Appearance.php`, `PlacementService.php`.
+- Deduplikasi: `PesertaExport::normalizeGender()` / `displayGender()` (identik) digabung; `PublicEventController::qrLabelPrintFiltered()` / `qrLabelPrintA4()` memakai query builder bersama `qrParticipantsQuery()`.
+
 ## Fixed (Event Role — template → code sync)
 
 ### Ringkasan

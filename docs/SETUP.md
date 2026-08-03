@@ -52,7 +52,7 @@ DB_DATABASE=kja_event_manager_test DB_USERNAME=kja DB_PASSWORD=your_password \
 vendor/bin/pest
 ```
 
-Both drivers pass the full suite: **1792 tests / 4219 assertions / 0 failures**.
+Both drivers pass the full suite: **1944 tests / 4648 assertions / 0 failures**.
 
 ## Frontend
 

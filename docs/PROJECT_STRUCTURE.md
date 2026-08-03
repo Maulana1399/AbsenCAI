@@ -47,31 +47,32 @@ IzinAbsensi (legacy + canonical — still written for legacy path)
 ```
 ├── app/
 │   ├── Actions/            (empty — planned for future)
-│   ├── Console/Commands/   (9 Artisan commands)
+│   ├── Console/Commands/   (10 Artisan commands)
 │   ├── Enums/              (Role.php — 9 roles)
 │   ├── Exceptions/         (empty)
-│   ├── Exports/            (3 export classes)
+│   ├── Exports/            (4 export classes)
 │   ├── Helpers/            (empty)
 │   ├── Http/
 │   │   └── Controllers/
 │   │       ├── Auth/       (VerifyEmailController)
-│   │       └── ImportDataController.php
+│   │       ├── ImportDataController.php
+│   │       └── PublicEventController.php
 │   ├── Imports/            (4 import classes)
-│   ├── Livewire/           (80+ components, 14 subdirectories)
-│   ├── Models/             (29 models)
+│   ├── Livewire/           (96+ components, 16 subdirectories)
+│   ├── Models/             (39 models)
 │   ├── Providers/          (AppServiceProvider)
-│   ├── Services/           (34 services, 13 subdirectories)
-│   └── Support/            (ActiveEventContext)
+│   ├── Services/           (43 services, 14 subdirectories)
+│   └── Support/            (ActiveEventContext, EventOwnership, EventRolePermissionDefaults)
 │
 ├── bootstrap/
 ├── config/                 (13 config files)
 ├── database/
 │   ├── factories/
-│   ├── migrations/         (65 migration files)
-│   └── seeders/            (6 seeders + DatabaseSeeder)
+│   ├── migrations/         (84 migration files)
+│   └── seeders/            (10 seeders + DatabaseSeeder)
 │
 ├── docs/                   (80+ documentation files)
-│   ├── ai/                 (16+ AI-related docs)
+│   ├── ai/                 (27 AI-related docs)
 │   ├── design/             (9 design system docs)
 │   ├── ui-blueprint/       (11 UI blueprint files)
 │   └── runbooks/           (1 runbook)
@@ -79,19 +80,20 @@ IzinAbsensi (legacy + canonical — still written for legacy path)
 ├── resources/
 │   ├── css/
 │   ├── js/
-│   └── views/              (90+ Blade templates)
+│   └── views/              (134 Blade templates)
 │       ├── components/
 │       ├── livewire/       (component-specific views)
 │       └── partials/
 │
 ├── routes/
-│   ├── web.php             (main routes — 726 lines)
+│   ├── web.php             (main routes — 355 lines)
 │   ├── auth.php            (auth routes — 36 lines)
-│   └── console.php         (Artisan commands — 65 lines)
+│   └── console.php         (Artisan commands — 55 lines)
 │
 ├── tests/
 │   ├── Feature/
 │   ├── Unit/
+│   ├── diagnostic/
 │   ├── Pest.php
 │   └── TestCase.php
 │
@@ -190,8 +192,8 @@ IzinAbsensi (legacy + canonical — still written for legacy path)
 | Rekap Absensi | `Livewire/Rekap/Absensi/RekapAbsensi.php` | ✅ Stable |
 | Peserta Export | `Exports/PesertaExport.php` | ✅ Stable |
 | Activity Registration Report | `Livewire/Rekap/Activity/ActivityRegistrationReport.php` | ✅ Stable |
-| Committee Report | `Livewire/Rekap/Activity/CommitteeReport.php` | ✅ Stable |
-| Rundown Report | `Livewire/Rekap/Activity/RundownReport.php` | ✅ Stable |
+| ~~Committee Report~~ | — | ❌ Dihapus di Sprint 3.1 cleanup |
+| ~~Rundown Report~~ | — | ❌ Dihapus di Sprint 3.1 cleanup |
 
 ### 3.9 Pengajian Desa Module
 | Component | Path | Status |
@@ -231,6 +233,25 @@ IzinAbsensi (legacy + canonical — still written for legacy path)
 | Activity Schedule Service | `Services/Activity/ActivityScheduleService.php` | ✅ Stable |
 | Event Committee Service | `Services/Activity/EventCommitteeService.php` | ✅ Stable |
 
+### 3.10b Competition V1 (Sprint 7–10)
+| Component | Path | Status |
+|-----------|------|--------|
+| Match Center | `Livewire/Competition/MatchCenter.php` | ✅ Stable |
+| Bracket Manager | `Livewire/Competition/BracketManager.php` | ✅ Stable |
+| Viewer | `Livewire/Competition/Viewer.php` | ✅ Stable |
+| Official Panel | `Livewire/Competition/OfficialPanel.php` | ✅ Stable |
+| Operator Dashboard | `Livewire/Competition/OperatorDashboard.php` | ✅ Stable |
+| Competition Dashboard | `Livewire/Competition/Dashboard.php` | ✅ Stable |
+| Participant List | `Livewire/Competition/ParticipantList.php` | ✅ Stable |
+| Registration | `Livewire/Competition/Registration.php` | ✅ Stable |
+| Schedule | `Livewire/Competition/Schedule/*` | ✅ Stable |
+| Report | `Livewire/Competition/Report/*` | ✅ Stable |
+| Venue CRUD | `Livewire/Competition/Venue/Index.php` | ✅ Stable |
+| Category CRUD | `Livewire/Competition/Category/Index.php` | ✅ Stable |
+| Class CRUD | `Livewire/Competition/Class/Index.php` | ✅ Stable |
+| Competition Export | `Exports/CompetitionExport.php` | ✅ Stable |
+| Public Event Controller | `Http/Controllers/PublicEventController.php` | ✅ Stable |
+
 ### 3.11 Audit
 | Component | Path | Status |
 |-----------|------|--------|
@@ -248,7 +269,7 @@ IzinAbsensi (legacy + canonical — still written for legacy path)
 
 ---
 
-## 4. DATABASE TABLES (65 Migrations)
+## 4. DATABASE TABLES (84 Migrations)
 
 | Table | Type | Scope | Status |
 |-------|------|-------|--------|
@@ -281,24 +302,40 @@ IzinAbsensi (legacy + canonical — still written for legacy path)
 | `legacy_participation_mappings` | Legacy Bridge | Event-scoped | Active |
 | `cai_participant_replacements` | CAI | Global | Active |
 | `identity_correction_requests` | Pengajian | Event-scoped | Active |
+| `competition_categories` | Competition | Event-scoped | Active |
+| `competition_classes` | Competition | Event-scoped | Active |
+| `competition_registrations` | Competition | Event-scoped | Active |
+| `competition_schedules` | Competition | Event-scoped | Active |
+| `competition_schedule_entries` | Competition | Event-scoped | Active |
+| `competition_outcomes` | Competition | Event-scoped | Active |
+| `competition_match_officials` | Competition | Event-scoped | Active |
+| `competition_brackets` | Competition | Event-scoped | Active |
+| `competition_bracket_matches` | Competition | Event-scoped | Active |
+| `competition_announcements` | Competition | Event-scoped | Active |
 
 ---
 
-## 5. ROLE & PERMISSION (15 Gate Abilities)
+## 5. ROLE & PERMISSION (18 Gate Abilities)
 
 See `docs/PERMISSION.md` and `docs/ROLE_MATRIX.md` for full matrix.
+
+**4 platform abilities** (`users.role`): `view-master-data`, `manage-master-data`, `manage-events`, `manage-users` — SuperAdmin (via `Gate::before` bypass) + Admin (`manage-events`).
+
+**14 event-scoped abilities** (Permission Engine — `User → Person → EventCommitteeAssignment → EventRole.permissions`): `view-dashboard`, `manage-registration`, `manage-participants`, `manage-attendance`, `manage-sessions`, `manage-qr-labels`, `manage-secretariat`, `manage-import`, `view-reports`, `manage-pengajian`, `view-activity-log`, `manage-matches`, `manage-officials`, `submit-result`.
 
 | Role | Code | 
 |------|------|
 | Super Admin | `super_admin` — full access |
-| Admin | `admin` — manage all events |
-| Ketua Event | `ketua_event` — event-scoped (via assignment) |
-| Sekretariat | `sekretariat` — admin & secretariat |
-| PJ Divisi | `pj_divisi` — attendance only |
-| Operator Registrasi | `operator_registrasi` — registration only |
-| Operator Scan | `operator_scan` — scan only |
-| Juri | `juri` — scoring (future) |
+| Admin | `admin` — manage all events (platform) |
+| Ketua Event | `ketua_event` — event-scoped (via EventRole assignment) |
+| Sekretariat | `sekretariat` — via EventRole permissions |
+| PJ Divisi | `pj_divisi` — via EventRole permissions |
+| Operator Registrasi | `operator_registrasi` — via EventRole permissions |
+| Operator Scan | `operator_scan` — via EventRole permissions |
+| Juri | `juri` — scoring (V2) |
 | Viewer | `viewer` — read-only reports |
+
+> **PENTING:** Sejak Permission Engine (Design C), ability event-scoped di-resolve dari **EventRole permissions**, bukan dari `users.role`. Role selain SuperAdmin/Admin harus punya `EventCommitteeAssignment` + `EventRole` aktif dengan ability yang sesuai.
 
 ---
 
@@ -429,10 +466,11 @@ Component Framework:
 | `attendance:parity` | Check attendance parity (legacy vs canonical) | `Console/Commands/AttendanceParity.php` |
 | `attendance:status` | Show attendance status | `Console/Commands/AttendanceStatus.php` |
 | `audit:legacy-data` | Audit legacy data integrity | `Console/Commands/AuditLegacyData.php` |
-| `kja:create-desa-grant` | Create desa access grant | `Console/Commands/CreateDesaGrant.php` |
-| `kja:database-info` | Show database info | `Console/Commands/DatabaseInfo.php` |
-| `kja:design-c-diagnostics` | Design C diagnostics | `Console/Commands/DesignCDiagnostics.php` |
-| `kja:reset-event-data` | Reset event data | `Console/Commands/ResetEventData.php` |
+| `event-roles:audit` | Audit EventRole codes/permissions | `Console/Commands/AuditEventRoles.php` |
+| `pengajian:create-desa-grant` | Create desa access grant | `Console/Commands/CreateDesaGrant.php` |
+| `db:info` | Show database info | `Console/Commands/DatabaseInfo.php` |
+| `diagnose:design-c` | Design C diagnostics | `Console/Commands/DesignCDiagnostics.php` |
+| `app:reset-event-data` | Reset event data | `Console/Commands/ResetEventData.php` |
 | `kja:identity-backfill` | (in console.php) Legacy identity repair | `routes/console.php` |
 
 ---
@@ -444,6 +482,7 @@ Component Framework:
 | `PesertaExport` | Export | Participant data Excel |
 | `ActivityRegistrationExport` | Export | Activity registration Excel |
 | `PersonImportTemplateExport` | Export | Person import template Excel |
+| `CompetitionExport` | Export | Competition registration/schedule/outcome CSV |
 | `DesaImport` | Import | Desa data import (Excel/CSV) |
 | `KelompokImport` | Import | Kelompok data import |
 | `ReguImport` | Import | Regu data import |
@@ -456,8 +495,8 @@ Component Framework:
 | Type | Count | 
 |------|-------|
 | Unit Tests | (In Feature + Unit dirs) |
-| Feature Tests | ~1574 tests / 3745 assertions |
+| Feature Tests | ~1944 tests / 4648 assertions |
 | Pest Framework | PHPUnit + Pest |
 | Coverage | Authorization, Services, Livewire, Integration, Regression |
 
-Test baseline: **1574 passed / 3745 assertions / 0 failures**
+Test baseline: **1944 passed / 4648 assertions / 0 failures**

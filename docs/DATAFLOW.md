@@ -139,15 +139,19 @@ Excel / PDF
 
 ---
 
-## V2 — Competition Engine (Planned)
+## V2 — Competition (Partially Implemented)
 
-> Lihat `VISION_V2.md` untuk detail arsitektur V2.
+> **Competition V1 (Sprint 7–10) COMPLETE** — module-based (bracket single elimination, schedule, outcomes, officials, announcements). **Competition Engine generic (bracket/league/round robin/double elimination)** masih Planned. Lihat `VISION_V2.md` untuk detail arsitektur V2.
 
 Registration / Participation
 
 ↓
 
-Competition Engine
+Competition V1 (COMPLETE) — Match Status, Match Center, Viewer, Result, Officials, Bracket Single Elimination
+
+↓
+
+Competition Engine (generic — Planned)
 ├── Bracket
 ├── League
 ├── Round Robin

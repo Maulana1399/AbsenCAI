@@ -439,7 +439,7 @@ Sprint 4
 
 ### Attendance (`manage-attendance`)
 - Route: `/absensi`
-- Livewire: `Dashboard\Scan` (scanQR, manualHadir, manualIzin)
+- Livewire: `Dashboard\Scan` (scanPeserta, manualAttend, manualIzin)
 - Roles: super_admin, admin, ketua_event, sekretariat, pj_divisi, operator_scan
 
 ### Session Management (`manage-sessions`)
@@ -575,29 +575,34 @@ User Management actions are recorded in the Activity Log:
 - Roles: super_admin, admin, sekretariat
 
 ### Full CAI Permission Matrix Verification
-All 10 operational abilities from S3 plus `manage-import` from S5 have been verified per role against the permission matrix at `docs/PERMISSION.md`. No authorization gaps remain in CAI operational routes.
+All 10 operational abilities from S3 plus Competition abilities (Sprint 7–10) telah diverifikasi per role terhadap permission matrix di `docs/PERMISSION.md`. No authorization gaps remain in CAI operational routes. (`manage-import` didefinisikan di engine; route import memakai `manage-participants` — lihat PERMISSION.md S5.)
 
-## Authorization Summary (All 15 Abilities)
+## Authorization Summary (All 18 Abilities)
 
-| # | Ability | Applied In | Status |
-|---|---------|-----------|--------|
-| 1 | `view-dashboard` | S3 | ✅ |
-| 2 | `view-master-data` | S2 | ✅ |
-| 3 | `manage-master-data` | S2 | ✅ |
-| 4 | `manage-events` | S3 | ✅ |
-| 5 | `manage-registration` | S3 | ✅ |
-| 6 | `manage-participants` | S3 | ✅ |
-| 7 | `manage-attendance` | S3 | ✅ |
-| 8 | `manage-sessions` | S3 | ✅ |
-| 9 | `manage-qr-labels` | S3 | ✅ |
-| 10 | `manage-secretariat` | S3 | ✅ |
-| 11 | `manage-import` | S5 | ✅ |
-| 12 | `view-reports` | S3 | ✅ |
-| 13 | `manage-pengajian` | S4 | ✅ |
-| 14 | `view-activity-log` | S3 | ✅ |
-| 15 | `manage-users` | S0 | ✅ |
+> Total Gate = 18 (4 platform + 14 event-scoped). Sejak Permission Engine (Sprint 2), ability event-scoped di-resolve via `User → Person → EventCommitteeAssignment → EventRole.permissions`.
 
-All 15 Gate abilities have been applied to routes and/or Livewire mutations. Sidebar visibility implemented in S6.
+| # | Ability | Type | Applied In | Status |
+|---|---------|------|-----------|--------|
+| 1 | `view-dashboard` | event | S3 | ✅ |
+| 2 | `view-master-data` | platform | S2 | ✅ |
+| 3 | `manage-master-data` | platform | S2 | ✅ |
+| 4 | `manage-events` | platform | S3 | ✅ |
+| 5 | `manage-registration` | event | S3 | ✅ |
+| 6 | `manage-participants` | event | S3 | ✅ |
+| 7 | `manage-attendance` | event | S3 | ✅ |
+| 8 | `manage-sessions` | event | S3 | ✅ |
+| 9 | `manage-qr-labels` | event | S3 | ✅ |
+| 10 | `manage-secretariat` | event | S3 | ✅ |
+| 11 | `manage-import` | event | S3 (tersedia; route import memakai `manage-participants`) | ✅ |
+| 12 | `view-reports` | event | S3 | ✅ |
+| 13 | `manage-pengajian` | event | S4 | ✅ |
+| 14 | `view-activity-log` | event | S3 | ✅ |
+| 15 | `manage-users` | platform | S0 | ✅ |
+| 16 | `manage-matches` | event (Competition) | Sprint 7–10 | ✅ |
+| 17 | `manage-officials` | event (Competition) | Sprint 7–10 | ✅ |
+| 18 | `submit-result` | event (Competition) | Sprint 7–10 | ✅ |
+
+Semua Gate abilities telah diterapkan ke routes dan/atau Livewire mutations. Sidebar visibility implemented di S6.
 
 ---
 
@@ -614,8 +619,8 @@ Sidebar menu visibility is now synchronized with backend Gate abilities. Every m
 ### EventSwitcher Remains Accessible to All
 The EventSwitcher component (`livewire:event.event-switcher`) is intentionally **not gated** — it remains visible to all authenticated users regardless of role. Event selection is a navigation feature, not an authorization gate. Server-side protection on event-scoped routes/Livewire mutations ensures unauthorized users cannot act on events they lack permission for.
 
-### Kelola Event Menu — No Gate
-The "Kelola Event" sidebar link is intentionally not wrapped in `@can('manage-events')`. The `Event\Index` render method and CRUD mutations are server-side protected. The menu item is visible so all authenticated users can see event listings and navigate, but only `super_admin` and `admin` can create/edit/archive events.
+### Kelola Event Menu — Gated
+The "Kelola Event" sidebar link is wrapped in `@can('manage-events')` (sidebar.blade.php). The `Event\Index` CRUD mutations are server-side protected with `manage-events`. Only `super_admin` dan `admin` dapat create/edit/archive events.
 
 ### Parent/Child Group Gating
 Groups use `@canany()` for the group heading (shown when user has ANY sub-ability), and child items use `@can()` for precise per-item control:
@@ -627,7 +632,7 @@ Sidebar gates work within both event contexts (CAI and Pengajian), providing con
 
 ## Sidebar Coverage (All 9 Roles)
 
-All 15 Gate abilities now have corresponding sidebar `@can()` directives where applicable:
+All 18 Gate abilities now have corresponding sidebar `@can()` directives where applicable:
 
 | Ability | Sidebar Gate | Menu Item |
 |---------|-------------|-----------|
@@ -643,6 +648,7 @@ All 15 Gate abilities now have corresponding sidebar `@can()` directives where a
 | `view-master-data` | `@can('view-master-data')` | Master Data |
 | `manage-pengajian` | `@can('manage-pengajian')` | Peserta group + Operasional Desa |
 | `manage-users` | `@can('manage-users')` | User Management |
+| `manage-matches` / `manage-officials` / `submit-result` | — (Competition UI di bawah `manage-events`/route gates) | Competition pages |
 
 ## Implementation Detail
 
@@ -657,23 +663,23 @@ All 15 Gate abilities now have corresponding sidebar `@can()` directives where a
 
 ## Status
 
-**COMPLETE** (2026-08-04). KetuaEvent abilities are now event-scoped.
+**COMPLETE** (2026-08-04). KetuaEvent abilities are now event-scoped. **Evolusi Sprint 2 — Permission Engine (Design C):** seluruh 14 event abilities kini di-resolve via `User → Person → EventCommitteeAssignment → EventRole.permissions`; `users.role` hanya menentukan hak platform.
 
 ## Architecture
 
 ```
-User.role → determines WHAT the account may do
+User.role (platform) → SuperAdmin (bypass) / Admin (bypass event abilities) / lain
 User.person_id → links account to canonical Person
 EventCommitteeAssignment → determines WHICH Event the Person/User is assigned to
-EventRole → operational committee position only — NOT RBAC authorization
+EventRole.permissions (JSON) → determines WHICH event abilities the assignment grants
 ```
 
 ### Key Design Decisions
 
-1. **EventRole is NOT authorization.** The `EventRole` model is operational/domain metadata. Assignment existence, not role name/code, drives authorization.
-2. **User↔Person is optional.** Not all Users need a linked Person. Only KetuaEvent requires it for event-scoped access.
-3. **Defense in depth.** EventSwitcher dropdown is filtered AND server-side `switchTo()` enforces assignment checks. Gate closures independently verify assignment on every check.
-4. **No automatic assignment creation.** Linking User→Person does not create EventCommitteeAssignment records. Assignment must be created explicitly via the Event Management UI.
+1. **EventRole IS authorization for event abilities (sejak Permission Engine).** Ability diberikan jika assignment + EventRole aktif dengan ability di `permissions`. Sebelumnya (S7 asli): EventRole hanya metadata dan assignment-existence yang menentukan.
+2. **User↔Person wajib untuk akses event.** Semua user non-platform harus punya `person_id` + assignment untuk ability event.
+3. **Defense in depth.** EventSwitcher dropdown difilter DAN server-side `switchTo()` enforces assignment. Gate closures independently verify pada setiap check.
+4. **No automatic assignment creation.** Linking User→Person tidak membuat EventCommitteeAssignment. Assignment harus dibuat eksplisit via Event Management UI.
 
 ### S7 Completed Deliverables
 
@@ -682,6 +688,7 @@ EventRole → operational committee position only — NOT RBAC authorization
 | S7.1 | User↔Person Foundation + IDOR fixes | ✅ |
 | S7.2 | Event-scoped gates + EventSwitcher | ✅ |
 | S7.3 | Assignment management UI + EventRole UI | ✅ |
+| Sprint 2 | Permission Engine (Design C) — EventRole.permissions sebagai sumber ability event | ✅ |
 
 ### Remaining Backlog (Non-Blocking)
 

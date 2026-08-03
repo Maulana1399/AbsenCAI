@@ -50,9 +50,14 @@
 
 | View | Status | Notes |
 |------|--------|-------|
-| `resources/views/welcome.blade.php` | ✅ Active | Landing page for guest users |
-| `resources/views/bkpwelcome.blade.php` | 🟡 Backup | `bkp` prefix suggests backup/obsolete |
-| `resources/views/components/placeholder-pattern.blade.php` | 🟡 Unknown | May be unused template pattern |
+| `resources/views/public/*` | ✅ Active | Public portal (home, event, schedule, bracket, announcements) — landing untuk guest via `PublicEventController` |
+| ~~`welcome.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup (diganti `public.home`) |
+| ~~`bkpwelcome.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup |
+| ~~`components/placeholder-pattern.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup |
+| ~~`components/footer.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup |
+| ~~`components/layouts/app/header.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup |
+| ~~`components/layouts/auth/card.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup |
+| ~~`components/layouts/auth/split.blade.php`~~ | 🔴 Removed | Dihapus di Sprint 3.1 cleanup |
 
 ## 7. Migration Files — Historical Backups
 
@@ -116,9 +121,26 @@ The following were removed in PGM.18 Sprint 1 — listed for reference:
 | `legacyNextNip()` methods | PGM.20 | Removed from model/service |
 | Regu dual-write to peserta | PGM.19 Sprint 8A | Stopped |
 
+## 11b. Removed in Sprint 3.1 Cleanup (2026-08-03)
+
+| Removed Item | Type | Reason |
+|-------------|------|--------|
+| `MatchResultInterface` | Contract | Zero implementors/references |
+| `CommitteeReport` | Livewire | Render view tidak ada; tidak direferensikan |
+| `RundownReport` | Livewire | Render view tidak ada; tidak direferensikan |
+| `QRLabel\Index::printHtmlForParticipants()` | Private method | Tidak pernah dipanggil |
+| 31 `use` statement tidak terpakai | Import | Deteksi via parser AST |
+| `welcome.blade.php`, `bkpwelcome.blade.php` | View | Tidak direferensikan |
+| `components/footer.blade.php`, `placeholder-pattern.blade.php` | View | Tidak direferensikan |
+| `components/layouts/app/header.blade.php` | View | Tidak direferensikan |
+| `components/layouts/auth/card.blade.php`, `split.blade.php` | View | Tidak direferensikan |
+| 3 flux icon views (book-open-text, folder-git-2, layout-grid) | View | Tidak dipakai |
+| Commented-out code di Livewire Database + `Controller.php` + `Appearance.php` + `PlacementService.php` | Cleanup | Dead/commented |
+| `PesertaExport::normalizeGender()` / `displayGender()` | Dedup | Digabung |
+
 ## 12. Test Baseline Dead Code
 
 | File | Status | Notes |
 |------|--------|-------|
 | All tests reference active production code | ✅ | No dead test references detected |
-| 1574 tests pass with 3745 assertions | ✅ | All tests executing against live code |
+| 1944 tests pass with 4648 assertions | ✅ | All tests executing against live code |

@@ -12,18 +12,25 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 
 | Area | Status |
 |------|--------|
+| Sprint 1 | ✅ COMPLETE 100% |
+| Sprint 2 | ✅ COMPLETE 100% |
+| Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
+| Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
+| Sprint 3.3 | 🔲 NOT STARTED |
+| Sprint 4 | 🔲 NOT STARTED |
 | CAI Operational | ✅ Stable — all modules operational |
 | S01–S04 Foundation | ✅ COMPLETE 100% |
 | Multi Event Architecture | ✅ S3.0–S3.10 Complete |
-| RBAC (S1–S7) | ✅ COMPLETE — 9 roles, 15 gates, event-scoped |
+| RBAC (S1–S7) | ✅ COMPLETE — 9 roles, 18 gate abilities, event-scoped |
 | Person Master Data CRUD | ✅ COMPLETE |
 | User Management | ✅ COMPLETE — Super Admin only |
 | Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete |
-| Competition V1 | ✅ COMPLETE — Sprint 1-5.5 |
+| Competition V1 | ✅ COMPLETE — Sprint 7.0–10.0 |
 | Reporting | ✅ COMPLETE — Summary, Registration, Schedule, Outcome, Statistics |
 | Export | ✅ CSV — Registration, Schedule, Outcome |
 | UI Bug Fix Sprint | ✅ Batch 1–4 VERIFIED. All resolved |
 | UI Standardization | ✅ Phases 2–7 COMPLETE |
+| PGM.18 Physical Mapping Cleanup | ✅ COMPLETE — `legacy_peserta_mappings` cleaned |
 | PGM.19 Physical Regu Retirement | ✅ COMPLETE — `pesertas.regu_id` retired |
 | PGM.20 Legacy NIP Retirement | ✅ COMPLETE — NIP retired from canonical architecture |
 | Database V2 / Design C | ✅ problem_total = 0 |
@@ -33,10 +40,10 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Migration Stabilization | ✅ COMPLETE — All race conditions fixed for `migrate:fresh` |
 | UI Audit & Standardization | ✅ COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues |
 | MariaDB Migration | ✅ COMPLETE — SQLite → MariaDB as primary DB; migrations/seeders/tests green on both |
-| Test Baseline | ✅ **1792 passed / 4219 assertions / 0 failures** (SQLite & MariaDB) |
+| Test Baseline | ✅ **1944 passed / 4648 assertions / 0 failures** |
 | **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
 | **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — All 10 sprints |
-| **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Blueprint Event, Venue Management, Certificate Engine, Public API, Mobile |
+| **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Blueprint Event, Venue Management (V2 hierarchy), Certificate Engine, Public API, Mobile |
 
 ---
 
@@ -93,15 +100,18 @@ Semua pengembangan foundation, Multi Event, RBAC, CAI Operational, Pengajian Des
 
 ## Roadmap V2 — Event Operating System (Planned)
 
+> **Competition V1** (Sprint 7.0–10.0), **Public Portal** (Sprint 9.0), dan **Event Dashboard** (Sprint 10.0) sudah COMPLETE.
+> **Announcement Engine** — fondasi Competition announcements sudah ada (model + route publik), engine generic belum dibangun.
+
 | # | Item | Status |
 |---|------|--------|
 | 1 | Blueprint Event | 📋 Planned |
-| 2 | Competition Engine | 📋 Planned |
+| 2 | Competition Engine (generic) | 📋 Planned — Competition V1 (module-based) COMPLETE |
 | 3 | Scoring Engine | 📋 Planned |
-| 4 | Venue Management | 📋 Planned |
-| 5 | Live Schedule Engine | 📋 Planned |
-| 6 | Public Dashboard | 📋 Planned |
-| 7 | Announcement Engine | 📋 Planned |
+| 4 | Venue Management (Master/Event/Arena) | 📋 Planned — Venue CRUD V1 sudah ada, hierarki reusable belum |
+| 5 | Live Schedule Engine | 📋 Planned — jadwal + status match sudah ada, estimasi realtime belum |
+| 6 | Public Dashboard | ✅ COMPLETE (Sprint 9.0 — Public Portal) |
+| 7 | Announcement Engine | 🟡 Partial — Competition announcements live, generic engine belum |
 | 8 | Certificate Engine | 📋 Planned |
 | 9 | Mobile | 📋 Planned |
 | 10 | Public API | 📋 Planned |
@@ -126,8 +136,8 @@ Semua pengembangan foundation, Multi Event, RBAC, CAI Operational, Pengajian Des
 
 ### RBAC
 - 9 roles: Super Admin, Admin, Ketua Event, Sekretariat, PJ Divisi, Operator Registrasi, Operator Scan, Juri, Viewer
-- 15 Gate abilities with Super Admin bypass
-- Event-scoped KetuaEvent authorization
+- 18 Gate abilities: 4 platform (`view-master-data`, `manage-master-data`, `manage-events`, `manage-users`) + 14 event-scoped (Permission Engine: `User → Person → EventCommitteeAssignment → EventRole.permissions`)
+- Super Admin bypass + Admin bypass (event abilities)
 - All routes + Livewire mutations protected
 
 ---

@@ -9,6 +9,19 @@
 
 ---
 
+## Sprint Series (current track)
+
+| Sprint | Status | Catatan |
+|--------|--------|---------|
+| Sprint 1 | ✅ COMPLETE 100% | Platform Consolidation — MariaDB Migration, Permission Engine, Competition V1, Public Portal, Event Dashboard |
+| Sprint 2 | ✅ COMPLETE 100% | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
+| Sprint 3.1 | ✅ COMPLETE 100% | Technical debt cleanup (dead code/views/imports, deduplication) |
+| Sprint 3.2 | ✅ COMPLETE 100% | Architecture hardening (Presenter Factory, EventOwnership, Import helper, ManualEntry trait) |
+| Sprint 3.3 | 🔲 NOT STARTED | — |
+| Sprint 4 | 🔲 NOT STARTED | — |
+
+---
+
 ## Foundation (Sprint 0)
 
 ```
@@ -19,11 +32,11 @@
 |------|----------|-------|
 | Authentication | 100% | Login, logout, register, password reset, email verification |
 | Role Enum | 100% | 9 roles defined |
-| Gate Definitions | 100% | 15 abilities + Super Admin bypass |
+| Gate Definitions | 100% | 18 abilities (4 platform + 14 event-scoped) + Super Admin bypass |
 | Documentation Setup | 100% | Extensive docs/ directory |
 | Test Framework | 100% | Pest + PHPUnit |
 | Config | 100% | All config files active |
-| Database Design | 100% | 65 migrations, 29 models |
+| Database Design | 100% | 84 migrations, 39 models |
 
 ---
 
@@ -140,7 +153,7 @@ Deferred: PDF export, Scheduled reports
 | Master Data Landing | 100% | Navigation hub |
 | User CRUD | 100% | Super Admin only |
 
-Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
+Deferred: CategoryDefinition CRUD UI (UI `Competition/Category` mengelola `competition_categories`, tabel berbeda)
 
 ---
 
@@ -245,18 +258,20 @@ Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
 ## Roadmap V2 — Event Operating System (Planned)
 
 ```
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0%
+██████████████████████████████████░░░░░░ 70% (bagian yang sudah dikerjakan)
 ```
+
+> Competition V1 (Sprint 7–10), Public Portal (Sprint 9.0), dan Event Dashboard (Sprint 10.0) sudah COMPLETE.
 
 | # | Item | Progress | Notes |
 |---|------|----------|-------|
 | 1 | Blueprint Event | 0% | 📋 Planned |
-| 2 | Competition Engine | 0% | 📋 Planned — replaces old Competition Module concept |
+| 2 | Competition Engine | 60% | Competition V1 (module) COMPLETE; generic engine masih Planned |
 | 3 | Scoring Engine | 0% | 📋 Planned — generic, not hardcoded |
-| 4 | Venue Management | 0% | 📋 Planned — reusable venue hierarchy |
-| 5 | Live Schedule Engine | 0% | 📋 Planned — realtime schedule |
-| 6 | Public Dashboard | 0% | 📋 Planned — no login required |
-| 7 | Announcement Engine | 0% | 📋 Planned |
+| 4 | Venue Management | 30% | Venue CRUD V1 ada; hierarki Master/Event/Arena masih Planned |
+| 5 | Live Schedule Engine | 30% | Jadwal + status match ada; estimasi realtime masih Planned |
+| 6 | Public Dashboard | 100% | ✅ COMPLETE — Public Portal (Sprint 9.0) |
+| 7 | Announcement Engine | 30% | Competition announcements live; generic engine Planned |
 | 8 | Certificate Engine | 0% | 📋 Planned |
 | 9 | Mobile | 0% | 📋 Planned |
 | 10 | Public API | 0% | 📋 Planned |
@@ -291,24 +306,24 @@ Deferred: Venue CRUD UI, CategoryDefinition CRUD UI
 | Multi Event | 100% | ✅ |
 | RBAC (S1–S7) | 100% | ✅ |
 | Pengajian Desa MVP | 100% | ✅ |
-| Activity/Committee (S3.9) | 100% | ✅ (Venue/Category UI missing) |
+| Activity/Committee (S3.9) | 100% | ✅ (CategoryDefinition CRUD UI belum — `competition_categories` punya UI sendiri) |
 | User Management | 100% | ✅ |
 | Activity Log | 100% | ✅ |
 | UI/UX | 100% | ✅ |
 
-## Overall Progress — Roadmap V2 (PLANNED 0%)
+## Overall Progress — Roadmap V2 (PLANNED → PARTIAL)
 
 | Area | Progress | Status |
 |------|----------|--------|
 | Blueprint Event | 0% | 📋 Planned |
-| Competition Engine | 0% | 📋 Planned |
+| Competition Engine | 60% | ✅ Competition V1 (module) COMPLETE; generic engine Planned |
 | Scoring Engine | 0% | 📋 Planned |
-| Venue Management | 0% | 📋 Planned |
-| Live Schedule Engine | 0% | 📋 Planned |
-| Public Dashboard | 0% | 📋 Planned |
-| Announcement Engine | 0% | 📋 Planned |
+| Venue Management | 30% | 🟡 Venue CRUD V1 ada; hierarki V2 Planned |
+| Live Schedule Engine | 30% | 🟡 Jadwal + status match ada |
+| Public Dashboard | 100% | ✅ Public Portal COMPLETE |
+| Announcement Engine | 30% | 🟡 Competition announcements live |
 | Certificate Engine | 0% | 📋 Planned |
 | Mobile | 0% | 📋 Planned |
 | Public API | 0% | 📋 Planned |
 
-**Current test baseline: 1756 passed / 4148 assertions / 0 failures**
+**Current test baseline: 1944 passed / 4648 assertions / 0 failures**

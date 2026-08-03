@@ -205,21 +205,19 @@ Dashboard internal untuk panitia.
 
 ## Status
 
-Semua item masih **Planned**.
-
-Belum ada yang diimplementasikan.
+🟡 **Sebagian terimplementasi.** Competition V1 (Sprint 7–10), Public Portal (Sprint 9.0), dan Event Dashboard (Sprint 10.0) sudah COMPLETE. Fondasi Competition announcements, Venue CRUD, jadwal + status match sudah ada. Item generic engine (Blueprint Event, Competition Engine generic, Scoring Engine, hierarki Venue V2, Live Schedule realtime, Certificate, Mobile, Public API) masih Planned.
 
 ## Urutan Pengembangan
 
 | # | Item | Status |
 |---|------|--------|
 | 1 | Blueprint Event | 📋 Planned |
-| 2 | Competition Engine | 📋 Planned |
+| 2 | Competition Engine | 🟡 Partial — Competition V1 (module) COMPLETE |
 | 3 | Scoring Engine | 📋 Planned |
-| 4 | Venue Management | 📋 Planned |
-| 5 | Live Schedule Engine | 📋 Planned |
-| 6 | Public Dashboard | 📋 Planned |
-| 7 | Announcement Engine | 📋 Planned |
+| 4 | Venue Management | 🟡 Partial — Venue CRUD V1 ada; hierarki V2 Planned |
+| 5 | Live Schedule Engine | 🟡 Partial — jadwal + status match ada |
+| 6 | Public Dashboard | ✅ COMPLETE — Sprint 9.0 Public Portal |
+| 7 | Announcement Engine | 🟡 Partial — Competition announcements live |
 | 8 | Certificate Engine | 📋 Planned |
 | 9 | Mobile | 📋 Planned |
 | 10 | Public API | 📋 Planned |
@@ -318,17 +316,19 @@ Roadmap V1 (COMPLETED)
 ├── Pengajian Desa MVP
 └── Documentation
 
-Roadmap V2 (PLANNED)
-├── Blueprint Event
-├── Competition Engine
-├── Scoring Engine
-├── Venue Management
-├── Live Schedule Engine
-├── Public Dashboard
-├── Announcement Engine
-├── Certificate Engine
-├── Mobile
-└── Public API
+Roadmap V2 (PARTIAL)
+├── ✅ Competition V1 (module) — COMPLETE
+├── ✅ Public Dashboard / Public Portal — COMPLETE
+├── ✅ Event Dashboard — COMPLETE
+├── 🟡 Competition Engine (generic) — Planned
+├── 🟡 Venue Management — Venue CRUD V1 ada
+├── 🟡 Live Schedule Engine — jadwal + status ada
+├── 🟡 Announcement Engine — fondasi ada
+├── 📋 Blueprint Event — Planned
+├── 📋 Scoring Engine — Planned
+├── 📋 Certificate Engine — Planned
+├── 📋 Mobile — Planned
+└── 📋 Public API — Planned
 ```
 
 V1 adalah fondasi. V2 adalah transformasi menjadi Event Operating System.

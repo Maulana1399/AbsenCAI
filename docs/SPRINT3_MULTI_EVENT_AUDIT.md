@@ -4,6 +4,8 @@
 > Source of truth: Actual code, migrations, models, services, tests
 > No implementation. No migrations. No commits.
 
+> ⚠️ **SUPERSEDED — HISTORICAL SNAPSHOT.** Dokumen ini adalah hasil audit PRA-migrasi (2026-07-17) yang menggambarkan kondisi sebelum Multi Event (S3.1) diimplementasikan. Temuannya ("zero event infrastructure", "no Event model", "single-event application") **tidak lagi berlaku** — Multi Event S3.0–S3.10 sudah COMPLETE, `events` table + `Event` model + `ActiveEventContext` sudah aktif, dan NIP sudah diretire (PGM.20). Gunakan `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`, dan `docs/DATABASE.md` sebagai sumber kebenaran saat ini.
+
 ---
 
 ## 1. EXECUTIVE SUMMARY

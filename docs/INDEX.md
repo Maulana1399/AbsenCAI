@@ -3,7 +3,7 @@
 > Complete index of all documentation files.
 
 > **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) = ✅ **100% COMPLETE**
-> **Roadmap V2** (Event Operating System) = 📋 **Planned** — Lihat `VISION_V2.md`
+> **Roadmap V2** (Event Operating System) = 🟡 **Partial** — Competition V1, Public Portal, Event Dashboard COMPLETE; generic engine Planned — Lihat `VISION_V2.md`
 
 ---
 
@@ -37,21 +37,30 @@
 
 | Area | Status |
 |------|--------|
+| Sprint 1 | ✅ COMPLETE 100% |
+| Sprint 2 | ✅ COMPLETE 100% |
+| Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
+| Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
+| Sprint 3.3 | 🔲 NOT STARTED |
+| Sprint 4 | 🔲 NOT STARTED |
 | Foundation (S01–S04) | ✅ COMPLETE 100% |
 | Multi Event (S3.0–S3.10) | ✅ COMPLETE/VERIFIED |
-| RBAC (S1–S7) | ✅ COMPLETE — 9 roles, 15 gates |
+| RBAC (S1–S7) | ✅ COMPLETE — 9 roles, 18 gates |
 | CAI Operational | ✅ Stable — all modules operational |
 | Person Master Data | ✅ COMPLETE |
 | User Management | ✅ COMPLETE |
 | Pengajian Desa MVP | ✅ PGM.12–PGM.17 Complete |
 | UI Bug Fix Sprint | ✅ Batch 1–4 VERIFIED |
-| UI Standardization | ✅ Phases 2–6 COMPLETE |
+| UI Standardization | ✅ Phases 2–7 COMPLETE |
+| Competition V1 (Sprint 7–10) | ✅ COMPLETE |
+| Public Portal (Sprint 9.0) | ✅ COMPLETE |
+| Event Dashboard (Sprint 10.0) | ✅ COMPLETE |
 | Physical Regu Retirement | ✅ PGM.19 COMPLETE |
 | Legacy NIP Retirement | ✅ PGM.20 COMPLETE |
 | Database V2 / Design C | ✅ problem_total = 0 |
-| Test Baseline | ✅ 1756 passed / 4148 assertions / 0 failures |
+| Test Baseline | ✅ **1944 passed / 4648 assertions / 0 failures** |
 | **Roadmap V1** (All Foundation) | ✅ **100% COMPLETE** |
-| **Roadmap V2** (Event Operating System) | 📋 **Planned** |
+| **Roadmap V2** (Event Operating System) | 🟡 **Partial** — Competition V1/Public Portal/Event Dashboard COMPLETE; generic engine Planned |
 
 ---
 
@@ -78,7 +87,7 @@
 ### Technical Documentation
 | Document | Description | Status |
 |----------|-------------|--------|
-| **ARCHITECTURE.md** | System architecture | 🟡 Partially stale |
+| **ARCHITECTURE.md** | System architecture | ✅ Updated |
 | **DATABASE.md** | Database design | ✅ Updated |
 | **DATABASE_V2.md** | Future database design | 🟡 Future planning |
 | **MODULES.md** | Module overview | ✅ Updated |
@@ -179,8 +188,8 @@
 ### Sprint Audit
 | Document | Description | Status |
 |----------|-------------|--------|
-| **SPRINT3_MULTI_EVENT_AUDIT.md** | Sprint 3 multi-event audit | 🟡 Historical |
-| **ARCHITECTURE_REVIEW_PHASE1.md** | Architecture review phase 1 | 🟡 Historical |
+| **SPRINT3_MULTI_EVENT_AUDIT.md** | Sprint 3 multi-event audit | 🟡 Historical — SUPERSEDED (pra-migrasi) |
+| **ARCHITECTURE_REVIEW_PHASE1.md** | Architecture review phase 1 | 🟡 Historical — sebagian superseded (NIP retired) |
 
 ### Runbooks
 | Document | Description | Status |

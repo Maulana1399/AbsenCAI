@@ -76,9 +76,16 @@ Contohnya:
 
 # Current Focus
 
-Prioritas saat ini adalah menyelesaikan seluruh kebutuhan operasional **CAI**.
+CAI digunakan sebagai MVP awal untuk memvalidasi desain sistem. Saat ini sistem sudah berkembang menjadi **KJA Event Manager** dengan:
 
-CAI digunakan sebagai MVP (Minimum Viable Product) untuk memvalidasi desain sistem sebelum dikembangkan menjadi platform yang lebih besar.
+- CAI Operational (Sprint 1–4) ✅
+- Multi Event (S3.0–S3.10) ✅
+- Pengajian Desa MVP (PGM.12–PGM.20) ✅
+- Competition V1 + Public Portal + Event Dashboard (Sprint 7–10) ✅
+- RBAC + Permission Engine (S1–S7 + Sprint 2) ✅
+- Sprint series 1–3.2 ✅ COMPLETE
+
+Tujuan berikutnya: **UAT** dan Roadmap V2 (Event Operating System).
 
 ---
 

@@ -26,17 +26,25 @@ Commercial Platform (Future)
 
 **Roadmap V2 — Competition V1** = ✅ **COMPLETE** — Competition Management, Match Status, Ready Detection, Match Center, Viewer Integration, Match Result Dialog, Officials Assignment, Single Elimination Bracket, Public Portal, Event Dashboard.
 
-**Remaining Roadmap V2** = 📋 **PLANNED** — Blueprint Event, Venue Management, Certificate Engine, Public API, Mobile. Lihat `VISION_V2.md` untuk detail.
+**Remaining Roadmap V2** = 📋 **PLANNED** — Blueprint Event, Venue Management (V2 hierarchy), Certificate Engine, Public API, Mobile. Lihat `VISION_V2.md` untuk detail.
 
 ---
 
 # Current Status
 
+> **Catatan penomoran sprint:** Bagian "# Sprint 0–6" di bawah adalah sprint *historis* roadmap CAI/Multi Event (sudah closed/complete). **Sprint series saat ini** (Sprint 1, 2, 3.1, 3.2 — track pengembangan pasca-Competition V1) tercantum pada tabel di bawah dan di `docs/CHANGELOG.md` [Unreleased].
+
 | Item | Status |
 |------|--------|
 | Roadmap V1 (Foundation, CAI, Pengajian) | ✅ 100% COMPLETE |
 | Competition V1 (Sprint 7–10) | ✅ COMPLETE |
-| Test Baseline | ✅ **1756 passed / 4148 assertions / 0 failures** |
+| Sprint 1 (Platform Consolidation — MariaDB, Permission Engine, Competition V1) | ✅ COMPLETE 100% |
+| Sprint 2 (RBAC & Permission Engine — Design C) | ✅ COMPLETE 100% |
+| Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
+| Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
+| Sprint 3.3 | 🔲 NOT STARTED |
+| Sprint 4 | 🔲 NOT STARTED |
+| Test Baseline | ✅ **1944 passed / 4648 assertions / 0 failures** |
 | Stage | **Pre-UAT** |
 
 ---
@@ -217,6 +225,8 @@ Notes:
 
 # Sprint 2
 
+> **Catatan:** Sprint 2 di bagian ini adalah sprint *historis* roadmap CAI (Secretariat Operational). Beda dengan **Sprint 2 series saat ini** (RBAC & Permission Engine) di bagian "Current Status".
+
 ## Status
 
 🟢 Operational Stable / Partially Deferred
@@ -241,7 +251,7 @@ Menerapkan Role-Based Access Control (RBAC) di seluruh aplikasi sesuai permissio
 - [x] `Role` enum (9 roles)
 - [x] `users.role` migration (nullable string)
 - [x] User model: role cast, hasRole(), hasAnyRole()
-- [x] Gate definitions (15 abilities) + Super Admin bypass
+- [x] Gate definitions (18 abilities) + Super Admin bypass
 - [x] Artisan command `php artisan user:set-role`
 
 ### S2 — Master Data Protection ✅
@@ -352,6 +362,8 @@ Notes:
 ---
 
 # Sprint 3
+
+> **Catatan:** Sprint 3 di bagian ini adalah sprint *historis* roadmap Multi Event (S3.0–S3.10, sudah complete). Beda dengan **Sprint 3.1 / 3.2 series saat ini** (cleanup & hardening) di bagian "Current Status".
 
 ## Status
 
@@ -921,7 +933,9 @@ Historical numerical delta cannot be reconstructed exactly because relevant Part
 
 ---
 
-# Sprint 4
+# Sprint 4 (HISTORIS — Identity & QR)
+
+> **Catatan:** Sprint 4 di bagian ini adalah sprint *historis* roadmap v1/v1.5 yang sudah selesai. Jangan dicampur dengan **Sprint 4 series saat ini** (track pasca-Competition V1, masih 🔲 NOT STARTED) yang tercantum di bagian "Current Status".
 
 ## Status
 
@@ -1029,7 +1043,7 @@ Current progress:
 * Sprint 2 Print Log completed: Surat Izin print, QR label single/batch/A4 print views integrated with ActivityLogService (action: print_viewed).
 * Sprint 2 Export Log completed: participant data Excel export integrated with ActivityLogService (action: exported).
 * Sprint 2 QR Log completed: single QR PNG download and batch QR export to storage integrated with ActivityLogService (action: downloaded / batch_exported).
-* Latest documented baseline: 459 tests, 1140 assertions (S3.9E). Actual count needs verification via `php artisan test`.
+* Latest baseline saat ini: **1944 tests, 4648 assertions** (pasca Sprint 3.1 + 3.2).
 * Sprint 2 remaining scope: Riwayat Izin, Scoring, Storage — **DEFERRED to 2027**.
 * **Sprint 3 (Multi Event)** ✅ COMPLETE/VERIFIED. Required for August 2026.
 * S3.0 Architecture & Database Audit: COMPLETE.
@@ -1226,20 +1240,26 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 # Current Priority
 
 ```
-1. **UI Bug Fix Sprint — Batch 1** ✅✅ Branding & Navigation (bugs #1, #2, #4, #6) — RESOLVED VERIFIED (908 tests/2192 assertions)
-2. **UI Bug Fix Sprint — Batch 2** ✅✅ Access Token UI & Security (bugs #5, #7, #8) — RESOLVED VERIFIED
-3. **UI Bug Fix Sprint — Batch 3** ✅✅ Functional/UI Logic (bugs #3, #9) — RESOLVED VERIFIED
-4. **UI Bug Fix Sprint — Batch 4** ✅ Final UI Polish (bugs #10, #11, #12) — RESOLVED VERIFIED
-5. **PGM.17 — Pilot Release** ✅ COMPLETE — UI interaction remediation, mobile/dark mode audit, modal close controls standardized
-6. **Pengajian Desa MVP** — PGM.12–PGM.17 ✅ Complete.
-7. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
-8. **S01–S04 Foundation** ✅ Complete
-9. **PGM.18 Sprint 2** ✅ COMPLETE — Mapping contract refactored, fully verified (1499/3592/0)
-10. **PGM.18 Sprint 3** ✅ COMPLETE — Physical mapping cleanup: columns dropped, relationships removed, tested (1508/3624/0)
-11. **PGM.19 Sprint 8A + 8B** ✅ COMPLETE — Physical Regu Retirement: `pesertas.regu_id` dropped, regu dual-write stopped, PlacementService requires eventId
-12. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired from Person/Participation/attendance/QR. `people.nip` and `pesertas.nip` columns physically dropped. `legacyNextNip()` removed.
-13. **Competition** (future sprint)
-14. **Commercial** (future sprint)
+1. **Sprint 3.2 — Architecture Hardening** ✅ COMPLETE — Dashboard Presenter Factory, EventOwnership deduplication, Import helper, ManualEntry trait. Baseline 1944/4648/0.
+2. **Sprint 3.1 — Technical Debt Cleanup** ✅ COMPLETE — dead code/views/imports removed, deduplication. Baseline 1944/4648/0.
+3. **Sprint 2 — RBAC & Permission Engine** ✅ COMPLETE — Permission Engine (Design C), User Management RBAC consistency, Event Role CRUD.
+4. **Sprint 1 — Platform Consolidation** ✅ COMPLETE — MariaDB Migration, Permission Engine foundation, Competition V1, Public Portal, Event Dashboard.
+5. **UAT (User Acceptance Testing)** 🔜 — Competition V1, Public Portal, Event Dashboard. Awaiting sign-off.
+6. **UI Bug Fix Sprint — Batch 1** ✅✅ Branding & Navigation (bugs #1, #2, #4, #6) — RESOLVED VERIFIED
+7. **UI Bug Fix Sprint — Batch 2** ✅✅ Access Token UI & Security (bugs #5, #7, #8) — RESOLVED VERIFIED
+8. **UI Bug Fix Sprint — Batch 3** ✅✅ Functional/UI Logic (bugs #3, #9) — RESOLVED VERIFIED
+9. **UI Bug Fix Sprint — Batch 4** ✅ Final UI Polish (bugs #10, #11, #12) — RESOLVED VERIFIED
+10. **Pengajian Desa MVP** — PGM.12–PGM.17 ✅ Complete.
+11. **Multi Event (Sprint 3)** ✅ Complete (S3.0–S3.10)
+12. **S01–S04 Foundation** ✅ Complete
+13. **PGM.18 Sprint 2** ✅ COMPLETE — Mapping contract refactored, fully verified
+14. **PGM.18 Sprint 3** ✅ COMPLETE — Physical mapping cleanup: columns dropped, relationships removed
+15. **PGM.19 Sprint 8A + 8B** ✅ COMPLETE — Physical Regu Retirement: `pesertas.regu_id` dropped
+16. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired
+17. **Sprint 3.3** 🔲 NOT STARTED — rekomendasi di bawah
+18. **Sprint 4** 🔲 NOT STARTED — rekomendasi di bawah
+19. **Competition** (future sprint — V2 generic engine)
+20. **Commercial** (future sprint)
 ```
 
 ---
@@ -1295,7 +1315,7 @@ Previously tracked as:
 **Completed:**
 - ✅ `manage-import` ability applied to `/import/peserta` and `/import/regu` routes
 - ✅ Livewire ImportPeserta and ImportRegu mutations gated with `Gate::authorize('manage-import')`
-- ✅ Full CAI permission matrix verified (all 15 abilities)
+- ✅ Full CAI permission matrix verified (all 18 abilities)
 - ✅ `manage-import` access matrix verified per role (super_admin, admin, sekretariat)
 
 **Phase 4 RBAC updated status:**
@@ -1313,7 +1333,7 @@ Previously tracked as:
 
 ## Status
 
-📋 **Planned** — Belum ada yang diimplementasikan.
+🟡 **Sebagian terimplementasi.** Competition V1 (Sprint 7–10), Public Portal (Sprint 9.0), Event Dashboard (Sprint 10.0), dan fondasi Competition announcements/venue/jadwal sudah COMPLETE. Item generic engine (Blueprint, Competition Engine generic, Scoring Engine, hierarki Venue V2, Certificate, Mobile, Public API) masih Planned.
 
 ## Filosofi
 
@@ -1328,12 +1348,12 @@ Sebagai gantinya, bangun **Competition Engine** + **Scoring Engine** + **Bluepri
 | # | Item | Status | Deskripsi |
 |---|------|--------|-----------|
 | 1 | Blueprint Event | 📋 Planned | Konfigurasi awal event (Pengajian, Silat, Olahraga, Festival, Seminar, Custom) |
-| 2 | Competition Engine | 📋 Planned | Generic competition engine — bracket, league, round robin, double elimination |
+| 2 | Competition Engine | 🟡 Partial | Competition V1 (module-based) COMPLETE; generic engine masih Planned |
 | 3 | Scoring Engine | 📋 Planned | Generic scoring — Versus, Score, Time, Distance, Ranking, Pass/Fail |
-| 4 | Venue Management | 📋 Planned | Master Venue → Event Venue → Arena/Room (reusable) |
-| 5 | Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi pertandingan |
-| 6 | Public Dashboard | 📋 Planned | Portal publik tanpa login — jadwal, bracket, hasil, pengumuman |
-| 7 | Announcement Engine | 📋 Planned | Pengumuman resmi panitia ke peserta dan publik |
+| 4 | Venue Management | 🟡 Partial | Venue CRUD V1 sudah ada; hierarki Master/Event/Arena masih Planned |
+| 5 | Live Schedule Engine | 🟡 Partial | Jadwal + status match (Sprint 7) sudah ada; estimasi realtime masih Planned |
+| 6 | Public Dashboard | ✅ COMPLETE | Portal publik tanpa login — jadwal, bracket, hasil, pengumuman (Sprint 9.0) |
+| 7 | Announcement Engine | 🟡 Partial | Competition announcements (model + route publik) live; engine generic Planned |
 | 8 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis berdasarkan hasil |
 | 9 | Mobile | 📋 Planned | Aplikasi mobile untuk peserta dan panitia |
 | 10 | Public API | 📋 Planned | REST API untuk integrasi pihak ketiga |

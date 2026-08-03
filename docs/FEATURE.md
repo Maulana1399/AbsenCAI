@@ -3,7 +3,7 @@
 > Feature Catalog for KJA Event Manager
 >
 > **Roadmap V1** = ✅ **100% COMPLETE**
-> **Roadmap V2** = 📋 **Planned** — Lihat `VISION_V2.md`
+> **Roadmap V2** = 🟡 **Partial** — Competition V1, Public Portal, Event Dashboard COMPLETE — Lihat `VISION_V2.md`
 
 ---
 
@@ -33,12 +33,11 @@ Notes:
 - Regu dikeluarkan dari Master Data (Legacy CAI Operational — route `/regu` tetap ada)
 - Master Data accessible without active event context
 - Protected with `can:view-master-data` / `can:manage-master-data` (S2 RBAC)
-- Appears for roles with `view-master-data` ability (super_admin, admin, sekretariat)
+- Appears for roles with `view-master-data` ability (saat ini: **super_admin** — Permission Engine membatasi ability platform ke SuperAdmin; Admin bypass hanya untuk event abilities)
 
 Future
 
-- Venue CRUD
-- CategoryDefinition CRUD
+- CategoryDefinition CRUD (`category_definitions` — event-scoped; UI `Competition/Category` mengelola `competition_categories`)
 
 ---
 
@@ -124,7 +123,7 @@ Notes:
 
 * Dashboard Admin stabil dan event-scoped.
 * Dashboard PJ Regu dan Live Monitoring — DEFERRED.
-* DashboardService belum diimplementasikan — stats dihitung inline di Livewire.
+* Dashboard presenter layer (`app/Services/Dashboard/*`) sudah ada — `CaiDashboardPresenter`, `CompetitionDashboardPresenter`, `PengajianDashboardPresenter`, `DashboardPresenterFactory`. `DashboardService` klasik tetap tidak ada (stats via presenter + Livewire).
 
 Future
 
@@ -330,7 +329,7 @@ Notes:
 
 Known Limitation:
 
-* EditSesi page references `SuratIzin.sesi_id` as editable session data — needs architectural review.
+* ~~EditSesi page references `SuratIzin.sesi_id`~~ — sudah diverifikasi: `EditSesi` memakai `SesiAbsensi` dengan event-scoping, tidak mereferensikan `SuratIzin.sesi_id`. Limitation usang.
 
 ---
 
@@ -391,7 +390,7 @@ Notes:
 * Schema is extensible: properties JSON column, polymorphic subject, nullable ip_address/user_agent.
 * Physical print limitation: `print_viewed` action records print-page generation/access, not guaranteed physical printer completion.
 * Low-level `QRService::generatePng()` is intentionally NOT logged to prevent duplicate logs from internal rendering.
-* Latest documented baseline: 459 tests, 1140 assertions (S3.9E). Actual count needs verification.
+* Baseline saat ini: **1944 passed / 4648 assertions / 0 failures** (pasca Sprint 3.1 + 3.2).
 
 ---
 
@@ -529,7 +528,7 @@ Features
 
 Status
 
-🟢 Stable (Venue + Rundown + RundownItem)
+🟢 Stable (Venue + Rundown + RundownItem + Competition Venue CRUD)
 
 Priority
 
@@ -542,6 +541,7 @@ Sprint
 Features
 
 * Multi Venue (event-scoped Venue model)
+* Venue CRUD UI — `Livewire/Competition/Venue/Index.php` (create/edit/toggle), route `competition.venue.index`
 * Rundown management (Rundown + RundownItem)
 * Time validation (ends_at > starts_at)
 * Parallel activities support
@@ -784,6 +784,7 @@ Tidak diperbolehkan membuat fitur baru tanpa memperbarui FEATURE.md terlebih dah
 # Current Development Focus
 
 **Pengajian Desa MVP (PGM.12–PGM.20)** — ALL COMPLETE
+**Sprint series:** Sprint 1–3.2 COMPLETE. Sprint 3.3 & 4 — NOT STARTED.
 
 Semua sprint utama sudah selesai:
 1. PGM.12–PGM.17 Pengajian Desa MVP ✅ COMPLETE
@@ -794,6 +795,10 @@ Semua sprint utama sudah selesai:
 6. User Management ✅ COMPLETE
 7. UI Bug Fix Sprint ✅ COMPLETE
 8. UI Standardization ✅ COMPLETE
+9. Sprint 1 — Platform Consolidation ✅ COMPLETE
+10. Sprint 2 — RBAC & Permission Engine ✅ COMPLETE
+11. Sprint 3.1 — Technical Debt Cleanup ✅ COMPLETE
+12. Sprint 3.2 — Architecture Hardening ✅ COMPLETE
 
 ---
 

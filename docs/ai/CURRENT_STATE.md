@@ -34,11 +34,16 @@ Pre-UAT
 
 # Current Sprint
 
-Competition V2 — Sprint 7.0 through 10.0 (COMPLETE)
-Public Portal (Sprint 9.0) (COMPLETE)
-Event Dashboard (Sprint 10.0) (COMPLETE)
-Migration Stabilization (COMPLETE)
-UI Standardization Audit (COMPLETE)
+Sprint series (current development track):
+
+| Sprint | Status | Catatan |
+|--------|--------|---------|
+| Sprint 1 | ✅ COMPLETE 100% | Platform Consolidation — MariaDB Migration, Permission Engine, Competition V1, Public Portal, Event Dashboard |
+| Sprint 2 | ✅ COMPLETE 100% | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
+| Sprint 3.1 | ✅ COMPLETE 100% | Technical debt cleanup (dead code/views/imports removal, deduplication) |
+| Sprint 3.2 | ✅ COMPLETE 100% | Architecture hardening (Dashboard Presenter Factory, EventOwnership, Import helper, ManualEntry trait) |
+| Sprint 3.3 | 🔲 NOT STARTED | — |
+| Sprint 4 | 🔲 NOT STARTED | — |
 
 Status:
 
@@ -47,6 +52,7 @@ Status:
 ✅ S3.0–S3.10 all COMPLETE/VERIFIED
 ✅ UI Bug Fix Sprint — Batch 1–4 COMPLETE
 ✅ UI Standardization Phases 2–7 COMPLETE
+✅ PGM.18 Sprint 1–3 COMPLETE — Legacy historical tooling removed, mapping contract refactored, physical cleanup
 ✅ PGM.19 Sprint 8A+8B — Legacy Regu Retirement COMPLETE / VERIFIED
 ✅ PGM.20 Legacy NIP Retirement (Phase 1–4B) COMPLETE / VERIFIED
 ✅ Competition V1 (Sprint 7.0–10.0) COMPLETE — Match Status, Ready Detection, Match Center, Viewer Integration, Match Result, Officials, Bracket
@@ -54,7 +60,9 @@ Status:
 ✅ Event Dashboard (Sprint 10.0) COMPLETE — Overview cards, today's schedule, live competition, quick actions
 ✅ Migration Audit COMPLETE — All race conditions fixed for migrate:fresh
 ✅ UI Audit COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues
-✅ Full test suite: **1756 passed / 4148 assertions / 0 failures**
+✅ Sprint 3.1 Cleanup COMPLETE — dead code/views/imports removed, deduplication (1944/4648/0)
+✅ Sprint 3.2 Hardening COMPLETE — architecture hardening, no behavior change (1944/4648/0)
+✅ Full test suite: **1944 passed / 4648 assertions / 0 failures**
 
 Target: UAT (immediate next).
 
@@ -174,13 +182,13 @@ Completed foundation work:
 
 ## Status
 
-🟢 S1–S7 RBAC COMPLETE (2026-08-04). Full RBAC implementation including event-scoped authorization for KetuaEvent.
+🟢 S1–S7 RBAC COMPLETE (2026-08-04). Full RBAC implementation including event-scoped authorization for KetuaEvent. **Sprint 2 evolution:** Permission Engine (Design C) — ability event-scoped di-resolve dari `User → Person → EventCommitteeAssignment → EventRole.permissions`. `users.role` hanya menentukan hak platform (SuperAdmin/Admin).
 
 ### S1 — RBAC Foundation ✅
 - Role enum (`app/Enums/Role.php`) — 9 roles
 - Migration `2026_08_03_000001` — nullable `role` column on users
 - User model: role cast, `hasRole()`, `hasAnyRole()`
-- 15 Gate abilities defined in `AppServiceProvider` with Super Admin bypass via `Gate::before()`
+- 18 Gate abilities (4 platform + 14 event-scoped) dengan Super Admin bypass via `Gate::before()`
 - Artisan command: `php artisan user:set-role {email} {role}`
 - 35 tests covering Role enum, User model, all Gate permissions, null-role safety, Artisan command, regression
 
@@ -242,7 +250,9 @@ Priority saat ini:
    - Sprint 10.0 — Event Dashboard (overview cards, today's schedule, live matches, quick actions)
 3. **Migration Stabilization** ✅ — 5 Sprint 7.0+ migration files renamed to correct timestamp order. `migrate:fresh` now works from empty database.
 4. **UI Audit & Standardization** ✅ — 19 view files fixed across 16 files. Status badges, typography, dark mode, empty states, buttons all standardized per documented design system.
-5. **Full test suite: 1756 passed / 4148 assertions / 0 failures**
+5. **Sprint 3.1 Cleanup** ✅ COMPLETE — dead code/views/imports removed, deduplication.
+6. **Sprint 3.2 Hardening** ✅ COMPLETE — architecture hardening, no behavior change.
+7. **Full test suite: 1944 passed / 4648 assertions / 0 failures**
 
 ---
 
@@ -250,15 +260,15 @@ Priority saat ini:
 
 ## Documentation
 
-🟢 Stable — updated for Competition V1 baseline (2026-07-28)
+🟢 Stable — updated for baseline 1944/4648 (2026-08-03, comprehensive sync)
 
 ## Architecture
 
-🟢 Stable — Multi Event architecture complete. Competition module added on top of existing architecture (Sprint 7–10). Public Portal and Event Dashboard added.
+🟢 Stable — Multi Event architecture complete. Competition module added on top of existing architecture (Sprint 7–10). Public Portal and Event Dashboard added. Dashboard presenter layer (`app/Services/Dashboard/*`) aktif sejak Sprint 3.2.
 
 ## Database
 
-🟢 Stable — MariaDB primary DB migration complete. SQLite → MariaDB: all migrations, seeders, and full test suite (1792 passed / 4219 assertions / 0 failures) green on both drivers. Competition tables: categories, classes, registrations, schedules, entries, outcomes, match_officials, brackets, bracket_matches. All migrations verified for `migrate:fresh`.
+🟢 Stable — MariaDB primary DB migration complete. SQLite → MariaDB: all migrations, seeders, and full test suite (**1944 passed / 4648 assertions / 0 failures**) green on both drivers. Competition tables: categories, classes, registrations, schedules, entries, outcomes, match_officials, brackets, bracket_matches. All migrations verified for `migrate:fresh`.
 
 ## Core Feature
 
@@ -266,7 +276,7 @@ Priority saat ini:
 
 ## Security
 
-🟢 S1–S7 RBAC complete — Role enum, 15 Gate abilities, event-scoped KetuaEvent authorization, User↔Person↔Assignment chain, defense-in-depth. Competition added: `manage-matches`, `manage-officials`, `submit-result` gates.
+🟢 S1–S7 RBAC complete — Role enum, 18 Gate abilities (4 platform + 14 event-scoped), event-scoped KetuaEvent authorization, User↔Person↔Assignment chain, defense-in-depth. Competition added: `manage-matches`, `manage-officials`, `submit-result` gates.
 
 ---
 
@@ -281,20 +291,20 @@ Database: MariaDB (primary), SQLite (test baseline)
 # Current Risks
 
 ## High
-- SQLite not suitable for concurrent large-scale access
+- SQLite not suitable for concurrent large-scale access (test-only now; production = MariaDB)
 - Multi Event is context-only — modules must be migrated one by one
 - Raw access token ditampilkan penuh di modal creation — potensi security issue jika pengguna tidak menyalin token dengan aman
 
 ## Medium
-- P2: Admin ManualEntry no RBAC
+- P2: Admin ManualEntry no RBAC (route sudah `manage-pengajian`; method-level masih perlu verifikasi)
 - P2: Two parallel identity correction submission paths
 - P2: No XLSX template download for Pengajian import
-- Landing page dan login page masih menggunakan branding CAI — membingungkan pengguna baru KJA Event Manager
+- `ATTENDANCE_LEGACY_WRITE` default `true` — legacy dual-write masih aktif
 
 ## Low
 - API not yet needed
 - Mobile App still planning
-- KJA logo navigasi ke dashboard CAI — perlu event-aware routing
+- KJA logo navigasi — sudah event-aware routing ke `route('home')` (fixed di UI Bug Fix Batch 1); verifikasi lanjut tetap disarankan
 
 ---
 
@@ -314,18 +324,19 @@ Database: MariaDB (primary), SQLite (test baseline)
 - `PlacementService` has mixed responsibilities (participant_number generation, regu placement)
 - Two parallel identity correction paths (PengajianIdentityService vs IdentityCorrectionService)
 - Sidebar is static Blade — doesn't live-render on event switch (page navigation resolves)
-- RBAC implemented S1–S7 — no known gaps in CAI Operational routes
+- RBAC implemented S1–S7 + Permission Engine — `manage-import` didefinisikan tapi route import memakai `manage-participants`; `ImportRegu::import()` belum punya Gate
 - Pengajian import template XLSX not yet downloadable from UI
 - Event edit form does not allow changing event_type after creation
 - No dedicated Pengajian admin dashboard (Regional Report serves as landing)
-- Landing page (`/`) still uses CAI branding — needs KJA Event Manager rebrand
-- Login page still uses CAI branding — needs KJA Event Manager rebrand
 - No hard-delete for revoked DesaAccessGrants — only soft revocation
-- `DashboardService` not yet implemented — dashboard stats computed inline in Livewire
+- `DashboardService` klasik tidak ada — sudah digantikan dashboard presenter layer (`app/Services/Dashboard/*`)
+- **3 placeholder TODO** di `platform-dashboard.blade.php` (event picker dialog) — belum selesai
+- **Migration NO-OP** `2026_08_09_000001_make_legacy_mapping_fk_nullable` — self-declares obsolete
+- **Legacy fallback read aktif** — `LegacyParticipationResolver` + `AttendanceReadService` masih resolve via mapping legacy; `ATTENDANCE_LEGACY_WRITE` default `true` (dual-write ke `Absensi`/`IzinAbsensi`)
 - **Regu retired from peserta** — `pesertas.regu_id` column dropped, `peserta::regu()` removed, `regu::peserta()` removed, dual-write stopped, global fallback eliminated ✅
 - **Regu on Participation** — canonical event-scoped regu path via `participations.regu_id` ✅
 - **NIP retired** — `people.nip` and `pesertas.nip` columns dropped, `legacyNextNip()` removed, NIP removed from all runtime code (QR scan, attendance, registration, reports, exports, Person CRUD) ✅
-- Test suite: **1756 passed, 4148 assertions, 0 failures**. Post-Competition V1, including all Sprint 7–10 features.
+- Test suite: **1944 passed, 4648 assertions, 0 failures**. Baseline pasca Sprint 3.1 Cleanup + 3.2 Hardening.
 
 ---
 
@@ -334,14 +345,15 @@ Database: MariaDB (primary), SQLite (test baseline)
 ## Immediate (Pre-UAT)
 
 1. **UAT** — User Acceptance Testing untuk Competition V1, Public Portal, Event Dashboard
-2. **Documentation Sync** — All markdown synchronized with current implementation (IN PROGRESS)
+2. **Documentation Sync** — All markdown synchronized with current implementation (COMPLETED 2026-08-03)
 3. **Any UAT findings** — Bug fixes as discovered
 
 ## Post-UAT
 
-1. **Venue CRUD UI** — Event-scoped venue management (model & migration sudah ada)
-2. **CategoryDefinition CRUD UI** — Event-scoped category management (model & migration sudah ada)
-3. **Absensi table retirement** — Deferred: table masih ada untuk historical reads
+1. **Sprint 3.3** — rekomendasi berikutnya (lihat laporan audit) — kandidat: legacy read-path retirement, `ATTENDANCE_LEGACY_WRITE` flip, Platform Dashboard event-picker TODO
+2. **Sprint 4** — rekomendasi berikutnya — kandidat: Roadmap V2 (Blueprint Event, Scoring Engine, Certificate)
+3. **CategoryDefinition CRUD UI** — Event-scoped category management (`category_definitions` — berbeda dengan `competition_categories`)
+4. **Absensi table retirement** — Deferred: table masih ada untuk historical reads
 
 ## Roadmap V2 — Event Operating System (Remaining)
 
@@ -353,12 +365,15 @@ Remaining V2 items:
 | # | Item | Status | Deskripsi |
 |---|------|--------|-----------|
 | 1 | Blueprint Event | 📋 Planned | Konfigurasi awal event — dapat diubah panitia |
-| 2 | Venue Management | 📋 Planned | Master Venue → Event Venue → Arena/Room |
-| 3 | Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi |
-| 4 | Announcement Engine | 📋 Planned | Pengumuman resmi panitia |
-| 5 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
-| 6 | Mobile | 📋 Planned | Aplikasi mobile |
-| 7 | Public API | 📋 Planned | REST API |
+| 2 | Competition Engine (generic) | 📋 Planned | Competition V1 (module) COMPLETE; generic engine belum |
+| 3 | Scoring Engine | 📋 Planned | Generic scoring |
+| 4 | Venue Management (V2 hierarchy) | 📋 Planned | Master/Event/Arena — Venue CRUD V1 sudah ada |
+| 5 | Live Schedule Engine | 📋 Planned | Jadwal realtime — status match sudah ada |
+| 6 | Public Dashboard | ✅ COMPLETE | Sprint 9.0 Public Portal |
+| 7 | Announcement Engine | 🟡 Partial | Competition announcements live; generic engine belum |
+| 8 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
+| 9 | Mobile | 📋 Planned | Aplikasi mobile |
+| 10 | Public API | 📋 Planned | REST API |
 
 Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap Roadmap V2.
 
@@ -510,14 +525,12 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 ✅ COMPLETE (2026-07-21).
 
 ### What was done
-- **Route protection**: 2 CAI import routes protected with `can:manage-import` middleware:
+- **Route protection**: 2 CAI import routes protected (`can:manage-participants` di kode aktual — `manage-import` tersedia di engine):
   - `/import/peserta` — CAI Participant Import
   - `/import/regu` — CAI Regu Import
-- **Livewire mutation protection**: 2 components gated with `Gate::authorize('manage-import')`:
-  - `ImportPeserta::import()`
-  - `ImportRegu::import()`
-- **Full CAI permission matrix verification**: All 15 Gate abilities now applied across routes and/or Livewire mutations
-- **`manage-import` access matrix**: super_admin, admin, sekretariat
+- **Livewire mutation protection**: `ImportPeserta::import()` gated; `ImportRegu::import()` belum punya Gate
+- **Full CAI permission matrix verification**: 18 Gate abilities diterapkan (4 platform + 14 event-scoped)
+- **`manage-participants` access matrix**: super_admin, admin, ketua_event, sekretariat (via engine)
 
 ### Updated RBAC Status
 - 🟢 S1 RBAC Foundation: ✅ Complete
@@ -616,7 +629,7 @@ Dokumen ini akan diperbarui setiap kali sprint selesai.
 - No changes to business logic, database, or architecture
 
 ### Verification
-- Full test suite: **1756 passed** (4148 assertions)
+- Full test suite: **1756 passed** (4148 assertions) pada saat itu; baseline saat ini **1944 passed / 4648 assertions / 0 failures**
 
 ### Phase 7 — Competition UI Audit & Standardization
 - ✅ Status badge consistency across 16 files (Finished/Playing/Ready/Scheduled/Waiting Result standardized)

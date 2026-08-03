@@ -6,6 +6,8 @@ Project
 
 KJA Event Manager
 
+> **Catatan:** Dokumen ini adalah **referensi desain** (katalog komponen yang direkomendasikan), bukan inventori komponen yang sudah ada di codebase. Beberapa komponen yang terdaftar (mis. `Footer`, `Breadcrumb`, `Certificate`) mungkin belum diimplementasikan. Untuk daftar fitur aktual berbasis code, lihat `FEATURE_INVENTORY.md`.
+
 ---
 
 # Purpose

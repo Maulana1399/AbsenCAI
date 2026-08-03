@@ -3,7 +3,7 @@
 > Non-Technical Project Overview untuk developer/AI baru.
 >
 > **Roadmap V1** = ✅ **100% COMPLETE**
-> **Roadmap V2** = 📋 **Planned** — Event Operating System
+> **Roadmap V2** = 🟡 **Partial** — Competition V1, Public Portal, Event Dashboard COMPLETE; generic engine Planned — Event Operating System
 
 ---
 
@@ -31,6 +31,10 @@ Legacy compatibility (masih ada, tidak boleh dijadikan canonical):
 
 | PGM/Sprint | Description |
 |------------|-------------|
+| Sprint 1 | Platform Consolidation — MariaDB Migration, Permission Engine, Competition V1, Public Portal, Event Dashboard |
+| Sprint 2 | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
+| Sprint 3.1 | Technical debt cleanup — dead code/views/imports removed, deduplication |
+| Sprint 3.2 | Architecture hardening — Dashboard Presenter Factory, EventOwnership, Import helper, ManualEntry trait |
 | PGM.12–17 | Pengajian Desa MVP — complete |
 | PGM.18 | Physical mapping cleanup — columns dropped, model cleanup |
 | PGM.19 Sprint 8A+8B | Physical Regu Retirement — `pesertas.regu_id` dropped, dual-write stopped |
@@ -73,11 +77,13 @@ The following documentation has been added as part of Project Audit:
 ## Current Test Baseline
 
 ```
-Full suite: 1792 passed, 4219 assertions, 0 failures (SQLite & MariaDB)
+Full suite: 1944 passed, 4648 assertions, 0 failures
 Design C:   problem_total = 0
 ```
 
 **MariaDB Migration (COMPLETE):** primary DB switched from SQLite to MariaDB. Migrations, seeders, and the full test suite are green on both drivers. See `docs/CHANGELOG.md` (Unreleased → MariaDB Migration) for the list of driver-compat fixes. Test command for MariaDB: `DB_CONNECTION=mariadb DB_DATABASE=kja_event_manager_test ... vendor/bin/pest`.
+
+**Sprint series (current):** Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 (cleanup) ✅, Sprint 3.2 (hardening) ✅. Sprint 3.3 & 4 — NOT STARTED.
 
 ---
 
@@ -93,18 +99,18 @@ Filosofi: **Build Engine, Not Module** — jangan buat modul Silat, Voli, MTQ, P
 
 ## Roadmap V2 — Event Operating System (Planned)
 
-| # | Item | Deskripsi |
-|---|------|-----------|
-| 1 | Blueprint Event | Konfigurasi awal event (Pengajian, Silat, Olahraga, Festival, Seminar, Custom) |
-| 2 | Competition Engine | Generic competition engine — bracket, league, round robin, double elimination |
-| 3 | Scoring Engine | Generic scoring — Versus, Score, Time, Distance, Ranking, Pass/Fail |
-| 4 | Venue Management | Master Venue → Event Venue → Arena/Room (reusable) |
-| 5 | Live Schedule Engine | Jadwal realtime mengikuti kondisi pertandingan |
-| 6 | Public Dashboard | Portal publik tanpa login — jadwal, bracket, hasil, pengumuman |
-| 7 | Announcement Engine | Pengumuman resmi panitia |
-| 8 | Certificate Engine | Generate sertifikat otomatis berdasarkan hasil |
-| 9 | Mobile | Aplikasi mobile |
-| 10 | Public API | REST API untuk integrasi pihak ketiga |
+| # | Item | Deskripsi | Status |
+|---|------|-----------|--------|
+| 1 | Blueprint Event | Konfigurasi awal event (Pengajian, Silat, Olahraga, Festival, Seminar, Custom) | 📋 Planned |
+| 2 | Competition Engine | Generic competition engine — bracket, league, round robin, double elimination | 🟡 Partial (Competition V1 COMPLETE) |
+| 3 | Scoring Engine | Generic scoring — Versus, Score, Time, Distance, Ranking, Pass/Fail | 📋 Planned |
+| 4 | Venue Management | Master Venue → Event Venue → Arena/Room (reusable) | 🟡 Partial (Venue CRUD V1 ada) |
+| 5 | Live Schedule Engine | Jadwal realtime mengikuti kondisi pertandingan | 🟡 Partial (jadwal + status match ada) |
+| 6 | Public Dashboard | Portal publik tanpa login — jadwal, bracket, hasil, pengumuman | ✅ COMPLETE (Sprint 9.0) |
+| 7 | Announcement Engine | Pengumuman resmi panitia | 🟡 Partial (Competition announcements) |
+| 8 | Certificate Engine | Generate sertifikat otomatis berdasarkan hasil | 📋 Planned |
+| 9 | Mobile | Aplikasi mobile | 📋 Planned |
+| 10 | Public API | REST API untuk integrasi pihak ketiga | 📋 Planned |
 
 Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap.
 
@@ -112,13 +118,17 @@ Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap.
 
 ## Pending Work (Immediate — V1 Scope)
 
-1. **Venue CRUD** — Event-scoped venue management UI (model & migration sudah ada)
-2. **CategoryDefinition CRUD** — Event-scoped category management UI (model & migration sudah ada)
-3. **Absensi table retirement** — Deferred: table masih ada untuk historical reads, tidak lagi ditulisi
+1. **CategoryDefinition CRUD UI** — Event-scoped category management UI (`category_definitions`; note: `Competition/Category` menangani `competition_categories`, tabel berbeda)
+2. **Absensi table retirement** — Deferred: table masih ada untuk historical reads, tidak lagi ditulisi
+
+## Pending Work (Sprint 3.3 / Sprint 4 — Rekomendasi)
+
+- Sprint 3.3: legacy read-path retirement, `ATTENDANCE_LEGACY_WRITE` flip, Platform Dashboard event-picker TODO
+- Sprint 4: Roadmap V2 (Blueprint Event, Scoring Engine, Certificate Engine)
 
 ## Pending Work (V2 — Future)
 
-Semua item Roadmap V2 masih Planned. Belum ada yang diimplementasikan. Lihat `docs/VISION_V2.md`.
+Item Roadmap V2 yang masih Planned. Lihat `docs/VISION_V2.md`.
 
 ---
 

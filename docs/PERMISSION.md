@@ -2,6 +2,8 @@
 
 > Role & Permission Matrix for KJA Event Manager
 
+> ⚠️ **EVOLUSI PENTING — PERMISSION ENGINE (Design C).** Sejak Sprint 2, ability **event-scoped di-resolve dari `User → Person → EventCommitteeAssignment → EventRole.permissions`**, bukan dari `users.role`. `users.role` hanya menentukan hak platform (SuperAdmin/Admin). Total Gate = **18** (4 platform + 14 event-scoped). Matriks statis di bawah menggambarkan **default EventRole template** (`EventRolePermissionDefaults::BY_CODE`) dan hak platform — bukan lagi sumber authorization runtime untuk role event. Lihat `docs/CHANGELOG.md` (Unreleased → Permission Engine) untuk detail.
+
 ---
 
 # S2 Implementation Status
@@ -11,8 +13,10 @@
 | Role enum | ✅ Implemented — `app/Enums/Role.php` |
 | Users role column | ✅ Migration `2026_08_03_000001` |
 | User model helpers | ✅ `hasRole()`, `hasAnyRole()` |
-| Gate definitions | ✅ 15 abilities in `AppServiceProvider` |
+| Gate definitions | ✅ 18 abilities (4 platform + 14 event-scoped) |
 | Super Admin bypass | ✅ `Gate::before()` |
+| Admin bypass (event) | ✅ `$eventAbility` — Admin bypass event-scoped abilities |
+| Permission Engine | ✅ `EventPermissionService::allows()` |
 | Artisan role command | ✅ `php artisan user:set-role` |
 | Route protection (S2) | ✅ Master Data routes protected |
 | Livewire authorization (S2) | ✅ Master Data mutations protected |
@@ -62,11 +66,13 @@ Catatan: Role `Peserta` tidak memiliki akun login terpisah. Peserta menggunakan 
 
 Berikut Gate abilities yang telah didefinisikan di `AppServiceProvider`. **Sudah dipasang ke route/sidebar/Livewire** — S2–S7 telah complete.
 
+> **Catatan:** Kolom di bawah ini menggambarkan hak **platform** (`users.role`) + **default EventRole template**. Untuk role event (Ketua/Sekretariat/PJ Divisi/Registrasi/Scan/Juri/Viewer), akses runtime ditentukan oleh **EventRole permissions** dari assignment-nya — bukan oleh kolom ini.
+
 | Ability              | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
 | -------------------- | :---------: | :---: | :---: | :---------: | :-------: | :--------: | :--: | :--: | :----: |
 | `view-dashboard`     |      ✅      |   ✅   |   ✅   |      ✅      |     ✅     |     ❌      |  ❌   |  ❌   |   ✅    |
-| `view-master-data`   |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
-| `manage-master-data` |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `view-master-data`   |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-master-data` |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
 | `manage-events`      |      ✅      |   ✅   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
 | `manage-registration`|      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ✅      |  ❌   |  ❌   |   ❌    |
 | `manage-participants`|      ✅      |   ✅   |   ✅   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
@@ -79,6 +85,14 @@ Berikut Gate abilities yang telah didefinisikan di `AppServiceProvider`. **Sudah
 | `manage-pengajian`   |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
 | `view-activity-log`  |      ✅      |   ✅   |   ❌   |      ✅      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
 | `manage-users`       |      ✅      |   ❌   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-matches`     |      ✅      |   ✅   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `manage-officials`   |      ✅      |   ✅   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ❌   |   ❌    |
+| `submit-result`      |      ✅      |   ✅   |   ❌   |      ❌      |     ❌     |     ❌      |  ❌   |  ✅   |   ❌    |
+
+Keterangan:
+- `view-master-data` / `manage-master-data` — **hanya SuperAdmin** sejak Permission Engine (ability platform). Admin tidak lagi mendapat ability ini.
+- `manage-matches`, `manage-officials`, `submit-result` — Gate Competition (Sprint 7–10); di-resolve via Permission Engine. Matriks default: `super_admin`/`admin_event` template = semua ability; `juri` template = `['submit-result']`.
+- Untuk ability event lainnya, template default: `sekretariat` = 11 ability; `ketua_event` = 7; `operator_registrasi` = manage-registration; `operator_scan` = manage-attendance; `pj_divisi` = view-dashboard + manage-attendance; `viewer` = view-dashboard + view-reports; `ketua_fosda` = view-dashboard + manage-pengajian + view-reports. (Lihat `app/Support/EventRolePermissionDefaults.php`.)
 
 ---
 
@@ -149,20 +163,23 @@ Role dan Permission harus sepenuhnya dinamis sehingga organisasi dapat membuat R
 
 Setiap operational route memiliki middleware `can:{ability}` sesuai permission matrix:
 
+> **Catatan routing:** routes operasional sekarang berada di bawah prefix `events/{event}/...` (dengan middleware `resolve.active-event`). Path tanpa prefix (`/absensi`, `/registrasi`, dst.) hanyalah redirect shim (auth-only) menuju route event-prefixed.
+
 | Route | Middleware | Ability |
 |-------|-----------|---------|
-| `/dashboard` | `can:view-dashboard` | `view-dashboard` |
-| `/registrasi` | `can:manage-registration` | `manage-registration` |
-| `/registrasi/ulang` | `can:manage-registration` | `manage-registration` |
-| `/database` | `can:manage-participants` | `manage-participants` |
-| `/sesi-absensi` | `can:manage-sessions` | `manage-sessions` |
-| `/rekap-peserta` | `can:view-reports` | `view-reports` |
-| `/rekap-absensi` | `can:view-reports` | `view-reports` |
-| `/qr-label` | `can:manage-qr-labels` | `manage-qr-labels` |
-| `/absensi` | `can:manage-attendance` | `manage-attendance` |
-| `/surat-izin` | `can:manage-secretariat` | `manage-secretariat` |
-| `/activity-log` | `can:view-activity-log` | `view-activity-log` |
-| `/events` | — (Livewire only) | `manage-events` |
+| `/dashboard` (platform) | `auth, verified` | — (landing platform; tidak ada gate) |
+| `/events/{event}/dashboard` | `can:view-dashboard` | `view-dashboard` |
+| `/events/{event}/registrasi` | `can:manage-registration` | `manage-registration` |
+| `/events/{event}/registrasi/ulang` | `can:manage-registration` | `manage-registration` |
+| `/events/{event}/database` | `can:manage-participants` | `manage-participants` |
+| `/events/{event}/sesi-absensi` | `can:manage-sessions` | `manage-sessions` |
+| `/events/{event}/rekap-peserta` | `can:view-reports` | `view-reports` |
+| `/events/{event}/rekap-absensi` | `can:view-reports` | `view-reports` |
+| `/events/{event}/qr-label` | `can:manage-qr-labels` | `manage-qr-labels` |
+| `/events/{event}/absensi` | `can:manage-attendance` | `manage-attendance` |
+| `/events/{event}/surat-izin` | `can:manage-secretariat` | `manage-secretariat` |
+| `/events/{event}/activity-log` | `can:view-activity-log` | `view-activity-log` |
+| `/events` | `can:manage-events` | `manage-events` |
 
 ## Livewire Mutation Protection
 
@@ -170,7 +187,7 @@ Semua CRUD mutation methods memiliki `Gate::authorize()` sebelum database write:
 
 | Livewire Component | Method(s) | Ability |
 |-------------------|-----------|---------|
-| `Event\Index` | `render()`, `archive()`, `activate()` | `manage-events` |
+| `Event\Index` | `create()`, `archive()`, `activate()`, `delete()` | `manage-events` |
 | `Event\EditStatus` | `update()` | `manage-events` |
 | `Database\Peserta\TambahPeserta` | `simpan()` | `manage-participants` |
 | `Database\Peserta\EditPeserta` | `update()` | `manage-participants` |
@@ -179,13 +196,13 @@ Semua CRUD mutation methods memiliki `Gate::authorize()` sebelum database write:
 | `Database\Sesi\TambahSesi` | `simpan()` | `manage-sessions` |
 | `Database\Sesi\EditSesi` | `update()` | `manage-sessions` |
 | `Database\Sesi\HapusSesi` | `destroy()` | `manage-sessions` |
-| `Dashboard\Scan` | `scanQR()`, `manualHadir()`, `manualIzin()` | `manage-attendance` |
-| `QRLabel\Index` | `downloadPng()`, `printSelected()`, `generateBatchExport()`, `exportBatch()` | `manage-qr-labels` |
+| `Dashboard\Scan` | `scanPeserta()`, `manualAttend()`, `manualIzin()` | `manage-attendance` |
+| `QRLabel\Index` | `downloadPng()`, `printSelectedLabel()`, `printAllFiltered()`, `generateBatchExport()` | `manage-qr-labels` |
 | `Rekap\Peserta\RekapPeserta` | `exportExcel()` | `view-reports` |
 | `SuratIzin\Index` | `submit()`, `approve()`, `reject()`, `cancel()`, `return()` | `manage-secretariat` |
 | `SuratIzin\Create` | `simpan()`, `submit()` | `manage-secretariat` |
-| `Registrasi\Ulang` | `registrasiUlang()`, `updatePeserta()` | `manage-participants` |
-| `Dashboard\Dashboard` | `setSesiAktif()` | `manage-sessions` |
+| `Registrasi\Ulang` | `registrasiUlang()`, `updatePeserta()` | `manage-registration` |
+| `Event\Dashboard` | `activateSesi()` | `manage-sessions` |
 
 ## Access Matrix per Role (S3 Operational Routes)
 
@@ -318,40 +335,41 @@ All these routes are now protected with `can:manage-pengajian` middleware. Only 
 
 ## Status
 
-✅ COMPLETE (2026-07-21). All CAI module import routes protected with `manage-import` ability. Full CAI permission matrix verified.
+✅ COMPLETE (2026-07-21). CAI module import routes protected. Full CAI permission matrix verified.
 
 ## Route-Level Protection
 
+> **Koreksi status aktual (2026-08-03):** `/import/peserta` dan `/import/regu` di kode memakai middleware **`can:manage-participants`** (bukan `manage-import`). Ability `manage-import` tetap didefinisikan (14 event-scoped) dan tersedia di Permission Engine, tetapi belum di-attach ke route ini. Lihat `routes/web.php`.
+
 | Route | Middleware | Ability |
 |-------|-----------|---------|
-| `/import/peserta` | `can:manage-import` | `manage-import` |
-| `/import/regu` | `can:manage-import` | `manage-import` |
+| `/import/peserta` | `can:manage-participants` | `manage-participants` |
+| `/import/regu` | `can:manage-participants` | `manage-participants` |
 
-Catatan: `/import/desa` dan `/import/kelompok` telah diproteksi di S2 dengan `manage-master-data`.
+Catatan: `/import/desa` dan `/import/kelompok` diproteksi di S2 dengan `manage-master-data`.
 
 ## Livewire Mutation Protection
 
-Import mutation methods gated with `manage-import`:
+Import mutation methods gated (sesuai kode aktual):
 
 | Livewire Component | Method(s) | Ability |
 |-------------------|-----------|---------|
-| `Database\Peserta\ImportPeserta` | `import()` | `manage-import` |
-| `Database\Regu\ImportRegu` | `import()` | `manage-import` |
+| `Database\Peserta\ImportPeserta` | `import()` | `manage-participants` |
+| `Database\Regu\ImportRegu` | — (tidak ada Gate) | — |
 
-Catatan: Import Desa dan Import Kelompok telah diproteksi di S2 dengan `manage-master-data`.
+Catatan: Import Desa dan Import Kelompok diproteksi di S2 dengan `manage-master-data`.
 
 ## Access Matrix per Role (S5 Import)
 
 | Ability | Super Admin | Admin | Ketua | Sekretariat | PJ Divisi | Registrasi | Scan | Juri | Viewer |
 |---------|:-----------:|:-----:|:-----:|:-----------:|:---------:|:----------:|:----:|:----:|:------:|
-| `manage-import` | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `manage-participants` | ✅ | ✅ | ✅* | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ## Complete S5 Deliverables
 
-- ✅ `manage-import` ability applied to `/import/peserta` and `/import/regu` routes
-- ✅ Livewire ImportPeserta and ImportRegu mutations gated with `manage-import`
-- ✅ Full CAI permission matrix verified (all 15 abilities)
-- ✅ `manage-import` access matrix: super_admin, admin, sekretariat
+- ✅ Import routes protected (via `manage-participants` di kode aktual; `manage-import` tersedia di engine)
+- ✅ Livewire ImportPeserta gated; ImportRegu belum punya Gate (catatan gap)
+- ✅ Full CAI permission matrix verified (18 abilities di kode)
 
 ---
 
@@ -385,10 +403,10 @@ User.role = ketua_event
 
 ### S7.2 — Event-Scoped Gates + EventSwitcher ✅
 - Added `EventAccessService` — `isUserAssignedToEvent()`, `getAssignedEventIds()`
-- 7 Gate abilities event-scoped for KetuaEvent: `view-dashboard`, `manage-registration`, `manage-participants`, `manage-attendance`, `manage-sessions`, `manage-secretariat`, `view-reports`
-- EventSwitcher filtered to assigned events for KetuaEvent
-- Server-side enforcement in `EventSwitcher::switchTo()` — throws `AuthorizationException` for unassigned events
-- All other roles preserve global behavior
+- 7 Gate abilities event-scoped untuk KetuaEvent: `view-dashboard`, `manage-registration`, `manage-participants`, `manage-attendance`, `manage-sessions`, `manage-secretariat`, `view-reports`
+- EventSwitcher filtered to assigned events untuk non-platform user
+- Server-side enforcement dalam `EventSwitcher::switchTo()` — throws `AuthorizationException` untuk unassigned events
+- **Evolusi (Sprint 2 — Permission Engine):** seluruh 14 event abilities kini di-resolve via `EventPermissionService` (assignment + EventRole.permissions), bukan hanya 7 untuk KetuaEvent. `users.role` hanya menentukan hak platform.
 
 ### S7.3 — Assignment Management UI ✅
 - User Create/Edit UI: searchable Person selection with uniqueness enforcement
@@ -410,14 +428,14 @@ User.role = ketua_event
 
 ## Authorization Rule
 
-**EventRole is NOT an RBAC authorization source.** Any EventCommitteeAssignment linking the User's Person to an Event is sufficient. EventRole is operational/domain metadata only.
+**EventRole IS the authorization source for event abilities (sejak Permission Engine).** Any `EventCommitteeAssignment` linking the User's Person to an Event + an active `EventRole` whose `permissions` JSON contains the ability grants access. `users.role` menentukan hak platform (SuperAdmin/Admin) saja.
 
 ## Security Principles
 
 - SuperAdmin bypass via `Gate::before()` — preserved
-- Admin/Sekretariat/other roles — global access preserved
-- KetuaEvent: role + person + assignment = event-scoped access
-- No assignment, no Person, no active event → denied
+- Admin bypass untuk event abilities via `$eventAbility` — preserved
+- Role event (ketua_event, sekretariat, dst.) — ability via EventRole.permissions (Permission Engine)
+- Tanpa assignment, tanpa Person, tanpa event aktif → denied
 - EventSwitcher: filtered dropdown + server-side enforcement (defense-in-depth)
 
 ## Sidebar @can Directives per Menu

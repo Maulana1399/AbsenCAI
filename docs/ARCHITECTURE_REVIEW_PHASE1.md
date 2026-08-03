@@ -1,5 +1,7 @@
 # ARCHITECTURE REVIEW PHASE 1
 
+> ⚠️ **HISTORICAL — SEBAGIAN SUPERSEDED.** Review phase 1 ini mendeskripsikan service layer awal dan menyebut `AttendanceService` "Cari peserta berdasarkan NIP" serta `peserta::nextAutoNip()`. Keduanya **sudah diretire** di PGM.20 (NIP dihapus dari attendance scan). `PlacementService`, `RegistrationService`, `AttendanceService` tetap hidup tetapi sudah berevolusi (event-scoped). Gunakan `docs/ARCHITECTURE.md`, `docs/PROJECT_STRUCTURE.md`, `docs/DATABASE.md` sebagai sumber kebenaran saat ini.
+
 ## Scope Review
 
 Review ini mengevaluasi Service Layer yang sudah dibuat pada fase awal refactor:

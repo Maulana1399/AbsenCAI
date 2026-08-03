@@ -22,11 +22,11 @@ KJA Event Manager adalah platform Event Management berbasis web yang dikembangka
 
 Current MVP:
 
-CAI Operational & Pengajian Desa MVP.
+CAI Operational + Pengajian Desa MVP + Competition V1.
 
 Long Term Goal:
 
-Commercial Event Management Platform.
+Commercial Event Management Platform (Event Operating System — Roadmap V2).
 
 ---
 
@@ -44,13 +44,13 @@ Commercial Event Management Platform.
 
 ## Database
 
-Current
-
-* SQLite
-
-Future
+Primary
 
 * MariaDB
+
+Test baseline
+
+* SQLite (`:memory:` — committed baseline)
 
 Possible Future
 

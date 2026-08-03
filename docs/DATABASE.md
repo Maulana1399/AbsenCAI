@@ -4,7 +4,7 @@
 
 - **Primary:** MariaDB (default connection in `.env` / `config/database.php`)
 - **Tests:** SQLite `:memory:` (phpunit.xml) — the committed test baseline; MariaDB test runs use `DB_DATABASE=kja_event_manager_test`
-- Both drivers verified: **1792 passed / 4219 assertions / 0 failures** on SQLite and MariaDB
+- Both drivers verified: **1944 passed / 4648 assertions / 0 failures** on SQLite and MariaDB
 
 ## Driver Compatibility Notes
 
@@ -37,6 +37,21 @@ Desa
               │
               ├── Absensi
               └── Registrasi
+
+## Competition Tables (Competition V1 — Sprint 7–10)
+
+| Table | Purpose |
+|-------|---------|
+| `competition_categories` | Event-scoped competition categories |
+| `competition_classes` | Competition classes (gender: L/P/M, category-linked) |
+| `competition_registrations` | Competition registrations (participation-linked) |
+| `competition_schedules` | Match schedule (status: Scheduled/Ready/Playing/Waiting Result/Finished; required_participants; match result fields) |
+| `competition_schedule_entries` | Schedule entries |
+| `competition_outcomes` | Match outcomes / results |
+| `competition_match_officials` | Officials assignment per match (referee/judge/scorer/supervisor) |
+| `competition_brackets` | Single elimination bracket |
+| `competition_bracket_matches` | Bracket matches |
+| `competition_announcements` | Public announcements |
 
 ## People Table Schema
 

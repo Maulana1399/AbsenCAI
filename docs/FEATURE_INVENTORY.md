@@ -3,7 +3,7 @@
 > Complete inventory of all implemented features based on actual code. Not based on roadmap.
 >
 > **Roadmap V1** = ✅ **100% COMPLETE** — Semua fitur di bawah adalah V1.
-> **Roadmap V2** = 📋 **Planned** — Lihat bagian "V2 Planned Features" di bawah.
+> **Roadmap V2** = 🟡 **Partial** — Competition V1 COMPLETE; generic engine Planned — Lihat bagian "V2 Planned Features" di bawah.
 
 ---
 
@@ -19,8 +19,10 @@
 | Reset Password | ✅ | `Livewire/Auth/ResetPassword.php` | Token-based |
 | Confirm Password | ✅ | `Livewire/Auth/ConfirmPassword.php` | For sensitive actions |
 | Email Verification | ✅ | `Livewire/Auth/VerifyEmail.php` + Controller | Route-level verified middleware |
-| Role-Based Access | ✅ | RBAC S1–S7 | 9 roles, 15 gates, event-scoped |
+| Role-Based Access | ✅ | RBAC S1–S7 + Permission Engine | 9 roles, 18 gates, event-scoped |
 | Super Admin Bypass | ✅ | `AppServiceProvider::boot()` | Gate::before() |
+| Admin Bypass (event) | ✅ | `AppServiceProvider` | `$eventAbility` — Admin bypass event abilities |
+| Permission Engine | ✅ | `EventPermissionService` | User→Person→EventCommitteeAssignment→EventRole.permissions |
 | Rate Limiting | ✅ | EnterToken (5/min), SelfAttendance (30/min) | Throttle middleware |
 
 ## Dashboard
@@ -85,7 +87,7 @@
 | Feature | Status | Location | Notes |
 |---------|--------|----------|-------|
 | QR Scan Attendance | ✅ | `AttendanceService::processScan()` | Attendance code based |
-| Manual Attendance (Hadir) | ✅ | `Scan::manualHadir()` | Manual entry |
+| Manual Attendance (Hadir) | ✅ | `Scan::manualAttend()` | Manual entry |
 | Manual Attendance (Izin) | ✅ | `Scan::manualIzin()` | Manual entry |
 | Active Session | ✅ | SesiAbsensi.aktif (per-event) | Session management |
 | Session CRUD | ✅ | `Livewire/Database/Sesi/*` | 4 components |
@@ -133,12 +135,13 @@
 | Rekap Absensi | ✅ | `Livewire/Rekap/Absensi/RekapAbsensi.php` | Event-scoped |
 | Export Excel (Peserta) | ✅ | `Exports/PesertaExport.php` | |
 | Export Excel (Activity Registration) | ✅ | `Exports/ActivityRegistrationExport.php` | S3.9 |
+| Export Competition | ✅ | `Exports/CompetitionExport.php` | Registration/Schedule/Outcome CSV |
 | Export Log | ✅ | ActivityLog logged | |
 | Regional Report (Pengajian) | ✅ | `PengajianRegionalReportService` | |
 | Desa Report (Pengajian) | ✅ | `PengajianDesaReportService` | |
 | Activity Registration Report | ✅ | `Livewire/Rekap/Activity/ActivityRegistrationReport.php` | |
-| Committee Report | ✅ | `Livewire/Rekap/Activity/CommitteeReport.php` | |
-| Rundown Report | ✅ | `Livewire/Rekap/Activity/RundownReport.php` | |
+| ~~Committee Report~~ | ❌ Dihapus | — | Dihapus di Sprint 3.1 cleanup (render view tidak ada) |
+| ~~Rundown Report~~ | ❌ Dihapus | — | Dihapus di Sprint 3.1 cleanup (render view tidak ada) |
 
 ## Pengajian Desa Module
 
@@ -173,7 +176,7 @@
 | Category Definitions | ✅ | `CategoryDefinition` model | Event-scoped |
 | Activity Category Link | ✅ | `ActivityCategory` model | |
 | Requires Category Flag | ✅ | `activities.requires_category` | Validation |
-| Venue CRUD | ✅ | `Venue` model (migration only) | No UI yet |
+| Venue CRUD | ✅ | `Livewire/Competition/Venue/Index.php` | Create/edit/toggle — route `competition.venue.index` |
 | Rundown | ✅ | `Rundown` model | Event-scoped |
 | Rundown Items | ✅ | `RundownItem` model | Time slots |
 | Parallel Activities | ✅ | Supported | Same time, diff venues |
@@ -230,6 +233,24 @@
 | User Management UI | ✅ | 5 components | Super Admin only |
 | Master Data Landing | ✅ | Navigation cards | Person, Desa, Kelompok |
 
+## Competition V1 (Sprint 7–10)
+
+| Feature | Status | Location | Notes |
+|---------|--------|----------|-------|
+| Match Status (Scheduled/Ready/Playing/Waiting Result/Finished) | ✅ | `CompetitionSchedule` model | |
+| Automatic Ready Detection | ✅ | Competition services | based on required_participants |
+| Match Center | ✅ | `Livewire/Competition/MatchCenter.php` | Start/finish, official assignment |
+| Viewer (public display) | ✅ | `Livewire/Competition/Viewer.php` | Playing + Next |
+| Match Result Dialog | ✅ | MatchCenter | Winner, finish reason, notes |
+| Match Officials | ✅ | `CompetitionMatchOfficial` + `OfficialPanel` | referee/judge/scorer/supervisor |
+| Single Elimination Bracket | ✅ | `CompetitionBracket` + `BracketManager` | 4/8/16/32, auto-advance |
+| Public Portal | ✅ | `PublicEventController` + views | homepage, detail, schedule, bracket, announcements |
+| Event Dashboard | ✅ | `Livewire/Event/Dashboard.php` | overview cards, live matches, today's schedule |
+| Competition Dashboard | ✅ | `Livewire/Competition/Dashboard.php` | Presenter-factory based |
+| Competition Export | ✅ | `Exports/CompetitionExport.php` | Registration/Schedule/Outcome CSV |
+| Competition Gates | ✅ | `manage-matches`, `manage-officials`, `submit-result` | 3 gate tambahan (total 18) |
+| Venue CRUD | ✅ | `Livewire/Competition/Venue/Index.php` | event-scoped |
+
 ## V2 Planned Features (Event Operating System)
 
 Fitur berikut adalah bagian dari **Roadmap V2**. Semua masih **Planned**, belum diimplementasikan.
@@ -237,12 +258,12 @@ Fitur berikut adalah bagian dari **Roadmap V2**. Semua masih **Planned**, belum 
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Blueprint Event | 📋 Planned | Konfigurasi awal event — Pengajian, Silat, Olahraga, Festival, Seminar, Custom |
-| Competition Engine | 📋 Planned | Generic — Bracket, League, Round Robin, Double Elimination |
+| Competition Engine | 🟡 Partial | Competition V1 (module) COMPLETE; generic engine Planned |
 | Scoring Engine | 📋 Planned | Generic — Versus, Score, Time, Distance, Ranking, Pass/Fail |
-| Venue Management (Reusable) | 📋 Planned | Master Venue → Event Venue → Arena/Room |
-| Live Schedule Engine | 📋 Planned | Jadwal realtime mengikuti kondisi pertandingan |
-| Public Dashboard | 📋 Planned | Portal publik tanpa login |
-| Announcement Engine | 📋 Planned | Pengumuman resmi panitia |
+| Venue Management (Reusable) | 🟡 Partial | Venue CRUD V1 ada; Master Venue → Event Venue → Arena/Room Planned |
+| Live Schedule Engine | 🟡 Partial | Jadwal + status match ada; estimasi realtime Planned |
+| Public Dashboard | ✅ COMPLETE | Sprint 9.0 — Public Portal tanpa login |
+| Announcement Engine | 🟡 Partial | Competition announcements live; generic engine Planned |
 | Certificate Engine | 📋 Planned | Generate sertifikat otomatis |
 | Mobile App | 📋 Planned | Android/iOS |
 | Public API | 📋 Planned | REST API untuk integrasi |
@@ -260,8 +281,9 @@ Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap.
 | attendance:parity | ✅ | `Console/Commands/AttendanceParity.php` |
 | attendance:status | ✅ | `Console/Commands/AttendanceStatus.php` |
 | audit:legacy-data | ✅ | `Console/Commands/AuditLegacyData.php` |
-| kja:create-desa-grant | ✅ | `Console/Commands/CreateDesaGrant.php` |
-| kja:database-info | ✅ | `Console/Commands/DatabaseInfo.php` |
-| kja:design-c-diagnostics | ✅ | `Console/Commands/DesignCDiagnostics.php` |
-| kja:reset-event-data | ✅ | `Console/Commands/ResetEventData.php` |
+| pengajian:create-desa-grant | ✅ | `Console/Commands/CreateDesaGrant.php` |
+| db:info | ✅ | `Console/Commands/DatabaseInfo.php` |
+| diagnose:design-c | ✅ | `Console/Commands/DesignCDiagnostics.php` |
+| app:reset-event-data | ✅ | `Console/Commands/ResetEventData.php` |
+| event-roles:audit | ✅ | `Console/Commands/AuditEventRoles.php` |
 | kja:identity-backfill | ✅ | `routes/console.php` (inline) |

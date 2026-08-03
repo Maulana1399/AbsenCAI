@@ -2,7 +2,7 @@
 
 **Roadmap V1** = ✅ **100% COMPLETE** — Semua modul bertanda 🟢 adalah V1.
 
-**Roadmap V2** = Competition V1 ✅ **COMPLETE** (Sprint 7–10). Competition Engine generic masih 📋 **Planned**. Lihat `VISION_V2.md`.
+**Roadmap V2** = Competition V1 ✅ **COMPLETE** (Sprint 7–10), Public Portal ✅ (Sprint 9.0), Event Dashboard ✅ (Sprint 10.0). Competition Engine generic masih 📋 **Planned**. Lihat `VISION_V2.md`.
 
 Status Legend
 
@@ -52,7 +52,7 @@ Notes:
 RBAC:
 - Route protection S2: `can:view-master-data` / `can:manage-master-data`
 - Sidebar: `@can('view-master-data')`
-- Hanya super_admin, admin, sekretariat
+- Hanya **super_admin** (sejak Permission Engine — ability platform dibatasi ke SuperAdmin; Admin bypass hanya untuk event abilities; sebelumnya admin & sekretariat)
 
 ---
 
@@ -156,9 +156,8 @@ Future
 
 - Universal Dashboard
 - Division Dashboard
-- Venue Dashboard
 - Live Monitoring
-- DashboardService (business logic extraction)
+- DashboardService (business logic extraction) — presenter layer `app/Services/Dashboard/*` sudah ada
 
 ---
 
@@ -346,13 +345,13 @@ Blueprint Event
 
 Scoring Engine
 
-Venue Management
+🟡 Venue Management — Venue CRUD V1 ada; hierarki Master/Event/Arena Planned
 
-Live Schedule Engine
+🟡 Live Schedule Engine — jadwal + status match ada; estimasi realtime Planned
 
 ✅ Public Dashboard (Sprint 9.0) — Public portal with event detail, schedule, bracket
 
-Announcement Engine
+🟡 Announcement Engine — Competition announcements live; generic engine Planned
 
 Certificate Engine
 
