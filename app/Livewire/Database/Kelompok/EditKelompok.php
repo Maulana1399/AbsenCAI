@@ -18,7 +18,6 @@ class EditKelompok extends Component
 
     public function mount()
     {
-        // $this->daftarkelompok = kelompok::with('desa')->get();
         $this->daftarDesa = desa::all();
     }
 
@@ -42,7 +41,6 @@ class EditKelompok extends Component
             'kelompok_asal' => $this->kelompok,
             'desa_id' => $this->desa_id
         ]);
-        // Flux::modal("edit-kelompok")->hide();
         return redirect()->to('/kelompok');
     }
 

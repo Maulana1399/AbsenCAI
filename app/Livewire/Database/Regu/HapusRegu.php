@@ -15,7 +15,6 @@ class HapusRegu extends Component
     #[On("HapusRegu")]
     public function hapusRegu($id)
     {
-        // dd($id); // Untuk memastikan method ini dijalankan
         $data = regu::find($id);
         $this->regu_id = $data->id;
         $this->regu = $data->regu;
@@ -27,8 +26,8 @@ class HapusRegu extends Component
         $regu = regu::find($this->regu_id);
         if ($regu) {
             $regu->delete();
-            $this->dispatch('refreshRegu'); // Tambahkan baris ini
-            Flux::modal("hapus-regu")->close(); // Tutup modal jika perlu
+            $this->dispatch('refreshRegu');
+            Flux::modal("hapus-regu")->close();
         }
     }
 

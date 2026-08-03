@@ -17,7 +17,6 @@ class HapusKelompok extends Component
     #[On("HapusKelompok")]
     public function hapusKelompok($id)
     {
-        // dd($id); // Untuk memastikan method ini dijalankan
         $data = kelompok::find($id);
         $this->kelompok_id = $data->id;
         $this->kelompok = $data->kelompok;
@@ -30,8 +29,8 @@ class HapusKelompok extends Component
         $kelompok = kelompok::find($this->kelompok_id);
         if ($kelompok) {
             $kelompok->delete();
-            $this->dispatch('refreshKelompok'); // Tambahkan baris ini
-            Flux::modal("hapus-kelompok")->close(); // Tutup modal jika perlu
+            $this->dispatch('refreshKelompok');
+            Flux::modal("hapus-kelompok")->close();
         }
     }
     public function render()

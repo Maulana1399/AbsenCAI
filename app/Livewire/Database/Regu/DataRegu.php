@@ -13,8 +13,6 @@ class DataRegu extends Component
 
     public function mount(){
         $this->daftarregu = regu::all();
-
-        // dd($this->daftarregu);
     }
 
     public function render()    

@@ -16,8 +16,6 @@ class DataKelompok extends Component
     public function mount(){
         $this->daftarkelompok = kelompok::with('desa')->get();
         $this->daftarDesa = desa::all();
-
-        // dd($this->daftarregu);
     }
 
     public function render()    

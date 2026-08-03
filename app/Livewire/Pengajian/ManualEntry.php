@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pengajian;
 
+use App\Livewire\Traits\HandlesManualEntryResult;
 use App\Models\DesaAccessGrant;
 use App\Models\kelompok;
 use App\Services\Registration\ManualParticipantRegistrationService;
@@ -11,6 +12,8 @@ use Livewire\Component;
 #[Layout('components.layouts.pengajian')]
 class ManualEntry extends Component
 {
+    use HandlesManualEntryResult;
+
     public bool $processing = false;
 
     public string $nama = '';
@@ -243,36 +246,6 @@ class ManualEntry extends Component
     public function render()
     {
         return view('livewire.pengajian.manual-entry');
-    }
-
-    private function handleResult(array $result): void
-    {
-        $this->processing = false;
-
-        switch ($result['status']) {
-            case 'created':
-            case 'matched':
-                $this->step = 3;
-                $this->successMessage = $result['message'];
-                $this->resultPersonName = $result['person']->nama;
-                $this->resultParticipantNumber = $result['participation']->participant_number;
-                $this->resultPersonId = $result['person']->id;
-                $this->resultParticipationId = $result['participation']->id;
-                break;
-
-            case 'duplicate':
-                $this->errorMessage = $result['message'];
-                break;
-
-            case 'ambiguous':
-                $this->step = 2;
-                $this->potentialMatches = $result['potential_matches'];
-                $this->errorMessage = $result['message'];
-                break;
-
-            default:
-                $this->errorMessage = 'Hasil tidak dikenali.';
-        }
     }
 
     private function revalidateGrant(): DesaAccessGrant

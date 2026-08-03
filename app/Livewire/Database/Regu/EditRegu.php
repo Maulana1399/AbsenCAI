@@ -42,7 +42,6 @@ class EditRegu extends Component
         $this->validate($rules);
 
         regu::where('id', $this->regu_id)->update($data);
-        // Flux::modal("edit-regu")->hide();
         return redirect()->to('/regu');
     }
 

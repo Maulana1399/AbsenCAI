@@ -3,7 +3,6 @@
 namespace App\Livewire\Pengajian;
 
 use App\Services\Pengajian\DesaAccessService;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;

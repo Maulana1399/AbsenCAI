@@ -11,6 +11,7 @@ use App\Models\SuratIzin;
 use App\Models\peserta;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Support\ActiveEventContext;
+use App\Support\EventOwnership;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -39,7 +40,7 @@ class HapusPeserta extends Component
         $resolver = app(LegacyParticipationResolver::class);
         $participation = Participation::with(['person', 'event'])->find($id);
 
-        if ($participation === null || (int) $participation->event_id !== (int) $event->id) {
+        if ($participation === null || ! EventOwnership::belongsToEvent($participation, $event)) {
             $participation = $resolver->resolveByPesertaAndEvent((int) $id, $event->id);
         }
 
@@ -96,7 +97,7 @@ class HapusPeserta extends Component
 
         DB::transaction(function () use ($event) {
             $participation = Participation::with(['person'])->findOrFail($this->participation_id);
-            if ((int) $participation->event_id !== (int) $event->id) {
+            if (! EventOwnership::belongsToEvent($participation, $event)) {
                 return;
             }
 

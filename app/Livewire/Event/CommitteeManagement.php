@@ -7,6 +7,7 @@ use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
 use App\Models\Person;
 use App\Services\Activity\EventCommitteeService;
+use App\Support\EventOwnership;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -66,7 +67,7 @@ class CommitteeManagement extends Component
             $event = Event::findOrFail($this->eventId);
             $role = EventRole::findOrFail($this->newEventRoleId);
 
-            if ((int) $role->event_id !== (int) $event->id) {
+            if (! EventOwnership::belongsToEvent($role, $event)) {
                 $this->addError('newEventRoleId', 'Role harus berasal dari event yang sama.');
                 return;
             }

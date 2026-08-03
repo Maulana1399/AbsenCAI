@@ -39,7 +39,6 @@ class TambahKelompok extends Component
                 "desa_id" => "required"
             ]);
             
-            // Debug
             logger([
                 'Kelompok' => $this->Kelompok,
                 'desa_id' => $this->desa_id,

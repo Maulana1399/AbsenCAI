@@ -14,7 +14,6 @@ use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 

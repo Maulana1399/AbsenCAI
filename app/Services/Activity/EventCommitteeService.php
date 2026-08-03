@@ -11,6 +11,7 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
 use App\Models\Venue;
+use App\Support\EventOwnership;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -52,11 +53,11 @@ class EventCommitteeService
             ? Venue::findOrFail($data['venue_id'])
             : null;
 
-        if ((int) $role->event_id !== (int) $event->id) {
+        if (! EventOwnership::belongsToEvent($role, $event)) {
             throw ValidationException::withMessages(['event_role_id' => 'Role must belong to the same event.']);
         }
 
-        if ($participation !== null && (int) $participation->event_id !== (int) $event->id) {
+        if ($participation !== null && ! EventOwnership::belongsToEvent($participation, $event)) {
             throw ValidationException::withMessages(['participation_id' => 'Participation must belong to the same event.']);
         }
 
@@ -64,15 +65,15 @@ class EventCommitteeService
             throw ValidationException::withMessages(['person_id' => 'Participation must belong to the same person.']);
         }
 
-        if ($activityGroup !== null && (int) $activityGroup->event_id !== (int) $event->id) {
+        if ($activityGroup !== null && ! EventOwnership::belongsToEvent($activityGroup, $event)) {
             throw ValidationException::withMessages(['activity_group_id' => 'Activity group must belong to the same event.']);
         }
 
-        if ($activity !== null && (int) $activity->event_id !== (int) $event->id) {
+        if ($activity !== null && ! EventOwnership::belongsToEvent($activity, $event)) {
             throw ValidationException::withMessages(['activity_id' => 'Activity must belong to the same event.']);
         }
 
-        if ($venue !== null && (int) $venue->event_id !== (int) $event->id) {
+        if ($venue !== null && ! EventOwnership::belongsToEvent($venue, $event)) {
             throw ValidationException::withMessages(['venue_id' => 'Venue must belong to the same event.']);
         }
 

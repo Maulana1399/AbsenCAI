@@ -4,7 +4,7 @@ namespace App\Livewire\Competition;
 
 use App\Livewire\Traits\ResolvesEventDashboard;
 use App\Models\Event;
-use App\Services\Dashboard\CompetitionDashboardPresenter;
+use App\Services\Dashboard\DashboardPresenterFactory;
 use App\Support\ActiveEventContext;
 use Livewire\Component;
 
@@ -19,11 +19,11 @@ class Dashboard extends Component
         $this->resolveEventDashboard($event);
     }
 
-    public function render(CompetitionDashboardPresenter $presenter)
+    public function render(DashboardPresenterFactory $factory)
     {
         $event = app(ActiveEventContext::class)->current();
 
-        $data = $presenter->present($event);
+        $data = $factory->make($event)->present($event);
 
         return view('livewire.competition.dashboard', array_merge($data, [
             'eventName' => $this->eventName,

@@ -15,24 +15,12 @@ class ImportDataController extends Controller
 {
     public function desa(Request $request): RedirectResponse
     {
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv',
-        ]);
-
-        Excel::import(new DesaImport, $request->file('file'));
-
-        return back()->with('success', 'Data desa berhasil diimpor.');
+        return $this->importFile($request, new DesaImport, 'Data desa berhasil diimpor.');
     }
 
     public function kelompok(Request $request): RedirectResponse
     {
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv',
-        ]);
-
-        Excel::import(new KelompokImport, $request->file('file'));
-
-        return back()->with('success', 'Data kelompok berhasil diimpor.');
+        return $this->importFile($request, new KelompokImport, 'Data kelompok berhasil diimpor.');
     }
 
     public function regu(Request $request): RedirectResponse
@@ -64,12 +52,17 @@ class ImportDataController extends Controller
 
     public function peserta(Request $request): RedirectResponse
     {
+        return $this->importFile($request, new PesertaImport, 'Data peserta berhasil diimpor.');
+    }
+
+    private function importFile(Request $request, object $import, string $message): RedirectResponse
+    {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);
 
-        Excel::import(new PesertaImport, $request->file('file'));
+        Excel::import($import, $request->file('file'));
 
-        return back()->with('success', 'Data peserta berhasil diimpor.');
+        return back()->with('success', $message);
     }
 }

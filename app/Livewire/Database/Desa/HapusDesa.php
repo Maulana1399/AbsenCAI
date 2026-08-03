@@ -16,7 +16,6 @@ class HapusDesa extends Component
     #[On("HapusDesa")]
     public function hapusDesa($id)
     {
-        // dd($id); // Untuk memastikan method ini dijalankan
         $data = desa::find($id);
         $this->desa_id = $data->id;
         $this->desa = $data->desa_asal;
@@ -30,8 +29,8 @@ class HapusDesa extends Component
         $desa = desa::find($this->desa_id);
         if ($desa) {
             $desa->delete();
-            $this->dispatch('refreshDesa'); // Tambahkan baris ini
-            Flux::modal("hapus-desa")->close(); // Tutup modal jika perlu
+            $this->dispatch('refreshDesa');
+            Flux::modal("hapus-desa")->close();
         }
     }
 

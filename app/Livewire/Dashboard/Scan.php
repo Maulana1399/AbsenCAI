@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\EventAttendance;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SesiAbsensi;
@@ -10,6 +9,7 @@ use App\Services\Attendance\AttendanceExceptionService;
 use App\Services\Attendance\AttendanceService;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Support\ActiveEventContext;
+use App\Support\EventOwnership;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -125,7 +125,7 @@ class Scan extends Component
 
         if ($source === 'canonical') {
             $part = Participation::with('person')->find($id);
-            if (! $part || (int) $part->event_id !== (int) $event->id) {
+            if (! $part || ! EventOwnership::belongsToEvent($part, $event)) {
                 return;
             }
 

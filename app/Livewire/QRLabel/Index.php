@@ -2,20 +2,16 @@
 
 namespace App\Livewire\QRLabel;
 
-use App\Models\Event;
 use App\Models\Participation;
 use App\Models\peserta;
 use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\BatchQRExportService;
-use App\Services\QR\QRIdentityResolver;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Index extends Component
@@ -301,47 +297,6 @@ class Index extends Component
             'event' => app(ActiveEventContext::class)->current(),
             ...$query,
         ]);
-    }
-
-    private function printHtmlForParticipants(Collection $participants): string
-    {
-        $qrService = app(QRService::class);
-
-        $pages = $participants->map(function ($participant) use ($qrService) {
-            $qrBase64 = base64_encode($qrService->generatePng((string) $participant->attendance_code));
-            $participantNumber = htmlspecialchars((string) $participant->participant_number, ENT_QUOTES, 'UTF-8');
-            $participantName = htmlspecialchars((string) $participant->nama, ENT_QUOTES, 'UTF-8');
-
-            return <<<HTML
-<div class="label-page">
-    <div class="label">
-        <div class="participant-number">{$participantNumber}</div>
-        <div class="qr"><img src="data:image/png;base64,{$qrBase64}" alt="QR Code"></div>
-        <div class="participant-name">{$participantName}</div>
-    </div>
-</div>
-HTML;
-        })->implode('');
-
-        return <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        @page { size: 4cm 4cm; margin: 0; }
-        html, body { margin: 0; padding: 0; }
-        .label-page { width: 4cm; height: 4cm; page-break-after: always; break-after: page; }
-        .label { width: 4cm; height: 4cm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; padding: 2mm; box-sizing: border-box; font-family: Arial, sans-serif; }
-        .participant-number { font-size: 10pt; font-weight: bold; }
-        .participant-name { font-size: 8pt; line-height: 1.1; }
-        .qr { width: 1.8cm; height: 1.8cm; }
-        .qr img { width: 100%; height: 100%; object-fit: contain; }
-    </style>
-</head>
-<body>{$pages}</body>
-</html>
-HTML;
     }
 
     private function requireSelectedParticipant(): Participation

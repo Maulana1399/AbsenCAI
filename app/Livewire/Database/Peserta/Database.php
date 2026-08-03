@@ -10,8 +10,6 @@ use App\Models\peserta;
 use Livewire\Attributes\On;
 use App\Models\Participation;
 use App\Support\ActiveEventContext;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 
 class Database extends Component
 {

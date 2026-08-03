@@ -7,7 +7,6 @@ use App\Models\CompetitionBracket;
 use App\Models\CompetitionClass;
 use App\Models\CompetitionSchedule;
 use App\Models\Event;
-use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\SuratIzin;
 use App\Models\Venue;
@@ -15,6 +14,7 @@ use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
+use App\Support\EventOwnership;
 use Illuminate\Http\Request;
 
 class PublicEventController extends Controller
@@ -185,14 +185,14 @@ class PublicEventController extends Controller
 
     public function qrLabelPrintSelected(Event $event, Participation $participant)
     {
-        abort_if((int) $participant->event_id !== (int) $event->id, 404);
+        abort_if(! EventOwnership::belongsToEvent($participant, $event), 404);
 
         $participant->load(['person', 'legacyParticipationMapping']);
 
         abort_if($participant->person === null, 404);
         abort_if(
             $participant->legacyParticipationMapping !== null
-            && (int) $participant->legacyParticipationMapping->event_id !== (int) $event->id,
+            && ! EventOwnership::belongsToEvent($participant->legacyParticipationMapping, $event),
             404
         );
 
@@ -232,49 +232,7 @@ class PublicEventController extends Controller
 
         abort_if($event === null, 404);
 
-        $query = Participation::with([
-            'person.desa',
-            'legacyParticipationMapping.peserta',
-        ])
-            ->where('event_id', $event->id)
-            ->whereNotNull('attendance_code');
-
-        if ($request->filled('desa')) {
-            $query->whereHas('person', fn ($q) =>
-                $q->where('desa_id', $request->input('desa'))
-            );
-        }
-
-        if ($request->filled('kelompok')) {
-            $query->whereHas('legacyParticipationMapping.peserta', function ($q) use ($request) {
-                $q->where('kelompok_id', $request->input('kelompok'));
-            });
-        }
-
-        if ($request->filled('regu')) {
-            $query->where('regu_id', $request->input('regu'));
-        }
-
-        if ($request->filled('gender')) {
-            $query->whereHas('person', fn ($q) =>
-                $q->where('jenis_kelamin', $request->input('gender'))
-            );
-        }
-
-        $keyword = trim((string) $request->input('keyword', ''));
-
-        if ($keyword !== '') {
-            $query->where(function ($builder) use ($keyword) {
-                $builder
-                    ->whereHas('person', fn ($q) =>
-                        $q->where('nama', 'like', '%'.$keyword.'%')
-                    )
-                    ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                    ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
-            });
-        }
-
-        $participants = $query
+        $participants = $this->qrParticipantsQuery($request, $event)
             ->get()
             ->sortBy(fn ($participant) => $participant->person?->nama ?? '')
             ->values();
@@ -390,49 +348,7 @@ HTML;
 
         abort_if($event === null, 404);
 
-        $query = Participation::with([
-            'person.desa',
-            'legacyParticipationMapping.peserta',
-        ])
-            ->where('event_id', $event->id)
-            ->whereNotNull('attendance_code');
-
-        if ($request->filled('desa')) {
-            $query->whereHas('person', fn ($q) =>
-                $q->where('desa_id', $request->input('desa'))
-            );
-        }
-
-        if ($request->filled('kelompok')) {
-            $query->whereHas('legacyParticipationMapping.peserta', function ($q) use ($request) {
-                $q->where('kelompok_id', $request->input('kelompok'));
-            });
-        }
-
-        if ($request->filled('regu')) {
-            $query->where('regu_id', $request->input('regu'));
-        }
-
-        if ($request->filled('gender')) {
-            $query->whereHas('person', fn ($q) =>
-                $q->where('jenis_kelamin', $request->input('gender'))
-            );
-        }
-
-        $keyword = trim((string) $request->input('keyword', ''));
-
-        if ($keyword !== '') {
-            $query->where(function ($builder) use ($keyword) {
-                $builder
-                    ->whereHas('person', fn ($q) =>
-                        $q->where('nama', 'like', '%'.$keyword.'%')
-                    )
-                    ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                    ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
-            });
-        }
-
-        $participants = $query
+        $participants = $this->qrParticipantsQuery($request, $event)
             ->get()
             ->sortBy(fn ($participant) => $participant->person?->nama ?? '')
             ->values();
@@ -582,8 +498,8 @@ HTML;
 
     public function suratIzinPrint(Event $event, SuratIzin $surat)
     {
-        abort_if($surat->event_id !== null && (int) $surat->event_id !== (int) $event->id, 404);
-        abort_if($surat->participation !== null && (int) $surat->participation->event_id !== (int) $event->id, 404);
+        abort_if($surat->event_id !== null && ! EventOwnership::belongsToEvent($surat, $event), 404);
+        abort_if($surat->participation !== null && ! EventOwnership::belongsToEvent($surat->participation, $event), 404);
         abort_if(! $surat->isApproved(), 403);
 
         app(ActivityLogService::class)->log(
@@ -600,5 +516,52 @@ HTML;
         );
 
         return view('surat-izin.print', compact('surat'));
+    }
+
+    private function qrParticipantsQuery(Request $request, Event $event): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = Participation::with([
+            'person.desa',
+            'legacyParticipationMapping.peserta',
+        ])
+            ->where('event_id', $event->id)
+            ->whereNotNull('attendance_code');
+
+        if ($request->filled('desa')) {
+            $query->whereHas('person', fn ($q) =>
+                $q->where('desa_id', $request->input('desa'))
+            );
+        }
+
+        if ($request->filled('kelompok')) {
+            $query->whereHas('legacyParticipationMapping.peserta', function ($q) use ($request) {
+                $q->where('kelompok_id', $request->input('kelompok'));
+            });
+        }
+
+        if ($request->filled('regu')) {
+            $query->where('regu_id', $request->input('regu'));
+        }
+
+        if ($request->filled('gender')) {
+            $query->whereHas('person', fn ($q) =>
+                $q->where('jenis_kelamin', $request->input('gender'))
+            );
+        }
+
+        $keyword = trim((string) $request->input('keyword', ''));
+
+        if ($keyword !== '') {
+            $query->where(function ($builder) use ($keyword) {
+                $builder
+                    ->whereHas('person', fn ($q) =>
+                        $q->where('nama', 'like', '%'.$keyword.'%')
+                    )
+                    ->orWhere('participant_number', 'like', '%'.$keyword.'%')
+                    ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
+            });
+        }
+
+        return $query;
     }
 }

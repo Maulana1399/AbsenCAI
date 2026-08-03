@@ -32,7 +32,6 @@ class EditDesa extends Component
         desa::where('id', $this->desa_id)->update([
             'desa_asal' => $this->desa
         ]);
-        // \Flux\Flux::modal("edit-desa")->hide();
         return redirect()->to('/desa');
     }
 

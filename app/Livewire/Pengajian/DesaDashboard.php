@@ -3,7 +3,6 @@
 namespace App\Livewire\Pengajian;
 
 use App\Models\DesaAccessGrant;
-use App\Models\Event;
 use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\PengajianAttendanceService;

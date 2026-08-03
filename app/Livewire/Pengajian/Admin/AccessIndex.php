@@ -3,7 +3,6 @@
 namespace App\Livewire\Pengajian\Admin;
 
 use App\Models\DesaAccessGrant;
-use App\Models\Event;
 use App\Models\desa;
 use App\Services\Audit\ActivityLogService;
 use App\Services\Pengajian\DesaAccessService;

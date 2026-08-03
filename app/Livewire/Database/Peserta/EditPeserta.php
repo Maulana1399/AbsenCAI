@@ -8,12 +8,12 @@ use App\Models\peserta;
 use Livewire\Attributes\On;
 use Flux\Flux;
 use App\Models\desa;
-use App\Models\kelompok;
 use App\Models\regu;
 use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Person\PersonLegacySyncService;
 use App\Support\ActiveEventContext;
+use App\Support\EventOwnership;
 use Illuminate\Support\Facades\Gate;
 
 class EditPeserta extends Component
@@ -53,7 +53,7 @@ class EditPeserta extends Component
         $resolver = app(LegacyParticipationResolver::class);
         $participation = Participation::with('person')->find($id);
 
-        if ($participation === null || (int) $participation->event_id !== (int) $event->id) {
+        if ($participation === null || ! EventOwnership::belongsToEvent($participation, $event)) {
             $participation = $resolver->resolveByPesertaAndEvent((int) $id, $event->id);
         }
 
@@ -93,7 +93,7 @@ class EditPeserta extends Component
         }
 
         $participation = Participation::with('person')->findOrFail($this->participation_id);
-        if ((int) $participation->event_id !== (int) $event->id) {
+        if (! EventOwnership::belongsToEvent($participation, $event)) {
             return redirect()->to('/database');
         }
 

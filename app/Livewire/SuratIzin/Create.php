@@ -3,7 +3,6 @@
 namespace App\Livewire\SuratIzin;
 
 use App\Models\Person;
-use App\Models\Participation;
 use App\Models\peserta;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Attendance\SuratIzinService;
