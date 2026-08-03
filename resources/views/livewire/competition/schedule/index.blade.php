@@ -259,21 +259,21 @@
                         {{-- Actions --}}
                         <div class="mt-auto flex flex-wrap gap-1.5 pt-3">
                             @if ($schedule->status === 'Scheduled')
-                                <flux:button :href="route('competition.schedule.entries', $schedule->id)" size="xs" icon="users" class="flex-1">Peserta</flux:button>
+                                <flux:button :href="route('competition.schedule.entries', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" size="xs" icon="users" class="flex-1">Peserta</flux:button>
                                 <flux:button wire:click="edit({{ $schedule->id }})" size="xs" icon="pencil" variant="ghost">Edit</flux:button>
 
                             @elseif ($schedule->status === 'Ready')
-                                <flux:button :href="route('competition.schedule.entries', $schedule->id)" size="xs" icon="users" class="flex-1">Peserta</flux:button>
-                                <flux:button :href="route('competition.match-center')" size="xs" icon="play" variant="primary" class="flex-1">Match Center</flux:button>
+                                <flux:button :href="route('competition.schedule.entries', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" size="xs" icon="users" class="flex-1">Peserta</flux:button>
+                                <flux:button :href="route('competition.match-center', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false)" size="xs" icon="play" variant="primary" class="flex-1">Match Center</flux:button>
                                 <flux:button wire:click="edit({{ $schedule->id }})" size="xs" icon="pencil" variant="ghost">Edit</flux:button>
 
                             @elseif ($schedule->status === 'Playing')
-                                <flux:button :href="route('competition.match-center')" size="xs" icon="play" variant="primary" class="flex-1">Match Center</flux:button>
-                                <flux:button :href="route('competition.schedule.outcomes', $schedule->id)" size="xs" icon="clipboard-document-list" class="flex-1">Hasil</flux:button>
+                                <flux:button :href="route('competition.match-center', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false)" size="xs" icon="play" variant="primary" class="flex-1">Match Center</flux:button>
+                                <flux:button :href="route('competition.schedule.outcomes', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" size="xs" icon="clipboard-document-list" class="flex-1">Hasil</flux:button>
                                 <flux:button wire:click="edit({{ $schedule->id }})" size="xs" icon="pencil" variant="ghost">Edit</flux:button>
 
                             @elseif ($schedule->status === 'Finished')
-                                <flux:button :href="route('competition.schedule.outcomes', $schedule->id)" size="xs" icon="clipboard-document-list" class="flex-1">Hasil</flux:button>
+                                <flux:button :href="route('competition.schedule.outcomes', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" size="xs" icon="clipboard-document-list" class="flex-1">Hasil</flux:button>
                                 <flux:button wire:click="edit({{ $schedule->id }})" size="xs" icon="pencil" variant="ghost">Edit</flux:button>
                             @endif
                         </div>

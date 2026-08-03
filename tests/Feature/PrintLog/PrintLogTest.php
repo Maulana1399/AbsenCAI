@@ -113,7 +113,7 @@ test('surat izin print creates print_viewed activity log entry', function () {
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $this->user);
 
-    $this->get(route('surat-izin.print', $surat->id));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $this->assertDatabaseHas('activity_logs', [
         'action'       => 'print_viewed',
@@ -134,7 +134,7 @@ test('surat izin print stores correct properties', function () {
     $surat->update(['status' => 'pending']);
     $surat = app(SuratIzinService::class)->approve($surat->fresh(), $this->user)['surat'];
 
-    $this->get(route('surat-izin.print', $surat->id));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $log = ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -159,7 +159,7 @@ test('surat izin print stores correct description', function () {
     $surat->update(['status' => 'pending']);
     $surat = app(SuratIzinService::class)->approve($surat->fresh(), $this->user)['surat'];
 
-    $this->get(route('surat-izin.print', $surat->id));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $log = ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -177,7 +177,7 @@ test('forbidden surat izin print does not create activity log entry', function (
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
-    $this->get(route('surat-izin.print', $surat->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]))
         ->assertStatus(403);
 
     $this->assertDatabaseMissing('activity_logs', [
@@ -197,8 +197,8 @@ test('repeated surat izin print requests create separate activity log entries', 
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $this->user);
 
-    $this->get(route('surat-izin.print', $surat->id));
-    $this->get(route('surat-izin.print', $surat->id));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $this->assertEquals(2, ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -216,7 +216,7 @@ test('surat izin print response remains successful', function () {
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $this->user);
 
-    $this->get(route('surat-izin.print', $surat->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]))
         ->assertStatus(200)
         ->assertSee($this->peserta->nama)
         ->assertSee($surat->nomor_surat);
@@ -227,7 +227,7 @@ test('surat izin print response remains successful', function () {
 // ---------------------------------------------------------------------------
 
 test('qr label single print creates print_viewed activity log entry', function () {
-    $this->get(route('qr-label.print.selected', $this->participation->id));
+    $this->get(route('qr-label.print.selected', ['event' => $this->event, 'participant' => $this->participation->id]));
 
     $this->assertDatabaseHas('activity_logs', [
         'action'       => 'print_viewed',
@@ -239,7 +239,7 @@ test('qr label single print creates print_viewed activity log entry', function (
 });
 
 test('qr label single print stores correct properties', function () {
-    $this->get(route('qr-label.print.selected', $this->participation->id));
+    $this->get(route('qr-label.print.selected', ['event' => $this->event, 'participant' => $this->participation->id]));
 
     $log = ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -254,7 +254,7 @@ test('qr label single print stores correct properties', function () {
 });
 
 test('qr label single print response remains successful', function () {
-    $this->get(route('qr-label.print.selected', $this->participation->id))
+    $this->get(route('qr-label.print.selected', ['event' => $this->event, 'participant' => $this->participation->id]))
         ->assertStatus(200)
         ->assertSee($this->peserta->nama);
 });
@@ -267,7 +267,7 @@ test('qr label batch filtered print creates exactly one activity log entry', fun
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
 
-    $this->get(route('qr-label.print.filtered'));
+    $this->get(route('qr-label.print.filtered', ['event' => $this->event]));
 
     $this->assertEquals(1, ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -279,7 +279,7 @@ test('qr label batch filtered print stores correct count', function () {
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
 
-    $this->get(route('qr-label.print.filtered'));
+    $this->get(route('qr-label.print.filtered', ['event' => $this->event]));
 
     $log = ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -293,7 +293,7 @@ test('qr label batch filtered print stores correct count', function () {
 test('qr label batch filtered print response remains successful', function () {
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $this->get(route('qr-label.print.filtered'))
+    $this->get(route('qr-label.print.filtered', ['event' => $this->event]))
         ->assertStatus(200);
 });
 
@@ -305,7 +305,7 @@ test('qr label batch a4 print creates exactly one activity log entry', function 
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 3', 'nip' => 8003, 'attendance_code' => 'KJA-P3', 'jenis_kelamin' => 'Perempuan']);
 
-    $this->get(route('qr-label.print.a4'));
+    $this->get(route('qr-label.print.a4', ['event' => $this->event]));
 
     $this->assertEquals(1, ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -316,7 +316,7 @@ test('qr label batch a4 print creates exactly one activity log entry', function 
 test('qr label batch a4 print stores correct count and format', function () {
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $this->get(route('qr-label.print.a4'));
+    $this->get(route('qr-label.print.a4', ['event' => $this->event]));
 
     $log = ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
@@ -330,7 +330,7 @@ test('qr label batch a4 print stores correct count and format', function () {
 test('qr label batch a4 print response remains successful', function () {
     printLog_createMappedPeserta($this->event, ['nama' => 'Peserta 2', 'nip' => 8002, 'attendance_code' => 'KJA-P2', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $this->get(route('qr-label.print.a4'))
+    $this->get(route('qr-label.print.a4', ['event' => $this->event]))
         ->assertStatus(200);
 });
 
@@ -348,7 +348,7 @@ test('surat izin print does not affect surat izin lifecycle logs', function () {
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $this->user);
 
-    $this->get(route('surat-izin.print', $surat->id));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $createdLogs = ActivityLog::where('module', 'surat_izin')->where('action', 'created')->count();
     $approvedLogs = ActivityLog::where('module', 'surat_izin')->where('action', 'approved')->count();

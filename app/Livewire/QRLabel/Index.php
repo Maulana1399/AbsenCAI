@@ -277,7 +277,12 @@ class Index extends Component
         Gate::authorize('manage-qr-labels');
 
         $participant = $this->requireSelectedParticipant();
-        return redirect()->route('qr-label.print.selected', ['participant' => $participant->id]);
+        $event = $participant->event ?? app(ActiveEventContext::class)->current();
+
+        return redirect()->route('qr-label.print.selected', [
+            'event' => $event,
+            'participant' => $participant->id,
+        ]);
     }
 
     public function printAllFiltered()
@@ -292,7 +297,10 @@ class Index extends Component
             'keyword' => $this->filterKeyword ?: null,
         ]);
 
-        return redirect()->route('qr-label.print.filtered', $query);
+        return redirect()->route('qr-label.print.filtered', [
+            'event' => app(ActiveEventContext::class)->current(),
+            ...$query,
+        ]);
     }
 
     private function printHtmlForParticipants(Collection $participants): string

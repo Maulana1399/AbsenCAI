@@ -336,7 +336,7 @@
                     </flux:button>
 
                     <flux:button
-                        onclick="window.open('{{ route('pengajian.qr-print', absolute: false) }}', 'print', 'width=600,height=800')"
+                        onclick="window.open('{{ route('pengajian.qr-print', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false) }}', 'print', 'width=600,height=800')"
                         variant="ghost"
                         size="sm"
                     >
@@ -369,7 +369,7 @@
             </p>
             <div class="mt-4">
                 <flux:button
-                    onclick="window.location.href='{{ route('pengajian.desa.tambah') }}'"
+                    onclick="window.location.href='{{ route('pengajian.desa.tambah', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false) }}'"
                     variant="primary"
                     class="w-full"
                 >

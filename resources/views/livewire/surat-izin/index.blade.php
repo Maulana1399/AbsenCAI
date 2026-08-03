@@ -114,7 +114,7 @@
                                         </flux:button>
                                     @endif
                                     @if ($surat->isApproved())
-                                        <flux:button :href="route('surat-izin.print', $surat->id)" target="_blank" size="sm">
+                                        <flux:button :href="route('surat-izin.print', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'surat' => $surat->id], absolute: false)" target="_blank" size="sm">
                                             {{ __('Print') }}
                                         </flux:button>
                                     @endif

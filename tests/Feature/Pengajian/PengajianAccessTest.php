@@ -53,7 +53,8 @@ function pgm3_createValidGrant(Event $event, desa $desa, ?User $user = null): ar
 // ---------------------------------------------------------------------------
 
 test('/pengajian dapat diakses tanpa Laravel auth', function () {
-    $response = $this->get(route('pengajian.enter-token'));
+    $event = pgm3_makeEvent();
+    $response = $this->get(route('pengajian.enter-token', ['event' => $event]));
 
     $response->assertStatus(200);
 });
@@ -71,7 +72,7 @@ test('valid token establishes Pengajian scoped session and redirects', function 
     Livewire::test(EnterToken::class)
         ->set('token', $result['raw_token'])
         ->call('submit')
-        ->assertRedirect(route('pengajian.desa'));
+        ->assertRedirect(route('pengajian.desa', ['event' => $event]));
 
     expect(session()->has('pengajian_access'))->toBeTrue();
     expect(session('pengajian_access.event_id'))->toBe($event->id);
@@ -193,7 +194,7 @@ test('valid token resets rate limiter', function () {
     Livewire::test(EnterToken::class)
         ->set('token', $result['raw_token'])
         ->call('submit')
-        ->assertRedirect(route('pengajian.desa'));
+        ->assertRedirect(route('pengajian.desa', ['event' => $event]));
 
     expect(Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5))->toBeFalse();
 });
@@ -203,9 +204,10 @@ test('valid token resets rate limiter', function () {
 // ---------------------------------------------------------------------------
 
 test('/pengajian/desa tanpa session redirects ke enter token', function () {
-    $response = $this->get(route('pengajian.desa'));
+    $event = pgm3_makeEvent();
+    $response = $this->get(route('pengajian.desa', ['event' => $event]));
 
-    $response->assertRedirect(route('pengajian.enter-token'));
+    $response->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('valid scoped session dapat membuka dashboard', function () {
@@ -284,8 +286,10 @@ test('revoked grant setelah session dibuat membatalkan access', function () {
 
     app(DesaAccessService::class)->revokeGrant($result['grant']);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(DesaDashboard::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 
     expect(session()->has('pengajian_access'))->toBeFalse();
 });
@@ -308,8 +312,10 @@ test('expired grant setelah session dibuat membatalkan access', function () {
         'desa_id' => $desa->id,
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(DesaDashboard::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 
     expect(session()->has('pengajian_access'))->toBeFalse();
 });
@@ -331,8 +337,10 @@ test('manipulated desa_id session ditolak', function () {
         'desa_id' => 999,
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(DesaDashboard::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('manipulated event_id session ditolak', function () {
@@ -348,11 +356,17 @@ test('manipulated event_id session ditolak', function () {
         'desa_id' => $desa->id,
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(DesaDashboard::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('invalid grant_id in session ditolak', function () {
+    $event = pgm3_makeEvent();
+
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     session()->put('pengajian_access', [
         'grant_id' => 99999,
         'event_id' => 1,
@@ -360,7 +374,7 @@ test('invalid grant_id in session ditolak', function () {
     ]);
 
     Livewire::test(DesaDashboard::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 // ---------------------------------------------------------------------------
@@ -383,9 +397,11 @@ test('Pengajian logout hanya membersihkan Pengajian session', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(DesaDashboard::class)
         ->call('logout')
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 
     expect(session()->has('pengajian_access'))->toBeFalse();
     // Laravel auth should still be active

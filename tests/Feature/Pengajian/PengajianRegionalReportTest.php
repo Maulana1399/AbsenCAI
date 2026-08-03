@@ -266,7 +266,8 @@ test('attendanceList attendance_code tidak terekspos', function () {
 });
 
 test('halaman report membutuhkan auth', function () {
-    $response = $this->get(route('pengajian.report'));
+    $event = pgm9_event();
+    $response = $this->get(route('pengajian.report', ['event' => $event]));
 
     $response->assertRedirect(route('login'));
 });
@@ -278,20 +279,20 @@ test('halaman report dapat diakses oleh user terverifikasi', function () {
     app(ActiveEventContext::class)->set($event);
 
     $response = $this->actingAs($user)
-        ->get(route('pengajian.report'));
+        ->get(route('pengajian.report', ['event' => $event]));
 
     $response->assertOk();
 });
 
 test('halaman report tidak 500 ketika tidak ada active event', function () {
+    $event = pgm9_event();
     $user = User::factory()->create(['role' => Role::Admin]);
 
     $response = $this->actingAs($user)
-        ->get(route('pengajian.report'));
+        ->get(route('pengajian.report', ['event' => $event]));
 
     $response->assertOk();
-    $response->assertSee('Tidak ada event aktif');
-    $response->assertSee('Kelola Event');
+    $response->assertSee('Total Warga');
 });
 
 test('halaman report dengan active event tetap berfungsi normal', function () {
@@ -303,7 +304,7 @@ test('halaman report dengan active event tetap berfungsi normal', function () {
     app(ActiveEventContext::class)->set($event);
 
     $response = $this->actingAs($user)
-        ->get(route('pengajian.report'));
+        ->get(route('pengajian.report', ['event' => $event]));
 
     $response->assertOk();
     $response->assertSee('Total Warga');

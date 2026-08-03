@@ -68,6 +68,19 @@ class Event extends Model
         };
     }
 
+    /**
+     * Landing route untuk event ini. Satu-satunya sumber kebenaran untuk
+     * redirect setelah memilih/membuat event.
+     */
+    public function dashboardRoute(): string
+    {
+        return match (true) {
+            $this->isPengajian() => route('pengajian.report', ['event' => $this], absolute: false),
+            $this->isCompetition() => route('competition.dashboard', $this, absolute: false),
+            default => route('events.dashboard', $this, absolute: false),
+        };
+    }
+
     public function scopeCai($query)
     {
         return $query->where('event_type', 'cai');

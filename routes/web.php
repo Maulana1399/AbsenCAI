@@ -33,23 +33,23 @@ Route::get('dashboard', PlatformDashboard::class)
     ->name('dashboard');
 
 Route::get('events/{event}/dashboard', EventDashboard::class)
-    ->middleware(['auth', 'verified', 'can:view-dashboard'])
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:view-dashboard'])
     ->name('events.dashboard');
 
-Route::view('registrasi', 'registrasi.peserta')
-    ->middleware(['auth', 'verified', 'can:manage-registration'])
+Route::view('events/{event}/registrasi', 'registrasi.peserta')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-registration'])
     ->name('registrasi.peserta');
 
-Route::get('registrasi/self', SelfRegister::class)
-    ->middleware(['auth', 'verified', 'can:manage-registration'])
+Route::get('events/{event}/registrasi/self', SelfRegister::class)
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-registration'])
     ->name('registrasi.self');
 
-Route::view('registrasi/ulang', 'registrasi.ulang')
-    ->middleware(['auth', 'verified', 'can:manage-registration'])
+Route::view('events/{event}/registrasi/ulang', 'registrasi.ulang')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-registration'])
     ->name('registrasi.ulang');
 
-Route::view('database', 'database.database')
-    ->middleware(['auth', 'verified', 'can:manage-participants'])
+Route::view('events/{event}/database', 'database.database')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-participants'])
     ->name('database');
 
 Route::view('desa', 'database.desa')
@@ -64,20 +64,20 @@ Route::view('regu', 'database.regu')
     ->middleware(['auth', 'verified'])
     ->name('regu');
 
-Route::view('sesi-absensi', 'database.sesi')
-    ->middleware(['auth', 'verified', 'can:manage-sessions'])
+Route::view('events/{event}/sesi-absensi', 'database.sesi')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-sessions'])
     ->name('sesi.absensi');
 
-Route::view('rekap-peserta', 'rekap.peserta')
-    ->middleware(['auth', 'verified', 'can:view-reports'])
+Route::view('events/{event}/rekap-peserta', 'rekap.peserta')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:view-reports'])
     ->name('rekap.peserta');
 
-Route::view('rekap-absensi', 'rekap.absensi')
-    ->middleware(['auth', 'verified', 'can:view-reports'])
+Route::view('events/{event}/rekap-absensi', 'rekap.absensi')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:view-reports'])
     ->name('rekap.absensi');
 
-Route::get('qr-label', QRLabelIndex::class)
-    ->middleware(['auth', 'verified', 'can:manage-qr-labels'])
+Route::get('events/{event}/qr-label', QRLabelIndex::class)
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-qr-labels'])
     ->name('qr-label.index');
 
 /*
@@ -88,45 +88,9 @@ Route::get('qr-label', QRLabelIndex::class)
 | Legacy peserta mapping is optional.
 */
 
-Route::get('qr-label/print/selected/{participant}', function (Participation $participant) {
-    $event = app(App\Support\ActiveEventContext::class)->current();
-
-    abort_if($event === null, 404);
-    abort_if((int) $participant->event_id !== (int) $event->id, 404);
-
-    $participant->load('person');
-
-    abort_if($participant->person === null, 404);
-
-    $mapping = LegacyParticipationMapping::where('participation_id', $participant->id)->first();
-
-    app(ActivityLogService::class)->log(
-        action: 'print_viewed',
-        module: 'print',
-        description: 'Membuka tampilan cetak label QR '.$participant->person->nama,
-        subject: $participant->person,
-        properties: [
-            'print_type'      => 'qr_label_single',
-            'peserta_id'      => $mapping?->peserta_id,
-            'participant_id'  => $participant->id,
-            'attendance_code' => $participant->attendance_code,
-        ],
-    );
-
-    $html = app(PrintEngine::class)->label4x4($participant);
-
-    $html = str_replace(
-        '</body>',
-        '<script>
-            window.addEventListener("load", function () {
-                window.print();
-            });
-        </script></body>',
-        $html
-    );
-
-    return response($html)->header('Content-Type', 'text/html');
-})->middleware(['auth', 'verified', 'can:manage-qr-labels'])->name('qr-label.print.selected');
+Route::get('events/{event}/qr-label/print/selected/{participant}', [PublicEventController::class, 'qrLabelPrintSelected'])
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-qr-labels'])
+    ->name('qr-label.print.selected');
 
 /*
 |--------------------------------------------------------------------------
@@ -135,170 +99,9 @@ Route::get('qr-label/print/selected/{participant}', function (Participation $par
 | Uses Participation directly and scopes all records to current Event.
 */
 
-Route::get('qr-label/print/filtered', function () {
-    $event = app(App\Support\ActiveEventContext::class)->current();
-
-    abort_if($event === null, 404);
-
-    $query = Participation::with([
-        'person.desa',
-        'legacyParticipationMapping.peserta',
-    ])
-        ->where('event_id', $event->id)
-        ->whereNotNull('attendance_code');
-
-    if (request()->filled('desa')) {
-        $query->whereHas('person', fn ($q) =>
-            $q->where('desa_id', request('desa'))
-        );
-    }
-
-    if (request()->filled('kelompok')) {
-        $query->whereHas('legacyParticipationMapping.peserta', function ($q) {
-            $q->where('kelompok_id', request('kelompok'));
-        });
-    }
-
-    if (request()->filled('regu')) {
-        $query->where('regu_id', request('regu'));
-    }
-
-    if (request()->filled('gender')) {
-        $query->whereHas('person', fn ($q) =>
-            $q->where('jenis_kelamin', request('gender'))
-        );
-    }
-
-    $keyword = trim((string) request('keyword', ''));
-
-    if ($keyword !== '') {
-        $query->where(function ($builder) use ($keyword) {
-            $builder
-                ->whereHas('person', fn ($q) =>
-                    $q->where('nama', 'like', '%'.$keyword.'%')
-                )
-                ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
-        });
-    }
-
-    $participants = $query
-        ->get()
-        ->sortBy(fn ($participant) => $participant->person?->nama ?? '')
-        ->values();
-
-    abort_if($participants->isEmpty(), 404);
-
-    app(ActivityLogService::class)->log(
-        action: 'print_viewed',
-        module: 'print',
-        description: 'Membuka tampilan cetak batch label QR sebanyak '.$participants->count().' peserta',
-        properties: [
-            'print_type' => 'qr_label_filtered',
-            'count'      => $participants->count(),
-            'format'     => '4x4_single',
-        ],
-    );
-
-    $qrService = app(QRService::class);
-
-    $pages = $participants->map(function ($participant) use ($qrService) {
-        $qrBase64 = base64_encode(
-            $qrService->generatePng((string) $participant->attendance_code)
-        );
-
-        $participantNumber = htmlspecialchars(
-            (string) $participant->participant_number,
-            ENT_QUOTES,
-            'UTF-8'
-        );
-
-        $participantName = htmlspecialchars(
-            (string) ($participant->person?->nama ?? '-'),
-            ENT_QUOTES,
-            'UTF-8'
-        );
-
-        return '<div class="label-page">'
-            .'<div class="label">'
-            .'<div class="participant-number">'.$participantNumber.'</div>'
-            .'<div class="qr">'
-            .'<img src="data:image/png;base64,'.$qrBase64.'" alt="QR Code">'
-            .'</div>'
-            .'<div class="participant-name">'.$participantName.'</div>'
-            .'</div>'
-            .'</div>';
-    })->implode('');
-
-    return response(
-        '<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                @page {
-                    size: 4cm 4cm;
-                    margin: 0;
-                }
-
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                }
-
-                .label-page {
-                    width: 4cm;
-                    height: 4cm;
-                    page-break-after: always;
-                    break-after: page;
-                }
-
-                .label {
-                    width: 4cm;
-                    height: 4cm;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    gap: 2px;
-                    padding: 2mm;
-                    box-sizing: border-box;
-                    font-family: Arial, sans-serif;
-                }
-
-                .participant-number {
-                    font-size: 10pt;
-                    font-weight: bold;
-                }
-
-                .participant-name {
-                    font-size: 8pt;
-                    line-height: 1.1;
-                }
-
-                .qr {
-                    width: 1.8cm;
-                    height: 1.8cm;
-                }
-
-                .qr img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                }
-            </style>
-
-            <script>
-                window.addEventListener("load", () => window.print());
-            </script>
-        </head>
-        <body>'
-        .$pages.
-        '</body>
-        </html>'
-    )->header('Content-Type', 'text/html');
-})->middleware(['auth', 'verified', 'can:manage-qr-labels'])->name('qr-label.print.filtered');
+Route::get('events/{event}/qr-label/print/filtered', [PublicEventController::class, 'qrLabelPrintFiltered'])
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-qr-labels'])
+    ->name('qr-label.print.filtered');
 
 /*
 |--------------------------------------------------------------------------
@@ -308,303 +111,24 @@ Route::get('qr-label/print/filtered', function () {
 | Supports modern event participants without requiring legacy peserta.
 */
 
-Route::get('qr-label/print/a4', function () {
-    $event = app(App\Support\ActiveEventContext::class)->current();
+Route::get('events/{event}/qr-label/print/a4', [PublicEventController::class, 'qrLabelPrintA4'])
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-qr-labels'])
+    ->name('qr-label.print.a4');
 
-    abort_if($event === null, 404);
-
-    $query = Participation::with([
-        'person.desa',
-        'legacyParticipationMapping.peserta',
-    ])
-        ->where('event_id', $event->id)
-        ->whereNotNull('attendance_code');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filter Desa
-    |--------------------------------------------------------------------------
-    | Desa belongs to Person in the modern architecture.
-    */
-
-    if (request()->filled('desa')) {
-        $query->whereHas('person', fn ($q) =>
-            $q->where('desa_id', request('desa'))
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filter Kelompok / Regu
-    |--------------------------------------------------------------------------
-    | Regu is read from participation.regu_id (canonical, event-scoped).
-    | Kelompok is still legacy data on peserta.
-    */
-
-    if (request()->filled('kelompok')) {
-        $query->whereHas('legacyParticipationMapping.peserta', function ($q) {
-            $q->where('kelompok_id', request('kelompok'));
-        });
-    }
-
-    if (request()->filled('regu')) {
-        $query->where('regu_id', request('regu'));
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filter Gender
-    |--------------------------------------------------------------------------
-    | Gender belongs to Person.
-    */
-
-    if (request()->filled('gender')) {
-        $query->whereHas('person', fn ($q) =>
-            $q->where('jenis_kelamin', request('gender'))
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Keyword Search
-    |--------------------------------------------------------------------------
-    | Search modern participant identity:
-    | - Person name
-    | - Participant number
-    | - Attendance code
-    */
-
-    $keyword = trim((string) request('keyword', ''));
-
-    if ($keyword !== '') {
-        $query->where(function ($builder) use ($keyword) {
-            $builder
-                ->whereHas('person', fn ($q) =>
-                    $q->where('nama', 'like', '%'.$keyword.'%')
-                )
-                ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
-        });
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Get Event-Scoped Participants
-    |--------------------------------------------------------------------------
-    */
-
-    $participants = $query
-        ->get()
-        ->sortBy(fn ($participant) => $participant->person?->nama ?? '')
-        ->values();
-
-    abort_if($participants->isEmpty(), 404);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Activity Log
-    |--------------------------------------------------------------------------
-    */
-
-    app(ActivityLogService::class)->log(
-        action: 'print_viewed',
-        module: 'print',
-        description: 'Membuka tampilan cetak label QR A4 sebanyak '.$participants->count().' peserta',
-        properties: [
-            'print_type' => 'qr_label_a4',
-            'count'      => $participants->count(),
-            'format'     => 'a4_grid',
-            'event_id'   => $event->id,
-        ],
-    );
-
-    /*
-    |--------------------------------------------------------------------------
-    | Generate Labels
-    |--------------------------------------------------------------------------
-    | A4 layout:
-    | 5 columns × 7 rows
-    | 35 labels per page
-    | Each label = 4cm × 4cm
-    */
-
-    $qrService = app(QRService::class);
-
-    $pages = $participants
-        ->chunk(35)
-        ->map(function ($chunk) use ($qrService) {
-            $labels = $chunk
-                ->map(function ($participant) use ($qrService) {
-                    $qrBase64 = base64_encode(
-                        $qrService->generatePng(
-                            (string) $participant->attendance_code
-                        )
-                    );
-
-                    $participantNumber = htmlspecialchars(
-                        (string) $participant->participant_number,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    );
-
-                    $participantName = htmlspecialchars(
-                        (string) ($participant->person?->nama ?? '-'),
-                        ENT_QUOTES,
-                        'UTF-8'
-                    );
-
-                    return '<div class="label">'
-                        .'<div class="participant-number">'.$participantNumber.'</div>'
-                        .'<div class="qr">'
-                        .'<img src="data:image/png;base64,'.$qrBase64.'" alt="QR Code">'
-                        .'</div>'
-                        .'<div class="participant-name">'.$participantName.'</div>'
-                        .'</div>';
-                })
-                ->implode('');
-
-            return '<div class="a4-page">'.$labels.'</div>';
-        })
-        ->implode('');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Print Response
-    |--------------------------------------------------------------------------
-    */
-
-    return response(
-        '<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-
-            <style>
-                @page {
-                    size: A4 portrait;
-                    margin: 5mm;
-                }
-
-                html,
-                body {
-                    margin: 0;
-                    padding: 0;
-                }
-
-                body {
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                    font-family: Arial, sans-serif;
-                }
-
-                .a4-page {
-                    width: 200mm;
-
-                    display: grid;
-                    grid-template-columns: repeat(5, 4cm);
-                    grid-auto-rows: 4cm;
-
-                    gap: 0;
-
-                    justify-content: center;
-                    align-content: start;
-
-                    page-break-after: always;
-                    break-after: page;
-                }
-
-                .a4-page:last-child {
-                    page-break-after: auto;
-                    break-after: auto;
-                }
-
-                .label {
-                    width: 4cm;
-                    height: 4cm;
-
-                    box-sizing: border-box;
-
-                    break-inside: avoid;
-                    page-break-inside: avoid;
-
-                    display: flex;
-                    flex-direction: column;
-
-                    align-items: center;
-                    justify-content: center;
-
-                    text-align: center;
-
-                    gap: 2px;
-                    padding: 2mm;
-                }
-
-                .participant-number {
-                    font-size: 10pt;
-                    font-weight: bold;
-                }
-
-                .participant-name {
-                    font-size: 8pt;
-                    line-height: 1.1;
-                }
-
-                .qr {
-                    width: 1.8cm;
-                    height: 1.8cm;
-                }
-
-                .qr img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                }
-            </style>
-
-            <script>
-                window.addEventListener("load", () => {
-                    window.print();
-                });
-            </script>
-        </head>
-
-        <body>'
-        .$pages.
-        '</body>
-
-        </html>'
-    )->header('Content-Type', 'text/html');
-})->middleware(['auth', 'verified', 'can:manage-qr-labels'])->name('qr-label.print.a4');
-
-Route::view('absensi', 'dashboard.absensi')
-    ->middleware(['auth', 'verified', 'can:manage-attendance'])
+Route::view('events/{event}/absensi', 'dashboard.absensi')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-attendance'])
     ->name('absensi');
 
-Route::view('surat-izin', 'surat-izin.index')
-    ->middleware(['auth', 'verified', 'can:manage-secretariat'])
+Route::view('events/{event}/surat-izin', 'surat-izin.index')
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-secretariat'])
     ->name('surat-izin');
 
-Route::get('surat-izin/{surat}/print', function (SuratIzin $surat) {
-    abort_if(! $surat->isApproved(), 403);
+Route::get('events/{event}/surat-izin/{surat}/print', [PublicEventController::class, 'suratIzinPrint'])
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-secretariat'])
+    ->name('surat-izin.print');
 
-    app(ActivityLogService::class)->log(
-        action: 'print_viewed',
-        module: 'print',
-        description: 'Membuka tampilan cetak surat izin '.$surat->nomor_surat,
-        subject: $surat,
-        properties: [
-            'print_type'    => 'surat_izin',
-            'peserta_id'    => $surat->peserta_id,
-            'surat_izin_id' => $surat->id,
-            'nomor_surat'   => $surat->nomor_surat,
-        ],
-    );
-
-    return view('surat-izin.print', compact('surat'));
-})->middleware(['auth', 'verified', 'can:manage-secretariat'])->name('surat-izin.print');
-
-Route::get('activity-log', ActivityLogIndex::class)
-    ->middleware(['auth', 'verified', 'can:view-activity-log'])
+Route::get('events/{event}/activity-log', ActivityLogIndex::class)
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:view-activity-log'])
     ->name('activity-log.index');
 
 Route::middleware(['auth'])->group(function () {
@@ -665,37 +189,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     )->middleware('can:manage-pengajian')->name('koreksi.data');
 
     Route::get(
-        'pengajian/report',
+        'events/{event}/pengajian/report',
         App\Livewire\Pengajian\RegionalReport::class
-    )->middleware('can:view-reports')->name('pengajian.report');
+    )->middleware(['resolve.active-event', 'can:view-reports'])->name('pengajian.report');
 
     Route::get(
-        'pengajian/admin/access',
+        'events/{event}/pengajian/admin/access',
         App\Livewire\Pengajian\Admin\AccessIndex::class
-    )->middleware('can:manage-pengajian')->name('pengajian.admin.access');
+    )->middleware(['resolve.active-event', 'can:manage-pengajian'])->name('pengajian.admin.access');
 
     Route::get(
-        'pengajian/admin/manual-entry',
+        'events/{event}/pengajian/admin/manual-entry',
         App\Livewire\Pengajian\Admin\ManualEntry::class
-    )->middleware('can:manage-pengajian')->name('pengajian.admin.manual-entry');
+    )->middleware(['resolve.active-event', 'can:manage-pengajian'])->name('pengajian.admin.manual-entry');
 
     Route::get(
-        'pengajian/admin/import-massal',
+        'events/{event}/pengajian/admin/import-massal',
         App\Livewire\Pengajian\Admin\ImportMassal::class
-    )->middleware('can:manage-pengajian')->name('pengajian.import-massal');
+    )->middleware(['resolve.active-event', 'can:manage-pengajian'])->name('pengajian.import-massal');
 
     Route::get(
-        'pengajian/admin/import-massal/template',
+        'events/{event}/pengajian/admin/import-massal/template',
         function () {
             return \Maatwebsite\Excel\Facades\Excel::download(
                 new \App\Exports\PersonImportTemplateExport,
                 'template_import_person.xlsx',
             );
         }
-    )->middleware('can:manage-pengajian')->name('pengajian.import-massal.template');
+    )->middleware(['resolve.active-event', 'can:manage-pengajian'])->name('pengajian.import-massal.template');
 });
 
-Route::prefix('pengajian')->group(function () {
+Route::prefix('events/{event}/pengajian')->middleware(['resolve.active-event'])->group(function () {
     Route::get(
         '/',
         App\Livewire\Pengajian\EnterToken::class
@@ -715,21 +239,19 @@ Route::prefix('pengajian')->group(function () {
         'desa/qr/print',
         App\Livewire\Pengajian\QrPrint::class
     )->name('pengajian.qr-print');
-
-    Route::get(
-        'hadir/{nonce}',
-        App\Livewire\Pengajian\SelfAttendance::class
-    )
-        ->middleware('throttle:30,1')
-        ->name('pengajian.hadir');
 });
 
 Route::get(
-    'events/{event}/competition-dashboard',
-    App\Livewire\Competition\Dashboard::class
-)->middleware(['auth', 'verified', 'can:view-dashboard'])->name('competition.dashboard');
+    'pengajian/hadir/{nonce}',
+    App\Livewire\Pengajian\SelfAttendance::class
+)->middleware('throttle:30,1')->name('pengajian.hadir');
 
-Route::prefix('competition')->middleware(['auth', 'verified'])->group(function () {
+Route::get(
+    'events/{event}/competition',
+    App\Livewire\Competition\Dashboard::class
+)->middleware(['auth', 'verified', 'resolve.active-event', 'can:view-dashboard'])->name('competition.dashboard');
+
+Route::prefix('events/{event}/competition')->middleware(['auth', 'verified', 'resolve.active-event'])->group(function () {
     Route::get(
         'registration',
         App\Livewire\Competition\Registration::class
@@ -800,8 +322,35 @@ Route::prefix('competition')->middleware(['auth', 'verified'])->group(function (
 });
 
 Route::get(
-    'events/{event}/viewer/{venue?}',
+    'events/{event}/competition/viewer/{venue?}',
     App\Livewire\Competition\Viewer::class
 )->name('competition.viewer');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    $eventModulePath = function (string $module): string {
+        $event = app(App\Support\ActiveEventContext::class)->current();
+
+        abort_if($event === null, 404);
+
+        return '/events/'.$event->getRouteKey().'/'.$module;
+    };
+
+    Route::get('absensi', fn () => redirect($eventModulePath('absensi')));
+    Route::get('sesi-absensi', fn () => redirect($eventModulePath('sesi-absensi')));
+    Route::get('database', fn () => redirect($eventModulePath('database')));
+    Route::get('registrasi', fn () => redirect($eventModulePath('registrasi')));
+    Route::get('registrasi/self', fn () => redirect($eventModulePath('registrasi/self')));
+    Route::get('registrasi/ulang', fn () => redirect($eventModulePath('registrasi/ulang')));
+    Route::get('rekap', fn () => redirect($eventModulePath('rekap-peserta')));
+    Route::get('rekap-peserta', fn () => redirect($eventModulePath('rekap-peserta')));
+    Route::get('rekap-absensi', fn () => redirect($eventModulePath('rekap-absensi')));
+    Route::get('qr-label', fn () => redirect($eventModulePath('qr-label')));
+    Route::get('qr-label/print/selected/{participant}', fn (string $participant) => redirect($eventModulePath('qr-label/print/selected/'.$participant)));
+    Route::get('qr-label/print/filtered', fn () => redirect($eventModulePath('qr-label/print/filtered')));
+    Route::get('qr-label/print/a4', fn () => redirect($eventModulePath('qr-label/print/a4')));
+    Route::get('surat-izin', fn () => redirect($eventModulePath('surat-izin')));
+    Route::get('surat-izin/{surat}/print', fn (string $surat) => redirect($eventModulePath('surat-izin/'.$surat.'/print')));
+    Route::get('activity-log', fn () => redirect($eventModulePath('activity-log')));
+});
 
 require __DIR__.'/auth.php';

@@ -59,7 +59,7 @@ class DesaDashboard extends Component
         $session = session('pengajian_access');
 
         if ($session === null || ! isset($session['grant_id'], $session['event_id'], $session['desa_id'])) {
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
@@ -67,7 +67,7 @@ class DesaDashboard extends Component
 
         if ($grant === null) {
             session()->forget('pengajian_access');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
@@ -77,28 +77,28 @@ class DesaDashboard extends Component
         if ((int) $this->grant->event_id !== (int) $session['event_id']
             || (int) $this->grant->desa_id !== (int) $session['desa_id']) {
             session()->forget('pengajian_access');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
         if ($this->grant->revoked_at !== null) {
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Sesi akses telah dicabut. Silakan hubungi Operator Daerah.');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
         if (now()->greaterThan($this->grant->valid_until)) {
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Masa berlaku akses telah habis. Silakan minta token baru.');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
         if (now()->lessThan($this->grant->valid_from)) {
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Token belum dapat digunakan. Periksa kembali masa berlaku.');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
@@ -392,7 +392,7 @@ class DesaDashboard extends Component
 
         if ($grant === null || ! $grant->isValid()) {
             session()->forget('pengajian_access');
-            $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+            $this->redirect($this->enterTokenRoute(), navigate: true);
             return;
         }
 
@@ -409,7 +409,7 @@ class DesaDashboard extends Component
     {
         session()->forget('pengajian_access');
         session()->flash('pengajian_logout', 'Berhasil keluar dari dashboard Pengajian Desa.');
-        $this->redirect(route('pengajian.enter-token', absolute: false), navigate: true);
+        $this->redirect($this->enterTokenRoute(), navigate: true);
     }
 
     public function render()
@@ -419,6 +419,18 @@ class DesaDashboard extends Component
         }
 
         return view('livewire.pengajian.desa-dashboard');
+    }
+
+    private function currentEventId(): ?int
+    {
+        return app(\App\Support\ActiveEventContext::class)->id()
+            ?? $this->grant?->event_id
+            ?? session('pengajian_access.event_id');
+    }
+
+    private function enterTokenRoute(): string
+    {
+        return route('pengajian.enter-token', ['event' => $this->currentEventId()], absolute: false);
     }
 
     private function generateQr(): void

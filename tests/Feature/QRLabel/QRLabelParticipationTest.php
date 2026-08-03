@@ -116,5 +116,5 @@ test('direct print route rejects cross-event legacy participant access', functio
     LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => 5007, 'legacy_participant_number' => 'KL401', 'legacy_attendance_code' => 'KJA-PRINT-B', 'migrated_at' => now()]);
     LegacyParticipationMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $eventB->id, 'migrated_at' => now()]);
 
-    $this->get('/qr-label/print/selected/'.$legacy->id)->assertNotFound();
+    $this->get(route('qr-label.print.selected', ['event' => $eventA, 'participant' => $legacy->id]))->assertNotFound();
 });

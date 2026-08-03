@@ -72,7 +72,7 @@ test('selected print returns 403 when no active event context', function () {
     $event = qrIsolation_makeEvent('A');
     $peserta = qrIsolation_createMappedPeserta($event, 'No Context', 7001, 'KJA-NOCTX1');
 
-    $this->get('/qr-label/print/selected/'.$peserta->id)
+    $this->get(route('qr-label.print.selected', ['event' => $event, 'participant' => $peserta->id]))
         ->assertStatus(403);
 });
 
@@ -83,7 +83,7 @@ test('filtered print returns 403 when no active event context', function () {
     $event = qrIsolation_makeEvent('A');
     qrIsolation_createMappedPeserta($event, 'No Context', 7002, 'KJA-NOCTX2');
 
-    $this->get(route('qr-label.print.filtered'))
+    $this->get(route('qr-label.print.filtered', ['event' => $event]))
         ->assertStatus(403);
 });
 
@@ -94,7 +94,7 @@ test('a4 print returns 403 when no active event context', function () {
     $event = qrIsolation_makeEvent('A');
     qrIsolation_createMappedPeserta($event, 'No Context', 7003, 'KJA-NOCTX3');
 
-    $this->get(route('qr-label.print.a4'))
+    $this->get(route('qr-label.print.a4', ['event' => $event]))
         ->assertStatus(403);
 });
 
@@ -116,13 +116,13 @@ test('selected print rejects participant from another event', function () {
 
     app(ActiveEventContext::class)->set($eventA);
 
-    $this->get('/qr-label/print/selected/'.$pesertaA->qrIsolationParticipationId)->assertOk();
-    $this->get('/qr-label/print/selected/'.$pesertaB->qrIsolationParticipationId)->assertNotFound();
+    $this->get(route('qr-label.print.selected', ['event' => $eventA, 'participant' => $pesertaA->qrIsolationParticipationId]))->assertOk();
+    $this->get(route('qr-label.print.selected', ['event' => $eventA, 'participant' => $pesertaB->qrIsolationParticipationId]))->assertNotFound();
 
     app(ActiveEventContext::class)->set($eventB);
 
-    $this->get('/qr-label/print/selected/'.$pesertaB->qrIsolationParticipationId)->assertOk();
-    $this->get('/qr-label/print/selected/'.$pesertaA->qrIsolationParticipationId)->assertNotFound();
+    $this->get(route('qr-label.print.selected', ['event' => $eventB, 'participant' => $pesertaB->qrIsolationParticipationId]))->assertOk();
+    $this->get(route('qr-label.print.selected', ['event' => $eventB, 'participant' => $pesertaA->qrIsolationParticipationId]))->assertNotFound();
 });
 
 // ---------------------------------------------------------------------------
@@ -142,12 +142,12 @@ test('filtered print only includes participants from active event', function () 
     qrIsolation_createMappedPeserta($eventB, 'Event B Person', 8004, 'KJA-CROSS-B2');
 
     app(ActiveEventContext::class)->set($eventA);
-    $this->get(route('qr-label.print.filtered'))
+    $this->get(route('qr-label.print.filtered', ['event' => $eventA]))
         ->assertOk()
         ->assertSee($pesertaA->nama);
 
     app(ActiveEventContext::class)->set($eventB);
-    $this->get(route('qr-label.print.filtered'))
+    $this->get(route('qr-label.print.filtered', ['event' => $eventB]))
         ->assertOk()
         ->assertDontSee($pesertaA->nama);
 });
@@ -169,12 +169,12 @@ test('a4 print only includes participants from active event', function () {
     qrIsolation_createMappedPeserta($eventB, 'Event B Person', 8006, 'KJA-CROSS-B3');
 
     app(ActiveEventContext::class)->set($eventA);
-    $this->get(route('qr-label.print.a4'))
+    $this->get(route('qr-label.print.a4', ['event' => $eventA]))
         ->assertOk()
         ->assertSee($pesertaA->nama);
 
     app(ActiveEventContext::class)->set($eventB);
-    $this->get(route('qr-label.print.a4'))
+    $this->get(route('qr-label.print.a4', ['event' => $eventB]))
         ->assertOk()
         ->assertDontSee($pesertaA->nama);
 });

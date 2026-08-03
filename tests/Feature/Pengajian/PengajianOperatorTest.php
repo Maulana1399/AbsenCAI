@@ -348,21 +348,23 @@ test('Event isolation terjaga di operator context', function () {
 // ---------------------------------------------------------------------------
 
 test('Dashboard membutuhkan valid Pengajian scoped session', function () {
-    $response = $this->get(route('pengajian.desa', absolute: false));
+    $event = pgm7_event();
+    $response = $this->get(route('pengajian.desa', ['event' => $event], absolute: false));
 
-    $response->assertRedirect(route('pengajian.enter-token', absolute: false));
+    $response->assertRedirect(route('pengajian.enter-token', ['event' => $event], absolute: false));
 });
 
 test('Invalid session ditolak dashboard', function () {
+    $event = pgm7_event();
     session()->put('pengajian_access', [
         'grant_id' => 99999,
         'event_id' => 1,
         'desa_id' => 1,
     ]);
 
-    $response = $this->get(route('pengajian.desa', absolute: false));
+    $response = $this->get(route('pengajian.desa', ['event' => $event], absolute: false));
 
-    $response->assertRedirect(route('pengajian.enter-token', absolute: false));
+    $response->assertRedirect(route('pengajian.enter-token', ['event' => $event], absolute: false));
 });
 
 test('Cross-Desa session manipulation ditolak', function () {
@@ -377,9 +379,9 @@ test('Cross-Desa session manipulation ditolak', function () {
         'desa_id' => $desaB->id,
     ]);
 
-    $response = $this->get(route('pengajian.desa', absolute: false));
+    $response = $this->get(route('pengajian.desa', ['event' => $event], absolute: false));
 
-    $response->assertRedirect(route('pengajian.enter-token', absolute: false));
+    $response->assertRedirect(route('pengajian.enter-token', ['event' => $event], absolute: false));
 });
 
 test('Dashboard summary scoped Event + Desa', function () {
@@ -393,7 +395,7 @@ test('Dashboard summary scoped Event + Desa', function () {
         'desa_id' => $desa->id,
     ]);
 
-    $response = $this->get(route('pengajian.desa', absolute: false));
+    $response = $this->get(route('pengajian.desa', ['event' => $event], absolute: false));
 
     $response->assertStatus(200);
     $response->assertSee($event->name);

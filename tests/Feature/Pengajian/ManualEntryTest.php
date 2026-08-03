@@ -823,9 +823,11 @@ test('30. Incomplete session (missing event_id) is rejected on mount', function 
         'desa_id'  => $desa->id,
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
 
-    $component->assertRedirect(route('pengajian.enter-token'));
+    $component->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('31. Revoked grant is rejected on submit', function () {
@@ -840,9 +842,11 @@ test('31. Revoked grant is rejected on submit', function () {
         'desa_id'  => $grant->desa_id,
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
 
-    $component->assertRedirect(route('pengajian.enter-token'));
+    $component->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('32. submit() uses eventId and desaId from validated grant, not from public Livewire properties', function () {

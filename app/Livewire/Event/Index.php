@@ -73,14 +73,8 @@ class Index extends Component
             if (! $context->hasActiveEvent()) {
                 $context->set($event);
 
-                $route = match (true) {
-                    $event->isPengajian() => route('pengajian.report', absolute: false),
-                    $event->isCompetition() => route('competition.dashboard', $event, absolute: false),
-                    default => route('events.dashboard', $event, absolute: false),
-                };
-
                 session()->flash('success', 'Event berhasil dibuat dan dipilih.');
-                $this->redirect($route, navigate: true);
+                $this->redirect($event->dashboardRoute(), navigate: true);
 
                 return;
             }

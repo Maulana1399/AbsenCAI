@@ -70,7 +70,8 @@ test('2. Guest cannot access identity correction review', function () {
 });
 
 test('3. Guest cannot access regional report', function () {
-    $this->get(route('pengajian.report'))->assertRedirect(route('login'));
+    $event = pgm9s_event();
+    $this->get(route('pengajian.report', ['event' => $event]))->assertRedirect(route('login'));
 });
 
 test('4. Authenticated unverified user can access auth-only routes (verified is not an authorization boundary)', function () {

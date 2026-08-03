@@ -87,13 +87,7 @@ class PlatformDashboard extends Component
         $event = Event::active()->findOrFail($eventId);
         app(ActiveEventContext::class)->set($event);
 
-        $route = match (true) {
-            $event->isPengajian() => route('pengajian.report', absolute: false),
-            $event->isCompetition() => route('competition.dashboard', $event, absolute: false),
-            default => route('events.dashboard', $event, absolute: false),
-        };
-
-        $this->redirect($route, navigate: true);
+        $this->redirect($event->dashboardRoute(), navigate: true);
     }
 
     public function render()

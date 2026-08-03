@@ -67,14 +67,16 @@ function pgm13_setActiveEvent(Event $event): void
 // ---------------------------------------------------------------------------
 
 test('guest cannot access admin access page', function () {
-    $response = $this->get(route('pengajian.admin.access'));
+    $event = pgm13_event();
+    $response = $this->get(route('pengajian.admin.access', ['event' => $event]));
 
     $response->assertRedirect(route('login'));
 });
 
 test('authenticated verified user can access admin access page', function () {
+    $event = pgm13_event();
     $response = $this->actingAs(pgm13_user())
-        ->get(route('pengajian.admin.access'));
+        ->get(route('pengajian.admin.access', ['event' => $event]));
 
     $response->assertOk();
 });
@@ -645,7 +647,8 @@ test('delete confirmation uses Flux danger button variant', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access admin access page (authorization confirm)', function () {
-    $this->get(route('pengajian.admin.access'))
+    $event = pgm13_event();
+    $this->get(route('pengajian.admin.access', ['event' => $event]))
         ->assertRedirect(route('login'));
 });
 
@@ -659,7 +662,7 @@ test('unauthenticated user cannot revoke grant', function () {
     $this->post(route('logout'));
 
     // Guest cannot even access the page
-    $this->get(route('pengajian.admin.access'))
+    $this->get(route('pengajian.admin.access', ['event' => $event]))
         ->assertRedirect(route('login'));
 });
 

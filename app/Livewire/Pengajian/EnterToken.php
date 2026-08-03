@@ -53,7 +53,7 @@ class EnterToken extends Component
             'desa_id' => $grant->desa_id,
         ]);
 
-        $this->redirect(route('pengajian.desa', absolute: false), navigate: true);
+        $this->redirect(route('pengajian.desa', ['event' => $grant->event_id], absolute: false), navigate: true);
     }
 
     public function render()

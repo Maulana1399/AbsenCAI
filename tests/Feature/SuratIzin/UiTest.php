@@ -35,12 +35,12 @@ beforeEach(function () {
 // ---------------------------------------------------------------------------
 
 test('surat izin page is accessible', function () {
-    $this->get('/surat-izin')->assertStatus(200);
+    $this->get(route('surat-izin', ['event' => $this->event]))->assertStatus(200);
 });
 
 test('surat izin page requires authentication', function () {
     auth()->logout();
-    $this->get('/surat-izin')->assertRedirect('/login');
+    $this->get(route('surat-izin', ['event' => $this->event]))->assertRedirect('/login');
 });
 
 // ---------------------------------------------------------------------------
@@ -343,7 +343,7 @@ test('print route requires authentication', function () {
 
     auth()->logout();
 
-    $this->get(route('surat-izin.print', $surat->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]))
         ->assertRedirect('/login');
 });
 
@@ -357,7 +357,7 @@ test('print route returns 200 for approved surat', function () {
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $this->user);
 
-    $this->get(route('surat-izin.print', $surat->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]))
         ->assertStatus(200);
 });
 
@@ -369,11 +369,11 @@ test('print route returns 403 for non-approved surat', function () {
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
-    $this->get(route('surat-izin.print', $surat->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]))
         ->assertStatus(403);
 
     $surat->update(['status' => 'pending']);
-    $this->get(route('surat-izin.print', $surat->fresh()->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->fresh()->id]))
         ->assertStatus(403);
 });
 
@@ -388,7 +388,7 @@ test('print output contains surat and participant data', function () {
     $surat->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($surat->fresh(), $this->user);
 
-    $response = $this->get(route('surat-izin.print', $surat->id));
+    $response = $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $response->assertStatus(200);
     $response->assertSee($this->peserta->nama);
@@ -411,7 +411,7 @@ test('print does not mutate surat state', function () {
 
     $originalUpdatedAt = $surat->fresh()->updated_at;
 
-    $this->get(route('surat-izin.print', $surat->id));
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $this->assertEquals(
         $originalUpdatedAt->toDateTimeString(),
@@ -432,6 +432,6 @@ test('missing logo does not break print', function () {
     config(['kjam.event_logo' => 'images/nonexistent.png']);
     config(['kjam.org_logo' => 'images/nonexistent.png']);
 
-    $this->get(route('surat-izin.print', $surat->id))
+    $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]))
         ->assertStatus(200);
 });

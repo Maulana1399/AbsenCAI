@@ -83,7 +83,7 @@
                     Atur Official
                 </flux:button>
             @endcan
-            <flux:button :href="route('competition.schedule.entries', $schedule->id)"
+            <flux:button :href="route('competition.schedule.entries', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)"
                          :variant="$schedule->status === 'Ready' && !$participantsComplete ? 'primary' : 'ghost'"
                          size="sm" class="whitespace-nowrap">
                 Atur Peserta

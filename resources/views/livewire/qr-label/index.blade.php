@@ -218,7 +218,7 @@
                             <div class="flex flex-wrap gap-2">
                                 @if($selectedLabelParticipantId)
                                     <flux:button
-                                        :href="route('qr-label.print.selected', ['participant' => $selectedLabelParticipantId])"
+                                        :href="route('qr-label.print.selected', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'participant' => $selectedLabelParticipantId])"
                                         target="_blank"
                                         variant="primary"
                                     >
@@ -233,6 +233,7 @@
                                 @if($labelPreview->count() > 0)
                                     <flux:button
                                         :href="route('qr-label.print.filtered', [
+                                            'event' => app(\App\Support\ActiveEventContext::class)->current(),
                                             'desa' => $filterDesa,
                                             'kelompok' => $filterKelompok,
                                             'regu' => $filterRegu,
@@ -245,6 +246,7 @@
                                     </flux:button>
                                     <flux:button
                                         :href="route('qr-label.print.a4', [
+                                            'event' => app(\App\Support\ActiveEventContext::class)->current(),
                                             'desa' => $filterDesa,
                                             'kelompok' => $filterKelompok,
                                             'regu' => $filterRegu,

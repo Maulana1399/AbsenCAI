@@ -4,6 +4,9 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        @php
+            $activeEvent = app(\App\Support\ActiveEventContext::class)->current();
+        @endphp
         <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
@@ -94,10 +97,12 @@
                     </flux:navlist.item>
                 </flux:navlist.group>
 
+                @if ($activeEvent)
                 <flux:navlist.group expandable heading="Absensi">
-                    <flux:navlist.item :href="route('absensi')" :current="request()->routeIs('absensi')" wire:navigate>{{ __('Scan Absensi') }}</flux:navlist.item>
-                    <flux:navlist.item :href="route('sesi.absensi')" :current="request()->routeIs('sesi.absensi')" wire:navigate>{{ __('Sesi Absensi') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('absensi', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('absensi')" wire:navigate>{{ __('Scan Absensi') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('sesi.absensi', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('sesi.absensi')" wire:navigate>{{ __('Sesi Absensi') }}</flux:navlist.item>
                 </flux:navlist.group>
+                @endif
             </flux:navlist>
 
             <flux:spacer />

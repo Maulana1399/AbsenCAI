@@ -42,7 +42,7 @@
                     </p>
 
                     <div class="mt-4">
-                        <a href="{{ route('pengajian.import-massal.template') }}" download>
+                        <a href="{{ route('pengajian.import-massal.template', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false) }}" download>
                             <flux:button type="button" variant="ghost" icon-trailing="arrow-down-tray">
                                 Download Template
                             </flux:button>
@@ -197,7 +197,7 @@
                     <flux:button wire:click="resetImport">
                         Import Lagi
                     </flux:button>
-                    <flux:button variant="ghost" href="{{ route('pengajian.report') }}" wire:navigate>
+                    <flux:button variant="ghost" href="{{ route('pengajian.report', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false) }}" wire:navigate>
                         Lihat Regional Report
                     </flux:button>
                 </div>

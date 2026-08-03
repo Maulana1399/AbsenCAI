@@ -157,8 +157,11 @@ test('QrPrint page mounts with absolute QR URL', function () {
 });
 
 test('QrPrint without session redirects to enter-token', function () {
+    $event = pgm6_event();
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(QrPrint::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('QrPrint with mismatched event_id in session redirects', function () {
@@ -176,8 +179,10 @@ test('QrPrint with mismatched event_id in session redirects', function () {
         ],
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($eventA);
+
     Livewire::test(QrPrint::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $eventA]));
 });
 
 test('QrPrint with mismatched desa_id in session redirects', function () {
@@ -195,8 +200,10 @@ test('QrPrint with mismatched desa_id in session redirects', function () {
         ],
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(QrPrint::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('QrPrint with revoked grant redirects', function () {
@@ -214,8 +221,10 @@ test('QrPrint with revoked grant redirects', function () {
         ],
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     Livewire::test(QrPrint::class)
-        ->assertRedirect(route('pengajian.enter-token'));
+        ->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('refresh QR nonce keeps absolute URL', function () {
@@ -429,9 +438,10 @@ test('QR payload tidak mengandung NIP', function () {
 // ===========================================================================
 
 test('Operator QR page membutuhkan valid scoped session', function () {
-    $response = $this->get(route('pengajian.qr-print'));
+    $event = pgm6_event();
+    $response = $this->get(route('pengajian.qr-print', ['event' => $event]));
 
-    $response->assertRedirect(route('pengajian.enter-token'));
+    $response->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('Operator QR page tampil dengan session', function () {
@@ -448,7 +458,7 @@ test('Operator QR page tampil dengan session', function () {
         ],
     ]);
 
-    $response = $this->get(route('pengajian.qr-print'));
+    $response = $this->get(route('pengajian.qr-print', ['event' => $event]));
 
     $response->assertStatus(200);
     $response->assertSee($event->name);
@@ -470,9 +480,11 @@ test('Operator dashboard redirects on cross-desa session', function () {
         ],
     ]);
 
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
     $component = Livewire::test(DesaDashboard::class);
 
-    $component->assertRedirect(route('pengajian.enter-token'));
+    $component->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 // ===========================================================================

@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands()
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'resolve.active-event' => \App\Http\Middleware\ResolveActiveEvent::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
