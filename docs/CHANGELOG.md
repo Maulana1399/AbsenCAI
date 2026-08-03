@@ -7,6 +7,33 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## Fixed (Committee Management — Single-step delete flow)
+
+### Ringkasan
+Bug "Hapus" pada Committee Management: tombol hanya men-trigger `confirmDelete()` yang menyimpan `deleteAssignmentId`, sedangkan `delete()` yang melakukan penghapusan tidak pernah dipanggil dari UI (flow dua-langkah yang tidak lengkap). Di-refactor menjadi single-step.
+
+### Perubahan (`app/Livewire/Event/CommitteeManagement.php`)
+- Dihapus: property `deleteAssignmentId`.
+- Dihapus: method `confirmDelete()` (beserta listener `confirmDeleteAssignment`).
+- `delete()` sekarang `delete(int $assignmentId)` — single-step:
+  - `Gate::authorize('manage-events')`
+  - cari `EventCommitteeAssignment` berdasarkan `id` + `event_id` (event aktif di modal)
+  - tidak ditemukan → flash error `Penugasan tidak ditemukan.`
+  - ditemukan → `delete()`
+- Logger audit sementara (`DELETE CLICKED`) dihapus.
+
+### Blade
+- `resources/views/livewire/event/committee-management.blade.php` — tombol kini `wire:click="delete({{ $assignment->id }})"` tetap dengan `wire:confirm="Hapus penugasan ...?"`.
+
+### Regression tests
+- `tests/Feature/Ui/CommitteeDeleteFlowTest.php` — 5 test:
+  - single-step delete menghapus assignment di event yang sama,
+  - assignment dari event lain tidak bisa dihapus,
+  - delete id tidak ditemukan → flash error,
+  - unauthorized role → forbidden + assignment tetap ada,
+  - flow tidak lagi bergantung pada `confirmDelete` staging.
+- `S7ThreeAssignmentManagementTest` — test delete diperbarui memakai `delete($id)` langsung.
+
 ## Changed (Final RBAC UI Polish — no architecture changes)
 
 ### Ringkasan

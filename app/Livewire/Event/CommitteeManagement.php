@@ -24,8 +24,6 @@ class CommitteeManagement extends Component
     public string $searchPerson = '';
     public string $selectedPersonNama = '';
 
-    public ?int $deleteAssignmentId = null;
-
     #[On('manageCommittee')]
     public function load(int $id): void
     {
@@ -97,19 +95,11 @@ class CommitteeManagement extends Component
         }
     }
 
-    #[On('confirmDeleteAssignment')]
-    public function confirmDelete(int $assignmentId): void
-    {
-        $this->deleteAssignmentId = $assignmentId;
-    }
-
-    public function delete(): void
+    public function delete(int $assignmentId): void
     {
         Gate::authorize('manage-events');
 
-        if ($this->deleteAssignmentId === null) return;
-
-        $assignment = EventCommitteeAssignment::where('id', $this->deleteAssignmentId)
+        $assignment = EventCommitteeAssignment::where('id', $assignmentId)
             ->where('event_id', $this->eventId)
             ->first();
 
@@ -119,7 +109,6 @@ class CommitteeManagement extends Component
         }
 
         $assignment->delete();
-        $this->deleteAssignmentId = null;
     }
 
     #[On('refreshCommittee')]
@@ -129,7 +118,7 @@ class CommitteeManagement extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['newPersonId', 'newEventRoleId', 'searchPerson', 'selectedPersonNama', 'deleteAssignmentId']);
+        $this->reset(['newPersonId', 'newEventRoleId', 'searchPerson', 'selectedPersonNama']);
         $this->resetErrorBag();
     }
 

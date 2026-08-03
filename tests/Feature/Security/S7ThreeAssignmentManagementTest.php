@@ -274,8 +274,7 @@ test('can delete assignment from same Event', function () {
     $this->actingAs($user);
     Livewire::test(\App\Livewire\Event\CommitteeManagement::class)
         ->dispatch('manageCommittee', id: $event->id)
-        ->call('confirmDelete', $assignment->id)
-        ->call('delete');
+        ->call('delete', $assignment->id);
 
     expect(EventCommitteeAssignment::find($assignment->id))->toBeNull();
 });
@@ -296,8 +295,7 @@ test('cannot delete assignment from another Event', function () {
     $this->actingAs($user);
     Livewire::test(\App\Livewire\Event\CommitteeManagement::class)
         ->dispatch('manageCommittee', id: $eventA->id)
-        ->call('confirmDelete', $assignment->id)
-        ->call('delete');
+        ->call('delete', $assignment->id);
 
     expect(EventCommitteeAssignment::find($assignment->id))->not->toBeNull();
 });

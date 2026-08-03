@@ -29,7 +29,7 @@
                             <div class="flex items-center gap-2 rounded-md bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-800">
                                 <span class="font-medium">{{ $assignment->person?->nama ?? '-' }}</span>
                                 <span class="text-xs text-zinc-500">{{ $assignment->eventRole?->name ?? '-' }}</span>
-                                <button wire:click="confirmDelete({{ $assignment->id }})" class="ml-auto text-red-500 hover:text-red-700 text-xs"
+                                <button wire:click="delete({{ $assignment->id }})" class="ml-auto text-red-500 hover:text-red-700 text-xs"
                                     wire:confirm="Hapus penugasan {{ $assignment->person?->nama ?? '' }}?">
                                     Hapus
                                 </button>
