@@ -93,7 +93,10 @@ beforeEach(function () {
         'event_id' => $this->event->id,
     ]);
 
-    app(ActiveEventContext::class)->set($this->event);
+    $this->person = $person;
+    $this->participation = $participation;
+
+    grantEventRoleToUser($this->user, $this->event, 'sekretariat');
 });
 
 // ---------------------------------------------------------------------------
@@ -224,23 +227,23 @@ test('surat izin print response remains successful', function () {
 // ---------------------------------------------------------------------------
 
 test('qr label single print creates print_viewed activity log entry', function () {
-    $this->get(route('qr-label.print.selected', $this->peserta->id));
+    $this->get(route('qr-label.print.selected', $this->participation->id));
 
     $this->assertDatabaseHas('activity_logs', [
         'action'       => 'print_viewed',
         'module'       => 'print',
         'subject_type' => App\Models\Person::class,
-        'subject_id'   => $this->peserta->id,
+        'subject_id'   => $this->person->id,
         'user_id'      => $this->user->id,
     ]);
 });
 
 test('qr label single print stores correct properties', function () {
-    $this->get(route('qr-label.print.selected', $this->peserta->id));
+    $this->get(route('qr-label.print.selected', $this->participation->id));
 
     $log = ActivityLog::where('module', 'print')
         ->where('action', 'print_viewed')
-        ->where('subject_id', $this->peserta->id)
+        ->where('subject_id', $this->person->id)
         ->first();
 
     expect($log->properties)->toMatchArray([
@@ -251,7 +254,7 @@ test('qr label single print stores correct properties', function () {
 });
 
 test('qr label single print response remains successful', function () {
-    $this->get(route('qr-label.print.selected', $this->peserta->id))
+    $this->get(route('qr-label.print.selected', $this->participation->id))
         ->assertStatus(200)
         ->assertSee($this->peserta->nama);
 });

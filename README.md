@@ -32,7 +32,8 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Event Dashboard (Sprint 10.0) | ✅ COMPLETE — Overview cards, live matches, today's schedule, quick actions |
 | Migration Stabilization | ✅ COMPLETE — All race conditions fixed for `migrate:fresh` |
 | UI Audit & Standardization | ✅ COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues |
-| Test Baseline | ✅ **1756 passed / 4148 assertions / 0 failures** |
+| MariaDB Migration | ✅ COMPLETE — SQLite → MariaDB as primary DB; migrations/seeders/tests green on both |
+| Test Baseline | ✅ **1792 passed / 4219 assertions / 0 failures** (SQLite & MariaDB) |
 | **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
 | **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — All 10 sprints |
 | **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Blueprint Event, Venue Management, Certificate Engine, Public API, Mobile |
@@ -43,7 +44,7 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 
 - **Backend:** Laravel 12
 - **Frontend:** Livewire v3, Flux UI, Tailwind CSS v4
-- **Database:** SQLite (current), MariaDB (future)
+- **Database:** MariaDB (primary), SQLite (test baseline) — see `docs/DATABASE.md` and `docs/SETUP.md`
 - **QR:** Internal PHP QR generator (PNG)
 
 ---
@@ -145,6 +146,8 @@ See `docs/` directory for full documentation.
 | `ROADMAP.md` | Product roadmap and sprint plan |
 | `TODO.md` | Active task list + Bug Backlog |
 | `HANDOFF.md` | Non-technical project overview |
+| `DATABASE.md` | Database design, schema, and driver-compat notes |
+| `SETUP.md` | Environment setup — MariaDB primary, test baseline |
 | `PENGAJIAN_MVP_OPERATIONAL.md` | Pengajian module operational guide |
 | `ai/CURRENT_STATE.md` | Current development snapshot |
 | `ai/LAPORAN_STATUS_PROYEK_FINAL_20260724.md` | Final project status report |

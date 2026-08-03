@@ -50,6 +50,7 @@ function s73_role(Event $event, array $overrides = []): EventRole
     return app(EventCommitteeService::class)->createRole(array_merge([
         'event_id' => $event->id,
         'name' => 'Role '.str()->random(6),
+        'code' => 'ketua_event',
         'scope' => 'event',
     ], $overrides));
 }
@@ -313,6 +314,7 @@ test('Admin can create EventRole for current Event', function () {
     Livewire::test(\App\Livewire\Event\EventRoleManager::class)
         ->dispatch('manageEventRoles', id: $event->id)
         ->set('newName', 'Sekretaris')
+        ->set('newCode', 'sekretariat')
         ->call('create');
 
     expect(EventRole::where('event_id', $event->id)->where('name', 'Sekretaris')->exists())->toBeTrue();
@@ -327,6 +329,7 @@ test('cannot create EventRole with duplicate name in same Event', function () {
     Livewire::test(\App\Livewire\Event\EventRoleManager::class)
         ->dispatch('manageEventRoles', id: $event->id)
         ->set('newName', 'Bendahara')
+        ->set('newCode', 'sekretariat')
         ->call('create');
 
     expect(EventRole::where('event_id', $event->id)->where('name', 'Bendahara')->count())->toBe(1);
@@ -406,7 +409,7 @@ test('complete KetuaEvent setup flow works end to end', function () {
         'person_id' => $person->id,
     ]);
 
-    $role = s73_role($eventA);
+    $role = s73_role($eventA, ['code' => 'ketua_event']);
     app(EventCommitteeService::class)->assign([
         'event_id' => $eventA->id,
         'person_id' => $person->id,
@@ -470,11 +473,14 @@ test('public Pengajian unchanged by S7.3', function () {
 });
 
 test('existing unchanged abilities remain correct', function () {
+    $event = s73_event();
     $user = s73_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-registration'))->toBeTrue();
 
     $opReg = s73_user('operator_registrasi');
+    grantEventRoleToUser($opReg, $event, 'operator_registrasi');
     expect(Gate::forUser($opReg)->allows('manage-registration'))->toBeTrue();
     expect(Gate::forUser($opReg)->denies('view-dashboard'))->toBeTrue();
 });

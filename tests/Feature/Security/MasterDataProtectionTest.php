@@ -556,8 +556,9 @@ test('admin sees all CAI sidebar menus without Master Data', function () {
 
 test('sekretariat sees all CAI sidebar menus without Master Data', function () {
     $event = s2_event();
-    app(ActiveEventContext::class)->set($event);
-    $this->actingAs(s2_user('sekretariat'));
+    $user = s2_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
+    $this->actingAs($user);
 
     $response = $this->get(route('events.dashboard', $event, false));
     $response->assertOk();
@@ -571,8 +572,9 @@ test('sekretariat sees all CAI sidebar menus without Master Data', function () {
 
 test('operator registrasi only sees registration menus', function () {
     $event = s2_event();
-    app(ActiveEventContext::class)->set($event);
-    $this->actingAs(s2_user('operator_registrasi'));
+    $user = s2_user('operator_registrasi');
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
+    $this->actingAs($user);
 
     $response = $this->get('/registrasi');
     $response->assertSee('Registrasi');
@@ -585,8 +587,9 @@ test('operator registrasi only sees registration menus', function () {
 
 test('operator scan only sees attendance menus', function () {
     $event = s2_event();
-    app(ActiveEventContext::class)->set($event);
-    $this->actingAs(s2_user('operator_scan'));
+    $user = s2_user('operator_scan');
+    grantEventRoleToUser($user, $event, 'operator_scan');
+    $this->actingAs($user);
 
     $response = $this->get('/absensi');
     $response->assertSee('Scan Absensi');
@@ -600,8 +603,9 @@ test('operator scan only sees attendance menus', function () {
 
 test('viewer only sees dashboard and reports', function () {
     $event = s2_event();
-    app(ActiveEventContext::class)->set($event);
-    $this->actingAs(s2_user('viewer'));
+    $user = s2_user('viewer');
+    grantEventRoleToUser($user, $event, 'viewer');
+    $this->actingAs($user);
 
     $response = $this->get(route('events.dashboard', $event));
     $response->assertSee('Dashboard');

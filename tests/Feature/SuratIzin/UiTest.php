@@ -21,6 +21,13 @@ beforeEach(function () {
         'attendance_code' => 'KJA-TEST-UI',
         'jenis_kelamin'   => 'Laki - Laki',
     ]);
+
+    $this->event = \App\Models\Event::create([
+        'name' => 'Surat Izin UI Event '.str()->random(6),
+        'slug' => 'surat-izin-ui-'.str()->random(6),
+        'status' => 'active',
+    ]);
+    grantEventRoleToUser($this->user, $this->event, 'sekretariat');
 });
 
 // ---------------------------------------------------------------------------
@@ -172,6 +179,7 @@ test('create validates jenis_izin must be pulang or keluar', function () {
 
 test('approve action creates izin absensi for sessions in range', function () {
     $sesi = SesiAbsensi::create([
+        'event_id'  => $this->event->id,
         'nama_sesi' => 'Sesi Pagi',
         'tanggal'   => '2026-07-20',
         'aktif'     => true,
@@ -262,8 +270,8 @@ test('markReturned sets returned_at on approved surat', function () {
 });
 
 test('markReturned removes izin for sessions on and after return date', function () {
-    SesiAbsensi::create(['nama_sesi' => 'Sesi 20', 'tanggal' => '2026-07-20', 'aktif' => true]);
-    SesiAbsensi::create(['nama_sesi' => 'Sesi 21', 'tanggal' => '2026-07-21', 'aktif' => true]);
+    SesiAbsensi::create(['event_id' => $this->event->id, 'nama_sesi' => 'Sesi 20', 'tanggal' => '2026-07-20', 'aktif' => true]);
+    SesiAbsensi::create(['event_id' => $this->event->id, 'nama_sesi' => 'Sesi 21', 'tanggal' => '2026-07-21', 'aktif' => true]);
 
     $surat = app(SuratIzinService::class)->create([
         'peserta_id'      => $this->peserta->id,

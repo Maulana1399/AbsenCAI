@@ -20,7 +20,7 @@ class CommitteeManagement extends Component
     public ?string $eventName = null;
 
     public ?int $newPersonId = null;
-    public ?int $newEventRoleId = null;
+    public string $newEventRoleId = '';
     public string $searchPerson = '';
     public string $selectedPersonNama = '';
 
@@ -73,14 +73,19 @@ class CommitteeManagement extends Component
                 return;
             }
 
-            app(EventCommitteeService::class)->assign([
+            $result = app(EventCommitteeService::class)->assignAndEnsureUser([
                 'event_id' => $event->id,
                 'person_id' => $this->newPersonId,
                 'event_role_id' => $role->id,
             ]);
 
             $this->resetForm();
-            session()->flash('success', 'Penugasan berhasil ditambahkan.');
+
+            if ($result['user_created']) {
+                session()->flash('success', "Panitia berhasil ditambahkan.\n\nAkun Login\nUsername: {$result['user']->username}\nPassword: {$result['plain_password']}");
+            } else {
+                session()->flash('success', 'Panitia berhasil ditambahkan. Menggunakan akun login yang sudah ada.');
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             if (str_contains($e->getMessage(), 'Duplicate')) {
                 $this->addError('newPersonId', 'Person ini sudah memiliki role yang sama di event ini.');

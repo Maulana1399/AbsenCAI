@@ -5,10 +5,178 @@ Semua perubahan penting pada KJA Event Manager dicatat pada dokumen ini.
 Format changelog mengikuti prinsip **Keep a Changelog**.
 
 ---
-
 # [Unreleased]
 
-## Added (PGM.19 Sprint 8A — Legacy Regu Dependency Elimination)
+## Changed (Final RBAC UI Polish — no architecture changes)
+
+### Ringkasan
+Polish UI/UX agar konsisten dengan arsitektur Permission Engine (Design C). Tidak ada perubahan pada Permission Engine, Gate, `EventPermissionService`, `EventAccessService`, resolver, migration, maupun schema DB. Perilaku authorization tidak berubah.
+
+### Dashboard — Role Display
+- `app/Livewire/Dashboard/PlatformDashboard.php` — sumber data role event diubah: `User → Person → EventCommitteeAssignment → EventRole->name` (bukan `users.role`).
+  - `roleNamesForEvent(Event, User)` — daftar nama EventRole milik user untuk satu event.
+  - `roleLabelForEvent(Event, User)` — label per event: `Ketua Fosda`, `Ketua Fosda (+1)`, atau `Tidak ada peran` (multi-assignment aman).
+  - Header: role platform (Super Admin / Admin) tetap memakai `users.role`; user non-platform memakai ringkasan role assignment lintas event.
+- `resources/views/livewire/dashboard/platform-dashboard.blade.php` — kartu event menampilkan `EventRole.name` per event; `Tidak ada peran` hanya bila memang belum ada assignment.
+
+### Role Manager — Template Permission
+- `app/Livewire/Event/EventRoleManager.php` — input code manual diganti dropdown **Template Permission** (`getTemplateOptionsProperty()`): `ketua_event`, `sekretariat`, `operator_registrasi`, `operator_scan`, `operator_lapangan`, `pj_divisi`, `juri`, `viewer`, `ketua_fosda`, `admin_event`. Validasi `newCode` dibatasi ke kunci template.
+- `resources/views/livewire/event/event-role-manager.blade.php` — dropdown template menentukan `code`; `permissions` otomatis terisi dari code oleh model (`EventRole` booted hook, tidak diubah). Code tampil **read-only** (tidak bisa diedit admin). Daftar role menampilkan code read-only.
+
+### UI Consistency
+- Seluruh tampilan role event kini berasal dari EventAssignment → EventRole. `users.role` hanya dipakai untuk role platform (Super Admin / Admin) di user management & header dashboard.
+
+### Regression tests
+- `tests/Feature/Ui/PlatformDashboardRoleDisplayTest.php` — 8 test:
+  - Dashboard menampilkan `EventRole.name`.
+  - User tanpa assignment → `Tidak ada peran`.
+  - Multi-assignment tidak error (`Ketua Fosda (+1)`).
+  - Dashboard membaca role dari EventAssignment, bukan `users.role`.
+  - Platform admin tetap memakai `users.role` (`Admin`).
+  - Template permission memetakan ke code valid.
+  - Pembuatan role via template → code + permissions benar.
+  - Code tidak valid ditolak oleh validasi template.
+
+
+## Changed (Remove Keyword-Based Permission Resolution)
+
+### Ringkasan
+Permission untuk event role kini **hanya** ditentukan dari `EventRole.code` — parsing nama (`str_contains` pada `name`) **dihapus** sebagai sumber permission. `code` menjadi **wajib** dan harus dikenali oleh matriks sistem (`EventRolePermissionDefaults`). Code yang tidak dikenali → `UnknownEventRoleCodeException` yang eksplisit, **bukan** role dengan `permissions = []`.
+
+### Resolver
+- `app/Support/EventRolePermissionDefaults.php`:
+  - `resolve(?string $code)` — signature diubah: HANYA menerima `code` (param `name` dihapus). Code kosong / tidak dikenal → throw `UnknownEventRoleCodeException` (`missingCode()` / `unknownCode()`).
+  - `forCode(?string $code)` — tetap non-throwing, `[]` untuk code tidak dikenal (dipakai migrasi backfill & audit).
+  - `isKnownCode()`, `knownCodes()` — daftar code sistem valid (untuk validasi UI & audit).
+  - `suggestCodeFromName(?string $name)` — mapping nama→code **legacy**, HANYA untuk backfill migrasi & audit data lama (BUKAN sumber permission runtime).
+  - Keyword `'fosda'` diurutkan sebelum `'ketua'` agar "Ketua Fosda" → `ketua_fosda`.
+
+### Model
+- `app/Models/EventRole.php` `booted()::creating`: `code` wajib & dikenal (else throw). `permissions` yang eksplisit tetap dipertahankan; yang kosong auto-isi dari `forCode($code)`. Tidak ada lagi role dengan `permissions = []` yang terbentuk dari nama yang tidak dikenali.
+
+### Migration
+- `2026_08_19_000001_add_permissions_to_event_roles_table.php` — disederhanakan: hanya menambah kolom `permissions` (backfill lama yang memakai `resolve(name, code)` dihapus).
+- `2026_08_20_000001_backfill_event_role_codes_and_permissions.php` — NEW:
+  1. Isi `code` untuk role lama yang kosong berdasarkan `suggestCodeFromName(name)` (hindari konflik unique `(event_id, code)`).
+  2. Isi `permissions` dari `forCode(code)` untuk role ber-code dikenal yang masih kosong.
+  - `down()` no-op (tidak ada rollback aman untuk backfill).
+
+### Command / Audit
+- `app/Console/Commands/AuditEventRoles.php` — NEW: `php artisan event-roles:audit`. Mendeteksi & menampilkan:
+  - role tanpa `code` (beserta saran code dari nama),
+  - role dengan `code` tidak dikenal,
+  - role tanpa `permissions`.
+  Exit code `1` bila ditemukan masalah, `0` bila semua valid.
+
+### UI (EventRoleManager)
+- `app/Livewire/Event/EventRoleManager.php` — validasi `newCode` → `required` + `Rule::in(EventRolePermissionDefaults::knownCodes())`. Blade menampilkan daftar code yang tersedia.
+
+### Seeder
+- `UatSeeder` sudah memakai code valid (`super_admin`, `admin_event`, `operator_lapangan`, `operator_registrasi`, `viewer`) — tidak berubah.
+
+### Regression tests
+- `tests/Feature/Security/EventRoleCodePolicyTest.php` — 10 test: resolver code-only, throw untuk code null/unknown, `forCode` non-throwing, `EventRole::create` wajib code dikenal, audit command (deteksi & sukses), `suggestCodeFromName`.
+- `tests/Feature/Database/EventRoleBackfillMigrationTest.php` — 3 test: backfill code+permissions untuk role legacy, tidak menimpa permissions eksplisit, tidak collision unique code dalam event yang sama.
+- Helper test yang membuat role kini melewati `code` valid (`ketua_event`, `sekretariat`, dst.).
+
+
+## Added (Permission Engine — Design C)
+
+### Ringkasan
+Migrasi authorization level event dari model lama berbasis `users.role` (user global) menuju **Permission Engine**: ability di-resolve dari `User → Person → EventCommitteeAssignment → EventRole.permissions` (JSON) melalui `ActiveEventContext`. `users.role` kini **hanya** menentukan hak platform (Super Admin/Admin). Seluruh Gate event-scoped memakai engine; Super Admin & Admin (Platform Admin) tetap bypass. Akun auto-create (role `null`) dengan Event Assignment mendapat akses fitur sesuai Event Role-nya.
+
+### Kemampuan (abilities)
+- **Platform (4)**: `view-master-data`, `manage-master-data`, `manage-events`, `manage-users` — hanya SuperAdmin (bypass via `Gate::before`) dan Admin (`manage-events`). Role lain (termasuk `null`) selalu deny.
+- **Event-scoped (14)**: `view-dashboard`, `manage-registration`, `manage-participants`, `manage-attendance`, `manage-sessions`, `manage-qr-labels`, `manage-secretariat`, `manage-import`, `view-reports`, `manage-pengajian`, `view-activity-log`, `manage-matches`, `manage-officials`, `submit-result`. Semua di-resolve oleh engine.
+
+### Migration
+- `2026_08_19_000001_add_permissions_to_event_roles_table.php` — NEW: kolom `permissions` (JSON, nullable) di `event_roles` + **backfill otomatis** dari `EventRolePermissionDefaults::resolve(name, code)` untuk role yang sudah ada (backfill ini kemudian dipindah ke `2026_08_20_000001` saat keyword-based resolution dihapus). `down()` menjatuhkan kolom.
+
+### Permission Engine
+- `app/Support/EventRolePermissionDefaults.php` — NEW: konstanta `EVENT_ABILITIES` (14 ability) + matriks default `BY_CODE` (`super_admin`, `admin_event`, `ketua_event`, `sekretariat`, `operator_registrasi`, `operator_scan`, `operator_lapangan`, `pj_divisi`, `viewer`, `juri`, `ketua_fosda`). **PENTING**: `resolve()` kini HANYA membaca `code` (keyword/`name` fallback dihapus pada perubahan berikutnya — lihat "Remove Keyword-Based Permission Resolution").
+- `app/Models/EventRole.php` — `permissions` masuk `fillable` + cast `array`; `booted()::creating` auto-isi default dari `code` bila kosong (dan mewajibkan `code` dikenal).
+- `app/Services/Event/EventPermissionService.php` — NEW: `allows(User, string $ability, ?Event $event)` — true bila user punya assignment aktif di event tsb (EventRole `active` + Person) dan ability ada di `permissions` (JSON-contains); `permissionsFor(User)` — gabungan unik. Tanpa event (aktif) → false (fail-closed).
+- `app/Providers/AppServiceProvider.php` — seluruh Gate ditulis ulang: `Gate::before` SuperAdmin (bypass semua); callback `$eventAbility` (Admin bypass event-scoped; selainnya delegasi ke `EventPermissionService`); 4 Gate platform + 14 Gate event-scoped semuanya memakai engine. `manage-import` & `manage-pengajian` ikut event-scoped.
+
+### Visibilitas & akses event
+- `app/Models/User.php` — helper `isPlatformUser()` (= SuperAdmin | Admin).
+- `app/Services/Event/EventAccessService.php` — `canAccess()` kini true hanya untuk platform user.
+- `app/Livewire/Dashboard/PlatformDashboard.php` & `app/Livewire/Event/EventSwitcher.php` — **PERUBAHAN PERILAKU (disengaja)**: user non-platform hanya melihat event yang di-assign (sebelumnya semua role kecuali KetuaEvent melihat semua event).
+
+### Regression tests
+- `tests/Feature/Security/PermissionEngineTest.php` — 13 test: auto-fill by `code` & fallback `name`, preserve permissions eksplisit, service butuh event aktif + assignment + person, user auto-create (role null) dengan assignment dapat akses fitur, visibilitas hanya event di-assign, `switchTo` ke event tak di-assign → Forbidden.
+
+### Behavior note (test disesuaikan)
+- Pengguna non-platform TANPA `EventCommitteeAssignment`+EventRole kini **deny** untuk seluruh ability event (sebelumnya berbasis `users.role`). Test lama yang memakai `role:` sekretariat/operator/viewer untuk aksi event diperbarui memakai grant role per-event (mis. `grantEventRoleToUser` di `tests/Pest.php`).
+- Aksi event berbasis route (surat izin, QR label, dsb.) kini wajib `ActiveEventContext` ter-set; tanpa konteks → deny (403 oleh Gate), bukan lagi 404 dari logic route.
+
+
+
+### Migration
+- `2026_08_18_000001_add_username_and_is_active_to_users_table.php` — NEW: adds nullable unique `username`, `is_active` (default true) to `users`; makes `email` nullable (unique still allows multiple NULLs). Verified `up()` + `down()` on SQLite and MariaDB-compatible `change()`.
+
+### Auto create user (EventCommitteeService)
+- `EventCommitteeService::assignAndEnsureUser()` — NEW: runs `assign()` + auto-created user in a single transaction; returns `{ assignment, user, user_created, plain_password }`
+- `EventCommitteeService::ensureUserForPerson()` — NEW: creates a login account when a Person has no `User` yet; returns existing user otherwise (never duplicates)
+- Username generated from Person name via `Str::slug()` (e.g. `Ada Saya` → `ada.saya`); numeric suffix on collision (`ada.saya2`, `ada.saya3`) — always unique
+- Password default from `tanggal_lahir` as `dmY` (`1999-09-13` → `13091999`), hashed with `Hash::make()`; when `tanggal_lahir` is empty uses temporary `12345678` and logs a warning
+- Auto-created user fills `person_id`, `name`, `username`, hashed `password`, `email = null`, `is_active = true`; EventRole is NOT stored on User (permissions flow through User → Person → EventCommitteeAssignment → EventRole)
+
+### CommitteeManagement (Livewire)
+- `create()` now uses `assignAndEnsureUser()` and flashes login credentials only when a new account was created; otherwise flashes "Menggunakan akun login yang sudah ada."
+- Event Role validation bug fixed: role selection binds correctly (`newEventRoleId`), assignment saves without "required" validation error
+- **FIX (native `<select>` auto-select root cause):** the persistent `The new event role id field is required.` error was **NOT** a validation, Livewire Service, or auto-create user bug. Root cause is native HTML `<select>` behavior: with `public ?int $newEventRoleId = null` and a `disabled` placeholder (`<option value="" disabled selected>`), the browser has no concept of `null` — only empty strings — so it silently **auto-selects the first enabled option**. The UI displayed `Ketua Fosda` while Livewire still held `null`, and because the value never *changed* (it was auto-selected, not user-selected), no `change` event fired — so even `wire:model.live` never synced. Confirmed upstream: Flux issue #1349 / Livewire discussion #9242 ("user sees a value selected, but Livewire treats the value as null").
+  - `public ?int $newEventRoleId = null` → **`public string $newEventRoleId = ''`** so the empty string maps cleanly to the placeholder's `value=""`; browser keeps the placeholder selected instead of auto-selecting the first option.
+  - Flux `placeholder` prop (which renders `disabled selected`) replaced with a selectable `<option value="">Pilih role...</option>` — not disabled, so the browser truly selects the empty value and any real pick (including the first option) fires a `change` event.
+  - Kept `wire:model.live="newEventRoleId"` (immediate commit on `change`).
+  - Added `wire:key="event-role-select-{{ $eventId }}"` per Livewire dependent-select docs so the select is rebuilt when the Event changes and stale options/values aren't carried over.
+  - `resetForm()` now returns `newEventRoleId` to `''` (its new default), never `null`.
+  - Validation unchanged: `'newEventRoleId' => 'required|exists:event_roles,id'` still catches the empty string.
+
+### Login
+- Login now accepts username or email (auto-detected by `@`); inactive users are rejected
+
+### Tests added
+- `tests/Feature/Activity/CommitteeAutoCreateUserTest.php` — 21 tests: auto-create on assignment, no duplicate user, unique username, password from birthday, fallback password, assignment success, EventRole validation bug regression, live model binding regression, native select auto-select regressions (default `''`, selectable non-disabled placeholder, first-option selection still submits + auto-creates user + resets to `''`), flash messages, username login, inactive rejection, migration columns
+
+## Added (MariaDB Migration — SQLite → MariaDB as primary DB)
+
+### Database driver switch
+- Default DB connection changed from `sqlite` to `mariadb` in `.env`, `.env.example`, and `config/database.php`
+- `phpunit.xml` still pins tests to `sqlite :memory:` for the committed test baseline; MariaDB test run uses `DB_CONNECTION=mariadb` + `DB_DATABASE=kja_event_manager_test`
+
+### Migration fixes (MariaDB compatibility)
+- `2025_06_16_071812_create_peserta_table.php`: `down()` now uses `dropIfExists('pesertas')` (was `peserta` — left the table behind and blocked `kelompoks` drop); reordered FK columns to `nullable()->constrained()`
+- `2025_06_16_071801_create_kelompok_table.php`: `desa_id` reordered to `nullable()->constrained()`
+- Root cause fixed: in Laravel, `foreignId()->constrained(...)->nullable()` ignores `nullable()` because `constrained()` returns a `ForeignKeyDefinition`. Produced NOT NULL on MariaDB; silently masked on SQLite (rebuild). Verified `pesertas.kelompok_id`, `pesertas.desa_id`, `kelompoks.desa_id` are nullable on MariaDB.
+- `2026_07_01_000002_make_jenis_kelamin_nullable_on_pesertas_table.php`: MariaDB path uses `string()->nullable()->change()`; SQLite rebuild preserved
+- `2026_07_27_000002_create_event_committee_assignments_table.php`: explicit unique index name (`eca_event_person_role_unique`) — auto-generated name exceeded MariaDB 64-char limit
+- `2026_08_04_000001_add_person_id_to_users_table.php`: `down()` now `dropUnique('person_id')` (was `dropIndex` with wrong name)
+- `2026_08_05_000001_add_session_and_status_to_event_attendances.php`: MariaDB path drops both FKs + unique index, uses plain nullable `legacy_participation_key` column (NOT a generated column — MariaDB 1901 forbids generated column referencing FK column) maintained by triggers; re-adds unique indexes + FKs
+- `2026_08_07_000001_add_participation_id_to_surat_izins.php`: `down()` drops the constrained FK first; MariaDB omits redundant `dropIndex` (dropping the column auto-drops its single-column index)
+- `2026_08_08_000001_fix_legacy_fk_preservation.php`: drops FKs before `->change()` (MariaDB 1832), uses `unsignedBigInteger` to match `pesertas.id` bigint unsigned (errno 150), recreates cascade FKs
+- `2026_08_10_000001_add_regu_id_to_participations_table.php`: PRAGMA gated to sqlite; `down()` drops FK before index (MariaDB 1553)
+- `2026_08_12_000001_retire_legacy_nip_columns.php`: unchanged (SQLite/MariaDB paths already driver-safe)
+
+### Command fixes (retired `nip` column referenced)
+- `AuditLegacyData`: NIP section now guarded with `Schema::hasColumn('pesertas', 'nip')` — column was retired by `2026_08_12_000001`; previously threw `Unknown column 'nip'` on MariaDB (SQLite silently treated the identifier as a string literal and returned 0)
+- `ResetEventData`: removed `nip` from `pesertas_fields` snapshot select + validation select (column retired)
+
+### QueryException message matching (SQLite-only `UNIQUE` string)
+- `EventRoleManager::create()` and `RegistrationService::createParticipant()` matched unique-constraint violations via `str_contains($message, 'UNIQUE')` — true on SQLite (`UNIQUE constraint failed: ...`) but false on MariaDB (`Duplicate entry ... for key ...`). Replaced with SQLSTATE check `$exception->getCode() === '23000'` (same pattern already used in `AttendanceExceptionService`). Preserves the table/index-specific branches in `RegistrationService`.
+
+### Test fixes (driver-order / id-coincidence)
+- `PersonFoundationTest` / `ParticipationFoundationTest`: column assertions now order-independent (sorted equality) — MariaDB honors `->after()`, SQLite appends at end
+- `PrintLogTest` / `QRPrintIsolationTest`: QR single-print tests now pass the actual `participation_id` (route binds `Participation`) instead of `peserta_id` — relied on coincidental id alignment that breaks on MariaDB (InnoDB AUTO_INCREMENT persists across rolled-back transactions; SQLite's `sqlite_sequence` resets each test)
+- `ParticipantEditUlangEventIsolationTest`: `Ulang` component calls now pass the `participation_id` (`Ulang::editPeserta`/`registrasiUlang` do `Participation::find($id)`); previously passed `peserta_id` relying on id coincidence
+
+### Final verified baseline
+- **SQLite (phpunit.xml default): 1792 passed / 4219 assertions / 0 failures**
+- **MariaDB (kja_event_manager_test): 1792 passed / 4219 assertions / 0 failures**
+- SQLite baseline before migration work: 19 failed / 1773 passed; MariaDB after connection switch (pre-fix): 296 failed / 1758 passed
+- `migrate:fresh --seed`, full `migrate:rollback` + re-migrate, and idempotent reseed verified on MariaDB
+
+
 
 ### Refactored (PlacementService — strict eventId contract)
 - **`leastFilledRegu()`** signature changed from `(?int $eventId = null)` to `int $eventId` — global fallback removed

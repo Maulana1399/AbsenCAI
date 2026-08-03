@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Event;
 
-use App\Enums\Role;
 use App\Models\Event;
 use App\Services\Event\EventAccessService;
 use App\Support\ActiveEventContext;
@@ -18,15 +17,6 @@ class EventSwitcher extends Component
     {
         $current = $context->current();
 
-        if ($current === null) {
-            $fallback = Event::active()->orderBy('event_type', 'desc')->first();
-
-            if ($fallback !== null) {
-                $context->set($fallback);
-                $current = $fallback;
-            }
-        }
-
         if ($current) {
             $this->currentEventName = $current->name;
             $this->currentEventId = $current->id;
@@ -37,7 +27,7 @@ class EventSwitcher extends Component
     {
         $user = auth()->user();
 
-        if ($user->role === Role::KetuaEvent) {
+        if (! $user->isPlatformUser()) {
             $eventAccess = app(EventAccessService::class);
             if (! $eventAccess->isUserAssignedToEvent($user, $eventId)) {
                 throw new AuthorizationException('Anda tidak memiliki akses ke event ini.');
@@ -67,7 +57,7 @@ class EventSwitcher extends Component
     {
         $user = auth()->user();
 
-        if ($user->role === Role::KetuaEvent) {
+        if (! $user->isPlatformUser()) {
             $assignedEventIds = app(EventAccessService::class)->getAssignedEventIds($user);
             return Event::active()->whereIn('id', $assignedEventIds)->orderBy('name')->get();
         }

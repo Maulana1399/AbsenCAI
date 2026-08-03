@@ -9,7 +9,7 @@
             </div>
 
             @if (session('success'))
-                <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+                <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200" style="white-space: pre-line;">
                     {{ session('success') }}
                 </div>
             @endif
@@ -66,7 +66,8 @@
 
                     <div>
                         <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Event Role</label>
-                        <flux:select wire:model="newEventRoleId" placeholder="Pilih role...">
+                        <flux:select wire:model.live="newEventRoleId" wire:key="event-role-select-{{ $eventId }}">
+                            <option value="">Pilih role...</option>
                             @foreach ($roles as $role)
                                 <flux:select.option value="{{ $role->id }}">{{ $role->name }}</flux:select.option>
                             @endforeach

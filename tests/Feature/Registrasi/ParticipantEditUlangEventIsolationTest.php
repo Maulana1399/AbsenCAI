@@ -133,7 +133,7 @@ test('Ulang edits active-event participation only', function () {
     app(ActiveEventContext::class)->set($eventA);
 
     Livewire::test(Ulang::class)
-        ->call('editPeserta', $legacy->id)
+        ->call('editPeserta', $participationA->id)
         ->set('editNama', 'Participant Alpha Ulang A')
         ->set('editJenisPeserta', 'Person')
         ->set('editDesa', $desa->id)
@@ -152,7 +152,7 @@ test('Ulang registrasi ulang uses active-event membership and legacy mirror only
     app(ActiveEventContext::class)->set($eventA);
 
     Livewire::test(Ulang::class)
-        ->call('registrasiUlang', $legacy->id);
+        ->call('registrasiUlang', $participationA->id);
 
     expect($legacy->fresh()->status_registrasi)->toBe(peserta::STATUS_REGISTRASI_ULANG)
         ->and($participationA->fresh()->jenis_peserta)->toBe('Wajib')

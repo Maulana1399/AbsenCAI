@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Enums\Role;
 use App\Models\User;
-use App\Services\Event\EventAccessService;
+use App\Services\Event\EventPermissionService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -20,15 +20,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $eventAccess = $this->app->make(EventAccessService::class);
-
-        $ketuaEventCanAccess = function (User $user) use ($eventAccess): bool {
-            $eventId = app(ActiveEventContext::class)->id();
-            if ($eventId === null) {
-                return false;
-            }
-            return $eventAccess->isUserAssignedToEvent($user, $eventId);
-        };
+        $permission = $this->app->make(EventPermissionService::class);
 
         Gate::before(function (User $user) {
             if ($user->role === Role::SuperAdmin) {
@@ -36,14 +28,15 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        Gate::define('view-dashboard', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
+        $eventAbility = function (User $user, string $ability) use ($permission): bool {
+            if ($user->role === Role::Admin) {
+                return true;
             }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat, Role::PjDivisi, Role::Viewer,
-            );
-        });
+
+            return $permission->allows($user, $ability);
+        };
+
+        // --- Platform abilities (users.role) ---
 
         Gate::define('view-master-data', fn (User $user) => $user->hasAnyRole(
             Role::SuperAdmin,
@@ -57,90 +50,38 @@ class AppServiceProvider extends ServiceProvider
             Role::SuperAdmin, Role::Admin,
         ));
 
-        Gate::define('manage-registration', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
-            }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat, Role::OperatorRegistrasi,
-            );
-        });
-
-        Gate::define('manage-participants', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
-            }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat,
-            );
-        });
-
-        Gate::define('manage-attendance', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
-            }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat, Role::PjDivisi, Role::OperatorScan,
-            );
-        });
-
-        Gate::define('manage-sessions', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
-            }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat,
-            );
-        });
-
-        Gate::define('manage-qr-labels', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Sekretariat,
-        ));
-
-        Gate::define('manage-secretariat', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
-            }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat,
-            );
-        });
-
-        Gate::define('manage-import', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Sekretariat,
-        ));
-
-        Gate::define('view-reports', function (User $user) use ($ketuaEventCanAccess) {
-            if ($user->role === Role::KetuaEvent) {
-                return $ketuaEventCanAccess($user);
-            }
-            return $user->hasAnyRole(
-                Role::Admin, Role::Sekretariat, Role::Viewer,
-            );
-        });
-
-        Gate::define('manage-matches', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin,
-        ));
-
-        Gate::define('manage-officials', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin,
-        ));
-
-        Gate::define('submit-result', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Juri,
-        ));
-
-        Gate::define('manage-pengajian', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Sekretariat,
-        ));
-
-        Gate::define('view-activity-log', fn (User $user) => $user->hasAnyRole(
-            Role::SuperAdmin, Role::Admin, Role::Sekretariat,
-        ));
-
         Gate::define('manage-users', fn (User $user) => $user->hasAnyRole(
             Role::SuperAdmin,
         ));
+
+        // --- Event abilities (Permission Engine) ---
+
+        Gate::define('view-dashboard', fn (User $user) => $eventAbility($user, 'view-dashboard'));
+
+        Gate::define('manage-registration', fn (User $user) => $eventAbility($user, 'manage-registration'));
+
+        Gate::define('manage-participants', fn (User $user) => $eventAbility($user, 'manage-participants'));
+
+        Gate::define('manage-attendance', fn (User $user) => $eventAbility($user, 'manage-attendance'));
+
+        Gate::define('manage-sessions', fn (User $user) => $eventAbility($user, 'manage-sessions'));
+
+        Gate::define('manage-qr-labels', fn (User $user) => $eventAbility($user, 'manage-qr-labels'));
+
+        Gate::define('manage-secretariat', fn (User $user) => $eventAbility($user, 'manage-secretariat'));
+
+        Gate::define('manage-import', fn (User $user) => $eventAbility($user, 'manage-import'));
+
+        Gate::define('view-reports', fn (User $user) => $eventAbility($user, 'view-reports'));
+
+        Gate::define('manage-pengajian', fn (User $user) => $eventAbility($user, 'manage-pengajian'));
+
+        Gate::define('view-activity-log', fn (User $user) => $eventAbility($user, 'view-activity-log'));
+
+        Gate::define('manage-matches', fn (User $user) => $eventAbility($user, 'manage-matches'));
+
+        Gate::define('manage-officials', fn (User $user) => $eventAbility($user, 'manage-officials'));
+
+        Gate::define('submit-result', fn (User $user) => $eventAbility($user, 'submit-result'));
     }
 }

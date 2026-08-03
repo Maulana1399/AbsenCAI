@@ -11,7 +11,7 @@ class EventAccessService
 {
     public function canAccess(User $user, Event $event): bool
     {
-        if ($user->role !== Role::KetuaEvent) {
+        if ($user->isPlatformUser()) {
             return true;
         }
 

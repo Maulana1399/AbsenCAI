@@ -56,6 +56,8 @@ function qrIsolation_createMappedPeserta(Event $event, string $name, int $nip, s
         'event_id' => $event->id,
     ]);
 
+    $peserta->setAttribute('qrIsolationParticipationId', $participation->id);
+
     return $peserta;
 }
 
@@ -63,7 +65,7 @@ function qrIsolation_createMappedPeserta(Event $event, string $name, int $nip, s
 // No-context — all routes must fail closed
 // ---------------------------------------------------------------------------
 
-test('selected print returns 404 when no active event context', function () {
+test('selected print returns 403 when no active event context', function () {
     $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
@@ -71,10 +73,10 @@ test('selected print returns 404 when no active event context', function () {
     $peserta = qrIsolation_createMappedPeserta($event, 'No Context', 7001, 'KJA-NOCTX1');
 
     $this->get('/qr-label/print/selected/'.$peserta->id)
-        ->assertStatus(404);
+        ->assertStatus(403);
 });
 
-test('filtered print returns 404 when no active event context', function () {
+test('filtered print returns 403 when no active event context', function () {
     $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
@@ -82,10 +84,10 @@ test('filtered print returns 404 when no active event context', function () {
     qrIsolation_createMappedPeserta($event, 'No Context', 7002, 'KJA-NOCTX2');
 
     $this->get(route('qr-label.print.filtered'))
-        ->assertStatus(404);
+        ->assertStatus(403);
 });
 
-test('a4 print returns 404 when no active event context', function () {
+test('a4 print returns 403 when no active event context', function () {
     $user = User::factory()->create(['role' => Role::Sekretariat]);
     $this->actingAs($user);
 
@@ -93,7 +95,7 @@ test('a4 print returns 404 when no active event context', function () {
     qrIsolation_createMappedPeserta($event, 'No Context', 7003, 'KJA-NOCTX3');
 
     $this->get(route('qr-label.print.a4'))
-        ->assertStatus(404);
+        ->assertStatus(403);
 });
 
 // ---------------------------------------------------------------------------
@@ -106,19 +108,21 @@ test('selected print rejects participant from another event', function () {
 
     $eventA = qrIsolation_makeEvent('A');
     $eventB = qrIsolation_makeEvent('B');
+    grantEventRoleToUser($user, $eventA, 'sekretariat');
+    grantEventRoleToUser($user, $eventB, 'sekretariat');
 
     $pesertaA = qrIsolation_createMappedPeserta($eventA, 'Event A Person', 8001, 'KJA-CROSS-A');
     $pesertaB = qrIsolation_createMappedPeserta($eventB, 'Event B Person', 8002, 'KJA-CROSS-B');
 
     app(ActiveEventContext::class)->set($eventA);
 
-    $this->get('/qr-label/print/selected/'.$pesertaA->id)->assertOk();
-    $this->get('/qr-label/print/selected/'.$pesertaB->id)->assertNotFound();
+    $this->get('/qr-label/print/selected/'.$pesertaA->qrIsolationParticipationId)->assertOk();
+    $this->get('/qr-label/print/selected/'.$pesertaB->qrIsolationParticipationId)->assertNotFound();
 
     app(ActiveEventContext::class)->set($eventB);
 
-    $this->get('/qr-label/print/selected/'.$pesertaB->id)->assertOk();
-    $this->get('/qr-label/print/selected/'.$pesertaA->id)->assertNotFound();
+    $this->get('/qr-label/print/selected/'.$pesertaB->qrIsolationParticipationId)->assertOk();
+    $this->get('/qr-label/print/selected/'.$pesertaA->qrIsolationParticipationId)->assertNotFound();
 });
 
 // ---------------------------------------------------------------------------
@@ -131,6 +135,8 @@ test('filtered print only includes participants from active event', function () 
 
     $eventA = qrIsolation_makeEvent('A');
     $eventB = qrIsolation_makeEvent('B');
+    grantEventRoleToUser($user, $eventA, 'sekretariat');
+    grantEventRoleToUser($user, $eventB, 'sekretariat');
 
     $pesertaA = qrIsolation_createMappedPeserta($eventA, 'Event A Person', 8003, 'KJA-CROSS-A2');
     qrIsolation_createMappedPeserta($eventB, 'Event B Person', 8004, 'KJA-CROSS-B2');
@@ -156,6 +162,8 @@ test('a4 print only includes participants from active event', function () {
 
     $eventA = qrIsolation_makeEvent('A');
     $eventB = qrIsolation_makeEvent('B');
+    grantEventRoleToUser($user, $eventA, 'sekretariat');
+    grantEventRoleToUser($user, $eventB, 'sekretariat');
 
     $pesertaA = qrIsolation_createMappedPeserta($eventA, 'Event A Person', 8005, 'KJA-CROSS-A3');
     qrIsolation_createMappedPeserta($eventB, 'Event B Person', 8006, 'KJA-CROSS-B3');

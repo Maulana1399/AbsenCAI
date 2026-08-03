@@ -59,6 +59,7 @@ function S3_9D_makeRole(array $overrides = []): EventRole
     return app(EventCommitteeService::class)->createRole(array_merge([
         'event_id' => $event,
         'name' => 'Ketua Panitia',
+        'code' => 'ketua_event',
         'scope' => 'event',
     ], $overrides));
 }
@@ -287,7 +288,7 @@ test('person can have multiple committee roles in same event', function () {
     $event = S3_9D_makeEvent();
     $person = S3_9D_makePerson();
     $roleA = S3_9D_makeRole(['event_id' => $event->id, 'name' => 'Ketua Panitia']);
-    $roleB = S3_9D_makeRole(['event_id' => $event->id, 'name' => 'Sekretaris']);
+    $roleB = S3_9D_makeRole(['event_id' => $event->id, 'name' => 'Sekretaris', 'code' => 'sekretariat']);
 
     $assignmentA = app(EventCommitteeService::class)->assign(['event_id' => $event->id, 'person_id' => $person->id, 'event_role_id' => $roleA->id]);
     $assignmentB = app(EventCommitteeService::class)->assign(['event_id' => $event->id, 'person_id' => $person->id, 'event_role_id' => $roleB->id]);

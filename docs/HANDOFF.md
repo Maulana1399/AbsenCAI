@@ -73,9 +73,11 @@ The following documentation has been added as part of Project Audit:
 ## Current Test Baseline
 
 ```
-Full suite: 1574 passed, 3745 assertions, 0 failures
+Full suite: 1792 passed, 4219 assertions, 0 failures (SQLite & MariaDB)
 Design C:   problem_total = 0
 ```
+
+**MariaDB Migration (COMPLETE):** primary DB switched from SQLite to MariaDB. Migrations, seeders, and the full test suite are green on both drivers. See `docs/CHANGELOG.md` (Unreleased → MariaDB Migration) for the list of driver-compat fixes. Test command for MariaDB: `DB_CONNECTION=mariadb DB_DATABASE=kja_event_manager_test ... vendor/bin/pest`.
 
 ---
 

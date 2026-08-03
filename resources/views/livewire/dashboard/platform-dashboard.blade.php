@@ -56,7 +56,7 @@
                         </div>
                         <div class="flex items-center gap-1.5">
                             <flux:icon.shield-check class="size-4" />
-                            {{ $userRole }}
+                            {{ !empty($roleNamesByEvent[$event->id]) ? $roleLabelForEvent($event) : __('Tidak ada peran') }}
                         </div>
                     </div>
 

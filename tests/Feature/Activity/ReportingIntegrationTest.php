@@ -77,7 +77,7 @@ function S3_9E_makeRundown(array $overrides = []): Rundown
 function S3_9E_makeRole(array $overrides = []): EventRole
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
-    return app(EventCommitteeService::class)->createRole(array_merge(['event_id' => $event, 'name' => 'Ketua Panitia', 'scope' => 'event'], $overrides));
+    return app(EventCommitteeService::class)->createRole(array_merge(['event_id' => $event, 'name' => 'Ketua Panitia', 'code' => 'ketua_event', 'scope' => 'event'], $overrides));
 }
 
 function S3_9E_makeAssignment(array $overrides = []): EventCommitteeAssignment

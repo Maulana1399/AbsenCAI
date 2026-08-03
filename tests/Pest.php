@@ -45,3 +45,34 @@ function something()
 {
     // ..
 }
+
+/**
+ * Grant an event role to a user by role code and make that event the active one.
+ *
+ * Links the user to a Person when they do not have one yet, creates the event
+ * role (default permissions auto-fill from the role code), creates the committee
+ * assignment, and sets the active event context.
+ */
+function grantEventRoleToUser(\App\Models\User $user, \App\Models\Event $event, string $roleCode): \App\Models\EventRole
+{
+    if ($user->person_id === null) {
+        $person = \App\Models\Person::create(['nama' => 'Grant Person '.str()->random(6)]);
+        $user->forceFill(['person_id' => $person->id])->save();
+    }
+
+    $role = \App\Models\EventRole::create([
+        'event_id' => $event->id,
+        'name' => $roleCode,
+        'code' => $roleCode,
+    ]);
+
+    \App\Models\EventCommitteeAssignment::create([
+        'event_id' => $event->id,
+        'person_id' => $user->person_id,
+        'event_role_id' => $role->id,
+    ]);
+
+    app(\App\Support\ActiveEventContext::class)->set($event);
+
+    return $role;
+}

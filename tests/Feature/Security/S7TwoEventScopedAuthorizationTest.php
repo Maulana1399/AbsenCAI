@@ -45,11 +45,12 @@ function s7e_user(string $role, ?int $personId = null): User
     return User::factory()->create($attrs);
 }
 
-function s7e_assignPersonToEvent(Person $person, Event $event): void
+function s7e_assignPersonToEvent(Person $person, Event $event, string $roleCode = 'ketua_event'): void
 {
     $role = app(EventCommitteeService::class)->createRole([
         'event_id' => $event->id,
         'name' => 'Panitia',
+        'code' => $roleCode,
         'scope' => 'event',
     ]);
 
@@ -58,6 +59,8 @@ function s7e_assignPersonToEvent(Person $person, Event $event): void
         'person_id' => $person->id,
         'event_role_id' => $role->id,
     ]);
+
+    app(ActiveEventContext::class)->set($event);
 }
 
 function s7e_ketuaEventAssignedTo(Event $event): User
@@ -122,9 +125,15 @@ test('event role code does not affect assignment authorization', function () {
     $role = app(EventCommitteeService::class)->createRole([
         'event_id' => $event->id,
         'name' => 'Sie Acara',
-        'code' => 'sie_acara',
+        'code' => 'pj_divisi',
         'scope' => 'event',
     ]);
+
+    // Simulasikan role legacy dengan code arbitrary (bukan dari matriks sistem):
+    // assignment authorization TIDAK bergantung pada nilai code.
+    \Illuminate\Support\Facades\DB::table('event_roles')
+        ->where('id', $role->id)
+        ->update(['code' => 'sie_acara']);
 
     app(EventCommitteeService::class)->assign([
         'event_id' => $event->id,
@@ -176,6 +185,7 @@ foreach ($ketuaEventAbilities as $ability) {
 test('KetuaEvent cannot access abilities with no active event', function () {
     $event = s7e_event();
     $user = s7e_ketuaEventAssignedTo($event);
+    app(ActiveEventContext::class)->clear();
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeFalse();
     expect(Gate::forUser($user)->allows('manage-registration'))->toBeFalse();
@@ -236,7 +246,10 @@ test('Admin remains global for all abilities', function () {
 });
 
 test('Sekretariat remains global for its existing abilities', function () {
-    $user = s7e_user('sekretariat');
+    $event = s7e_event();
+    $person = s7e_person();
+    $user = s7e_user('sekretariat', $person->id);
+    s7e_assignPersonToEvent($person, $event, 'sekretariat');
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-registration'))->toBeTrue();
@@ -248,7 +261,10 @@ test('Sekretariat remains global for its existing abilities', function () {
 });
 
 test('PjDivisi existing abilities unchanged', function () {
-    $user = s7e_user('pj_divisi');
+    $event = s7e_event();
+    $person = s7e_person();
+    $user = s7e_user('pj_divisi', $person->id);
+    s7e_assignPersonToEvent($person, $event, 'pj_divisi');
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-attendance'))->toBeTrue();
@@ -257,21 +273,30 @@ test('PjDivisi existing abilities unchanged', function () {
 });
 
 test('OperatorRegistrasi unchanged', function () {
-    $user = s7e_user('operator_registrasi');
+    $event = s7e_event();
+    $person = s7e_person();
+    $user = s7e_user('operator_registrasi', $person->id);
+    s7e_assignPersonToEvent($person, $event, 'operator_registrasi');
 
     expect(Gate::forUser($user)->allows('manage-registration'))->toBeTrue();
     expect(Gate::forUser($user)->denies('view-dashboard'))->toBeTrue();
 });
 
 test('OperatorScan unchanged', function () {
-    $user = s7e_user('operator_scan');
+    $event = s7e_event();
+    $person = s7e_person();
+    $user = s7e_user('operator_scan', $person->id);
+    s7e_assignPersonToEvent($person, $event, 'operator_scan');
 
     expect(Gate::forUser($user)->allows('manage-attendance'))->toBeTrue();
     expect(Gate::forUser($user)->denies('view-dashboard'))->toBeTrue();
 });
 
 test('Viewer unchanged', function () {
-    $user = s7e_user('viewer');
+    $event = s7e_event();
+    $person = s7e_person();
+    $user = s7e_user('viewer', $person->id);
+    s7e_assignPersonToEvent($person, $event, 'viewer');
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->allows('view-reports'))->toBeTrue();

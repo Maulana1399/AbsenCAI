@@ -142,7 +142,10 @@ test('guest cannot access registration page', function () {
 });
 
 test('operator registrasi can access registration page', function () {
-    $this->actingAs(s3_user('operator_registrasi'));
+    $event = s3_event();
+    $user = s3_user('operator_registrasi');
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
+    $this->actingAs($user);
     $this->get('/registrasi')->assertOk();
 });
 
@@ -157,7 +160,10 @@ test('null role cannot access registration page', function () {
 });
 
 test('operator registrasi can access re-registration page', function () {
-    $this->actingAs(s3_user('operator_registrasi'));
+    $event = s3_event();
+    $user = s3_user('operator_registrasi');
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
+    $this->actingAs($user);
     $this->get('/registrasi/ulang')->assertOk();
 });
 
@@ -213,12 +219,18 @@ test('guest cannot access attendance page', function () {
 });
 
 test('operator scan can access attendance page', function () {
-    $this->actingAs(s3_user('operator_scan'));
+    $event = s3_event();
+    $user = s3_user('operator_scan');
+    grantEventRoleToUser($user, $event, 'operator_scan');
+    $this->actingAs($user);
     $this->get('/absensi')->assertOk();
 });
 
 test('pj divisi can access attendance page', function () {
-    $this->actingAs(s3_user('pj_divisi'));
+    $event = s3_event();
+    $user = s3_user('pj_divisi');
+    grantEventRoleToUser($user, $event, 'pj_divisi');
+    $this->actingAs($user);
     $this->get('/absensi')->assertOk();
 });
 
@@ -292,7 +304,10 @@ test('guest cannot access reports', function () {
 });
 
 test('viewer can access reports', function () {
-    $this->actingAs(s3_user('viewer'));
+    $event = s3_event();
+    $user = s3_user('viewer');
+    grantEventRoleToUser($user, $event, 'viewer');
+    $this->actingAs($user);
     $this->get('/rekap-peserta')->assertOk();
     $this->get('/rekap-absensi')->assertOk();
 });
@@ -312,7 +327,10 @@ test('guest cannot access surat izin page', function () {
 });
 
 test('sekretariat can access surat izin page', function () {
-    $this->actingAs(s3_user('sekretariat'));
+    $event = s3_event();
+    $user = s3_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
+    $this->actingAs($user);
     $this->get('/surat-izin')->assertOk();
 });
 
@@ -348,7 +366,10 @@ test('guest cannot access activity log page', function () {
 });
 
 test('sekretariat can access activity log page', function () {
-    $this->actingAs(s3_user('sekretariat'));
+    $event = s3_event();
+    $user = s3_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
+    $this->actingAs($user);
     $this->get('/activity-log')->assertOk();
 });
 
@@ -412,8 +433,8 @@ test('pengajian public flow unchanged by S3', function () {
 test('event switching is not protected by manage-events', function () {
     $event = s3_event();
     $user = s3_user('operator_scan');
+    grantEventRoleToUser($user, $event, 'operator_scan');
     $this->actingAs($user);
-    app(ActiveEventContext::class)->set($event);
 
     Livewire::test(\App\Livewire\Event\EventSwitcher::class)
         ->assertSee($event->name);

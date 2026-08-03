@@ -25,11 +25,11 @@
         <!-- Email Address -->
         <flux:input
             wire:model="email"
-            :label="__('Email address')"
-            type="email"
+            :label="__('Email atau Username')"
+            type="text"
             required
             autofocus
-            autocomplete="email"
+            autocomplete="username"
             placeholder="email@example.com"
         />
 

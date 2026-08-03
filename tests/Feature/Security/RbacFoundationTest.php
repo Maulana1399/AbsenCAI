@@ -142,7 +142,9 @@ test('Admin has administrative permissions', function () {
 // ---------------------------------------------------------------------------
 
 test('Sekretariat has operational permissions', function () {
+    $event = Event::create(['name' => 'Sekretariat Event', 'slug' => 'sekretariat-event-'.str()->random(6), 'status' => 'active']);
     $user = rbac_user(['role' => 'sekretariat']);
+    grantEventRoleToUser($user, $event, 'sekretariat');
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
@@ -165,7 +167,9 @@ test('Sekretariat has operational permissions', function () {
 // ---------------------------------------------------------------------------
 
 test('Operator Registrasi has registration permission only', function () {
+    $event = Event::create(['name' => 'Operator Reg Event', 'slug' => 'operator-reg-event-'.str()->random(6), 'status' => 'active']);
     $user = rbac_user(['role' => 'operator_registrasi']);
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
 
     expect(Gate::forUser($user)->denies('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
@@ -182,7 +186,9 @@ test('Operator Registrasi has registration permission only', function () {
 // ---------------------------------------------------------------------------
 
 test('Operator Scan has attendance permission only', function () {
+    $event = Event::create(['name' => 'Operator Scan Event', 'slug' => 'operator-scan-event-'.str()->random(6), 'status' => 'active']);
     $user = rbac_user(['role' => 'operator_scan']);
+    grantEventRoleToUser($user, $event, 'operator_scan');
 
     expect(Gate::forUser($user)->denies('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
@@ -199,7 +205,9 @@ test('Operator Scan has attendance permission only', function () {
 // ---------------------------------------------------------------------------
 
 test('Viewer has read-only permissions', function () {
+    $event = Event::create(['name' => 'Viewer Event', 'slug' => 'viewer-event-'.str()->random(6), 'status' => 'active']);
     $user = rbac_user(['role' => 'viewer']);
+    grantEventRoleToUser($user, $event, 'viewer');
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
@@ -270,6 +278,7 @@ test('Ketua Event has event-scoped permissions', function () {
     $role = app(EventCommitteeService::class)->createRole([
         'event_id' => $event->id,
         'name' => 'Ketua Panitia',
+        'code' => 'ketua_event',
         'scope' => 'event',
     ]);
 
@@ -298,7 +307,9 @@ test('Ketua Event has event-scoped permissions', function () {
 // ---------------------------------------------------------------------------
 
 test('PJ Divisi has monitoring permissions', function () {
+    $event = Event::create(['name' => 'PJ Divisi Event', 'slug' => 'pj-divisi-event-'.str()->random(6), 'status' => 'active']);
     $user = rbac_user(['role' => 'pj_divisi']);
+    grantEventRoleToUser($user, $event, 'pj_divisi');
 
     expect(Gate::forUser($user)->allows('view-dashboard'))->toBeTrue();
     expect(Gate::forUser($user)->allows('manage-attendance'))->toBeTrue();

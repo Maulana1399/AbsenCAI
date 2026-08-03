@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,7 +16,7 @@ use Livewire\Component;
 #[Layout('components.layouts.auth')]
 class Login extends Component
 {
-    #[Validate('required|string|email')]
+    #[Validate('required|string|max:255')]
     public string $email = '';
 
     #[Validate('required|string')]
@@ -32,7 +33,21 @@ class Login extends Component
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        $user = User::query()
+            ->where(fn ($q) => $q->where('email', $this->email)->orWhere('username', $this->email))
+            ->first();
+
+        if ($user !== null && $user->is_active === false) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('Akun ini dinonaktifkan.'),
+            ]);
+        }
+
+        $field = Str::contains($this->email, '@') ? 'email' : 'username';
+
+        if (! Auth::attempt([$field => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

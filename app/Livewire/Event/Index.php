@@ -55,7 +55,7 @@ class Index extends Component
                 'newEndDate' => 'nullable|date|after_or_equal:newStartDate',
             ]);
 
-            Event::create([
+            $event = Event::create([
                 'name' => $this->newName,
                 'slug' => $this->newSlug,
                 'event_type' => $this->newEventType,
@@ -67,6 +67,24 @@ class Index extends Component
 
             $this->showCreateForm = false;
             $this->resetForm();
+
+            $context = app(ActiveEventContext::class);
+
+            if (! $context->hasActiveEvent()) {
+                $context->set($event);
+
+                $route = match (true) {
+                    $event->isPengajian() => route('pengajian.report', absolute: false),
+                    $event->isCompetition() => route('competition.dashboard', $event, absolute: false),
+                    default => route('events.dashboard', $event, absolute: false),
+                };
+
+                session()->flash('success', 'Event berhasil dibuat dan dipilih.');
+                $this->redirect($route, navigate: true);
+
+                return;
+            }
+
             session()->flash('success', 'Event berhasil dibuat.');
         } finally {
             $this->processing = false;

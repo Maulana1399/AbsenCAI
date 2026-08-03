@@ -9,7 +9,12 @@ use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\User;
 use App\Models\Venue;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class EventCommitteeService
@@ -96,5 +101,104 @@ class EventCommitteeService
             'assigned_at' => $data['assigned_at'] ?? now(),
             'notes' => $data['notes'] ?? null,
         ]);
+    }
+
+    /**
+     * Assign a person to an event role and ensure they have a login account.
+     *
+     * Runs assignment and auto-created user inside a single transaction.
+     *
+     * @return array{
+     *     assignment: EventCommitteeAssignment,
+     *     user: User,
+     *     user_created: bool,
+     *     plain_password: string|null,
+     * }
+     */
+    public function assignAndEnsureUser(array $data): array
+    {
+        return DB::transaction(function () use ($data) {
+            $assignment = $this->assign($data);
+
+            $result = $this->ensureUserForPerson($assignment->person);
+
+            return [
+                'assignment' => $assignment,
+                'user' => $result['user'],
+                'user_created' => $result['created'],
+                'plain_password' => $result['plain_password'],
+            ];
+        });
+    }
+
+    /**
+     * Create a login account for a person when they do not have one yet.
+     *
+     * @return array{user: User, created: bool, plain_password: string|null}
+     */
+    public function ensureUserForPerson(Person $person): array
+    {
+        $existing = $person->user;
+
+        if ($existing !== null) {
+            return [
+                'user' => $existing,
+                'created' => false,
+                'plain_password' => null,
+            ];
+        }
+
+        $username = $this->buildUniqueUsername($person->nama);
+        $plainPassword = $this->buildPasswordFromBirthDate($person);
+
+        $user = User::create([
+            'person_id' => $person->id,
+            'name' => $person->nama,
+            'username' => $username,
+            'password' => Hash::make($plainPassword),
+            'email' => null,
+            'is_active' => true,
+        ]);
+
+        return [
+            'user' => $user,
+            'created' => true,
+            'plain_password' => $plainPassword,
+        ];
+    }
+
+    private function buildUniqueUsername(string $nama): string
+    {
+        $base = Str::slug($nama, separator: '.');
+        $base = (string) preg_replace('/[^a-z0-9.]+/', '', $base);
+        $base = trim($base, '.');
+
+        if ($base === '') {
+            $base = 'user';
+        }
+
+        $username = $base;
+        $suffix = 2;
+
+        while (User::where('username', $username)->exists()) {
+            $username = $base . $suffix;
+            $suffix++;
+        }
+
+        return $username;
+    }
+
+    private function buildPasswordFromBirthDate(Person $person): string
+    {
+        if ($person->tanggal_lahir === null) {
+            Log::warning('Auto-create user: person tanpa tanggal lahir, menggunakan password sementara.', [
+                'person_id' => $person->id,
+                'nama' => $person->nama,
+            ]);
+
+            return '12345678';
+        }
+
+        return $person->tanggal_lahir->format('dmY');
     }
 }

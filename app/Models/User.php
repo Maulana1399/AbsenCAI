@@ -17,9 +17,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
         'role',
         'person_id',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -33,6 +35,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
+            'is_active' => 'boolean',
         ];
     }
 
@@ -63,6 +66,11 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    public function isPlatformUser(): bool
+    {
+        return $this->hasAnyRole(Role::SuperAdmin, Role::Admin);
     }
 
     public function person()

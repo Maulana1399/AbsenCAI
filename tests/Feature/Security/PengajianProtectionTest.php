@@ -58,8 +58,8 @@ test('admin can access pengajian admin routes', function () {
 
 test('sekretariat can access pengajian admin routes', function () {
     $event = s4_event();
-    app(ActiveEventContext::class)->set($event);
     $user = s4_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
     $this->actingAs($user);
 
     $this->get(route('pengajian.admin.access'))->assertOk();
@@ -91,8 +91,8 @@ test('null role cannot access pengajian admin routes', function () {
 
 test('viewer can access pengajian report', function () {
     $event = s4_event();
-    app(ActiveEventContext::class)->set($event);
     $user = s4_user('viewer');
+    grantEventRoleToUser($user, $event, 'viewer');
     $this->actingAs($user);
 
     $this->get(route('pengajian.report'))->assertOk();

@@ -78,13 +78,17 @@ test('unauthorized role cannot access surat izin print route', function () {
 });
 
 test('authorized role can access surat izin print for approved surat', function () {
+    $event = s5_event();
+    $user = s5_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
+
     $peserta = peserta::create(['nama' => 'Print Test 2', 'nip' => 6003, 'jenis_kelamin' => 'Laki - Laki']);
     $surat = SuratIzin::create([
         'peserta_id' => $peserta->id, 'alasan' => 'Test alasan panjang',
         'tanggal_mulai' => '2026-07-20', 'tanggal_selesai' => '2026-07-22',
         'status' => 'approved', 'created_by' => s5_user('admin')->id,
     ]);
-    $this->actingAs(s5_user('sekretariat'));
+    $this->actingAs($user);
 
     $this->get(route('surat-izin.print', $surat->id))->assertOk();
 });
@@ -132,11 +136,13 @@ test('unauthorized role cannot use self register', function () {
 
 test('operator registrasi can use self register', function () {
     $event = s5_event();
-    app(ActiveEventContext::class)->set($event);
+    $user = s5_user('operator_registrasi');
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
+
     $desa = \App\Models\desa::create(['desa_asal' => 'S5 Desa']);
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'S5 Kelompok', 'desa_id' => $desa->id]);
     $regu = \App\Models\regu::create(['regu' => 'S5 Regu', 'jenis_kelamin' => 'Laki - Laki']);
-    $this->actingAs(s5_user('operator_registrasi'));
+    $this->actingAs($user);
 
     Livewire::test(\App\Livewire\Registrasi\SelfRegister::class)
         ->set('nama', 'Self Register Test')
@@ -163,7 +169,10 @@ test('null role cannot access activity log', function () {
 });
 
 test('sekretariat can access activity log', function () {
-    $this->actingAs(s5_user('sekretariat'));
+    $event = s5_event();
+    $user = s5_user('sekretariat');
+    grantEventRoleToUser($user, $event, 'sekretariat');
+    $this->actingAs($user);
     $this->get('/activity-log')->assertOk();
 });
 
@@ -181,8 +190,9 @@ test('unauthorized role cannot access report routes', function () {
 
 test('viewer can access report routes', function () {
     $event = s5_event();
-    app(ActiveEventContext::class)->set($event);
-    $this->actingAs(s5_user('viewer'));
+    $user = s5_user('viewer');
+    grantEventRoleToUser($user, $event, 'viewer');
+    $this->actingAs($user);
     $this->get('/rekap-peserta')->assertOk();
     $this->get('/rekap-absensi')->assertOk();
 });
@@ -220,7 +230,10 @@ test('unauthorized role cannot access registration routes', function () {
 });
 
 test('operator registrasi can access registration routes', function () {
-    $this->actingAs(s5_user('operator_registrasi'));
+    $event = s5_event();
+    $user = s5_user('operator_registrasi');
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
+    $this->actingAs($user);
     $this->get('/registrasi')->assertOk();
     $this->get('/registrasi/ulang')->assertOk();
 });
@@ -263,7 +276,10 @@ test('unauthorized role cannot access attendance route', function () {
 });
 
 test('operator scan can access attendance route', function () {
-    $this->actingAs(s5_user('operator_scan'));
+    $event = s5_event();
+    $user = s5_user('operator_scan');
+    grantEventRoleToUser($user, $event, 'operator_scan');
+    $this->actingAs($user);
     $this->get('/absensi')->assertOk();
 });
 
@@ -323,20 +339,27 @@ test('user management still super admin only', function () {
 // ---------------------------------------------------------------------------
 
 test('operator registrasi workflow works', function () {
-    $this->actingAs(s5_user('operator_registrasi'));
+    $event = s5_event();
+    $user = s5_user('operator_registrasi');
+    grantEventRoleToUser($user, $event, 'operator_registrasi');
+    $this->actingAs($user);
     $this->get('/registrasi')->assertOk();
     $this->get('/registrasi/ulang')->assertOk();
 });
 
 test('operator scan workflow works', function () {
-    $this->actingAs(s5_user('operator_scan'));
+    $event = s5_event();
+    $user = s5_user('operator_scan');
+    grantEventRoleToUser($user, $event, 'operator_scan');
+    $this->actingAs($user);
     $this->get('/absensi')->assertOk();
 });
 
 test('viewer workflow works', function () {
     $event = s5_event();
-    app(ActiveEventContext::class)->set($event);
-    $this->actingAs(s5_user('viewer'));
+    $user = s5_user('viewer');
+    grantEventRoleToUser($user, $event, 'viewer');
+    $this->actingAs($user);
     $this->get('/rekap-peserta')->assertOk();
     $this->get('/rekap-absensi')->assertOk();
     $this->get(route('pengajian.report'))->assertOk();

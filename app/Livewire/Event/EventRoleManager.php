@@ -7,6 +7,7 @@ use App\Models\EventRole;
 use App\Services\Activity\EventCommitteeService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -22,6 +23,26 @@ class EventRoleManager extends Component
     public ?string $newDescription = null;
     public bool $newIsActive = true;
     public ?int $newSortOrder = null;
+
+    /**
+     * Pilihan template permission. Kunci = code (source of truth),
+     * nilai = label tampilan yang mudah dipahami admin.
+     */
+    public function getTemplateOptionsProperty(): array
+    {
+        return [
+            'ketua_event' => 'Ketua Event',
+            'sekretariat' => 'Sekretariat',
+            'operator_registrasi' => 'Operator Registrasi',
+            'operator_scan' => 'Operator Scan',
+            'operator_lapangan' => 'Operator Lapangan',
+            'pj_divisi' => 'PJ Divisi',
+            'juri' => 'Juri',
+            'viewer' => 'Viewer',
+            'ketua_fosda' => 'Ketua Fosda',
+            'admin_event' => 'Admin Event',
+        ];
+    }
 
     #[On('manageEventRoles')]
     public function load(int $id): void
@@ -43,7 +64,7 @@ class EventRoleManager extends Component
         try {
             $this->validate([
                 'newName' => 'required|string|max:255',
-                'newCode' => 'nullable|string|max:100',
+                'newCode' => ['required', 'string', 'max:100', Rule::in(array_keys($this->templateOptions))],
                 'newDescription' => 'nullable|string',
                 'newIsActive' => 'boolean',
                 'newSortOrder' => 'nullable|integer|min:0',
@@ -63,7 +84,7 @@ class EventRoleManager extends Component
             $this->resetForm();
             session()->flash('success', 'Role berhasil dibuat.');
         } catch (\Illuminate\Database\QueryException $e) {
-            if (str_contains($e->getMessage(), 'UNIQUE')) {
+            if ($e->getCode() === '23000') {
                 $this->addError('newName', 'Nama role sudah digunakan di event ini.');
             } else {
                 throw $e;
@@ -93,6 +114,7 @@ class EventRoleManager extends Component
 
         return view('livewire.event.event-role-manager', [
             'roles' => $roles,
+            'templateOptions' => $this->templateOptions,
         ]);
     }
 }

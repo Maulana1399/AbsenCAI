@@ -9,12 +9,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            LegacyEventSeeder::class,
-            EventSeeder::class,
+            SuperUserSeeder::class,
+            UserSeeder::class,
             DesaSeeder::class,
             KelompokSeeder::class,
-            UserSeeder::class,
-            UatSeeder::class,
         ]);
     }
 }

@@ -24,6 +24,8 @@ use App\Models\Venue;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Support\ActiveEventContext;
+use Database\Seeders\DesaSeeder;
+use Database\Seeders\KelompokSeeder;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -63,13 +65,6 @@ class UatSeeder extends Seeder
 
     private array $arenaNames = [
         'Arena A', 'Arena B', 'Arena C', 'Arena D',
-    ];
-
-    private array $committeeUsers = [
-        ['name' => 'Admin Event', 'email' => 'event@kja.local', 'role' => Role::Admin],
-        ['name' => 'Operator Lapangan', 'email' => 'lapangan@kja.local', 'role' => Role::OperatorScan],
-        ['name' => 'Operator Registrasi', 'email' => 'registrasi@kja.local', 'role' => Role::OperatorRegistrasi],
-        ['name' => 'Viewer', 'email' => 'viewer@kja.local', 'role' => Role::Viewer],
     ];
 
     private array $categoryDefs = [
@@ -170,7 +165,13 @@ class UatSeeder extends Seeder
         app(ActiveEventContext::class)->set($event);
 
         $eventRoles = $this->createEventRoles($event);
-        $this->createCommitteeUsers($event, $eventRoles);
+
+        if (desa::count() === 0) {
+            $this->call(DesaSeeder::class);
+        }
+        if (kelompok::count() === 0) {
+            $this->call(KelompokSeeder::class);
+        }
 
         $desaIds = desa::pluck('id')->toArray();
         $kelompokIds = kelompok::pluck('id')->toArray();
@@ -278,73 +279,6 @@ class UatSeeder extends Seeder
         }
 
         return $ids;
-    }
-
-    private function createCommitteeUsers(Event $event, array $eventRoles): void
-    {
-        foreach ($this->committeeUsers as $cu) {
-            $user = User::where('email', $cu['email'])->first();
-
-            if ($user && $user->person_id) {
-                $person = Person::find($user->person_id);
-                if (!$person) {
-                    $person = Person::create([
-                        'nama' => $cu['name'],
-                        'jenis_kelamin' => 'L',
-                        'desa_id' => desa::inRandomOrder()->first()->id,
-                        'kelompok_id' => kelompok::inRandomOrder()->first()->id,
-                        'tanggal_lahir' => '1990-01-01',
-                    ]);
-                    $user->update(['person_id' => $person->id]);
-                }
-            } else {
-                $person = Person::create([
-                    'nama' => $cu['name'],
-                    'jenis_kelamin' => 'L',
-                    'desa_id' => desa::inRandomOrder()->first()->id,
-                    'kelompok_id' => kelompok::inRandomOrder()->first()->id,
-                    'tanggal_lahir' => '1990-01-01',
-                ]);
-
-                $user = User::create([
-                    'name' => $cu['name'],
-                    'email' => $cu['email'],
-                    'password' => Hash::make('admin123'),
-                    'email_verified_at' => now(),
-                    'role' => $cu['role'],
-                    'person_id' => $person->id,
-                ]);
-            }
-
-            $participation = Participation::updateOrCreate(
-                ['person_id' => $person->id, 'event_id' => $event->id],
-                [
-                    'participant_number' => 'KJA-' . Str::upper(Str::random(6)),
-                    'attendance_code' => 'KJA-' . Str::upper(Str::random(8)),
-                    'jenis_peserta' => 'Panitia',
-                    'status_registrasi' => 'checked_in',
-                ],
-            );
-
-            $roleCode = match ($cu['role']->value) {
-                'admin' => 'admin_event',
-                'operator_scan' => 'operator_lapangan',
-                'operator_registrasi' => 'operator_registrasi',
-                'viewer' => 'viewer',
-                default => 'viewer',
-            };
-
-            EventCommitteeAssignment::updateOrCreate(
-                ['event_id' => $event->id, 'person_id' => $person->id],
-                [
-                    'participation_id' => $participation->id,
-                    'event_role_id' => $eventRoles[$roleCode] ?? $eventRoles['viewer'],
-                    'assigned_at' => now(),
-                ],
-            );
-
-            $this->totalCommitteeAssignments++;
-        }
     }
 
     private function createPersons(array $desaIds, array $kelompokIds): array
@@ -974,12 +908,7 @@ class UatSeeder extends Seeder
         $this->command->info('Announcements ........ ' . CompetitionAnnouncement::count());
         $this->command->info('============================================');
         $this->command->info('');
-        $this->command->info('Committee Users:');
-        $this->command->info('  admin@kja.local     (Super Admin)');
-        $this->command->info('  event@kja.local     (Event Admin)');
-        $this->command->info('  lapangan@kja.local  (Operator Lapangan)');
-        $this->command->info('  registrasi@kja.local (Operator Registrasi)');
-        $this->command->info('  viewer@kja.local    (Viewer)');
+        $this->command->info('Reusing existing users from SuperUserSeeder & UserSeeder.');
         $this->command->info('  Password: admin123');
         $this->command->info('');
         $this->command->info('============================================');

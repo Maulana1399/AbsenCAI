@@ -41,7 +41,22 @@
                     <flux:input wire:model="newName" label="Nama Role" placeholder="Ketua Panitia" />
                     @error('newName') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
 
-                    <flux:input wire:model="newCode" label="Kode (opsional)" placeholder="ketua_panitia" />
+                    <flux:select wire:model="newCode" label="Template Permission" placeholder="Pilih template...">
+                        @foreach ($templateOptions as $code => $label)
+                            <flux:select.option value="{{ $code }}">{{ $label }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    @error('newCode')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Code</label>
+                        <div class="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                            {{ $newCode ?: '—' }}
+                        </div>
+                        <p class="mt-1 text-xs text-zinc-500">Code diisi otomatis dari template permission dan tidak dapat diubah.</p>
+                    </div>
 
                     <div>
                         <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Deskripsi (opsional)</label>

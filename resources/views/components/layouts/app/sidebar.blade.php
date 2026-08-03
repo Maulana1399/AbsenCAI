@@ -26,6 +26,7 @@
 
             <livewire:event.event-switcher />
 
+            @if ($activeEvent)
             @if ($isPengajian)
                 {{-- Pengajian Navigation --}}
                 <flux:navlist variant="outline">
@@ -176,7 +177,22 @@
                     @endcanany
                 </flux:navlist>
             @endif
+            @else
+                {{-- Platform Mode: no active event selected --}}
+                <flux:navlist variant="outline">
+                    @can('view-dashboard')
+                    <flux:navlist.group :heading="__('Platform')" class="grid">
+                        <flux:navlist.item icon="home" :href="route('dashboard', absolute: false)" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    </flux:navlist.group>
+                    @endcan
 
+                    @can('manage-events')
+                    <flux:navlist.group expandable heading="Event" class="grid">
+                        <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Kelola Event') }}</flux:navlist.item>
+                    </flux:navlist.group>
+                    @endcan
+                </flux:navlist>
+            @endif
 
             @can('view-master-data')
             @php

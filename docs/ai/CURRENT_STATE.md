@@ -258,7 +258,7 @@ Priority saat ini:
 
 ## Database
 
-🟢 Stable — Competition tables: categories, classes, registrations, schedules, entries, outcomes, match_officials, brackets, bracket_matches. All migrations verified for `migrate:fresh`.
+🟢 Stable — MariaDB primary DB migration complete. SQLite → MariaDB: all migrations, seeders, and full test suite (1792 passed / 4219 assertions / 0 failures) green on both drivers. Competition tables: categories, classes, registrations, schedules, entries, outcomes, match_officials, brackets, bracket_matches. All migrations verified for `migrate:fresh`.
 
 ## Core Feature
 
@@ -274,7 +274,7 @@ Priority saat ini:
 
 Backend: Laravel 12
 Frontend: Livewire, Flux UI, Tailwind CSS
-Database: SQLite
+Database: MariaDB (primary), SQLite (test baseline)
 
 ---
 
