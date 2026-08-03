@@ -2,7 +2,6 @@
 
 namespace App\Services\QR;
 
-use App\Models\Event;
 use App\Models\Participation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;

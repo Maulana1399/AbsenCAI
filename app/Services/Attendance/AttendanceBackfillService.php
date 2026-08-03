@@ -3,14 +3,12 @@
 namespace App\Services\Attendance;
 
 use App\Models\Absensi;
-use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\SuratIzin;
-use Illuminate\Support\Facades\DB;
 
 class AttendanceBackfillService
 {

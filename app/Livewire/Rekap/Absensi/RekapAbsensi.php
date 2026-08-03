@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Rekap\Absensi;
 
-use App\Models\Participation;
 use App\Models\regu;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceReadService;

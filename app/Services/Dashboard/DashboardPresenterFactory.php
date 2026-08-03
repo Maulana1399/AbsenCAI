@@ -3,7 +3,6 @@
 namespace App\Services\Dashboard;
 
 use App\Models\Event;
-use InvalidArgumentException;
 
 class DashboardPresenterFactory
 {

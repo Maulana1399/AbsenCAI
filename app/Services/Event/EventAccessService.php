@@ -2,7 +2,6 @@
 
 namespace App\Services\Event;
 
-use App\Enums\Role;
 use App\Models\Event;
 use App\Models\EventCommitteeAssignment;
 use App\Models\User;

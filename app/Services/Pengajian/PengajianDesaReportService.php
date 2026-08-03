@@ -6,7 +6,6 @@ use App\Models\DesaAccessGrant;
 use App\Models\EventAttendance;
 use App\Models\Person;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class PengajianDesaReportService
 {

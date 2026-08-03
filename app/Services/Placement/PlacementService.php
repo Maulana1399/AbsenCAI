@@ -3,7 +3,6 @@
 namespace App\Services\Placement;
 
 use App\Models\Participation;
-use App\Models\peserta;
 use App\Models\regu;
 
 class PlacementService
@@ -47,8 +46,6 @@ class PlacementService
 
     public static function autoPlacement(?string $jenisKelamin = null, ?int $eventId = null): array
     {
-        // NIP generation retired per PGM.20. Use participant_number for
-        // human-facing participant identity within an event.
         $regu = $eventId !== null ? self::leastFilledRegu($jenisKelamin, $eventId) : null;
 
         return [

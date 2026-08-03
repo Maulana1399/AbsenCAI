@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use App\Models\Participation;
-use App\Support\ActiveEventContext;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -57,7 +56,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
         }
 
         if ($this->jenis_kelamin) {
-            $query->whereHas('person', fn ($builder) => $builder->where('jenis_kelamin', $this->normalizeGender($this->jenis_kelamin)));
+            $query->whereHas('person', fn ($builder) => $builder->where('jenis_kelamin', $this->displayGender($this->jenis_kelamin)));
         }
 
         if ($this->jenis_peserta) {
@@ -93,15 +92,6 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Regu',
             'Status Registrasi',
         ];
-    }
-
-    private function normalizeGender(?string $gender): ?string
-    {
-        return match ($gender) {
-            'L' => 'Laki - Laki',
-            'P' => 'Perempuan',
-            default => $gender,
-        };
     }
 
     private function displayGender(?string $gender): ?string
