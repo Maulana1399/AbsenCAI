@@ -2,52 +2,31 @@
 
 namespace App\Livewire\Competition;
 
+use App\Livewire\Traits\ResolvesEventDashboard;
 use App\Models\Event;
-use App\Models\CompetitionCategory;
-use App\Models\CompetitionClass;
-use App\Models\CompetitionRegistration;
-use App\Models\Venue;
-use App\Services\Event\EventAccessService;
+use App\Services\Dashboard\CompetitionDashboardPresenter;
 use App\Support\ActiveEventContext;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
-    public string $eventName;
+    use ResolvesEventDashboard;
 
-    public function mount(Event $event)
+    public string $eventName = '';
+
+    public function mount(Event $event): void
     {
-        abort_unless($event->isActive(), 404);
-
-        abort_unless(
-            app(EventAccessService::class)->canAccess(auth()->user(), $event),
-            403
-        );
-
-        app(ActiveEventContext::class)->set($event);
-
-        $this->eventName = $event->name;
+        $this->resolveEventDashboard($event);
     }
 
-    public function render()
+    public function render(CompetitionDashboardPresenter $presenter)
     {
         $event = app(ActiveEventContext::class)->current();
 
-        $totalRegistrations = CompetitionRegistration::whereIn(
-            'competition_category_id',
-            CompetitionCategory::where('event_id', $event?->id)->pluck('id')
-        )->count();
+        $data = $presenter->present($event);
 
-        $totalCategories = CompetitionCategory::where('event_id', $event?->id)->count();
-        $totalClasses = CompetitionClass::where('event_id', $event?->id)->count();
-        $totalVenues = Venue::where('event_id', $event?->id)->count();
-
-        return view('livewire.competition.dashboard', [
-            'totalRegistrations' => $totalRegistrations,
-            'totalCategories' => $totalCategories,
-            'totalClasses' => $totalClasses,
-            'totalVenues' => $totalVenues,
+        return view('livewire.competition.dashboard', array_merge($data, [
             'eventName' => $this->eventName,
-        ]);
+        ]));
     }
 }
