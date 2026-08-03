@@ -195,7 +195,7 @@ class ResetEventData extends Command
         }
 
         $snapshot['pesertas_fields'] = DB::table('pesertas')
-            ->select('id', 'nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id')
+            ->select('id', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id')
             ->orderBy('id')
             ->get()
             ->map(fn ($r) => (array) $r)
@@ -278,7 +278,7 @@ class ResetEventData extends Command
 
         // 2. Peserta fields unchanged
         $pesertasNow = DB::table('pesertas')
-            ->select('id', 'nip', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id')
+            ->select('id', 'participant_number', 'attendance_code', 'desa_id', 'kelompok_id')
             ->orderBy('id')
             ->get()
             ->keyBy('id');
@@ -297,7 +297,7 @@ class ResetEventData extends Command
             }
         }
         if (empty($errors)) {
-            $this->line('  ✅ All peserta fields unchanged (nip, participant_number, attendance_code, desa_id, kelompok_id)');
+            $this->line('  ✅ All peserta fields unchanged (participant_number, attendance_code, desa_id, kelompok_id)');
         }
 
         // 3. No orphan FK

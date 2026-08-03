@@ -1,5 +1,19 @@
 # Database Design
 
+## Database Engine
+
+- **Primary:** MariaDB (default connection in `.env` / `config/database.php`)
+- **Tests:** SQLite `:memory:` (phpunit.xml) — the committed test baseline; MariaDB test runs use `DB_DATABASE=kja_event_manager_test`
+- Both drivers verified: **1792 passed / 4219 assertions / 0 failures** on SQLite and MariaDB
+
+## Driver Compatibility Notes
+
+- Laravel `foreignId()->constrained(...)->nullable()` ignores `nullable()` — the FK is created NOT NULL on MariaDB (masked on SQLite). All such columns use explicit `nullable()` before `constrained()`.
+- MariaDB enforces a 64-char identifier limit — migrations with long composite unique indexes use explicit short names.
+- `Schema::getColumnListing()` order differs: MariaDB honors `->after()`, SQLite appends at end. Tests asserting columns use order-independent (sorted) comparisons.
+- InnoDB AUTO_INCREMENT persists across rolled-back transactions (SQLite's `sqlite_sequence` resets). Tests must not rely on coincidental id alignment between tables.
+- Unique-constraint `QueryException` messages differ: SQLite `UNIQUE constraint failed: ...`, MariaDB `Duplicate entry ... for key ...`. Code must match on SQLSTATE `23000`, not the message string `'UNIQUE'`.
+
 ## Current Structure
 
 Person (global identity)

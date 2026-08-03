@@ -49,9 +49,11 @@ function ParticipationFoundation_makeParticipation(array $overrides = []): Parti
 
 test('participations table has expected columns', function () {
     $columns = Schema::getColumnListing('participations');
-    $expected = ['id', 'person_id', 'event_id', 'participant_number', 'attendance_code', 'jenis_peserta', 'created_at', 'updated_at'];
+    $expected = ['id', 'person_id', 'event_id', 'participant_number', 'attendance_code', 'jenis_peserta', 'status_registrasi', 'created_at', 'updated_at', 'regu_id'];
 
-    expect($columns)->toMatchArray($expected);
+    sort($columns);
+    sort($expected);
+    expect($columns)->toEqual($expected);
 });
 
 // ---------------------------------------------------------------------------

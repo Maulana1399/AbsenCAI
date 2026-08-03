@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\peserta;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AuditLegacyData extends Command
 {
@@ -26,29 +27,33 @@ class AuditLegacyData extends Command
         })->count();
         $this->line($this->keyValue('blank/null nama', $blankNama));
 
-        $nullNip = peserta::whereNull('nip')->count();
-        $this->line($this->keyValue('null NIP', $nullNip));
+        if (Schema::hasColumn('pesertas', 'nip')) {
+            $nullNip = peserta::whereNull('nip')->count();
+            $this->line($this->keyValue('null NIP', $nullNip));
 
-        $dupNip = peserta::select('nip', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('nip')
-            ->having('cnt', '>', 1)
-            ->count();
-        $this->line($this->keyValue('duplicate NIP', $dupNip));
+            $dupNip = peserta::select('nip', DB::raw('COUNT(*) as cnt'))
+                ->groupBy('nip')
+                ->having('cnt', '>', 1)
+                ->count();
+            $this->line($this->keyValue('duplicate NIP', $dupNip));
 
-        $minNip = peserta::min('nip');
-        $maxNip = peserta::max('nip');
-        $this->line($this->keyValue('minimum NIP', $minNip ?? 'N/A'));
-        $this->line($this->keyValue('maximum NIP', $maxNip ?? 'N/A'));
+            $minNip = peserta::min('nip');
+            $maxNip = peserta::max('nip');
+            $this->line($this->keyValue('minimum NIP', $minNip ?? 'N/A'));
+            $this->line($this->keyValue('maximum NIP', $maxNip ?? 'N/A'));
 
-        $rangeM = peserta::whereBetween('nip', [1000, 1999])->count();
-        $rangeF = peserta::whereBetween('nip', [2000, 2999])->count();
-        $rangeOther = peserta::where(function ($q) {
-            $q->where('nip', '<', 1000)->orWhere('nip', '>', 2999);
-        })->count();
-        $this->line('  NIP distribution:');
-        $this->line('    1000–1999: ' . $rangeM);
-        $this->line('    2000–2999: ' . $rangeF);
-        $this->line('    outside expected range: ' . $rangeOther);
+            $rangeM = peserta::whereBetween('nip', [1000, 1999])->count();
+            $rangeF = peserta::whereBetween('nip', [2000, 2999])->count();
+            $rangeOther = peserta::where(function ($q) {
+                $q->where('nip', '<', 1000)->orWhere('nip', '>', 2999);
+            })->count();
+            $this->line('  NIP distribution:');
+            $this->line('    1000–1999: ' . $rangeM);
+            $this->line('    2000–2999: ' . $rangeF);
+            $this->line('    outside expected range: ' . $rangeOther);
+        } else {
+            $this->line($this->keyValue('NIP column', 'retired (not present in schema)'));
+        }
 
         $this->section('IDENTIFIER QUALITY');
 

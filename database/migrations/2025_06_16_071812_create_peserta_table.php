@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('nama');
             $table->integer('nip');
             $table->enum('jenis_kelamin',['Laki - Laki', 'Perempuan']);
-            $table->foreignId('kelompok_id')->constrained('kelompoks')->onDelete('cascade')->nullable(); 
-            $table->foreignId('desa_id')->constrained('desas')->onDelete('cascade')->nullable();
-            $table->foreignId('regu_id')->constrained('regus')->onDelete('cascade')->nullable();
+            $table->foreignId('kelompok_id')->nullable()->constrained('kelompoks')->onDelete('cascade'); 
+            $table->foreignId('desa_id')->nullable()->constrained('desas')->onDelete('cascade');
+            $table->foreignId('regu_id')->nullable()->constrained('regus')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('peserta');
+        Schema::dropIfExists('pesertas');
     }
 };

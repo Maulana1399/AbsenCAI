@@ -9,6 +9,30 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            $this->makeNullableSqlite();
+            return;
+        }
+
+        Schema::table('pesertas', function (Blueprint $table) {
+            $table->string('jenis_kelamin')->nullable()->change();
+        });
+    }
+
+    public function down(): void
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            $this->restoreNonNullableSqlite();
+            return;
+        }
+
+        Schema::table('pesertas', function (Blueprint $table) {
+            $table->enum('jenis_kelamin', ['Laki - Laki', 'Perempuan'])->change();
+        });
+    }
+
+    private function makeNullableSqlite(): void
+    {
         DB::statement('PRAGMA foreign_keys = OFF');
 
         Schema::create('pesertas_new', function (Blueprint $table) {
@@ -34,7 +58,7 @@ return new class extends Migration
         DB::statement('PRAGMA foreign_keys = ON');
     }
 
-    public function down(): void
+    private function restoreNonNullableSqlite(): void
     {
         DB::statement('PRAGMA foreign_keys = OFF');
 

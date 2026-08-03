@@ -155,8 +155,9 @@ class RegistrationService
             });
         } catch (QueryException $exception) {
             $message = $exception->getMessage();
+            $isIntegrity = $exception->getCode() === '23000';
 
-            if (str_contains($message, 'UNIQUE') && str_contains($message, 'pesertas')) {
+            if ($isIntegrity && str_contains($message, 'pesertas')) {
                 if (str_contains($message, 'pesertas.nama') || str_contains($message, 'nama_desa_id_kelompok_id')) {
                     throw ValidationException::withMessages([
                         'nama' => 'Peserta dengan nama, desa, dan kelompok ini sudah terdaftar. Schema constraint (nama+desa+kelompok) belum dimigrasi untuk multi-event.',
@@ -168,7 +169,7 @@ class RegistrationService
                 ]);
             }
 
-            if (str_contains($message, 'UNIQUE') && str_contains($message, 'people')) {
+            if ($isIntegrity && str_contains($message, 'people')) {
                 throw ValidationException::withMessages([
                     'nama' => 'Data person sudah terdaftar.',
                 ]);

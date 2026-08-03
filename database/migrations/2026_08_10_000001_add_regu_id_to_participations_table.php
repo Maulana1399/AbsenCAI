@@ -9,7 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('PRAGMA foreign_keys = OFF');
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+
+        if ($isSqlite) {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
 
         Schema::table('participations', function (Blueprint $table) {
             $table->foreignId('regu_id')
@@ -31,14 +35,16 @@ return new class extends Migration
             WHERE regu_id IS NULL
         ');
 
-        DB::statement('PRAGMA foreign_keys = ON');
+        if ($isSqlite) {
+            DB::statement('PRAGMA foreign_keys = ON');
+        }
     }
 
     public function down(): void
     {
         Schema::table('participations', function (Blueprint $table) {
-            $table->dropIndex(['regu_id']);
             $table->dropForeign(['regu_id']);
+            $table->dropIndex(['regu_id']);
             $table->dropColumn('regu_id');
         });
     }

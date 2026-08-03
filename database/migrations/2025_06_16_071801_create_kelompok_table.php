@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('kelompoks', function (Blueprint $table) {
             $table->id();
             $table->string('kelompok_asal');
-            $table->foreignId('desa_id')->constrained('desas')->onDelete('cascade')->nullable();
+            $table->foreignId('desa_id')->nullable()->constrained('desas')->onDelete('cascade');
             $table->timestamps();
         });
     }

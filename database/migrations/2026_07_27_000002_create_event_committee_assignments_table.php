@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->unique(['event_id', 'person_id', 'event_role_id']);
+            $table->unique(['event_id', 'person_id', 'event_role_id'], 'eca_event_person_role_unique');
             $table->index('event_id');
             $table->index('person_id');
             $table->index('event_role_id');
