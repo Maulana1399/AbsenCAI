@@ -7,6 +7,125 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## Fixed (Event Role — template → code sync)
+
+### Ringkasan
+Bug: saat membuat Event Role, memilih **Template Permission** tidak mengisi `newCode`, sehingga muncul validasi `The new code field is required.` dan role tidak bisa dibuat. Field Code tetap menampilkan `—`.
+
+### Root cause
+- Dropdown Template Permission terikat langsung ke `newCode` dengan `wire:model` (deferred, non-live) dan memakai prop Flux `placeholder` yang merender `<option value="" disabled selected>`.
+- Dengan placeholder `disabled`, browser **auto-select opsi pertama tanpa memicu `change` event** sehingga Livewire tidak pernah menyinkronkan `newCode` (perilaku sama dengan fix CommitteeManagement sebelumnya).
+- Tidak ada properti `newTemplate` maupun hook `updated*` yang mengisi `newCode` dari template.
+- Validasi masih `newCode => required`, padahal `newCode` tidak pernah terisi.
+
+### Perbaikan (`app/Livewire/Event/EventRoleManager.php`)
+- Tambah properti `newTemplate` (di-bind dropdown).
+- Hook `updatedNewTemplate()`: `newCode = newTemplate` (atau `null` bila kosong) — admin tidak pernah mengetik code.
+- Validasi create pindah ke `newTemplate => required|in:templateOptions`; `newCode` di-fallback dari `newTemplate` bila belum tersinkron.
+- `resetForm()` mereset `newTemplate` + `newCode`.
+
+### Blade
+- Dropdown memakai `<select wire:model.live="newTemplate">` dengan `<option value="">Pilih template...</option>` yang **selectable** (bukan `disabled`), agar `change` selalu terpantau.
+- Field Code tetap read-only (`{{ $newCode ?: '—' }}`).
+
+### Regression tests
+- `EventRoleCrudTest` — +4 test: create via template mengisi code otomatis; select live + tanpa disabled placeholder; create tanpa template → validasi gagal; code tidak bisa diisi manual.
+- `PlatformDashboardRoleDisplayTest` — test create/validasi diubah ke `newTemplate`; +2 test (reject missing template, selecting template fills code).
+- `S7ThreeAssignmentManagementTest` — test create EventRole diubah ke `newTemplate`.
+
+## Added (Event Role — Complete CRUD)
+
+### Ringkasan
+Event Role Manager kini CRUD lengkap (sebelumnya hanya Create + Read). Ditambahkan **Edit** dan **Delete**. Permission Engine, EventCommitteeService, Gate, migration, seeder, dan schema tidak diubah.
+
+### `app/Livewire/Event/EventRoleManager.php`
+- `edit(int $roleId)` — memuat role untuk diedit; hanya `name` & `description` yang bisa diubah.
+- `update()` — validasi unique nama per event; simpan `name` + `description`; **code, template, dan permissions TIDAK disentuh** (identitas Permission Engine).
+- `delete(int $roleId)` — `Gate::authorize('manage-events')`; cek `committeeAssignments()->count()`:
+  - masih dipakai → flash error `Role masih digunakan oleh N panitia.` (tidak dihapus, tidak ada orphan assignment),
+  - tidak dipakai → hapus + flash success.
+- `render()` — role di-load dengan `withCount('committeeAssignments')` untuk menampilkan jumlah panitia.
+
+### Blade `resources/views/livewire/event/event-role-manager.blade.php`
+- Daftar "Role Saat Ini": menampilkan nama, `(code)`, status `Dipakai oleh N panitia` / `Belum digunakan`, serta tombol **Edit** & **Hapus** (Hapus memakai `wire:confirm`).
+- Modal **Edit Event Role**: field Nama + Deskripsi (editable); Template Permission & Code ditampilkan **read-only** (bukan input/select).
+- Blok flash `error` ditambahkan.
+
+### Regression tests
+- `tests/Feature/Event/EventRoleCrudTest.php` — 14 test:
+  - role tanpa assignment dapat dihapus,
+  - role dengan assignment ditolak (flash error + count),
+  - assignment tetap utuh setelah delete ditolak,
+  - delete di event A tidak memengaruhi event B,
+  - unauthorized (`operator_scan`) → forbidden,
+  - delete role tidak ditemukan → flash error,
+  - edit nama berhasil,
+  - edit deskripsi berhasil,
+  - code tidak berubah,
+  - template/permissions tidak berubah,
+  - code tampil read-only,
+  - tidak ada template select di modal edit,
+  - daftar menampilkan `Dipakai oleh N panitia`,
+  - daftar menampilkan `Belum digunakan`.
+
+## Changed (User Management — RBAC consistency)
+
+### Ringkasan
+User Management kini hanya mengelola **ACCOUNT LOGIN** + **Platform Role**. Role event dikelola sepenuhnya oleh Event Management (EventRole + Assignment). Tidak ada dua tempat yang mengubah permission event. Permission Engine, EventCommitteeService, EventRole, Gate, migration, seeder, dan login tidak diubah.
+
+### Platform Role dropdown
+- `app/Enums/Role.php` — NEW: `platformCases()`, `platformValues()`, `isPlatformRole()` (SuperAdmin + Admin).
+- `CreateUser` & `EditUser` — dropdown **Platform Role** hanya menampilkan Super Admin / Admin; role event (`ketua_event`, `sekretariat`, `pj_divisi`, `operator_registrasi`, `operator_scan`, `juri`, `viewer`) dihapus dari dropdown & validasi (`in:platformValues`).
+
+### Person relation
+- `EditUser` — field Person **read-only**: identitas akun tidak bisa dipindah antar Person. Method `selectPerson`/`removePerson`/search dihapus. `update()` tidak lagi mengirim `person_id` ke service.
+- Blade edit menampilkan `Person: <nama>` pada header dan field read-only (`—` bila kosong).
+
+### User list (`IndexUser`)
+- Kolom **Platform Role** (dari `users.role`, hanya Super Admin / Admin / `—`).
+- Kolom **Event Role** (dari assignment aktif pada event aktif → `EventRole.name`; multi-assignment → `Ketua Fosda (+1)`).
+- Filter role hanya menampilkan platform role.
+- Tombol **Aktifkan / Nonaktifkan** berdasarkan `is_active` (tidak bisa menonaktifkan akun sendiri).
+
+### Delete user
+- Tidak ada perubahan service — `UserManagementService::delete()` hanya `$user->delete()`. Diverifikasi tidak menghapus Person, Assignment, Attendance, Participation (FK `users.person_id` `nullOnDelete` arah Person→User; assignment/attendance/participation refer ke Person, bukan User).
+
+### Regression tests
+- `tests/Feature/MasterData/User/UserManagementRbacConsistencyTest.php` — 19 test: dropdown platform-only, role event tidak muncul, Person read-only, tidak bisa ganti person via update, header Person, kolom Platform/Event Role, event role dari assignment, delete tidak menghapus person/assignment/attendance/participation, toggle aktif/nonaktif, login inactive ditolak / active diterima.
+- Test lama yang memakai role event di form Create/Edit User diperbarui memakai platform role (`admin`).
+
+
+Bug HTTP 500 saat mengklik **Edit** pada user auto-create (`users.email = NULL`): `TypeError: Cannot assign null to property EditUser::$email of type string`. Property Livewire `$email` bertipe `string` non-nullable tidak kompatibel dengan kolom `users.email` yang nullable.
+
+### Perubahan (`app/Livewire/MasterData/User/EditUser.php`)
+- `public string $email = ''` → `public ?string $email = null` — kompatibel dengan `users.email` nullable.
+- `editUser()` — `$this->email = $user->email` kini aman untuk nilai NULL (tidak TypeError).
+- `update()` — string kosong dikonversi menjadi `null` sebelum disimpan:
+  ```php
+  $email = trim((string) $this->email);
+  $email = $email === '' ? null : $email;
+  ```
+  Tidak pernah menyimpan `''` ke kolom email.
+- Validasi email: `required|email` → `nullable|email|max:255|unique:users,email,{id}`. Unique tetap ter-enforce untuk email yang terisi; `null`/kosong lolos (kolom nullable).
+- Pesan validasi `email.required` dihapus (tidak berlaku lagi).
+
+### Audit
+- `UserManagementService::update()` — tidak berubah: `email` null diteruskan apa adanya (kolom nullable, tanpa cast). Unique validation hidup di Livewire rules, bukan service. Username & role platform tidak terpengaruh.
+- `IndexUser` blade — `{{ $user->email }}` null aman (render kosong).
+- `CreateUser` — tetap `required|email` (create via UI wajib email; user auto-create tidak lewat sini).
+
+### Regression tests
+- `tests/Feature/MasterData/User/EditUserEmailNullableTest.php` — 9 test:
+  - edit user email NULL tidak 500,
+  - modal edit terbuka normal,
+  - save tanpa email → email tetap NULL,
+  - save email kosong (`''`) → konversi ke NULL,
+  - save email baru berhasil,
+  - akun email normal tetap bekerja,
+  - username tidak berubah saat edit email NULL user,
+  - role platform tetap bisa diubah,
+  - service `update()` mendukung email nullable.
+
 ## Fixed (Committee Management — Single-step delete flow)
 
 ### Ringkasan
