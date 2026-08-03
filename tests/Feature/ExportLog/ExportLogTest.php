@@ -30,11 +30,11 @@ beforeEach(function () {
 
 test('rekap peserta page requires authentication', function () {
     auth()->logout();
-    $this->get('/rekap-peserta')->assertRedirect('/login');
+    $this->get(route('rekap.peserta', ['event' => $this->eventA]))->assertRedirect('/login');
 });
 
 test('rekap peserta page is accessible by authenticated user', function () {
-    $this->get('/rekap-peserta')->assertStatus(200);
+    $this->get(route('rekap.peserta', ['event' => $this->eventA]))->assertStatus(200);
 });
 
 test('rekap peserta shows only active event participations', function () {

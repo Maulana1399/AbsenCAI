@@ -83,4 +83,5 @@ class SuratIzin extends Model
     {
         return $this->isApproved() && $this->returned_at !== null;
     }
+
 }

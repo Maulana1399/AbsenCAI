@@ -17,14 +17,14 @@ function s3_user(string $role): User
     return User::factory()->create(['role' => $role]);
 }
 
-function s3_event(): Event
+function s3_event(array $overrides = []): Event
 {
-    return Event::create([
+    return Event::create(array_merge([
         'name' => 'S3 Test Event ' . str()->random(6),
         'slug' => 's3-event-' . str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
-    ]);
+    ], $overrides));
 }
 
 function s3_session(Event $event): SesiAbsensi
@@ -138,7 +138,7 @@ test('admin can update event', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access registration page', function () {
-    $this->get('/registrasi')->assertRedirect('/login');
+    $this->get(route('registrasi.peserta', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('operator registrasi can access registration page', function () {
@@ -146,17 +146,17 @@ test('operator registrasi can access registration page', function () {
     $user = s3_user('operator_registrasi');
     grantEventRoleToUser($user, $event, 'operator_registrasi');
     $this->actingAs($user);
-    $this->get('/registrasi')->assertOk();
+    $this->get(route('registrasi.peserta', ['event' => $event]))->assertOk();
 });
 
 test('unauthorized role cannot access registration page', function () {
     $this->actingAs(s3_user('operator_scan'));
-    $this->get('/registrasi')->assertForbidden();
+    $this->get(route('registrasi.peserta', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('null role cannot access registration page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/registrasi')->assertForbidden();
+    $this->get(route('registrasi.peserta', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('operator registrasi can access re-registration page', function () {
@@ -164,7 +164,7 @@ test('operator registrasi can access re-registration page', function () {
     $user = s3_user('operator_registrasi');
     grantEventRoleToUser($user, $event, 'operator_registrasi');
     $this->actingAs($user);
-    $this->get('/registrasi/ulang')->assertOk();
+    $this->get(route('registrasi.ulang', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -172,22 +172,22 @@ test('operator registrasi can access re-registration page', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access database page', function () {
-    $this->get('/database')->assertRedirect('/login');
+    $this->get(route('database', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('admin can access database page', function () {
     $this->actingAs(s3_user('admin'));
-    $this->get('/database')->assertOk();
+    $this->get(route('database', ['event' => s3_event()]))->assertOk();
 });
 
 test('operator registrasi cannot access database page', function () {
     $this->actingAs(s3_user('operator_registrasi'));
-    $this->get('/database')->assertForbidden();
+    $this->get(route('database', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('null role cannot access database page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/database')->assertForbidden();
+    $this->get(route('database', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('unauthorized role cannot create participant via Livewire', function () {
@@ -215,7 +215,7 @@ test('unauthorized role cannot create participant via Livewire', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access attendance page', function () {
-    $this->get('/absensi')->assertRedirect('/login');
+    $this->get(route('absensi', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('operator scan can access attendance page', function () {
@@ -223,7 +223,7 @@ test('operator scan can access attendance page', function () {
     $user = s3_user('operator_scan');
     grantEventRoleToUser($user, $event, 'operator_scan');
     $this->actingAs($user);
-    $this->get('/absensi')->assertOk();
+    $this->get(route('absensi', ['event' => $event]))->assertOk();
 });
 
 test('pj divisi can access attendance page', function () {
@@ -231,17 +231,17 @@ test('pj divisi can access attendance page', function () {
     $user = s3_user('pj_divisi');
     grantEventRoleToUser($user, $event, 'pj_divisi');
     $this->actingAs($user);
-    $this->get('/absensi')->assertOk();
+    $this->get(route('absensi', ['event' => $event]))->assertOk();
 });
 
 test('null role cannot access attendance page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/absensi')->assertForbidden();
+    $this->get(route('absensi', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('unauthorized role cannot access attendance mutation', function () {
     $this->actingAs(s3_user('viewer'));
-    $this->get('/absensi')->assertForbidden();
+    $this->get(route('absensi', ['event' => s3_event()]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -249,22 +249,22 @@ test('unauthorized role cannot access attendance mutation', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access sessions page', function () {
-    $this->get('/sesi-absensi')->assertRedirect('/login');
+    $this->get(route('sesi.absensi', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('admin can access sessions page', function () {
     $this->actingAs(s3_user('admin'));
-    $this->get('/sesi-absensi')->assertOk();
+    $this->get(route('sesi.absensi', ['event' => s3_event()]))->assertOk();
 });
 
 test('operator scan cannot access sessions page', function () {
     $this->actingAs(s3_user('operator_scan'));
-    $this->get('/sesi-absensi')->assertForbidden();
+    $this->get(route('sesi.absensi', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('null role cannot access sessions page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/sesi-absensi')->assertForbidden();
+    $this->get(route('sesi.absensi', ['event' => s3_event()]))->assertForbidden();
 });
 
 test('unauthorized role cannot create session via Livewire', function () {
@@ -299,8 +299,8 @@ test('admin can create session', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access reports', function () {
-    $this->get('/rekap-peserta')->assertRedirect('/login');
-    $this->get('/rekap-absensi')->assertRedirect('/login');
+    $this->get(route('rekap.peserta', ['event' => s3_event()]))->assertRedirect('/login');
+    $this->get(route('rekap.absensi', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('viewer can access reports', function () {
@@ -308,14 +308,14 @@ test('viewer can access reports', function () {
     $user = s3_user('viewer');
     grantEventRoleToUser($user, $event, 'viewer');
     $this->actingAs($user);
-    $this->get('/rekap-peserta')->assertOk();
-    $this->get('/rekap-absensi')->assertOk();
+    $this->get(route('rekap.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('rekap.absensi', ['event' => $event]))->assertOk();
 });
 
 test('null role cannot access reports', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/rekap-peserta')->assertForbidden();
-    $this->get('/rekap-absensi')->assertForbidden();
+    $this->get(route('rekap.peserta', ['event' => s3_event()]))->assertForbidden();
+    $this->get(route('rekap.absensi', ['event' => s3_event()]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -323,7 +323,7 @@ test('null role cannot access reports', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access surat izin page', function () {
-    $this->get('/surat-izin')->assertRedirect('/login');
+    $this->get(route('surat-izin', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('sekretariat can access surat izin page', function () {
@@ -331,12 +331,12 @@ test('sekretariat can access surat izin page', function () {
     $user = s3_user('sekretariat');
     grantEventRoleToUser($user, $event, 'sekretariat');
     $this->actingAs($user);
-    $this->get('/surat-izin')->assertOk();
+    $this->get(route('surat-izin', ['event' => $event]))->assertOk();
 });
 
 test('null role cannot access surat izin page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/surat-izin')->assertForbidden();
+    $this->get(route('surat-izin', ['event' => s3_event()]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -344,17 +344,17 @@ test('null role cannot access surat izin page', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access qr label page', function () {
-    $this->get('/qr-label')->assertRedirect('/login');
+    $this->get(route('qr-label.index', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('admin can access qr label page', function () {
     $this->actingAs(s3_user('admin'));
-    $this->get('/qr-label')->assertOk();
+    $this->get(route('qr-label.index', ['event' => s3_event()]))->assertOk();
 });
 
 test('null role cannot access qr label page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/qr-label')->assertForbidden();
+    $this->get(route('qr-label.index', ['event' => s3_event()]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -362,7 +362,7 @@ test('null role cannot access qr label page', function () {
 // ---------------------------------------------------------------------------
 
 test('guest cannot access activity log page', function () {
-    $this->get('/activity-log')->assertRedirect('/login');
+    $this->get(route('activity-log.index', ['event' => s3_event()]))->assertRedirect('/login');
 });
 
 test('sekretariat can access activity log page', function () {
@@ -370,12 +370,12 @@ test('sekretariat can access activity log page', function () {
     $user = s3_user('sekretariat');
     grantEventRoleToUser($user, $event, 'sekretariat');
     $this->actingAs($user);
-    $this->get('/activity-log')->assertOk();
+    $this->get(route('activity-log.index', ['event' => $event]))->assertOk();
 });
 
 test('null role cannot access activity log page', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/activity-log')->assertForbidden();
+    $this->get(route('activity-log.index', ['event' => s3_event()]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -423,7 +423,7 @@ test('master data routes still protected after S3', function () {
 // ---------------------------------------------------------------------------
 
 test('pengajian public flow unchanged by S3', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $this->get(route('pengajian.enter-token', ['event' => s3_event(['event_type' => 'pengajian'])]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------

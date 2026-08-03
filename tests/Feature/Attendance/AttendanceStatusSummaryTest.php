@@ -116,7 +116,7 @@ it('dashboard counts active event participants', function () {
     Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL701', 'attendance_code' => 'KJA-DASH701', 'jenis_peserta' => 'Wajib']);
 
     Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $event])
-        ->assertSet('totalPeserta', 1)
+        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1)
         ->assertSee('Total Peserta');
 });
 
@@ -130,10 +130,12 @@ it('dashboard excludes participations from other events', function () {
     Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'participant_number' => 'KP702', 'attendance_code' => 'KJA-DASHB1', 'jenis_peserta' => 'Wajib']);
 
     app(ActiveEventContext::class)->set($eventA);
-    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventA])->assertSet('totalPeserta', 1);
+    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventA])
+        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1);
 
     app(ActiveEventContext::class)->set($eventB);
-    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventB])->assertSet('totalPeserta', 1);
+    Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventB])
+        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1);
 });
 
 it('dashboard counts remain safe without active event', function () {

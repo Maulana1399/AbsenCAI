@@ -312,7 +312,7 @@ test('Admin can create EventRole for current Event', function () {
     Livewire::test(\App\Livewire\Event\EventRoleManager::class)
         ->dispatch('manageEventRoles', id: $event->id)
         ->set('newName', 'Sekretaris')
-        ->set('newCode', 'sekretariat')
+        ->set('newTemplate', 'sekretariat')
         ->call('create');
 
     expect(EventRole::where('event_id', $event->id)->where('name', 'Sekretaris')->exists())->toBeTrue();
@@ -327,7 +327,7 @@ test('cannot create EventRole with duplicate name in same Event', function () {
     Livewire::test(\App\Livewire\Event\EventRoleManager::class)
         ->dispatch('manageEventRoles', id: $event->id)
         ->set('newName', 'Bendahara')
-        ->set('newCode', 'sekretariat')
+        ->set('newTemplate', 'sekretariat')
         ->call('create');
 
     expect(EventRole::where('event_id', $event->id)->where('name', 'Bendahara')->count())->toBe(1);
@@ -365,7 +365,7 @@ test('SuperAdmin can manage User-Person link', function () {
         ->set('email', 'newp@example.com')
         ->set('password', 'password123')
         ->set('passwordConfirmation', 'password123')
-        ->set('role', 'ketua_event')
+        ->set('role', 'admin')
         ->set('person_id', $person->id)
         ->call('simpan');
 
@@ -467,7 +467,7 @@ test('Person Master Data unchanged by S7.3', function () {
 });
 
 test('public Pengajian unchanged by S7.3', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $this->get(route('pengajian.enter-token', ['event' => s73_event(['event_type' => 'pengajian'])]))->assertOk();
 });
 
 test('existing unchanged abilities remain correct', function () {

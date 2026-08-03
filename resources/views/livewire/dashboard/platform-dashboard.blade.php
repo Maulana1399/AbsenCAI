@@ -115,7 +115,7 @@
                 </div>
                 @if($activeCount === 1)
                     <flux:button
-                        href="{{ route('absensi') }}"
+                        href="{{ route('absensi', ['event' => $events->first()], absolute: false) }}"
                         variant="ghost"
                         size="sm"
                         class="mt-3 w-full"

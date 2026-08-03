@@ -141,10 +141,10 @@ test('dashboard shows Alfa count when session is active and no one attended', fu
 
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertSet('totalPeserta', 1)
-        ->assertViewHas('belumAbsenCount', 1)
-        ->assertViewHas('sudahAbsenCount', 0)
-        ->assertViewHas('izinCount', 0);
+        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1)
+        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 1)
+        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 0)
+        ->assertViewHas('presenterData', fn($d) => $d['izinCount'] === 0);
 });
 
 test('dashboard Alfa count decreases when participant attends', function () {
@@ -174,9 +174,9 @@ test('dashboard Alfa count decreases when participant attends', function () {
 
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertSet('totalPeserta', 2)
-        ->assertViewHas('sudahAbsenCount', 1)
-        ->assertViewHas('belumAbsenCount', 1);
+        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 2)
+        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 1)
+        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 1);
 });
 
 test('dashboard Alfa shows 0 when all participants attended', function () {
@@ -203,8 +203,8 @@ test('dashboard Alfa shows 0 when all participants attended', function () {
 
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('belumAbsenCount', 0)
-        ->assertViewHas('sudahAbsenCount', 1);
+        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 0)
+        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 1);
 });
 
 test('dashboard Belum Absen table shows correct names', function () {
@@ -252,6 +252,6 @@ test('dashboard attendance from other session does not affect Alfa count', funct
     // Person should still show as belum absen because they're not in the active session
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('belumAbsenCount', 1)
-        ->assertViewHas('sudahAbsenCount', 0);
+        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 1)
+        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 0);
 });

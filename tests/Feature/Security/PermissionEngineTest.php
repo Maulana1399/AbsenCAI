@@ -192,8 +192,8 @@ test('auto-created user with event assignment can access features per event role
     expect(Gate::forUser($user)->denies('view-master-data'))->toBeTrue();
 
     $this->actingAs($user);
-    $this->get('/registrasi')->assertOk();
-    $this->get('/absensi')->assertForbidden();
+    $this->get(route('registrasi.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('absensi', ['event' => $event]))->assertForbidden();
 });
 
 test('auto-created user with ketua event role gets dashboard and management', function () {

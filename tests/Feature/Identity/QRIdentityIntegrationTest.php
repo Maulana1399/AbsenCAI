@@ -69,7 +69,7 @@ it('QR label print route encodes attendance code and keeps participant number as
 
     app(ActiveEventContext::class)->set($event);
 
-    $response = $this->get('/qr-label/print/selected/'.$legacy->id);
+    $response = $this->get(route('qr-label.print.selected', ['event' => $event, 'participant' => $legacy->id]));
 
     $response->assertOk();
     $response->assertSee('KL001', false);

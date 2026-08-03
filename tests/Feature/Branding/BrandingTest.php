@@ -152,7 +152,7 @@ test('Pengajian menu is visible in Pengajian event context', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get(route('pengajian.report'));
+    $response = $this->get(route('pengajian.report', ['event' => $event]));
     $response->assertStatus(200);
 
     $response->assertSee('Pengajian');

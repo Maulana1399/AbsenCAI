@@ -142,9 +142,9 @@ test('pengajian admin routes remain accessible even when CAI event is active', f
 
     app(ActiveEventContext::class)->set($event);
 
-    $this->get(route('pengajian.report'))->assertOk();
-    $this->get(route('pengajian.admin.access'))->assertOk();
-    $this->get(route('pengajian.admin.manual-entry'))->assertOk();
+    $this->get(route('pengajian.report', ['event' => $event]))->assertOk();
+    $this->get(route('pengajian.admin.access', ['event' => $event]))->assertOk();
+    $this->get(route('pengajian.admin.manual-entry', ['event' => $event]))->assertOk();
 });
 
 test('cai admin routes remain accessible even when Pengajian event is active', function () {
@@ -155,9 +155,9 @@ test('cai admin routes remain accessible even when Pengajian event is active', f
     app(ActiveEventContext::class)->set($event);
 
     $this->get(route('dashboard'))->assertOk();
-    $this->get(route('database'))->assertOk();
-    $this->get(route('registrasi.peserta'))->assertOk();
-    $this->get(route('sesi.absensi'))->assertOk();
+    $this->get(route('database', ['event' => $event]))->assertOk();
+    $this->get(route('registrasi.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('sesi.absensi', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------

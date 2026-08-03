@@ -18,7 +18,14 @@ uses(RefreshDatabase::class);
 // ---------------------------------------------------------------------------
 
 test('GET /pengajian returns 200 not 500', function () {
-    $response = $this->get('/pengajian');
+    $event = Event::create([
+        'name' => 'Regression Event',
+        'slug' => 'regression-'.str()->random(6),
+        'status' => 'active',
+        'event_type' => 'pengajian',
+    ]);
+
+    $response = $this->get(route('pengajian.enter-token', ['event' => $event]));
 
     $response->assertStatus(200);
 });

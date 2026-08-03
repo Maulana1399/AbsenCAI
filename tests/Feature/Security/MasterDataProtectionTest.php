@@ -28,13 +28,13 @@ function s2_person(): Person
     ]);
 }
 
-function s2_event(): Event
+function s2_event(array $overrides = []): Event
 {
-    return Event::create([
+    return Event::create(array_merge([
         'name' => 'S2 Test Event ' . str()->random(6),
         'slug' => 's2-event-' . str()->random(6),
         'status' => 'active',
-    ]);
+    ], $overrides));
 }
 
 // ---------------------------------------------------------------------------
@@ -493,7 +493,7 @@ test('admin cannot access master data without active event', function () {
 // ---------------------------------------------------------------------------
 
 test('pengajian public flow unchanged by S2', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $this->get(route('pengajian.enter-token', ['event' => s2_event(['event_type' => 'pengajian'])]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -576,7 +576,7 @@ test('operator registrasi only sees registration menus', function () {
     grantEventRoleToUser($user, $event, 'operator_registrasi');
     $this->actingAs($user);
 
-    $response = $this->get('/registrasi');
+    $response = $this->get(route('registrasi.peserta', ['event' => $event]));
     $response->assertSee('Registrasi');
     $response->assertDontSee('Scan Absensi');
     $response->assertDontSee('Daftar Peserta');
@@ -591,7 +591,7 @@ test('operator scan only sees attendance menus', function () {
     grantEventRoleToUser($user, $event, 'operator_scan');
     $this->actingAs($user);
 
-    $response = $this->get('/absensi');
+    $response = $this->get(route('absensi', ['event' => $event]));
     $response->assertSee('Scan Absensi');
     $response->assertDontSee('Registrasi');
     $response->assertDontSee('Daftar Peserta');
@@ -636,5 +636,5 @@ test('operator scan cannot access pengajian report route', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s2_user('operator_scan'));
 
-    $this->get(route('pengajian.report'))->assertForbidden();
+    $this->get(route('pengajian.report', ['event' => $event]))->assertForbidden();
 });

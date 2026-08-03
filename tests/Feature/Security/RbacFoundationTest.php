@@ -370,13 +370,24 @@ test('null role cannot access S3 operational routes', function () {
     $user = rbac_user(['role' => null]);
     $this->actingAs($user);
 
+    $event = Event::create([
+        'name' => 'Rbac Operational Event',
+        'slug' => 'rbac-operational-'.str()->random(6),
+        'status' => 'active',
+    ]);
+
     $this->get('/dashboard')->assertOk('Null role should access platform dashboard');
 
-    $protected = ['/sesi-absensi', '/rekap-peserta',
-                  '/rekap-absensi', '/surat-izin', '/activity-log'];
+    $protected = [
+        route('sesi.absensi', ['event' => $event]),
+        route('rekap.peserta', ['event' => $event]),
+        route('rekap.absensi', ['event' => $event]),
+        route('surat-izin', ['event' => $event]),
+        route('activity-log.index', ['event' => $event]),
+    ];
 
-    foreach ($protected as $route) {
-        $this->get($route)->assertForbidden("Null role should be denied {$route}");
+    foreach ($protected as $url) {
+        $this->get($url)->assertForbidden("Null role should be denied {$url}");
     }
 });
 
@@ -405,5 +416,11 @@ test('guest behavior unchanged after S2', function () {
 });
 
 test('Pengajian public flow unchanged in S1', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $event = Event::create([
+        'name' => 'Rbac Pengajian Event',
+        'slug' => 'rbac-pengajian-'.str()->random(6),
+        'status' => 'active',
+        'event_type' => 'pengajian',
+    ]);
+    $this->get(route('pengajian.enter-token', ['event' => $event]))->assertOk();
 });

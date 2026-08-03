@@ -59,7 +59,7 @@
                 </div>
 
                 <div class="flex flex-col items-center">
-                    <a href="{{ route('pengajian.enter-token') }}"
+                    <a href="{{ route('public.home') }}"
                         class="inline-flex items-center gap-2 px-10 py-4 rounded-2xl border border-white/30 hover:bg-white/10 backdrop-blur transition-all duration-300 font-semibold text-lg shadow-lg hover:scale-105">
                         Absensi Pengajian
                     </a>

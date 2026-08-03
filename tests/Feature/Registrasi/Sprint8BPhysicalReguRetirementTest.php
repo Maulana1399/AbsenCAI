@@ -316,7 +316,12 @@ test('S8B-15: SelfRegister mounts without active event without crashing', functi
 // ──────────────────────────────────────────────
 test('S8B-16: database page renders without active event context', function () {
     $this->actingAs(\App\Models\User::factory()->create(['role' => 'admin']));
-    $this->get('/database')->assertOk();
+    $event = \App\Models\Event::create([
+        'name' => 'S8B Database Event '.str()->random(6),
+        'slug' => 's8b-database-'.str()->random(6),
+        'status' => 'active',
+    ]);
+    $this->get(route('database', ['event' => $event]))->assertOk();
 });
 
 // ──────────────────────────────────────────────

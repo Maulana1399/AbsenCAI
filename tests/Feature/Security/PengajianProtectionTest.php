@@ -38,9 +38,10 @@ function s4_desa(): desa
 // ---------------------------------------------------------------------------
 
 test('guest cannot access pengajian admin routes', function () {
-    $this->get(route('pengajian.admin.access'))->assertRedirect('/login');
-    $this->get(route('pengajian.admin.manual-entry'))->assertRedirect('/login');
-    $this->get(route('pengajian.import-massal'))->assertRedirect('/login');
+    $event = s4_event();
+    $this->get(route('pengajian.admin.access', ['event' => $event]))->assertRedirect('/login');
+    $this->get(route('pengajian.admin.manual-entry', ['event' => $event]))->assertRedirect('/login');
+    $this->get(route('pengajian.import-massal', ['event' => $event]))->assertRedirect('/login');
     $this->get(route('koreksi.data'))->assertRedirect('/login');
 });
 
@@ -50,9 +51,9 @@ test('admin can access pengajian admin routes', function () {
     $user = s4_user('admin');
     $this->actingAs($user);
 
-    $this->get(route('pengajian.admin.access'))->assertOk();
-    $this->get(route('pengajian.admin.manual-entry'))->assertOk();
-    $this->get(route('pengajian.import-massal'))->assertOk();
+    $this->get(route('pengajian.admin.access', ['event' => $event]))->assertOk();
+    $this->get(route('pengajian.admin.manual-entry', ['event' => $event]))->assertOk();
+    $this->get(route('pengajian.import-massal', ['event' => $event]))->assertOk();
     $this->get(route('koreksi.data'))->assertOk();
 });
 
@@ -62,7 +63,7 @@ test('sekretariat can access pengajian admin routes', function () {
     grantEventRoleToUser($user, $event, 'sekretariat');
     $this->actingAs($user);
 
-    $this->get(route('pengajian.admin.access'))->assertOk();
+    $this->get(route('pengajian.admin.access', ['event' => $event]))->assertOk();
 });
 
 test('unauthorized roles cannot access pengajian admin routes', function () {
@@ -71,7 +72,7 @@ test('unauthorized roles cannot access pengajian admin routes', function () {
     foreach (['ketua_event', 'pj_divisi', 'operator_registrasi', 'operator_scan', 'juri', 'viewer'] as $role) {
         $user = s4_user($role);
         $this->actingAs($user);
-        $this->get(route('pengajian.admin.access'))->assertForbidden("Role {$role} should be denied");
+        $this->get(route('pengajian.admin.access', ['event' => $event]))->assertForbidden("Role {$role} should be denied");
     }
 });
 
@@ -79,9 +80,9 @@ test('null role cannot access pengajian admin routes', function () {
     $event = s4_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get(route('pengajian.admin.access'))->assertForbidden();
-    $this->get(route('pengajian.admin.manual-entry'))->assertForbidden();
-    $this->get(route('pengajian.import-massal'))->assertForbidden();
+    $this->get(route('pengajian.admin.access', ['event' => $event]))->assertForbidden();
+    $this->get(route('pengajian.admin.manual-entry', ['event' => $event]))->assertForbidden();
+    $this->get(route('pengajian.import-massal', ['event' => $event]))->assertForbidden();
     $this->get(route('koreksi.data'))->assertForbidden();
 });
 
@@ -95,14 +96,14 @@ test('viewer can access pengajian report', function () {
     grantEventRoleToUser($user, $event, 'viewer');
     $this->actingAs($user);
 
-    $this->get(route('pengajian.report'))->assertOk();
+    $this->get(route('pengajian.report', ['event' => $event]))->assertOk();
 });
 
 test('null role cannot access pengajian report', function () {
     $event = s4_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get(route('pengajian.report'))->assertForbidden();
+    $this->get(route('pengajian.report', ['event' => $event]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -258,11 +259,13 @@ test('unauthorized role cannot approve identity correction', function () {
 // ---------------------------------------------------------------------------
 
 test('pengajian enter token route is public', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $event = s4_event();
+    $this->get(route('pengajian.enter-token', ['event' => $event]))->assertOk();
 });
 
 test('pengajian desa dashboard redirects without token session', function () {
-    $this->get(route('pengajian.desa'))->assertRedirect(route('pengajian.enter-token', absolute: false));
+    $event = s4_event();
+    $this->get(route('pengajian.desa', ['event' => $event]))->assertRedirect(route('pengajian.enter-token', ['event' => $event], absolute: false));
 });
 
 test('valid token establishes pengajian session', function () {
@@ -275,7 +278,7 @@ test('valid token establishes pengajian session', function () {
     Livewire::test(\App\Livewire\Pengajian\EnterToken::class)
         ->set('token', $result['raw_token'])
         ->call('submit')
-        ->assertRedirect(route('pengajian.desa', absolute: false));
+        ->assertRedirect(route('pengajian.desa', ['event' => $event], absolute: false));
 
     expect(session('pengajian_access.event_id'))->toBe($event->id);
     expect(session('pengajian_access.desa_id'))->toBe($desa->id);
@@ -307,10 +310,10 @@ test('master data still protected after S4', function () {
 test('event cai protection still enforced after S4', function () {
     $event = s4_event();
     $this->actingAs(s4_user('operator_scan'));
-    $this->get('/database')->assertForbidden();
+    $this->get(route('database', ['event' => $event]))->assertForbidden();
     // operator_scan can access /absensi (has manage-attendance)
     // but cannot access /sesi-absensi (needs manage-sessions)
-    $this->get('/sesi-absensi')->assertForbidden();
+    $this->get(route('sesi.absensi', ['event' => $event]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -318,20 +321,23 @@ test('event cai protection still enforced after S4', function () {
 // ---------------------------------------------------------------------------
 
 test('import template route requires auth', function () {
-    $this->get(route('pengajian.import-massal.template', absolute: false))
+    $event = s4_event();
+    $this->get(route('pengajian.import-massal.template', ['event' => $event], absolute: false))
         ->assertRedirect(route('login', absolute: false));
 });
 
 test('import template route requires manage-pengajian', function () {
+    $event = s4_event();
     $this->actingAs(s4_user('operator_scan'));
-    $this->get(route('pengajian.import-massal.template', absolute: false))
+    $this->get(route('pengajian.import-massal.template', ['event' => $event], absolute: false))
         ->assertForbidden();
 });
 
 test('import template download succeeds for authorized user', function () {
+    $event = s4_event();
     $this->actingAs(s4_user('admin'));
 
-    $response = $this->get(route('pengajian.import-massal.template', absolute: false));
+    $response = $this->get(route('pengajian.import-massal.template', ['event' => $event], absolute: false));
 
     $response->assertOk();
     $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -339,9 +345,10 @@ test('import template download succeeds for authorized user', function () {
 });
 
 test('import template returns BinaryFileResponse not rendered HTML', function () {
+    $event = s4_event();
     $this->actingAs(s4_user('admin'));
 
-    $response = $this->get(route('pengajian.import-massal.template', absolute: false));
+    $response = $this->get(route('pengajian.import-massal.template', ['event' => $event], absolute: false));
 
     $contentType = $response->headers->get('Content-Type');
     expect($contentType)->toContain('vnd.openxmlformats-officedocument');
@@ -350,9 +357,10 @@ test('import template returns BinaryFileResponse not rendered HTML', function ()
 });
 
 test('import template file has correct filename', function () {
+    $event = s4_event();
     $this->actingAs(s4_user('admin'));
 
-    $response = $this->get(route('pengajian.import-massal.template', absolute: false));
+    $response = $this->get(route('pengajian.import-massal.template', ['event' => $event], absolute: false));
 
     $disposition = $response->headers->get('Content-Disposition');
     expect($disposition)->toContain('template_import_person.xlsx');

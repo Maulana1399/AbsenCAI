@@ -483,11 +483,12 @@ test('KetuaEvent can switch from stale unassigned event to assigned event', func
 // ---------------------------------------------------------------------------
 
 test('pengajian enter token remains publicly accessible', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $this->get(route('pengajian.enter-token', ['event' => s7e_event(['event_type' => 'pengajian'])]))->assertOk();
 });
 
 test('pengajian desa redirects without session', function () {
-    $this->get(route('pengajian.desa'))->assertRedirect(route('pengajian.enter-token'));
+    $event = s7e_event(['event_type' => 'pengajian']);
+    $this->get(route('pengajian.desa', ['event' => $event]))->assertRedirect(route('pengajian.enter-token', ['event' => $event]));
 });
 
 test('pengajian hadir nonce route remains publicly accessible', function () {

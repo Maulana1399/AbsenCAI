@@ -55,4 +55,5 @@ class Participation extends Model
     {
         return $this->hasMany(CompetitionRegistration::class);
     }
+
 }

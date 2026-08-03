@@ -409,7 +409,7 @@ test('event switcher redirects to Pengajian report when switching to Pengajian e
 
     Livewire::test(\App\Livewire\Event\EventSwitcher::class)
         ->call('switchTo', $eventB->id)
-        ->assertRedirect(route('pengajian.report'));
+        ->assertRedirect(route('pengajian.report', ['event' => $eventB]));
 });
 
 test('event switcher does not redirect when switching to invalid event', function () {
@@ -450,23 +450,27 @@ test('existing application works without selecting an event', function () {
     $user = EventFoundation_makeUser();
     $this->actingAs($user);
 
+    $event = EventFoundation_makeEvent();
+
     $this->get('/dashboard')->assertStatus(200);
-    $this->get('/database')->assertStatus(200);
-    $this->get('/sesi-absensi')->assertStatus(200);
-    $this->get('/absensi')->assertStatus(200);
-    $this->get('/surat-izin')->assertStatus(200);
-    $this->get('/rekap-peserta')->assertStatus(200);
-    $this->get('/rekap-absensi')->assertStatus(200);
+    $this->get(route('database', ['event' => $event]))->assertStatus(200);
+    $this->get(route('sesi.absensi', ['event' => $event]))->assertStatus(200);
+    $this->get(route('absensi', ['event' => $event]))->assertStatus(200);
+    $this->get(route('surat-izin', ['event' => $event]))->assertStatus(200);
+    $this->get(route('rekap.peserta', ['event' => $event]))->assertStatus(200);
+    $this->get(route('rekap.absensi', ['event' => $event]))->assertStatus(200);
 });
 
 test('admin can access all operational routes without master data', function () {
     $user = EventFoundation_makeUser();
     $this->actingAs($user);
 
-    $this->get('/sesi-absensi')->assertOk();
-    $this->get('/database')->assertOk();
+    $event = EventFoundation_makeEvent();
+
+    $this->get(route('sesi.absensi', ['event' => $event]))->assertOk();
+    $this->get(route('database', ['event' => $event]))->assertOk();
     $this->get('/regu')->assertOk();
-    $this->get('/qr-label')->assertOk();
+    $this->get(route('qr-label.index', ['event' => $event]))->assertOk();
     $this->get('/desa')->assertForbidden();
     $this->get('/kelompok')->assertForbidden();
 });

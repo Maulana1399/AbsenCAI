@@ -363,13 +363,15 @@ test('no-event state is safe for all legacy routes', function () {
     $user = ActiveEvent_makeUser();
     $this->actingAs($user);
 
+    $event = ActiveEvent_makeEvent();
+
     $this->get('/dashboard')->assertStatus(200);
-    $this->get('/database')->assertStatus(200);
-    $this->get('/sesi-absensi')->assertStatus(200);
-    $this->get('/absensi')->assertStatus(200);
-    $this->get('/surat-izin')->assertStatus(200);
-    $this->get('/rekap-peserta')->assertStatus(200);
-    $this->get('/rekap-absensi')->assertStatus(200);
+    $this->get(route('database', ['event' => $event]))->assertStatus(200);
+    $this->get(route('sesi.absensi', ['event' => $event]))->assertStatus(200);
+    $this->get(route('absensi', ['event' => $event]))->assertStatus(200);
+    $this->get(route('surat-izin', ['event' => $event]))->assertStatus(200);
+    $this->get(route('rekap.peserta', ['event' => $event]))->assertStatus(200);
+    $this->get(route('rekap.absensi', ['event' => $event]))->assertStatus(200);
 });
 
 test('no active event — event switcher shows Pilih Event', function () {

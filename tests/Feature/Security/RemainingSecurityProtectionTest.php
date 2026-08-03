@@ -18,14 +18,14 @@ function s5_user(string $role): User
     return User::factory()->create(['role' => $role]);
 }
 
-function s5_event(): Event
+function s5_event(array $overrides = []): Event
 {
-    return Event::create([
+    return Event::create(array_merge([
         'name' => 'S5 Test Event ' . str()->random(6),
         'slug' => 's5-event-' . str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
-    ]);
+    ], $overrides));
 }
 
 // ---------------------------------------------------------------------------
@@ -33,8 +33,9 @@ function s5_event(): Event
 // ---------------------------------------------------------------------------
 
 test('guest cannot access qr print routes', function () {
-    $this->get(route('qr-label.print.filtered'))->assertRedirect('/login');
-    $this->get(route('qr-label.print.a4'))->assertRedirect('/login');
+    $event = s5_event();
+    $this->get(route('qr-label.print.filtered', ['event' => $event]))->assertRedirect('/login');
+    $this->get(route('qr-label.print.a4', ['event' => $event]))->assertRedirect('/login');
 });
 
 test('unauthorized role cannot access qr print routes', function () {
@@ -42,8 +43,8 @@ test('unauthorized role cannot access qr print routes', function () {
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s5_user('operator_scan'));
 
-    $this->get(route('qr-label.print.filtered'))->assertForbidden();
-    $this->get(route('qr-label.print.a4'))->assertForbidden();
+    $this->get(route('qr-label.print.filtered', ['event' => $event]))->assertForbidden();
+    $this->get(route('qr-label.print.a4', ['event' => $event]))->assertForbidden();
 });
 
 test('authorized role can access qr print filtered route', function () {
@@ -56,7 +57,7 @@ test('authorized role can access qr print filtered route', function () {
     ]);
     $this->actingAs(s5_user('admin'));
 
-    $this->get(route('qr-label.print.filtered'))->assertOk();
+    $this->get(route('qr-label.print.filtered', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -74,7 +75,7 @@ test('unauthorized role cannot access surat izin print route', function () {
     ]);
     $this->actingAs(s5_user('operator_scan'));
 
-    $this->get(route('surat-izin.print', $surat->id))->assertForbidden();
+    $this->get(route('surat-izin.print', ['event' => $event, 'surat' => $surat->id]))->assertForbidden();
 });
 
 test('authorized role can access surat izin print for approved surat', function () {
@@ -90,7 +91,7 @@ test('authorized role can access surat izin print for approved surat', function 
     ]);
     $this->actingAs($user);
 
-    $this->get(route('surat-izin.print', $surat->id))->assertOk();
+    $this->get(route('surat-izin.print', ['event' => $event, 'surat' => $surat->id]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -160,12 +161,12 @@ test('operator registrasi can use self register', function () {
 
 test('unauthorized role cannot access activity log', function () {
     $this->actingAs(s5_user('operator_scan'));
-    $this->get('/activity-log')->assertForbidden();
+    $this->get(route('activity-log.index', ['event' => s5_event()]))->assertForbidden();
 });
 
 test('null role cannot access activity log', function () {
     $this->actingAs(User::factory()->create(['role' => null]));
-    $this->get('/activity-log')->assertForbidden();
+    $this->get(route('activity-log.index', ['event' => s5_event()]))->assertForbidden();
 });
 
 test('sekretariat can access activity log', function () {
@@ -173,7 +174,7 @@ test('sekretariat can access activity log', function () {
     $user = s5_user('sekretariat');
     grantEventRoleToUser($user, $event, 'sekretariat');
     $this->actingAs($user);
-    $this->get('/activity-log')->assertOk();
+    $this->get(route('activity-log.index', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -184,8 +185,8 @@ test('unauthorized role cannot access report routes', function () {
     $event = s5_event();
     app(ActiveEventContext::class)->set($event);
     $this->actingAs(s5_user('operator_scan'));
-    $this->get('/rekap-peserta')->assertForbidden();
-    $this->get('/rekap-absensi')->assertForbidden();
+    $this->get(route('rekap.peserta', ['event' => $event]))->assertForbidden();
+    $this->get(route('rekap.absensi', ['event' => $event]))->assertForbidden();
 });
 
 test('viewer can access report routes', function () {
@@ -193,8 +194,8 @@ test('viewer can access report routes', function () {
     $user = s5_user('viewer');
     grantEventRoleToUser($user, $event, 'viewer');
     $this->actingAs($user);
-    $this->get('/rekap-peserta')->assertOk();
-    $this->get('/rekap-absensi')->assertOk();
+    $this->get(route('rekap.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('rekap.absensi', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -203,7 +204,7 @@ test('viewer can access report routes', function () {
 
 test('unauthorized role cannot access surat izin page', function () {
     $this->actingAs(s5_user('operator_scan'));
-    $this->get('/surat-izin')->assertForbidden();
+    $this->get(route('surat-izin', ['event' => s5_event()]))->assertForbidden();
 });
 
 test('unauthorized role cannot use surat izin mutations', function () {
@@ -224,9 +225,10 @@ test('unauthorized role cannot use surat izin mutations', function () {
 // ---------------------------------------------------------------------------
 
 test('unauthorized role cannot access registration routes', function () {
+    $event = s5_event();
     $this->actingAs(s5_user('viewer'));
-    $this->get('/registrasi')->assertForbidden();
-    $this->get('/registrasi/ulang')->assertForbidden();
+    $this->get(route('registrasi.peserta', ['event' => $event]))->assertForbidden();
+    $this->get(route('registrasi.ulang', ['event' => $event]))->assertForbidden();
 });
 
 test('operator registrasi can access registration routes', function () {
@@ -234,8 +236,8 @@ test('operator registrasi can access registration routes', function () {
     $user = s5_user('operator_registrasi');
     grantEventRoleToUser($user, $event, 'operator_registrasi');
     $this->actingAs($user);
-    $this->get('/registrasi')->assertOk();
-    $this->get('/registrasi/ulang')->assertOk();
+    $this->get(route('registrasi.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('registrasi.ulang', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -244,12 +246,12 @@ test('operator registrasi can access registration routes', function () {
 
 test('unauthorized role cannot access database route', function () {
     $this->actingAs(s5_user('operator_scan'));
-    $this->get('/database')->assertForbidden();
+    $this->get(route('database', ['event' => s5_event()]))->assertForbidden();
 });
 
 test('authorized role can access database route', function () {
     $this->actingAs(s5_user('admin'));
-    $this->get('/database')->assertOk();
+    $this->get(route('database', ['event' => s5_event()]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -272,7 +274,7 @@ test('pj divisi can access dashboard', function () {
 
 test('unauthorized role cannot access attendance route', function () {
     $this->actingAs(s5_user('viewer'));
-    $this->get('/absensi')->assertForbidden();
+    $this->get(route('absensi', ['event' => s5_event()]))->assertForbidden();
 });
 
 test('operator scan can access attendance route', function () {
@@ -280,7 +282,7 @@ test('operator scan can access attendance route', function () {
     $user = s5_user('operator_scan');
     grantEventRoleToUser($user, $event, 'operator_scan');
     $this->actingAs($user);
-    $this->get('/absensi')->assertOk();
+    $this->get(route('absensi', ['event' => $event]))->assertOk();
 });
 
 // ---------------------------------------------------------------------------
@@ -289,7 +291,7 @@ test('operator scan can access attendance route', function () {
 
 test('unauthorized role cannot access sessions route', function () {
     $this->actingAs(s5_user('operator_scan'));
-    $this->get('/sesi-absensi')->assertForbidden();
+    $this->get(route('sesi.absensi', ['event' => s5_event()]))->assertForbidden();
 });
 
 // ---------------------------------------------------------------------------
@@ -297,11 +299,12 @@ test('unauthorized role cannot access sessions route', function () {
 // ---------------------------------------------------------------------------
 
 test('pengajian enter token remains public', function () {
-    $this->get(route('pengajian.enter-token'))->assertOk();
+    $this->get(route('pengajian.enter-token', ['event' => s5_event(['event_type' => 'pengajian'])]))->assertOk();
 });
 
 test('pengajian desa redirects without session', function () {
-    $this->get(route('pengajian.desa'))->assertRedirect(route('pengajian.enter-token', absolute: false));
+    $event = s5_event(['event_type' => 'pengajian']);
+    $this->get(route('pengajian.desa', ['event' => $event]))->assertRedirect(route('pengajian.enter-token', ['event' => $event], absolute: false));
 });
 
 test('pengajian self attendance is publicly accessible', function () {
@@ -343,8 +346,8 @@ test('operator registrasi workflow works', function () {
     $user = s5_user('operator_registrasi');
     grantEventRoleToUser($user, $event, 'operator_registrasi');
     $this->actingAs($user);
-    $this->get('/registrasi')->assertOk();
-    $this->get('/registrasi/ulang')->assertOk();
+    $this->get(route('registrasi.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('registrasi.ulang', ['event' => $event]))->assertOk();
 });
 
 test('operator scan workflow works', function () {
@@ -352,7 +355,7 @@ test('operator scan workflow works', function () {
     $user = s5_user('operator_scan');
     grantEventRoleToUser($user, $event, 'operator_scan');
     $this->actingAs($user);
-    $this->get('/absensi')->assertOk();
+    $this->get(route('absensi', ['event' => $event]))->assertOk();
 });
 
 test('viewer workflow works', function () {
@@ -360,9 +363,9 @@ test('viewer workflow works', function () {
     $user = s5_user('viewer');
     grantEventRoleToUser($user, $event, 'viewer');
     $this->actingAs($user);
-    $this->get('/rekap-peserta')->assertOk();
-    $this->get('/rekap-absensi')->assertOk();
-    $this->get(route('pengajian.report'))->assertOk();
+    $this->get(route('rekap.peserta', ['event' => $event]))->assertOk();
+    $this->get(route('rekap.absensi', ['event' => $event]))->assertOk();
+    $this->get(route('pengajian.report', ['event' => $event]))->assertOk();
 });
 
 test('super admin bypass works', function () {

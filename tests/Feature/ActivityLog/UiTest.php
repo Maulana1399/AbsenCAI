@@ -9,6 +9,12 @@ use App\Livewire\Audit\ActivityLogIndex;
 
 beforeEach(function () {
     $this->user = User::factory()->create(['role' => Role::Admin]);
+
+    $this->event = \App\Models\Event::create([
+        'name' => 'Activity Log UI Event '.str()->random(6),
+        'slug' => 'activity-log-ui-'.str()->random(6),
+        'status' => 'active',
+    ]);
 });
 
 // ---------------------------------------------------------------------------
@@ -17,7 +23,7 @@ beforeEach(function () {
 
 test('activity log page is accessible by authenticated user', function () {
     $this->actingAs($this->user)
-        ->get('/activity-log')
+        ->get(route('activity-log.index', ['event' => $this->event]))
         ->assertStatus(200);
 });
 
@@ -26,7 +32,7 @@ test('activity log page is accessible by authenticated user', function () {
 // ---------------------------------------------------------------------------
 
 test('activity log page requires authentication', function () {
-    $this->get('/activity-log')->assertRedirect('/login');
+    $this->get(route('activity-log.index', ['event' => $this->event]))->assertRedirect('/login');
 });
 
 // ---------------------------------------------------------------------------

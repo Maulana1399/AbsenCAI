@@ -51,7 +51,7 @@ test('sidebar shows platform mode when no event exists', function () {
 test('sidebar stays in platform mode when events exist but none is selected', function () {
     $this->actingAs(sm_super_admin());
 
-    sm_event(['name' => 'Existing Unselected CAI', 'event_type' => 'cai']);
+    $event = sm_event(['name' => 'Existing Unselected CAI', 'event_type' => 'cai']);
 
     expect(app(ActiveEventContext::class)->id())->toBeNull();
 
@@ -64,9 +64,9 @@ test('sidebar stays in platform mode when events exist but none is selected', fu
         ->assertDontSee('Surat Izin')
         ->assertDontSee('Activity Log')
         ->assertDontSee('/absensi')
-        ->assertDontSee(route('qr-label.index'))
-        ->assertDontSee(route('surat-izin'))
-        ->assertDontSee(route('activity-log.index'));
+        ->assertDontSee(route('qr-label.index', ['event' => $event]))
+        ->assertDontSee(route('surat-izin', ['event' => $event]))
+        ->assertDontSee(route('activity-log.index', ['event' => $event]));
 });
 
 test('platform mode dashboard item points to the platform dashboard', function () {
