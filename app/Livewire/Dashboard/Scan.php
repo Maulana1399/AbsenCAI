@@ -113,7 +113,9 @@ class Scan extends Component
                 ];
             })->filter()->values();
 
-        $this->manualResults = $participations->concat($searchPeserta)->take(10);
+        $this->manualResults = $participations->isNotEmpty()
+            ? $participations->take(10)
+            : $searchPeserta->take(10);
     }
 
     public function selectManualParticipant(int $id, ?string $source = null): void
