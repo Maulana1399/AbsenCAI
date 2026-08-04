@@ -40,7 +40,9 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Migration Stabilization | ✅ COMPLETE — All race conditions fixed for `migrate:fresh` |
 | UI Audit & Standardization | ✅ COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues |
 | MariaDB Migration | ✅ COMPLETE — SQLite → MariaDB as primary DB; migrations/seeders/tests green on both |
-| Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
+| Test Baseline | ✅ **1949 tests PASS / 4657 assertions PASS / 0 failures** |
+| Sprint 6A | ✅ COMPLETE — Import Architecture COMPLETE |
+| Sprint 6A.1 | 🟡 Release Stabilization |
 | **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
 | **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — All 10 sprints |
 | **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Blueprint Event, Venue Management (V2 hierarchy), Certificate Engine, Public API, Mobile |

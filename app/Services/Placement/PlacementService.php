@@ -23,7 +23,7 @@ class PlacementService
         return $prefix . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
-    public static function leastFilledRegu(?string $jenisKelamin = null, int $eventId): ?regu
+    public static function leastFilledRegu(int $eventId, ?string $jenisKelamin = null): ?regu
     {
         $jenisKelaminFix = self::normalizeGender($jenisKelamin);
 
@@ -34,19 +34,19 @@ class PlacementService
             ->first();
     }
 
-    public static function leastFilledReguId(?string $jenisKelamin = null, int $eventId): ?int
+    public static function leastFilledReguId(int $eventId, ?string $jenisKelamin = null): ?int
     {
-        return self::leastFilledRegu($jenisKelamin, $eventId)?->id;
+        return self::leastFilledRegu($eventId, $jenisKelamin)?->id;
     }
 
-    public static function leastFilledReguName(?string $jenisKelamin = null, int $eventId): string
+    public static function leastFilledReguName(int $eventId, ?string $jenisKelamin = null): string
     {
-        return self::leastFilledRegu($jenisKelamin, $eventId)?->regu ?? '-';
+        return self::leastFilledRegu($eventId, $jenisKelamin)?->regu ?? '-';
     }
 
     public static function autoPlacement(?string $jenisKelamin = null, ?int $eventId = null): array
     {
-        $regu = $eventId !== null ? self::leastFilledRegu($jenisKelamin, $eventId) : null;
+        $regu = $eventId !== null ? self::leastFilledRegu($eventId, $jenisKelamin) : null;
 
         return [
             'regu_id' => $regu?->id,

@@ -44,6 +44,8 @@
 | Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
+| Sprint 6A (Import Architecture) | ✅ COMPLETE 100% |
+| Sprint 6A.1 (Release Stabilization) | 🟡 IN PROGRESS |
 | Sprint 4 | 🔲 NOT STARTED |
 | Foundation (S01–S04) | ✅ COMPLETE 100% |
 | Multi Event (S3.0–S3.10) | ✅ COMPLETE/VERIFIED |

@@ -7,6 +7,13 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## Sprint 6A.1 (Release Stabilization — 2026-08-04)
+
+- PHP 8.3 compatibility cleanup started: deprecated signature ordering audited and corrected where required.
+- Documentation synchronized for Sprint 6A COMPLETE and release stabilization status.
+- Performance note added: global EventSwitcher remains a technical debt candidate; no runtime memory leak evidence documented.
+- Verification target updated to the latest stable baseline.
+
 ## Sprint 3.3 (Legacy Retirement Preparation & UAT Readiness — 2026-08-03)
 
 Sprint non-feature: menyiapkan sistem menuju penghapusan layer legacy dan UAT. **Tidak** mengubah business logic, Permission Engine, EventRole, Route, Dashboard flow, database, migration, seeder, bridge model, maupun `ATTENDANCE_LEGACY_WRITE`. Baseline tetap hijau.
