@@ -70,6 +70,8 @@ The following documentation has been added as part of Project Audit:
 | `HIDDEN_FEATURES.md` | Hidden/unused features |
 | `DEAD_CODE.md` | Dead code report |
 | `PROGRESS.md` | Implementation progress vs roadmap |
+| `UAT_CHECKLIST.md` | UAT checklist (Platform, CAI, Competition, Pengajian, Permission, Import, Export, Print, Master Data) |
+| `LEGACY_RETIREMENT_PLAN.md` | Legacy retirement plan |
 | `VISION_V2.md` | V2 product vision — Event Operating System |
 
 ---
@@ -83,7 +85,7 @@ Design C:   problem_total = 0
 
 **MariaDB Migration (COMPLETE):** primary DB switched from SQLite to MariaDB. Migrations, seeders, and the full test suite are green on both drivers. See `docs/CHANGELOG.md` (Unreleased → MariaDB Migration) for the list of driver-compat fixes. Test command for MariaDB: `DB_CONNECTION=mariadb DB_DATABASE=kja_event_manager_test ... vendor/bin/pest`.
 
-**Sprint series (current):** Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 (cleanup) ✅, Sprint 3.2 (hardening) ✅. Sprint 3.3 & 4 — NOT STARTED.
+**Sprint series (current):** Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 (cleanup) ✅, Sprint 3.2 (hardening) ✅, Sprint 3.3 (legacy retirement prep & UAT readiness) ✅. Sprint 4 — NOT STARTED.
 
 ---
 
@@ -123,8 +125,8 @@ Lihat `docs/VISION_V2.md` untuk dokumentasi lengkap.
 
 ## Pending Work (Sprint 3.3 / Sprint 4 — Rekomendasi)
 
-- Sprint 3.3: legacy read-path retirement, `ATTENDANCE_LEGACY_WRITE` flip, Platform Dashboard event-picker TODO
-- Sprint 4: Roadmap V2 (Blueprint Event, Scoring Engine, Certificate Engine)
+- Sprint 3.3 ✅ COMPLETE — legacy dependency audit, Platform Dashboard event-picker TODOs, import Gate hardening, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`
+- Sprint 4: legacy retirement phases (lihat `LEGACY_RETIREMENT_PLAN.md`), Roadmap V2 (Blueprint Event, Scoring Engine, Certificate Engine)
 
 ## Pending Work (V2 — Future)
 

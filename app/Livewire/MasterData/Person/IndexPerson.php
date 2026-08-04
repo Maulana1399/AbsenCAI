@@ -5,6 +5,7 @@ namespace App\Livewire\MasterData\Person;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\On;
@@ -22,6 +23,8 @@ class IndexPerson extends Component
 
     public function render()
     {
+        Gate::authorize('view-master-data');
+
         $query = Person::with(['desa', 'kelompok']);
 
         if (trim($this->search) !== '') {
@@ -75,17 +78,23 @@ class IndexPerson extends Component
 
     public function edit(int $id): void
     {
+        Gate::authorize('view-master-data');
+
         $this->dispatch('editPerson', id: $id);
     }
 
     public function delete(int $id): void
     {
+        Gate::authorize('view-master-data');
+
         $this->dispatch('deletePerson', id: $id);
     }
 
     #[On('refreshPerson')]
     public function refreshPerson(): void
     {
+        Gate::authorize('view-master-data');
+
         $this->resetPage();
     }
 

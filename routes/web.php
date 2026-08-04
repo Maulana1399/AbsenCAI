@@ -275,7 +275,7 @@ Route::prefix('events/{event}/competition')->middleware(['auth', 'verified', 're
     Route::get(
         'participants',
         App\Livewire\Competition\ParticipantList::class
-    )->name('competition.participants');
+    )->middleware('can:view-dashboard')->name('competition.participants');
 
     Route::get(
         'schedules',

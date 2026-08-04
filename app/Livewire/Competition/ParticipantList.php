@@ -6,6 +6,7 @@ use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
 use App\Models\CompetitionRegistration;
 use App\Support\ActiveEventContext;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class ParticipantList extends Component
@@ -16,6 +17,7 @@ class ParticipantList extends Component
     public function mount(): void
     {
         app(ActiveEventContext::class)->requireCurrent();
+        Gate::authorize('view-dashboard');
     }
 
     public function updatedCompetitionCategoryId(): void

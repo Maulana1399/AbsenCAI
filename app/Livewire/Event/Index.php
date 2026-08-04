@@ -32,6 +32,8 @@ class Index extends Component
 
     public function toggleCreateForm(): void
     {
+        Gate::authorize('manage-events');
+
         $this->showCreateForm = ! $this->showCreateForm;
         $this->resetForm();
     }
@@ -119,11 +121,15 @@ class Index extends Component
 
     public function confirmDelete(int $eventId): void
     {
+        Gate::authorize('manage-events');
+
         $this->deleteEventId = $eventId;
     }
 
     public function cancelDelete(): void
     {
+        Gate::authorize('manage-events');
+
         $this->deleteEventId = null;
     }
 
@@ -170,6 +176,8 @@ class Index extends Component
 
     public function edit(int $eventId): void
     {
+        Gate::authorize('manage-events');
+
         $this->dispatch('editEvent', id: $eventId);
     }
 

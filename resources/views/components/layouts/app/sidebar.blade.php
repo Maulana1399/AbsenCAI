@@ -63,9 +63,11 @@
                     </flux:navlist.group>
                     @endcan
 
+                    @can('view-dashboard')
                     <flux:navlist.group expandable heading="Peserta" class="grid">
                         <flux:navlist.item :href="route('competition.participants', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.participants')" wire:navigate>{{ __('Daftar Peserta') }}</flux:navlist.item>
                     </flux:navlist.group>
+                    @endcan
 
                     <flux:navlist.group expandable heading="Operasional" class="grid">
                         <flux:navlist.item :href="route('competition.schedule.index', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.schedule.index')" wire:navigate>{{ __('Jadwal') }}</flux:navlist.item>
@@ -194,13 +196,12 @@
                 </flux:navlist>
             @endif
 
-            @can('view-master-data')
+                    @can('view-master-data')
             @php
                 $isMasterDataActive = request()->routeIs('master-data.index')
                     || request()->routeIs('person.index')
                     || request()->routeIs('desa')
                     || request()->routeIs('kelompok')
-                    || request()->routeIs('events.index')
                     || request()->routeIs('correction-requests.index');
             @endphp
             <flux:navlist variant="outline">
@@ -219,7 +220,6 @@
                         <flux:navlist.item :href="route('person.index')" :current="request()->routeIs('person.index')" wire:navigate>{{ __('Person') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('desa')" :current="request()->routeIs('desa')" wire:navigate>{{ __('Desa') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('kelompok')" :current="request()->routeIs('kelompok')" wire:navigate>{{ __('Kelompok') }}</flux:navlist.item>
-                        <flux:navlist.item :href="route('events.index')" :current="request()->routeIs('events.index')" wire:navigate>{{ __('Event') }}</flux:navlist.item>
                         <flux:navlist.item :href="route('correction-requests.index')" :current="request()->routeIs('correction-requests.index')" wire:navigate>{{ __('Permintaan Perubahan') }}</flux:navlist.item>
                     </div>
                 </div>

@@ -42,9 +42,9 @@ Commercial Platform (Future)
 | Sprint 2 (RBAC & Permission Engine — Design C) | ✅ COMPLETE 100% |
 | Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
-| Sprint 3.3 | 🔲 NOT STARTED |
+| Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
-| Test Baseline | ✅ **1944 passed / 4648 assertions / 0 failures** |
+| Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | Stage | **Pre-UAT** |
 
 ---
@@ -1256,7 +1256,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 14. **PGM.18 Sprint 3** ✅ COMPLETE — Physical mapping cleanup: columns dropped, relationships removed
 15. **PGM.19 Sprint 8A + 8B** ✅ COMPLETE — Physical Regu Retirement: `pesertas.regu_id` dropped
 16. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired
-17. **Sprint 3.3** 🔲 NOT STARTED — rekomendasi di bawah
+17. **Sprint 3.3** ✅ COMPLETE — Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`)
 18. **Sprint 4** 🔲 NOT STARTED — rekomendasi di bawah
 19. **Competition** (future sprint — V2 generic engine)
 20. **Commercial** (future sprint)

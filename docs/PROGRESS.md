@@ -17,7 +17,7 @@
 | Sprint 2 | ✅ COMPLETE 100% | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
 | Sprint 3.1 | ✅ COMPLETE 100% | Technical debt cleanup (dead code/views/imports, deduplication) |
 | Sprint 3.2 | ✅ COMPLETE 100% | Architecture hardening (Presenter Factory, EventOwnership, Import helper, ManualEntry trait) |
-| Sprint 3.3 | 🔲 NOT STARTED | — |
+| Sprint 3.3 | ✅ COMPLETE 100% | Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, UAT checklist, legacy retirement plan) |
 | Sprint 4 | 🔲 NOT STARTED | — |
 
 ---

@@ -7,6 +7,27 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## Sprint 3.3 (Legacy Retirement Preparation & UAT Readiness — 2026-08-03)
+
+Sprint non-feature: menyiapkan sistem menuju penghapusan layer legacy dan UAT. **Tidak** mengubah business logic, Permission Engine, EventRole, Route, Dashboard flow, database, migration, seeder, bridge model, maupun `ATTENDANCE_LEGACY_WRITE`. Baseline tetap hijau.
+
+- **Legacy dependency audit (T1)** — Semua komponen legacy dikelompokkan: Production / Compatibility / Migration / Test Only. Temuan kunci: `Absensi` = migration + test-only (tidak ditulis production); `IzinAbsensi` = compatibility fallback + production guard; `sesi_absensis`/`surat_izins` = production (bukan kandidat retire); `peserta` = compatibility dual-maintain; `desas`/`kelompoks`/`regus` = effective canonical dimension lookup; bridge models (`LegacyPesertaMapping`/`LegacyParticipationMapping`) = wajib dipertahankan. Dependency graph + removal order → `docs/LEGACY_RETIREMENT_PLAN.md`.
+- **Platform Dashboard (T2)** — 3 TODO placeholder di `platform-dashboard.blade.php` diselesaikan:
+  - Scan QR / Registrasi Peserta / Cari Peserta kini punya tombol **Buka** (1 event) atau **Pilih Event** (banyak event) via modal event picker.
+  - Komponen `PlatformDashboard` mendapat method `openQuickAccess(target, eventId)` yang me-redirect ke `absensi` / `registrasi.peserta` / `database` sesuai event terpilih.
+  - Edge case 0 event ditangani (pesan "Belum ada event aktif").
+  - 4 test baru di `RoutingConsolidationTest` (redirect scan/registrasi/cari + reject target unknown).
+- **Import Gate audit (T3)** — Audit seluruh endpoint import; gap kecil diperbaiki di level komponen/controller (defense-in-depth, tidak mengubah Route):
+  - `ImportRegu::import()` kini `Gate::authorize('manage-participants')` (sebelumnya tanpa gate).
+  - `ImportDataController::desa/kelompok/regu/peserta` kini `Gate::authorize(...)` di dalam controller (sebelumnya hanya route middleware).
+  - `ImportMassal::preview()` kini `Gate::authorize('manage-pengajian')` (konsisten dengan `executeImport`).
+  - 1 test baru `MasterDataProtectionTest::unauthorized user cannot import regu via Livewire`.
+  - Gap yang tidak diperbaiki (karena aturan sprint: Route & Permission Engine tidak boleh berubah) dicatat sebagai Sprint 4 Candidate: wire `manage-import`, `can:` pada route `/regu`, `can:` pada registrasi page dsb.
+- **UAT checklist (T4)** — `docs/UAT_CHECKLIST.md` baru: Platform, CAI, Competition, Pengajian, Permission, Import, Export, Print, Master Data (manual UAT panduan + sign-off).
+- **Legacy retirement plan (T5)** — `docs/LEGACY_RETIREMENT_PLAN.md` baru: current legacy components, dependency graph, removal order (Phase 1–4), risk, rollback plan, acceptance criteria, Sprint 4 candidate.
+- **Documentation sync (T6)** — `README.md`, `ROADMAP.md`, `HANDOFF.md`, `INDEX.md`, `PROGRESS.md`, `ARCHITECTURE.md`, `FEATURE.md`, `ai/CURRENT_STATE.md`, `TODO.md` diupdate: Sprint 3.3 → COMPLETE 100%; baseline → 1944+ / 4648+; referensi dokumen baru.
+- **Verifikasi:** `php artisan test --parallel` → **1944 passed / 4648 assertions / 0 failures**.
+
 ## Documentation Sync (comprehensive audit — 2026-08-03)
 
 Audit menyeluruh dokumentasi vs source code. **Tidak ada perubahan code, business logic, permission, routing, database, maupun migration.**

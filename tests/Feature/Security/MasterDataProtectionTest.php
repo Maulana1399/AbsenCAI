@@ -416,6 +416,17 @@ test('null role can access regu', function () {
     $this->get('/regu')->assertOk();
 });
 
+test('unauthorized user cannot import regu via Livewire', function () {
+    $user = s2_user('viewer');
+    $this->actingAs($user);
+
+    Livewire::test(\App\Livewire\Database\Regu\ImportRegu::class)
+        ->call('import')
+        ->assertForbidden();
+
+    $this->assertDatabaseMissing('regus', ['regu' => 'Hacked Regu']);
+});
+
 // ---------------------------------------------------------------------------
 // E. Regression — Person-Legacy sync
 // ---------------------------------------------------------------------------

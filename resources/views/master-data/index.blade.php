@@ -51,20 +51,22 @@
             </div>
         </a>
 
-        <a href="{{ route('events.index') }}" wire:navigate
-            class="group block rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-rose-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-rose-500">
-            <div class="flex items-start gap-4">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                    </svg>
+        @can('manage-events')
+            <a href="{{ route('events.index') }}" wire:navigate
+                class="group block rounded-xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-rose-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-rose-500">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <flux:heading size="lg" class="group-hover:text-rose-600 dark:group-hover:text-rose-400">{{ __('Event') }}</flux:heading>
+                        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ __('Kelola data event master yang digunakan lintas modul.') }}</p>
+                    </div>
                 </div>
-                <div class="min-w-0">
-                    <flux:heading size="lg" class="group-hover:text-rose-600 dark:group-hover:text-rose-400">{{ __('Event') }}</flux:heading>
-                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ __('Kelola data event master yang digunakan lintas modul.') }}</p>
-                </div>
-            </div>
-        </a>
+            </a>
+        @endcan
 
         @can('manage-users')
             <a href="{{ route('users.index') }}" wire:navigate

@@ -784,7 +784,7 @@ Tidak diperbolehkan membuat fitur baru tanpa memperbarui FEATURE.md terlebih dah
 # Current Development Focus
 
 **Pengajian Desa MVP (PGM.12–PGM.20)** — ALL COMPLETE
-**Sprint series:** Sprint 1–3.2 COMPLETE. Sprint 3.3 & 4 — NOT STARTED.
+**Sprint series:** Sprint 1–3.3 COMPLETE. Sprint 4 — NOT STARTED.
 
 Semua sprint utama sudah selesai:
 1. PGM.12–PGM.17 Pengajian Desa MVP ✅ COMPLETE

@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Database\Regu;
 
+use App\Imports\ReguImport;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Imports\ReguImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportRegu extends Component
@@ -15,8 +16,10 @@ class ImportRegu extends Component
 
     public function import()
     {
+        Gate::authorize('manage-participants');
+
         $this->validate([
-            'file' => 'required|file|mimes:xlsx,csv,xls'
+            'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
 
         Excel::import(new ReguImport, $this->file);

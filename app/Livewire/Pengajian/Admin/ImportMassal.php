@@ -19,10 +19,13 @@ class ImportMassal extends Component
     public int $step = 1;
 
     public array $previewRows = [];
+
     public array $validationErrors = [];
+
     public array $importResult = [];
 
     public bool $noActiveEvent = false;
+
     public ?string $eventName = null;
 
     protected function rules(): array
@@ -45,6 +48,7 @@ class ImportMassal extends Component
 
         if ($event === null) {
             $this->noActiveEvent = true;
+
             return;
         }
 
@@ -53,6 +57,8 @@ class ImportMassal extends Component
 
     public function preview(): void
     {
+        Gate::authorize('manage-pengajian');
+
         $this->validate();
 
         $this->processing = true;

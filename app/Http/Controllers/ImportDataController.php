@@ -8,6 +8,7 @@ use App\Imports\PesertaImport;
 use App\Imports\ReguImport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 
@@ -15,16 +16,22 @@ class ImportDataController extends Controller
 {
     public function desa(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-master-data');
+
         return $this->importFile($request, new DesaImport, 'Data desa berhasil diimpor.');
     }
 
     public function kelompok(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-master-data');
+
         return $this->importFile($request, new KelompokImport, 'Data kelompok berhasil diimpor.');
     }
 
     public function regu(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-participants');
+
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv',
         ]);
@@ -52,6 +59,8 @@ class ImportDataController extends Controller
 
     public function peserta(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-participants');
+
         return $this->importFile($request, new PesertaImport, 'Data peserta berhasil diimpor.');
     }
 

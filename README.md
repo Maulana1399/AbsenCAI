@@ -16,7 +16,7 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Sprint 2 | ✅ COMPLETE 100% |
 | Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
-| Sprint 3.3 | 🔲 NOT STARTED |
+| Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
 | CAI Operational | ✅ Stable — all modules operational |
 | S01–S04 Foundation | ✅ COMPLETE 100% |
@@ -40,7 +40,7 @@ Dikembangkan dari sistem absensi CAI (Cinta Alam Indonesia) menjadi platform Eve
 | Migration Stabilization | ✅ COMPLETE — All race conditions fixed for `migrate:fresh` |
 | UI Audit & Standardization | ✅ COMPLETE — 19 files standardized across HIGH/MEDIUM consistency issues |
 | MariaDB Migration | ✅ COMPLETE — SQLite → MariaDB as primary DB; migrations/seeders/tests green on both |
-| Test Baseline | ✅ **1944 passed / 4648 assertions / 0 failures** |
+| Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | **Roadmap V1** (Foundation, Multi Event, RBAC, CAI, Pengajian) | ✅ **100% COMPLETE** |
 | **Roadmap V2** — Competition V1 | ✅ **COMPLETE** — All 10 sprints |
 | **Roadmap V2** — Event Operating System (remaining) | 📋 **Planned** — Blueprint Event, Venue Management (V2 hierarchy), Certificate Engine, Public API, Mobile |
@@ -164,6 +164,8 @@ See `docs/` directory for full documentation.
 | `DEAD_CODE.md` | Dead code report |
 | `HIDDEN_FEATURES.md` | Hidden/unused features |
 | `PROGRESS.md` | Implementation progress vs roadmap |
+| `UAT_CHECKLIST.md` | User Acceptance Testing checklist (Platform, CAI, Competition, Pengajian, Permission, Import, Export, Print, Master Data) |
+| `LEGACY_RETIREMENT_PLAN.md` | Legacy retirement plan (current components, dependency, removal order, risk, rollback, acceptance criteria) |
 | `VISION_V2.md` | Event Operating System — V2 product vision |
 
 ---

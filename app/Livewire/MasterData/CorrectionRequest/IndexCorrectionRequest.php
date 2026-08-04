@@ -26,6 +26,8 @@ class IndexCorrectionRequest extends Component
 
     public function render()
     {
+        Gate::authorize('view-master-data');
+
         $query = IdentityCorrectionRequest::with(['person.desa', 'person.kelompok', 'desa', 'event', 'reviewer'])
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 WHEN status = 'approved' THEN 1 ELSE 2 END")
             ->orderBy('submitted_at', 'desc');

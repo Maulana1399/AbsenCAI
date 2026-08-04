@@ -19,6 +19,7 @@ class PlatformDashboard extends Component
 
         if (! $user->isPlatformUser()) {
             $ids = app(EventAccessService::class)->getAssignedEventIds($user);
+
             return Event::active()->whereIn('id', $ids)
                 ->withCount('participations')
                 ->with(['sesiAbsensis' => fn ($q) => $q->where('aktif', true)])
@@ -88,6 +89,27 @@ class PlatformDashboard extends Component
         app(ActiveEventContext::class)->set($event);
 
         $this->redirect($event->dashboardRoute(), navigate: true);
+    }
+
+    /**
+     * Buka salah satu modul quick-access untuk event terpilih.
+     *
+     * @param  'scan'|'registrasi'|'cari'  $target
+     */
+    public function openQuickAccess(string $target, int $eventId)
+    {
+        $event = Event::active()->findOrFail($eventId);
+
+        $routeName = match ($target) {
+            'scan' => 'absensi',
+            'registrasi' => 'registrasi.peserta',
+            'cari' => 'database',
+            default => null,
+        };
+
+        abort_unless($routeName !== null, 404);
+
+        $this->redirect(route($routeName, ['event' => $event], absolute: false), navigate: true);
     }
 
     public function render()

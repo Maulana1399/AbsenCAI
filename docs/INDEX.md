@@ -30,6 +30,8 @@
 19. `TODO.md` — Active task list
 20. `HANDOFF.md` — Non-technical overview
 21. `PENGAJIAN_MVP_OPERATIONAL.md` — Pengajian operational guide
+22. `UAT_CHECKLIST.md` — UAT checklist (Platform, CAI, Competition, Pengajian, Permission, Import, Export, Print, Master Data)
+23. `LEGACY_RETIREMENT_PLAN.md` — Legacy retirement plan
 
 ---
 
@@ -41,7 +43,7 @@
 | Sprint 2 | ✅ COMPLETE 100% |
 | Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
-| Sprint 3.3 | 🔲 NOT STARTED |
+| Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
 | Foundation (S01–S04) | ✅ COMPLETE 100% |
 | Multi Event (S3.0–S3.10) | ✅ COMPLETE/VERIFIED |

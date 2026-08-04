@@ -80,7 +80,7 @@ After PGM.19 (Physical Regu Retirement), PGM.20 (Legacy NIP Retirement), Competi
 ✅ Sprint 2 — RBAC & Permission Engine (Design C) — COMPLETE
 ✅ Sprint 3.1 — Technical Debt Cleanup — COMPLETE
 ✅ Sprint 3.2 — Architecture Hardening — COMPLETE
-🔲 Sprint 3.3 — NOT STARTED
+✅ Sprint 3.3 — Legacy Retirement Prep & UAT Readiness — COMPLETE
 🔲 Sprint 4 — NOT STARTED
 ✅ PGM.12–PGM.17 Pengajian Desa MVP — COMPLETE
 ✅ PGM.18 Physical Mapping Cleanup — COMPLETE

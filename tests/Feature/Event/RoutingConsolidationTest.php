@@ -245,6 +245,42 @@ test('platform dashboard openEvent redirects via the shared resolver', function 
         ->assertRedirect($event->dashboardRoute());
 });
 
+test('platform dashboard openQuickAccess scan redirects to absensi', function () {
+    $event = rc_event();
+    $this->actingAs(rc_super_admin());
+
+    Livewire::test(PlatformDashboard::class)
+        ->call('openQuickAccess', 'scan', $event->id)
+        ->assertRedirect(route('absensi', ['event' => $event], absolute: false));
+});
+
+test('platform dashboard openQuickAccess registrasi redirects to registrasi.peserta', function () {
+    $event = rc_event();
+    $this->actingAs(rc_super_admin());
+
+    Livewire::test(PlatformDashboard::class)
+        ->call('openQuickAccess', 'registrasi', $event->id)
+        ->assertRedirect(route('registrasi.peserta', ['event' => $event], absolute: false));
+});
+
+test('platform dashboard openQuickAccess cari redirects to database', function () {
+    $event = rc_event();
+    $this->actingAs(rc_super_admin());
+
+    Livewire::test(PlatformDashboard::class)
+        ->call('openQuickAccess', 'cari', $event->id)
+        ->assertRedirect(route('database', ['event' => $event], absolute: false));
+});
+
+test('platform dashboard openQuickAccess rejects unknown target', function () {
+    $event = rc_event();
+    $this->actingAs(rc_super_admin());
+
+    Livewire::test(PlatformDashboard::class)
+        ->call('openQuickAccess', 'unknown', $event->id)
+        ->assertStatus(404);
+});
+
 test('event creation redirects via the shared resolver for competition events', function () {
     $user = rc_super_admin();
     $this->actingAs($user);

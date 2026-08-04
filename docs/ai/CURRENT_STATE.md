@@ -42,7 +42,7 @@ Sprint series (current development track):
 | Sprint 2 | ✅ COMPLETE 100% | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
 | Sprint 3.1 | ✅ COMPLETE 100% | Technical debt cleanup (dead code/views/imports removal, deduplication) |
 | Sprint 3.2 | ✅ COMPLETE 100% | Architecture hardening (Dashboard Presenter Factory, EventOwnership, Import helper, ManualEntry trait) |
-| Sprint 3.3 | 🔲 NOT STARTED | — |
+| Sprint 3.3 | ✅ COMPLETE 100% | Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, UAT checklist, legacy retirement plan) |
 | Sprint 4 | 🔲 NOT STARTED | — |
 
 Status:
@@ -344,14 +344,14 @@ Database: MariaDB (primary), SQLite (test baseline)
 
 ## Immediate (Pre-UAT)
 
-1. **UAT** — User Acceptance Testing untuk Competition V1, Public Portal, Event Dashboard
-2. **Documentation Sync** — All markdown synchronized with current implementation (COMPLETED 2026-08-03)
+1. **UAT** — User Acceptance Testing untuk Competition V1, Public Portal, Event Dashboard (checklist: `UAT_CHECKLIST.md`)
+2. **Documentation Sync** — All markdown synchronized with current implementation (COMPLETED 2026-08-03; updated Sprint 3.3)
 3. **Any UAT findings** — Bug fixes as discovered
 
 ## Post-UAT
 
-1. **Sprint 3.3** — rekomendasi berikutnya (lihat laporan audit) — kandidat: legacy read-path retirement, `ATTENDANCE_LEGACY_WRITE` flip, Platform Dashboard event-picker TODO
-2. **Sprint 4** — rekomendasi berikutnya — kandidat: Roadmap V2 (Blueprint Event, Scoring Engine, Certificate)
+1. **Sprint 3.3** ✅ COMPLETE — legacy dependency audit, Platform Dashboard event-picker TODOs, import Gate hardening, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`
+2. **Sprint 4** — rekomendasi berikutnya — kandidat: legacy retirement phases (lihat `LEGACY_RETIREMENT_PLAN.md`), Roadmap V2 (Blueprint Event, Scoring Engine, Certificate)
 3. **CategoryDefinition CRUD UI** — Event-scoped category management (`category_definitions` — berbeda dengan `competition_categories`)
 4. **Absensi table retirement** — Deferred: table masih ada untuk historical reads
 
