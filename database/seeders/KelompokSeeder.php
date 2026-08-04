@@ -19,7 +19,7 @@ class KelompokSeeder extends Seeder
                 'Soekarno Hatta',
                 'Somber',
             ],
-            'Ring Road' => [
+            'Ringroad' => [
                 'Gunung Samarinda',
                 'Sumber Rejo',
                 'Bandara Utara',

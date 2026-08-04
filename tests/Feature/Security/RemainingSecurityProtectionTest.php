@@ -128,6 +128,7 @@ test('unauthorized role cannot use self register', function () {
 
     Livewire::test(\App\Livewire\Registrasi\SelfRegister::class)
         ->set('nama', 'Hacker Self')
+        ->set('tanggal_lahir', '1995-05-10')
         ->set('jenis_kelamin', 'Laki - Laki')
         ->set('desa_id', '1')
         ->set('kelompok_id', '1')
@@ -147,6 +148,7 @@ test('operator registrasi can use self register', function () {
 
     Livewire::test(\App\Livewire\Registrasi\SelfRegister::class)
         ->set('nama', 'Self Register Test')
+        ->set('tanggal_lahir', '1995-05-10')
         ->set('jenis_kelamin', 'Laki - Laki')
         ->set('desa_id', (string) $desa->id)
         ->set('kelompok_id', (string) $kelompok->id)

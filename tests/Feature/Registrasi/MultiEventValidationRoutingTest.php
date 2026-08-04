@@ -409,6 +409,7 @@ test('SelfRegister Case C rejected with user-friendly message', function () {
     Livewire::actingAs($user)
         ->test(SelfRegister::class)
         ->set('nama', 'Self Register Dup')
+        ->set('tanggal_lahir', '1995-05-10')
         ->set('jenis_kelamin', 'Laki - Laki')
         ->set('jenis_peserta', 'Wajib')
         ->set('desa_id', $desa->id)

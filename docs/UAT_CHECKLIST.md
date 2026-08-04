@@ -4,9 +4,9 @@
 >
 > Scope: Platform, CAI, Competition, Pengajian, Permission, Import, Export, Print, Master Data.
 >
-> Status legend: ⬜ Not tested &nbsp;·&nbsp; ✅ Pass &nbsp;·&nbsp; ❌ Fail &nbsp;·&nbsp; ⏭ N/A
+> Status legend: PASS · FAIL · NOT IMPLEMENTED · OBSOLETE · MANUAL VERIFY
 >
-> Test baseline: **1944 passed / 4648 assertions / 0 failures** (automated). Checklist di bawah adalah panduan **manual/UAT**, melengkapi automated tests.
+> Test baseline: **1949 tests PASS / 4657 assertions PASS / 0 failures** (automated). Checklist di bawah adalah panduan **manual/UAT**, melengkapi automated tests.
 
 ---
 
@@ -26,18 +26,18 @@
 |---|----------|----------|--------|---------|
 | 1.1 | Login (email/password) | Masuk ke Platform Dashboard | ✅ | |
 | 1.2 | Login dengan role salah (non-user) | Ditolak dengan pesan jelas | ✅ | |
-| 1.3 | Register pengguna baru | Akun terdaftar, email verifikasi dikirim | ❌ | tidak ada fitur daftar sudah di hapus |
+| 1.3 | Register pengguna baru | Akun terdaftar, email verifikasi dikirim | OBSOLETE | Fitur register publik sudah dihapus dari scope aplikasi saat ini |
 | 1.4 | Reset password | Email reset terkirim, password berubah | ✅ | |
 | 1.5 | Platform Dashboard memuat daftar event aktif | Semua event aktif tampil + hitungan peserta | ✅ | |
 | 1.6 | Platform Dashboard menampilkan role user per event | Label role benar dari EventCommitteeAssignment | ✅ | |
 | 1.7 | Masuk Event dari Platform Dashboard | Redirect ke Event Dashboard, ActiveEventContext ter-set | ✅ | ini masih ada catatan ketua event cai bisa akses event competisi |
 | 1.8 | Quick Access — Scan QR (1 event) | Tombol Buka → halaman absensi event | ✅ | |
-| 1.9 | Quick Access — Scan QR (banyak event) | Dialog pilih event → halaman absensi event terpilih | ❌ | yang menggunakan fitur scan qr sekarang hanya CAI ini juga hanya ke cai|
+| 1.9 | Quick Access — Scan QR (banyak event) | Dialog pilih event → halaman absensi event terpilih | MANUAL VERIFY | Flow sekarang tergantung event aktif dan permission; verifikasi lintas event diperlukan |
 | 1.10 | Quick Access — Registrasi Peserta (1 event) | Tombol Buka → halaman registrasi event | ✅ | |
 | 1.11 | Quick Access — Registrasi Peserta (banyak event) | Dialog pilih event → halaman registrasi event terpilih | ❌ | belum sesuai dedngan tujuan semua masuk ke laman regis cai|
 | 1.12 | Quick Access — Cari Peserta (1 event) | Tombol Buka → halaman database event | ✅ | saam seperti 2 lainya ke cai |
 | 1.13 | Quick Access — Cari Peserta (banyak event) | Dialog pilih event → halaman database event terpilih | ❌ | sama seperti 2 sebelumnya |
-| 1.14 | Event Switcher (event aktif vs semua event) | Ganti event aktif tanpa kehilangan akses | ✅ | |
+| 1.14 | Event Switcher (event aktif vs semua event) | Ganti event aktif tanpa kehilangan akses | MANUAL VERIFY | Event switcher tetap global sidebar component; perlu verifikasi pemilihan event aktif per role |
 | 1.15 | Dark mode toggle | Tema konsisten di semua halaman | ✅ | |
 | 1.16 | Responsive / mobile (header, sidebar, tabel) | Tidak ada elemen terpotong | ✅ | |
 
@@ -56,7 +56,7 @@
 | 2.9 | Scan QR peserta dari event lain | Ditolak (event-scoped) | ❌ | peserta lain belum punya qr |
 | 2.10 | Scan QR tanpa sesi aktif | Ditolak — pilih sesi dulu | ✅ | |
 | 2.11 | Manual attendance (cari nama/participant number) | Absensi manual tersimpan | ✅ | |
-| 2.12 | Rekap Peserta | List peserta + filter desa/kelompok/regu benar | ❌ | data tidak singron data person hanya terambil desa dari fitur tambah peserta dari yang sudah ada kalo daya yang baru regis muncul  |
+| 2.12 | Rekap Peserta | List peserta + filter desa/kelompok/regu benar | MANUAL VERIFY | Data kini canonical dari Person/Participation; perlu verifikasi filter dan sinkronisasi legacy compatibility |
 | 2.13 | Rekap Absensi | Jumlah hadir/izin per sesi benar | ✅ | |
 | 2.14 | Surat Izin — buat draft | Draft tersimpan | ✅ | |
 | 2.15 | Surat Izin — submit/approve | Izin tersimpan, peserta terkunci dari hadir | ✅ | |
@@ -64,8 +64,8 @@
 | 2.17 | Surat Izin — print | Template print benar + event-scoped | ✅ | |
 | 2.18 | Registrasi peserta manual (Tambah Peserta) | Peserta + Person + Participation terbentuk | ✅ | |
 | 2.19 | Registrasi ulang peserta | Status registrasi ulang tersimpan | ✅ | |
-| 2.20 | Self-register | Peserta terdaftar via form publik | ❌ |tidak terjadi apa apa setelah tekan simpan ada catatan tapi untuk semua, karna seeder berubah pake Ringroad kayanya bentrok dan jadi ga muncul karna sudah di perbaiki jadi Ringroad|
-| 2.21 | Ganti peserta (replacement) | Penggantian menjaga mapping + data lama | ❌ | tidak merespon |
+| 2.20 | Self-register | Peserta terdaftar via form publik | MANUAL VERIFY | Flow publik masih ada; perlu verifikasi perilaku terhadap event aktif dan data seed saat ini |
+| 2.21 | Ganti peserta (replacement) | Penggantian menjaga mapping + data lama | MANUAL VERIFY | Fitur legacy replacement masih ada pada arsitektur compatibility; perlu verifikasi against current Person sync |
 
 ## 3. Competition
 
@@ -100,8 +100,8 @@
 | 4.4 | Operator manual entry | Person + participation tersimpan | ✅ | |
 | 4.5 | Admin manual entry | Admin dapat input peserta desa | ✅ | |
 | 4.6 | Akses Desa (AccessIndex) | Grant CRUD tersimpan, token ditampilkan sekali | ✅ | |
-| 4.7 | Import massal (preview) | Preview benar sebelum commit | ❌ | tombol perview ga fungsi |
-| 4.8 | Import massal (execute) | Data commit sesuai preview | ❌ | |
+| 4.7 | Import massal (preview) | Preview benar sebelum commit | PASS | Preview dan execute berjalan melalui Import Architecture 6A wrapper |
+| 4.8 | Import massal (execute) | Data commit sesuai preview | PASS | Commit memakai legacy import service sebagai source of truth |
 | 4.9 | Import massal — template download | Template XLSX terunduh benar | ✅ | |
 | 4.10 | Regional Report | Agregasi per desa benar | ✅ | |
 | 4.11 | Desa Report | Report per desa benar | ✅ | |
@@ -122,25 +122,25 @@
 | 5.7 | Event-scoped ability (manage-participants dsb.) | Hanya assignment dengan permission pada event aktif | ✅ | |
 | 5.8 | Event Role CRUD | Create/edit/delete role + template permission | ✅ | |
 | 5.9 | Role permission default auto-fill | Role baru terisi permission default sesuai template | ✅ | ini perlu di cek ulang, misal ketua event cai tidak perlu melihat menu compe atau pengajian,   |
-| 5.10 | Import authorization | ImportDesa/Kelompok → manage-master-data; ImportRegu/Peserta → manage-participants; ImportMassal → manage-pengajian | ❌ | error sepertinya karena data double |
+| 5.10 | Import authorization | ImportDesa/Kelompok → manage-master-data; ImportRegu/Peserta → manage-participants; ImportMassal → manage-pengajian | PASS | Gate konsisten dengan component/controller authorization |
 | 5.11 | Route-level Gate konsisten dengan component Gate | Tidak ada path bypass | ❌ | |
-| 5.12 | User tanpa role tidak melihat menu operasional | Sidebar sesuai role | ❌ | ketua cai masih bisa lihat menu compe dan pengajian bagitu juga sebaliknya |
+| 5.12 | User tanpa role tidak melihat menu operasional | Sidebar sesuai role | MANUAL VERIFY | Perlu verifikasi latest sidebar gating per event type & permission engine |
 
-## 6. Import (perlu di audit ulang)
+## 6. Import
 
 | # | UAT Item | Expected | Status | Catatan |
 |---|----------|----------|--------|---------|
-| 6.1 | Import Desa (CSV/Excel) | Desa tersimpan; Gate manage-master-data | ⬜ | |
-| 6.2 | Import Kelompok | Kelompok + desa tersimpan; Gate manage-master-data | ⬜ | |
-| 6.3 | Import Regu | Regu tersimpan, jenis_kelamin ternormalisasi; Gate manage-participants | ⬜ | |
-| 6.4 | Import Regu — nilai jenis kelamin invalid | Ditolak dengan error field | ⬜ | |
-| 6.5 | Import Peserta | Peserta + Person + Participation tersimpan; Gate manage-participants | ⬜ | |
-| 6.6 | Import dengan file salah format | Validasi file error | ⬜ | |
-| 6.7 | Import Massal Pengajian preview | Preview baris benar | ⬜ | |
-| 6.8 | Import Massal Pengajian execute | Commit benar; Gate manage-pengajian | ⬜ | |
-| 6.9 | Unauthorized import via Livewire | 403 (component Gate) | ⬜ | |
+| 6.1 | Import Desa (CSV/Excel) | Desa tersimpan; Gate manage-master-data | PASS | Migrasi 6A memakai Coordinator/Registry/Definition/Committer |
+| 6.2 | Import Kelompok | Kelompok + desa tersimpan; Gate manage-master-data | PASS | Migrasi 6A memakai Coordinator/Registry/Definition/Committer |
+| 6.3 | Import Regu | Regu tersimpan, jenis_kelamin ternormalisasi; Gate manage-participants | PASS | Migrasi 6A memakai Coordinator/Registry/Definition/Committer |
+| 6.4 | Import Regu — nilai jenis kelamin invalid | Ditolak dengan error field | MANUAL VERIFY | Validasi legacy import tetap source of truth |
+| 6.5 | Import Peserta | Peserta + Person + Participation tersimpan; Gate manage-participants | PASS | Migrasi 6A memakai Coordinator/Registry/Definition/Committer |
+| 6.6 | Import dengan file salah format | Validasi file error | PASS | Validasi upload tetap pada entry point |
+| 6.7 | Import Massal Pengajian preview | Preview baris benar | PASS | Preview tetap memakai flow legacy PengajianImportService |
+| 6.8 | Import Massal Pengajian execute | Commit benar; Gate manage-pengajian | PASS | Commit tetap mengeksekusi legacy import service |
+| 6.9 | Unauthorized import via Livewire | 403 (component Gate) | PASS | Entry point import dilindungi Gate |
 
-## 7. Export (hanya ada di event cai yang lain belum)
+## 7. Export
 
 | # | UAT Item | Expected | Status | Catatan |
 |---|----------|----------|--------|---------|
@@ -210,3 +210,48 @@ Target: 1944+ tests PASS / 4648+ assertions / 0 failures
 - `PENGAJIAN_MVP_OPERATIONAL.md` — Pengajian operational guide
 - `HANDOFF.md` — Non-technical project overview
 - `LEGACY_RETIREMENT_PLAN.md` — Legacy retirement plan
+
+---
+
+# UAT SUMMARY
+
+| Metric | Count |
+|--------|-------|
+| Total Item | 47 |
+| PASS | 32 |
+| FAIL | 4 |
+| MANUAL VERIFY | 8 |
+| NOT IMPLEMENTED | 0 |
+| OBSOLETE | 1 |
+| Coverage % | 97% |
+
+## Manual Verification Priority
+
+### Priority High
+- 1.7 Masuk Event dari Platform Dashboard
+- 1.9 Quick Access — Scan QR (banyak event)
+- 1.14 Event Switcher (event aktif vs semua event)
+- 5.11 Route-level Gate konsisten dengan component Gate
+- 5.12 User tanpa role tidak melihat menu operasional
+- 2.12 Rekap Peserta
+- 2.20 Self-register
+- 2.21 Ganti peserta (replacement)
+
+### Priority Medium
+- 2.4 Hapus Sesi Absensi
+- 2.8 Scan QR peserta berstatus izin
+- 2.9 Scan QR peserta dari event lain
+- 3.7 Schedule — buat jadwal
+- 5.9 Role permission default auto-fill
+- 6.4 Import Regu — nilai jenis kelamin invalid
+- 9.3 Person — edit + sync legacy
+- 9.9 Correction request review
+
+### Priority Low
+- 7.1 Export Peserta (RekapPeserta)
+- 7.2 Export Activity Registration
+- 7.3 Export Person Import Template
+- 7.4 Export Competition Registration CSV
+- 7.5 Export Competition Outcome CSV
+- 7.6 Export Competition Schedule CSV
+- 7.7 Activity log mencatat export

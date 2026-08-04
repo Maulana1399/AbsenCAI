@@ -26,6 +26,8 @@ class SelfRegister extends Component
 
     public string $nama = '';
 
+    public ?string $tanggal_lahir = null;
+
     public string $jenis_kelamin = '';
 
     public string $jenis_peserta = peserta::JENIS_WAJIB;
@@ -37,6 +39,8 @@ class SelfRegister extends Component
     public ?int $regu_id = null;
 
     public string $regu_nama = '-';
+
+    public string $warningMessage = '';
 
     public $daftarDesa = [];
 
@@ -65,6 +69,19 @@ class SelfRegister extends Component
 
     public function register(): void
     {
+        $eventId = app(ActiveEventContext::class)->id();
+
+            logger()->info('SelfRegister register: method entry', [
+                'nama' => $this->nama,
+                'tanggal_lahir' => $this->tanggal_lahir,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'jenis_peserta' => $this->jenis_peserta,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'event_id' => $eventId,
+            ]);
+
+
         Gate::authorize('manage-registration');
 
         if ($this->processing) {
@@ -73,15 +90,48 @@ class SelfRegister extends Component
         $this->processing = true;
 
         try {
+            logger()->info('SelfRegister register: before validate', [
+                'nama' => $this->nama,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'jenis_peserta' => $this->jenis_peserta,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'event_id' => $eventId,
+            ]);
+
             $this->fillReguPlacement();
+
+            if ($eventId !== null && $this->regu_id === null) {
+                $this->warningMessage = 'Registrasi belum dapat dilakukan karena Event ini belum memiliki Regu. Silakan hubungi panitia.';
+                logger()->warning('SelfRegister register: regu unavailable', [
+                    'nama' => $this->nama,
+                    'jenis_kelamin' => $this->jenis_kelamin,
+                    'jenis_peserta' => $this->jenis_peserta,
+                    'desa_id' => $this->desa_id,
+                    'kelompok_id' => $this->kelompok_id,
+                    'event_id' => $eventId,
+                ]);
+                return;
+            }
 
             $validated = $this->validate([
                 'nama'          => ['required', 'string', 'max:255'],
+                'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
                 'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
                 'jenis_peserta' => ['required', Rule::in(peserta::jenisPesertaOptions())],
                 'desa_id'       => ['required', Rule::exists('desas', 'id')],
                 'kelompok_id'   => ['required', Rule::exists('kelompoks', 'id')],
                 'regu_id'       => ['required', Rule::exists('regus', 'id')],
+            ]);
+
+            logger()->info('SelfRegister register: after validate', [
+                'nama' => $validated['nama'],
+                'tanggal_lahir' => $validated['tanggal_lahir'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'jenis_peserta' => $validated['jenis_peserta'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'event_id' => $eventId,
             ]);
 
             $existingPerson = Person::where('nama', $validated['nama'])
@@ -90,7 +140,6 @@ class SelfRegister extends Component
                 ->first();
 
             if ($existingPerson) {
-                // CASE B or C — Person exists. Check if same-event (Case C).
                 $activeEvent = app(ActiveEventContext::class)->current();
 
                 if ($activeEvent) {
@@ -106,8 +155,27 @@ class SelfRegister extends Component
                 }
             }
 
+            logger()->info('SelfRegister register: before DB transaction', [
+                'nama' => $validated['nama'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'jenis_peserta' => $validated['jenis_peserta'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'event_id' => $eventId,
+            ]);
+
+            logger()->info('SelfRegister register: inside DB transaction', [
+                'nama' => $validated['nama'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'jenis_peserta' => $validated['jenis_peserta'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'event_id' => $eventId,
+            ]);
+
             app(RegistrationService::class)->createParticipant([
                 'nama'             => $validated['nama'],
+                'tanggal_lahir'    => $validated['tanggal_lahir'],
                 'jenis_kelamin'    => $validated['jenis_kelamin'],
                 'jenis_peserta'    => $validated['jenis_peserta'],
                 'desa_id'          => $validated['desa_id'],
@@ -116,13 +184,57 @@ class SelfRegister extends Component
                 'status_registrasi' => peserta::STATUS_SELF_REGISTER,
             ]);
 
+            logger()->info('SelfRegister register: after DB transaction', [
+                'nama' => $validated['nama'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'jenis_peserta' => $validated['jenis_peserta'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'event_id' => $eventId,
+            ]);
+
             session()->flash('self_register', [
                 'nama'     => $this->nama,
                 'desa'     => desa::find($this->desa_id)?->desa_asal,
                 'kelompok' => kelompok::find($this->kelompok_id)?->kelompok_asal,
             ]);
 
+            logger()->info('SelfRegister register: before redirect', [
+                'nama' => $validated['nama'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'jenis_peserta' => $validated['jenis_peserta'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'event_id' => $eventId,
+            ]);
+
             $this->redirect(route('register.success', absolute: false), navigate: true);
+        } catch (ValidationException $throwable) {
+            logger()->error('SelfRegister register: validation exception', [
+                'message' => $throwable->getMessage(),
+                'errors' => $throwable->errors(),
+                'nama' => $this->nama,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'jenis_peserta' => $this->jenis_peserta,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'event_id' => $eventId,
+            ]);
+
+            throw $throwable;
+        } catch (\Throwable $throwable) {
+            logger()->error('SelfRegister register: exception', [
+                'message' => $throwable->getMessage(),
+                'exception' => $throwable::class,
+                'nama' => $this->nama,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'jenis_peserta' => $this->jenis_peserta,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'event_id' => $eventId,
+            ]);
+
+            throw $throwable;
         } finally {
             $this->processing = false;
         }

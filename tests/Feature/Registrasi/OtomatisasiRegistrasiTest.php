@@ -89,6 +89,7 @@ test('auto placement picks next nip and least filled regu by gender with event s
 test('self register uses automatic nip and least filled regu', function () {
     Livewire::test(SelfRegister::class)
         ->set('nama', 'Peserta Baru')
+        ->set('tanggal_lahir', '1995-05-10')
         ->set('jenis_kelamin', 'Perempuan')
         ->set('desa_id', $this->desa->id)
         ->set('kelompok_id', $this->kelompok->id)

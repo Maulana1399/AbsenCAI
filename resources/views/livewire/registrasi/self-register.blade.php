@@ -7,6 +7,11 @@
     </div>
 
     <form wire:submit="register" class="flex flex-col gap-4">
+        @if ($warningMessage)
+            <div class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                {{ $warningMessage }}
+            </div>
+        @endif
         <flux:input
             wire:model="nama"
             label="Nama Lengkap"
@@ -15,6 +20,16 @@
             autofocus
             placeholder="Masukkan nama lengkap"
         />
+
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Tanggal Lahir</label>
+            <flux:input
+                wire:model="tanggal_lahir"
+                type="date"
+                required
+            />
+            @error('tanggal_lahir') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+        </div>
 
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Jenis Kelamin</label>

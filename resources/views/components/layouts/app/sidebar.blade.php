@@ -30,11 +30,12 @@
             @if ($isPengajian)
                 {{-- Pengajian Navigation --}}
                 <flux:navlist variant="outline">
-                    @can('view-reports')
                     <flux:navlist.group :heading="__('Pengajian')" class="grid">
+                        <flux:navlist.item icon="home" :href="route('pengajian.enter-token', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('pengajian.enter-token')" wire:navigate>{{ __('Dashboard Pengajian') }}</flux:navlist.item>
+                        @can('view-reports')
                         <flux:navlist.item icon="chart-bar" :href="route('pengajian.report', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('pengajian.report')" wire:navigate>{{ __('Regional Report') }}</flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
-                    @endcan
 
                     @can('manage-pengajian')
                     <flux:navlist.group expandable heading="Peserta" class="grid">
