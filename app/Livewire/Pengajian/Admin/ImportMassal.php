@@ -2,6 +2,18 @@
 
 namespace App\Livewire\Pengajian\Admin;
 
+use App\Services\Import\Adapters\Pengajian\PengajianImportCommitter;
+use App\Services\Import\Adapters\Pengajian\PengajianImportDefinition;
+use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\NullObjects\NullImportActivityLogger;
+use App\Services\Import\NullObjects\NullImportDuplicateDetector;
+use App\Services\Import\NullObjects\NullImportNormalizer;
+use App\Services\Import\NullObjects\NullImportParser;
+use App\Services\Import\NullObjects\NullImportValidator;
+use App\Services\Import\Pipeline\DefaultImportPipeline;
+use App\Services\Import\Pipeline\ImportCoordinator;
+use App\Services\Import\Registry\ImportRegistry;
+use App\Services\Import\Support\ArrayPipelineStageRunner;
 use App\Services\Pengajian\PengajianImportService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
@@ -102,8 +114,38 @@ class ImportMassal extends Component
         try {
             $event = app(ActiveEventContext::class)->requireCurrent();
 
-            $service = app(PengajianImportService::class);
-            $this->importResult = $service->import($this->previewRows, $event->id);
+            $registry = new ImportRegistry;
+            $registry->register(new PengajianImportDefinition(
+                new NullImportParser,
+                new NullImportValidator,
+                new NullImportNormalizer,
+                new NullImportDuplicateDetector,
+                app(PengajianImportCommitter::class),
+                new NullImportActivityLogger,
+            ));
+
+            $coordinator = new ImportCoordinator(
+                $registry,
+                new DefaultImportPipeline(new ArrayPipelineStageRunner),
+            );
+
+            $context = new ImportContext(
+                type: 'pengajian',
+                eventId: $event->id,
+                userId: auth()->id(),
+                fileName: $this->file?->getClientOriginalName(),
+                source: 'livewire',
+                mode: 'execute',
+                options: ['file' => $this->file],
+                definitionKey: 'pengajian',
+            );
+
+            $result = $coordinator->execute('pengajian', $context, $this->previewRows);
+            $this->importResult = [
+                'created_participations' => $result->commit?->summary->createdRows ?? 0,
+                'skipped_duplicates' => $result->commit?->summary->skippedRows ?? 0,
+                'errors' => $result->commit?->summary->errors ?? [],
+            ];
             $this->step = 3;
         } catch (\Throwable $e) {
             $this->importResult = [

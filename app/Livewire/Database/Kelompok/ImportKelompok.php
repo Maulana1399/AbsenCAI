@@ -2,15 +2,24 @@
 
 namespace App\Livewire\Database\Kelompok;
 
-use Livewire\Component;
-use App\Imports\KelompokImport;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Services\Import\Adapters\Kelompok\KelompokImportActivityLogger;
+use App\Services\Import\Adapters\Kelompok\KelompokImportCommitter;
+use App\Services\Import\Adapters\Kelompok\KelompokImportDefinition;
+use App\Services\Import\Adapters\Kelompok\KelompokImportDuplicateDetector;
+use App\Services\Import\Adapters\Kelompok\KelompokImportNormalizer;
+use App\Services\Import\Adapters\Kelompok\KelompokImportParser;
+use App\Services\Import\Adapters\Kelompok\KelompokImportValidator;
+use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\Pipeline\DefaultImportPipeline;
+use App\Services\Import\Pipeline\ImportCoordinator;
+use App\Services\Import\Registry\ImportRegistry;
+use App\Services\Import\Support\ArrayPipelineStageRunner;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class ImportKelompok extends Component
 {
-
     use WithFileUploads;
     public $file;
 
@@ -22,7 +31,33 @@ class ImportKelompok extends Component
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
 
-        Excel::import(new KelompokImport, $this->file);
+        $registry = new ImportRegistry;
+        $registry->register(new KelompokImportDefinition(
+            new KelompokImportParser,
+            new KelompokImportValidator,
+            new KelompokImportNormalizer,
+            new KelompokImportDuplicateDetector,
+            new KelompokImportCommitter,
+            new KelompokImportActivityLogger,
+        ));
+
+        $coordinator = new ImportCoordinator(
+            $registry,
+            new DefaultImportPipeline(new ArrayPipelineStageRunner),
+        );
+
+        $context = new ImportContext(
+            type: 'kelompok',
+            userId: auth()->id(),
+            fileName: $this->file->getClientOriginalName(),
+            source: 'livewire',
+            mode: 'execute',
+            options: ['file' => $this->file],
+            definitionKey: 'kelompok',
+        );
+
+        $coordinator->execute('kelompok', $context, $this->file);
+
         session()->flash('success', 'Data kelompok berhasil diimpor.');
         $this->reset('file');
         $this->dispatch('refreshKelompokList');

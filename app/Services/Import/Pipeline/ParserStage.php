@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Services\Import\Pipeline;
+
+use App\Services\Import\DTO\ImportContext;
+
+final class ParserStage
+{
+    public function handle(mixed $payload, ImportContext $context): mixed
+    {
+        return $payload;
+    }
+}
