@@ -37,7 +37,7 @@ class RekapPeserta extends Component
     public function render()
     {
         $event = app(ActiveEventContext::class)->current();
-        $query = Participation::with(['person.desa', 'person.legacyPesertaMapping.peserta', 'event', 'regu']);
+        $query = Participation::with(['person.desa', 'person.kelompok', 'person.legacyPesertaMapping.peserta', 'event', 'regu']);
 
         if ($event !== null) {
             $query->where('event_id', $event->id);
@@ -50,7 +50,8 @@ class RekapPeserta extends Component
         }
 
         if ($this->kelompok_id) {
-            $query->whereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('kelompok_id', $this->kelompok_id));
+            $query->whereHas('person', fn ($builder) => $builder->where('kelompok_id', $this->kelompok_id))
+                ->orWhereHas('person.legacyPesertaMapping.peserta', fn ($builder) => $builder->where('kelompok_id', $this->kelompok_id));
         }
 
         if ($this->desa_id) {
@@ -69,6 +70,8 @@ class RekapPeserta extends Component
         $daftar = $query->orderBy('id')->get()->map(function (Participation $participation) {
             $person = $participation->person;
             $peserta = $person?->legacyPesertaMapping?->peserta;
+            $kelompok = $person?->kelompok ?? $peserta?->kelompok;
+            $statusRegistrasi = $person?->legacyPesertaMapping?->peserta?->status_registrasi;
 
             return (object) [
                 'id' => $participation->id,
@@ -80,9 +83,9 @@ class RekapPeserta extends Component
                 'participant_number' => $participation->participant_number,
                 'attendance_code' => $participation->attendance_code,
                 'desa' => $person?->desa,
-                'kelompok' => $peserta?->kelompok,
+                'kelompok' => $kelompok,
                 'regu' => $participation->regu,
-                'status_registrasi' => $peserta?->status_registrasi,
+                'status_registrasi' => $statusRegistrasi,
                 'status_registrasi_label' => $peserta?->status_registrasi_label ?? 'Belum Registrasi',
             ];
         })->values();
