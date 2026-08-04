@@ -263,7 +263,7 @@
 
                     <flux:button
 
-                        href="{{ route('absensi', ['event' => $singleEvent], absolute: false) }}"
+                        href="{{ $singleEvent->quickAccessRoute('scan') }}"
 
                         variant="ghost"
 
@@ -337,7 +337,7 @@
 
                     <flux:button
 
-                        href="{{ route('registrasi.peserta', ['event' => $singleEvent], absolute: false) }}"
+                        href="{{ $singleEvent->quickAccessRoute('registrasi') }}"
 
                         variant="ghost"
 
@@ -411,7 +411,7 @@
 
                     <flux:button
 
-                        href="{{ route('database', ['event' => $singleEvent], absolute: false) }}"
+                        href="{{ $singleEvent->quickAccessRoute('cari') }}"
 
                         variant="ghost"
 

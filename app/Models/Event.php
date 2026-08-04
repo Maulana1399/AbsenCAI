@@ -85,17 +85,17 @@ class Event extends Model
     {
         return match ($target) {
             'scan' => $this->isPengajian()
-                ? route('pengajian.desa', ['event' => $this], absolute: false)
+                ? route('pengajian.report', ['event' => $this], absolute: false)
                 : ($this->isCompetition()
                     ? route('competition.dashboard', $this, absolute: false)
                     : route('absensi', ['event' => $this], absolute: false)),
             'registrasi' => $this->isPengajian()
-                ? route('pengajian.desa.tambah', ['event' => $this], absolute: false)
+                ? route('pengajian.admin.manual-entry', ['event' => $this], absolute: false)
                 : ($this->isCompetition()
                     ? route('competition.registration', ['event' => $this], absolute: false)
                     : route('registrasi.peserta', ['event' => $this], absolute: false)),
             'cari' => $this->isPengajian()
-                ? route('pengajian.desa', ['event' => $this], absolute: false)
+                ? route('pengajian.report', ['event' => $this], absolute: false)
                 : ($this->isCompetition()
                     ? route('competition.participants', ['event' => $this], absolute: false)
                     : route('database', ['event' => $this], absolute: false)),
