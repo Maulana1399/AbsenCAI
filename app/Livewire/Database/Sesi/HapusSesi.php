@@ -45,6 +45,8 @@ class HapusSesi extends Component
         }
 
         SesiAbsensi::where('event_id', $eventId)->where('id', $this->sesi_id)->delete();
+        session()->flash('success', 'Sesi absensi berhasil dihapus.');
+
         return redirect()->to('/sesi-absensi');
     }
 

@@ -36,8 +36,8 @@ class AttendanceService
 
         if ($identity->isCanonical() && $identity->participation->event_id != $activeEvent->id) {
             return [
-                'status' => 'not_found',
-                'message' => 'Data peserta tidak ditemukan!',
+                'status' => 'wrong_event',
+                'message' => 'Peserta tidak terdaftar pada event ini.',
             ];
         }
 

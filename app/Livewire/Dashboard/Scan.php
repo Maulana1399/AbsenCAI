@@ -209,7 +209,7 @@ class Scan extends Component
 
         $this->message = $result['message'];
 
-        if ($result['status'] === 'not_found' || $result['status'] === 'session_required') {
+        if ($result['status'] === 'not_found' || $result['status'] === 'session_required' || $result['status'] === 'wrong_event') {
             $this->nama = null;
             $this->jam_scan = null;
             return;
@@ -271,7 +271,9 @@ class Scan extends Component
             $this->jam_scan = null;
             $this->message = 'Peserta berhasil dicatat sebagai izin';
         } catch (ValidationException $exception) {
-            $this->message = $exception->validator->errors()->first('peserta');
+            $this->message = $exception->validator->errors()->first('peserta')
+                ?? $exception->validator->errors()->first('participation')
+                ?? 'Gagal mencatat izin.';
         }
     }
 
@@ -289,7 +291,7 @@ class Scan extends Component
 
         $this->message = $result['message'];
 
-        if ($result['status'] === 'not_found' || $result['status'] === 'session_required') {
+        if ($result['status'] === 'not_found' || $result['status'] === 'session_required' || $result['status'] === 'wrong_event') {
             $this->nama = null;
             $this->jam_scan = null;
 
