@@ -100,16 +100,7 @@ class PlatformDashboard extends Component
     {
         $event = Event::active()->findOrFail($eventId);
 
-        $routeName = match ($target) {
-            'scan' => 'absensi',
-            'registrasi' => 'registrasi.peserta',
-            'cari' => 'database',
-            default => null,
-        };
-
-        abort_unless($routeName !== null, 404);
-
-        $this->redirect(route($routeName, ['event' => $event], absolute: false), navigate: true);
+        $this->redirect($event->quickAccessRoute($target), navigate: true);
     }
 
     public function render()
