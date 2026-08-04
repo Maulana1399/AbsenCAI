@@ -85,7 +85,14 @@
             </div>
 
             @if($message)
-                <div class="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">
+                @php
+                    $messageClasses = [
+                        'success' => 'bg-green-50 text-green-700',
+                        'warning' => 'bg-amber-50 text-amber-700',
+                        'error' => 'bg-red-50 text-red-600',
+                    ];
+                @endphp
+                <div class="mt-4 rounded-xl px-3 py-2 text-sm {{ $messageClasses[$messageType] ?? $messageClasses['error'] }}">
                     {{ $message }}
                 </div>
             @endif

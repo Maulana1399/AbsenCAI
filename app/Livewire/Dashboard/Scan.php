@@ -20,6 +20,8 @@ class Scan extends Component
     public $jam_scan;
     public $message;
 
+    public string $messageType = 'error';
+
     public $manualSearch = '';
     public $manualResults = [];
     public $selectedManualParticipantId = null;
@@ -160,11 +162,13 @@ class Scan extends Component
         $event = app(ActiveEventContext::class)->current();
         if (! $event) {
             $this->message = 'Tidak ada event aktif';
+            $this->messageType = 'error';
             return;
         }
 
         if (! $this->validateSessionForEvent($event->id)) {
             $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
+            $this->messageType = 'error';
             $this->nama = null;
             $this->jam_scan = null;
             return;
@@ -196,18 +200,28 @@ class Scan extends Component
 
         if (! $attendanceCode) {
             $this->message = 'Pilih peserta terlebih dahulu';
+            $this->messageType = 'error';
             $this->nama = null;
             $this->jam_scan = null;
             return;
         }
 
-        $result = app(AttendanceService::class)->processScan(
-            $attendanceCode,
-            $this->sesi_id ? (int) $this->sesi_id : null,
-            'manual'
-        );
+        try {
+            $result = app(AttendanceService::class)->processScan(
+                $attendanceCode,
+                $this->sesi_id ? (int) $this->sesi_id : null,
+                'manual'
+            );
+        } catch (ValidationException $exception) {
+            $this->nama = null;
+            $this->jam_scan = null;
+            $this->message = 'Peserta berstatus IZIN. Absensi tidak dilakukan.';
+            $this->messageType = 'warning';
 
-        $this->message = $result['message'];
+            return;
+        }
+
+        $this->applyScanResult($result);
 
         if ($result['status'] === 'not_found' || $result['status'] === 'session_required' || $result['status'] === 'wrong_event') {
             $this->nama = null;
@@ -228,11 +242,13 @@ class Scan extends Component
 
         if (! $this->validateSessionForEvent($event->id)) {
             $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
+            $this->messageType = 'error';
             return;
         }
 
         if (! $this->sesi_id) {
             $this->message = 'Pilih sesi absensi terlebih dahulu';
+            $this->messageType = 'error';
             return;
         }
 
@@ -256,6 +272,7 @@ class Scan extends Component
 
         if (! $pesertaId && ! $participationId) {
             $this->message = 'Pilih peserta terlebih dahulu';
+            $this->messageType = 'error';
             return;
         }
 
@@ -270,10 +287,12 @@ class Scan extends Component
             $this->nama = \App\Models\peserta::find($pesertaId)?->nama ?? '-';
             $this->jam_scan = null;
             $this->message = 'Peserta berhasil dicatat sebagai izin';
+            $this->messageType = 'success';
         } catch (ValidationException $exception) {
             $this->message = $exception->validator->errors()->first('peserta')
                 ?? $exception->validator->errors()->first('participation')
                 ?? 'Gagal mencatat izin.';
+            $this->messageType = 'error';
         }
     }
 
@@ -284,12 +303,22 @@ class Scan extends Component
         $event = app(ActiveEventContext::class)->current();
         if ($event && $this->sesi_id && ! $this->validateSessionForEvent($event->id)) {
             $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
+            $this->messageType = 'error';
             return;
         }
 
-        $result = app(AttendanceService::class)->processScan((string) $data, $this->sesi_id ? (int) $this->sesi_id : null);
+        try {
+            $result = app(AttendanceService::class)->processScan((string) $data, $this->sesi_id ? (int) $this->sesi_id : null);
+        } catch (ValidationException $exception) {
+            $this->nama = null;
+            $this->jam_scan = null;
+            $this->message = 'Peserta berstatus IZIN. Absensi tidak dilakukan.';
+            $this->messageType = 'warning';
 
-        $this->message = $result['message'];
+            return;
+        }
+
+        $this->applyScanResult($result);
 
         if ($result['status'] === 'not_found' || $result['status'] === 'session_required' || $result['status'] === 'wrong_event') {
             $this->nama = null;
@@ -300,6 +329,17 @@ class Scan extends Component
 
         $this->nama = $result['identity']->nama;
         $this->jam_scan = $result['jam_scan'] ?? null;
+    }
+
+    private function applyScanResult(array $result): void
+    {
+        $this->message = $result['message'];
+
+        $this->messageType = match ($result['status']) {
+            'success' => 'success',
+            'duplicate' => 'warning',
+            default => 'error',
+        };
     }
 
 
@@ -318,6 +358,7 @@ class Scan extends Component
         $this->nama = null;
         $this->jam_scan = null;
         $this->message = null;
+        $this->messageType = 'error';
         $this->manualSearch = '';
         $this->manualResults = [];
         $this->selectedManualParticipantId = null;
