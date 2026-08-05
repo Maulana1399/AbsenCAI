@@ -11,8 +11,11 @@ use Livewire\Component;
 class TambahSesi extends Component
 {
     public bool $processing = false;
+
     public $nama_sesi = '';
+
     public $tanggal = '';
+
     public $aktif = true;
 
     public function render()

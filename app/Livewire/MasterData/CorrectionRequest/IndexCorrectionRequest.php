@@ -6,20 +6,24 @@ use App\Models\desa;
 use App\Models\IdentityCorrectionRequest;
 use App\Services\Pengajian\IdentityCorrectionService;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class IndexCorrectionRequest extends Component
 {
     use WithPagination;
 
     public string $filterStatus = '';
+
     public string $filterDesaId = '';
+
     public string $search = '';
 
     public ?int $reviewingId = null;
+
     public string $operatorNotes = '';
+
     public bool $processing = false;
 
     protected $updatesQueryString = ['filterStatus', 'filterDesaId', 'search'];
@@ -104,6 +108,7 @@ class IndexCorrectionRequest extends Component
 
         if (trim($this->operatorNotes) === '') {
             $this->dispatch('correction-validation-error', message: 'Catatan operator wajib diisi saat menolak.');
+
             return;
         }
 

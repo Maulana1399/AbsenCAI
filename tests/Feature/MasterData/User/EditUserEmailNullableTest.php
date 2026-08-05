@@ -13,7 +13,7 @@ function enu_superAdmin(): User
 {
     return User::factory()->create([
         'role' => 'super_admin',
-        'email' => 'enu-admin-' . str()->random(8) . '@example.com',
+        'email' => 'enu-admin-'.str()->random(8).'@example.com',
     ]);
 }
 
@@ -23,7 +23,7 @@ function enu_autoUser(array $overrides = []): User
     return User::factory()->create(array_merge([
         'name' => 'Auto Create User',
         'email' => null,
-        'username' => 'auto.user' . random_int(10, 9999),
+        'username' => 'auto.user'.random_int(10, 9999),
         'role' => null,
     ], $overrides));
 }

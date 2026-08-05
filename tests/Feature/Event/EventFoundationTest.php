@@ -1,8 +1,8 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\Event;
 use App\Models\User;
-use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +18,7 @@ function EventFoundation_makeEvent(array $overrides = []): Event
 {
     return Event::create(array_merge([
         'name' => 'Test Event',
-        'slug' => 'test-event-' . str()->random(6),
+        'slug' => 'test-event-'.str()->random(6),
         'status' => 'active',
     ], $overrides));
 }

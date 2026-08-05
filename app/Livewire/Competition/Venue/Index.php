@@ -10,15 +10,23 @@ use Livewire\Component;
 class Index extends Component
 {
     public bool $showCreateForm = false;
+
     public string $newName = '';
+
     public string $newCode = '';
+
     public string $newLocationDetail = '';
+
     public string $newSortOrder = '';
 
     public ?int $editId = null;
+
     public string $editName = '';
+
     public string $editCode = '';
+
     public string $editLocationDetail = '';
+
     public string $editSortOrder = '';
 
     public bool $processing = false;
@@ -30,7 +38,7 @@ class Index extends Component
 
     public function toggleCreateForm(): void
     {
-        $this->showCreateForm = !$this->showCreateForm;
+        $this->showCreateForm = ! $this->showCreateForm;
         $this->reset(['newName', 'newCode', 'newLocationDetail', 'newSortOrder']);
         $this->resetErrorBag();
     }
@@ -39,7 +47,9 @@ class Index extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {

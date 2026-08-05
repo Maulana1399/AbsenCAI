@@ -1,13 +1,13 @@
 <?php
 
-use App\Livewire\Database\Peserta\TambahPeserta;
 use App\Livewire\Database\Peserta\EditPeserta;
 use App\Livewire\Database\Peserta\GantiPeserta;
 use App\Livewire\Database\Peserta\HapusPeserta;
-use App\Livewire\Database\Regu\TambahRegu;
+use App\Livewire\Database\Peserta\TambahPeserta;
 use App\Livewire\Database\Regu\DataRegu;
 use App\Livewire\Database\Regu\EditRegu;
 use App\Livewire\Database\Regu\HapusRegu;
+use App\Livewire\Database\Regu\TambahRegu;
 use App\Models\CaiParticipantReplacement;
 use App\Models\desa;
 use App\Models\Event;
@@ -338,7 +338,7 @@ test('simpan blocks existing Person with exact match (duplicate detection)', fun
         ->set('kelompok_id', $this->kelompok->id)
         ->call('simpan')
         ->assertSet('errorMessage', 'Orang dengan nama dan tanggal lahir yang sama sudah terdaftar. '
-            . 'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.');
+            .'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.');
 
     expect(Participation::where('person_id', $person->id)->where('event_id', $this->event->id)->exists())->toBeFalse();
 });
@@ -1190,7 +1190,7 @@ test('duplicate detection: exact normalized match is detected as strong duplicat
         ->set('kelompok_id', $this->kelompok->id)
         ->call('simpan')
         ->assertSet('errorMessage', 'Orang dengan nama dan tanggal lahir yang sama sudah terdaftar. '
-            . 'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.');
+            .'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.');
 });
 
 test('duplicate detection: whitespace variation is detected as strong duplicate', function () {
@@ -1213,7 +1213,7 @@ test('duplicate detection: whitespace variation is detected as strong duplicate'
         ->set('kelompok_id', $this->kelompok->id)
         ->call('simpan')
         ->assertSet('errorMessage', 'Orang dengan nama dan tanggal lahir yang sama sudah terdaftar. '
-            . 'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.');
+            .'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.');
 });
 
 test('duplicate detection: same name different birthday shows possible duplicate warning', function () {

@@ -80,7 +80,7 @@ class IdentityCorrectionService
 
             if ($locked->status !== IdentityCorrectionRequest::STATUS_PENDING) {
                 throw new \RuntimeException(
-                    'Permintaan koreksi sudah ' . $locked->status . '.'
+                    'Permintaan koreksi sudah '.$locked->status.'.'
                 );
             }
 
@@ -126,7 +126,7 @@ class IdentityCorrectionService
 
             if ($locked->status !== IdentityCorrectionRequest::STATUS_PENDING) {
                 throw new \RuntimeException(
-                    'Permintaan koreksi sudah ' . $locked->status . '.'
+                    'Permintaan koreksi sudah '.$locked->status.'.'
                 );
             }
 

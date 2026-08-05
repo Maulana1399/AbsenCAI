@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Registrasi;
 
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
-use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
@@ -71,16 +71,15 @@ class SelfRegister extends Component
     {
         $eventId = app(ActiveEventContext::class)->id();
 
-            logger()->info('SelfRegister register: method entry', [
-                'nama' => $this->nama,
-                'tanggal_lahir' => $this->tanggal_lahir,
-                'jenis_kelamin' => $this->jenis_kelamin,
-                'jenis_peserta' => $this->jenis_peserta,
-                'desa_id' => $this->desa_id,
-                'kelompok_id' => $this->kelompok_id,
-                'event_id' => $eventId,
-            ]);
-
+        logger()->info('SelfRegister register: method entry', [
+            'nama' => $this->nama,
+            'tanggal_lahir' => $this->tanggal_lahir,
+            'jenis_kelamin' => $this->jenis_kelamin,
+            'jenis_peserta' => $this->jenis_peserta,
+            'desa_id' => $this->desa_id,
+            'kelompok_id' => $this->kelompok_id,
+            'event_id' => $eventId,
+        ]);
 
         Gate::authorize('manage-registration');
 
@@ -111,17 +110,18 @@ class SelfRegister extends Component
                     'kelompok_id' => $this->kelompok_id,
                     'event_id' => $eventId,
                 ]);
+
                 return;
             }
 
             $validated = $this->validate([
-                'nama'          => ['required', 'string', 'max:255'],
+                'nama' => ['required', 'string', 'max:255'],
                 'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
                 'jenis_kelamin' => ['required', Rule::in(['Laki - Laki', 'Perempuan'])],
                 'jenis_peserta' => ['required', Rule::in(peserta::jenisPesertaOptions())],
-                'desa_id'       => ['required', Rule::exists('desas', 'id')],
-                'kelompok_id'   => ['required', Rule::exists('kelompoks', 'id')],
-                'regu_id'       => ['required', Rule::exists('regus', 'id')],
+                'desa_id' => ['required', Rule::exists('desas', 'id')],
+                'kelompok_id' => ['required', Rule::exists('kelompoks', 'id')],
+                'regu_id' => ['required', Rule::exists('regus', 'id')],
             ]);
 
             logger()->info('SelfRegister register: after validate', [
@@ -174,13 +174,13 @@ class SelfRegister extends Component
             ]);
 
             app(RegistrationService::class)->createParticipant([
-                'nama'             => $validated['nama'],
-                'tanggal_lahir'    => $validated['tanggal_lahir'],
-                'jenis_kelamin'    => $validated['jenis_kelamin'],
-                'jenis_peserta'    => $validated['jenis_peserta'],
-                'desa_id'          => $validated['desa_id'],
-                'kelompok_id'      => $validated['kelompok_id'],
-                'regu_id'          => $this->regu_id,
+                'nama' => $validated['nama'],
+                'tanggal_lahir' => $validated['tanggal_lahir'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'jenis_peserta' => $validated['jenis_peserta'],
+                'desa_id' => $validated['desa_id'],
+                'kelompok_id' => $validated['kelompok_id'],
+                'regu_id' => $this->regu_id,
                 'status_registrasi' => peserta::STATUS_SELF_REGISTER,
             ]);
 
@@ -194,8 +194,8 @@ class SelfRegister extends Component
             ]);
 
             session()->flash('self_register', [
-                'nama'     => $this->nama,
-                'desa'     => desa::find($this->desa_id)?->desa_asal,
+                'nama' => $this->nama,
+                'desa' => desa::find($this->desa_id)?->desa_asal,
                 'kelompok' => kelompok::find($this->kelompok_id)?->kelompok_asal,
             ]);
 

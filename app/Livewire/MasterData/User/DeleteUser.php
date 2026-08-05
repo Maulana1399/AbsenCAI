@@ -6,14 +6,17 @@ use App\Models\User;
 use App\Services\User\UserManagementService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DeleteUser extends Component
 {
     public ?int $userId = null;
+
     public ?string $userName = null;
+
     public ?string $blockReason = null;
+
     public bool $canDelete = false;
 
     #[On('deleteUser')]
@@ -32,7 +35,7 @@ class DeleteUser extends Component
             $reasons = $service->canDelete($user);
 
             if (! empty($reasons)) {
-                $this->blockReason = 'User tidak dapat dihapus karena:<br>' . implode('<br>', $reasons);
+                $this->blockReason = 'User tidak dapat dihapus karena:<br>'.implode('<br>', $reasons);
                 $this->canDelete = false;
             } else {
                 $this->blockReason = null;
@@ -51,6 +54,7 @@ class DeleteUser extends Component
 
         if (! $user) {
             Flux::modal('hapus-user')->close();
+
             return;
         }
 

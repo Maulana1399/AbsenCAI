@@ -12,8 +12,7 @@ final class PengajianImportCommitter implements ImportCommitter
 {
     public function __construct(
         private readonly PengajianImportService $service,
-    ) {
-    }
+    ) {}
 
     public function commit(ImportContext $context): ImportCommit
     {

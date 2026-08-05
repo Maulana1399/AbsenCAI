@@ -1,19 +1,19 @@
 <?php
 
-use App\Livewire\Database\Peserta\TambahPeserta;
 use App\Enums\Role;
 use App\Imports\PesertaImport;
+use App\Livewire\Database\Peserta\TambahPeserta;
 use App\Livewire\Registrasi\SelfRegister;
-use App\Models\User;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
-use App\Models\peserta;
-use App\Models\regu;
-use App\Support\ActiveEventContext;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
+use App\Models\regu;
+use App\Models\User;
 use App\Services\Placement\PlacementService;
+use App\Support\ActiveEventContext;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -126,7 +126,7 @@ test('database peserta form uses automatic nip and least filled regu', function 
 });
 
 test('import peserta uses automatic nip and least filled regu', function () {
-    $model = (new PesertaImport())->model([
+    $model = (new PesertaImport)->model([
         'nama' => 'Peserta Import',
         'jenis_kelamin' => 'Perempuan',
         'kelompok' => 'Kelompok A',

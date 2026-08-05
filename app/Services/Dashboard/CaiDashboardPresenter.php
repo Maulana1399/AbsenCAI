@@ -21,28 +21,28 @@ class CaiDashboardPresenter implements DashboardPresenterContract
             ->where('aktif', true)
             ->first();
 
-        $sudahAbsenCount    = 0;
-        $izinCount          = 0;
-        $belumAbsenCount    = 0;
-        $totalFiltered      = 0;
+        $sudahAbsenCount = 0;
+        $izinCount = 0;
+        $belumAbsenCount = 0;
+        $totalFiltered = 0;
         $persentaseKehadiran = 0;
-        $attendance         = collect();
-        $pesertaBelumAbsen  = collect();
+        $attendance = collect();
+        $pesertaBelumAbsen = collect();
 
         if ($sesiAktif !== null) {
             $sessionData = $this->attendanceReadService
                 ->getSessionAttendance($event->id, $sesiAktif->id, null);
 
-            $attendance          = $sessionData['attendance'];
-            $sudahAbsenCount     = $sessionData['hadir_count'];
-            $izinCount           = $sessionData['izin_count'];
-            $belumAbsenCount     = $sessionData['belum_count'];
-            $totalFiltered       = $sessionData['total'];
+            $attendance = $sessionData['attendance'];
+            $sudahAbsenCount = $sessionData['hadir_count'];
+            $izinCount = $sessionData['izin_count'];
+            $belumAbsenCount = $sessionData['belum_count'];
+            $totalFiltered = $sessionData['total'];
             $persentaseKehadiran = $sessionData['persentase'];
 
             $pesertaBelumAbsen = $attendance
-                ->filter(fn($entry) => $entry->status === 'belum')
-                ->map(fn($entry) => $entry->participation)
+                ->filter(fn ($entry) => $entry->status === 'belum')
+                ->map(fn ($entry) => $entry->participation)
                 ->values();
         }
 
@@ -51,14 +51,14 @@ class CaiDashboardPresenter implements DashboardPresenterContract
             ->get();
 
         return [
-            'totalPeserta'       => $totalFiltered > 0 ? $totalFiltered : $totalPeserta,
-            'sesiAktif'          => $sesiAktif,
-            'sudahAbsenCount'    => $sudahAbsenCount,
-            'izinCount'          => $izinCount,
-            'belumAbsenCount'    => $belumAbsenCount,
+            'totalPeserta' => $totalFiltered > 0 ? $totalFiltered : $totalPeserta,
+            'sesiAktif' => $sesiAktif,
+            'sudahAbsenCount' => $sudahAbsenCount,
+            'izinCount' => $izinCount,
+            'belumAbsenCount' => $belumAbsenCount,
             'persentaseKehadiran' => $persentaseKehadiran,
-            'pesertaBelumAbsen'  => $pesertaBelumAbsen,
-            'daftarSesi'         => $daftarSesi,
+            'pesertaBelumAbsen' => $pesertaBelumAbsen,
+            'daftarSesi' => $daftarSesi,
         ];
     }
 

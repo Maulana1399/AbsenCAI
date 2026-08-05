@@ -5,9 +5,9 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\User;
-use App\Models\peserta;
 use App\Services\Attendance\AttendanceExceptionService;
 use App\Services\Attendance\AttendanceService;
 use App\Services\Attendance\LegacyParticipationResolver;
@@ -16,7 +16,6 @@ use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 

@@ -23,10 +23,10 @@ class SuratIzin extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai'  => 'date',
+        'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
-        'approved_at'    => 'datetime',
-        'returned_at'    => 'datetime',
+        'approved_at' => 'datetime',
+        'returned_at' => 'datetime',
     ];
 
     public function peserta()
@@ -83,5 +83,4 @@ class SuratIzin extends Model
     {
         return $this->isApproved() && $this->returned_at !== null;
     }
-
 }

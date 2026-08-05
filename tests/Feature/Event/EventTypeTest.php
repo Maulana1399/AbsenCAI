@@ -1,8 +1,8 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\Event;
 use App\Models\User;
-use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

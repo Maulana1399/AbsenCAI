@@ -3,15 +3,13 @@
 use App\Livewire\Database\Peserta\HapusPeserta;
 use App\Models\Event;
 use App\Models\EventAttendance;
-use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
-use App\Models\SuratIzin;
-use App\Models\User;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
+use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -26,8 +24,8 @@ function hp_admin(): User
 function hp_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'HP Event ' . $suffix,
-        'slug' => 'hp-' . $suffix . '-' . str()->random(6),
+        'name' => 'HP Event '.$suffix,
+        'slug' => 'hp-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);

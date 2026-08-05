@@ -182,7 +182,7 @@ class EventCommitteeService
         $suffix = 2;
 
         while (User::where('username', $username)->exists()) {
-            $username = $base . $suffix;
+            $username = $base.$suffix;
             $suffix++;
         }
 

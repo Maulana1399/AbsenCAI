@@ -3,8 +3,8 @@
 namespace App\Services\Attendance;
 
 use App\Models\LegacyParticipationMapping;
-use App\Models\SuratIzin;
 use App\Models\peserta;
+use App\Models\SuratIzin;
 
 class SuratIzinBackfillService
 {
@@ -34,6 +34,7 @@ class SuratIzinBackfillService
 
                 if ($surat->peserta_id === null) {
                     $stats['no_peserta']++;
+
                     continue;
                 }
 
@@ -41,6 +42,7 @@ class SuratIzinBackfillService
 
                 if ($peserta === null) {
                     $stats['no_peserta']++;
+
                     continue;
                 }
 
@@ -53,6 +55,7 @@ class SuratIzinBackfillService
 
                 if ($eventId === null) {
                     $stats['no_mapping']++;
+
                     continue;
                 }
 
@@ -60,11 +63,13 @@ class SuratIzinBackfillService
 
                 if ($participation === null) {
                     $stats['no_participation']++;
+
                     continue;
                 }
 
                 if ($participation === false) {
                     $stats['ambiguous']++;
+
                     continue;
                 }
 
@@ -103,6 +108,7 @@ class SuratIzinBackfillService
 
                 if ($surat->peserta_id === null) {
                     $stats['no_peserta']++;
+
                     continue;
                 }
 
@@ -110,6 +116,7 @@ class SuratIzinBackfillService
 
                 if ($peserta === null) {
                     $stats['no_peserta']++;
+
                     continue;
                 }
 
@@ -122,6 +129,7 @@ class SuratIzinBackfillService
 
                 if ($eventId === null) {
                     $stats['no_mapping']++;
+
                     continue;
                 }
 
@@ -129,11 +137,13 @@ class SuratIzinBackfillService
 
                 if ($participation === null) {
                     $stats['no_participation']++;
+
                     continue;
                 }
 
                 if ($participation === false) {
                     $stats['ambiguous']++;
+
                     continue;
                 }
 

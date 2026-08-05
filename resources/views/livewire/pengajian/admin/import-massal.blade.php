@@ -17,6 +17,13 @@
         {{-- Step 1: Upload --}}
         @if ($step === 1)
             <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                @if ($processing)
+                    <div class="mb-4 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-400">
+                        <span class="inline-block size-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></span>
+                        Membaca dan memvalidasi file…
+                    </div>
+                @endif
+
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                     Upload File
                 </h2>
@@ -53,10 +60,21 @@
                         <input
                             type="file"
                             wire:model="file"
+                            x-on:livewire-upload-error="$wire.uploadError()"
                             accept=".csv,.xlsx,.xls,.txt"
                             class="block w-full text-sm text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-950 dark:file:text-emerald-400"
                         />
                     </div>
+
+                    @if ($file)
+                        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                            File terpilih: <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $file->getClientOriginalName() }}</span>
+                        </p>
+                    @endif
+
+                    @if ($uploadError)
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $uploadError }}</p>
+                    @endif
 
                     @error('file')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -64,7 +82,7 @@
                 </div>
 
                 <div class="mt-6 flex gap-2">
-                    <flux:button wire:click="preview" :loading="$processing" :disabled="!$file">
+                    <flux:button wire:click="preview" :loading="$processing" :disabled="$processing || !$file">
                         Preview & Validasi
                     </flux:button>
                 </div>
@@ -74,6 +92,13 @@
         {{-- Step 2: Preview & Validation --}}
         @if ($step === 2)
             <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                @if ($processing)
+                    <div class="mb-4 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-400">
+                        <span class="inline-block size-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></span>
+                        Mengimpor data…
+                    </div>
+                @endif
+
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                     Preview Data
                 </h2>
@@ -93,6 +118,12 @@
                                 </li>
                             @endforeach
                         </ul>
+                    </div>
+                @elseif (empty($previewRows))
+                    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+                        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">
+                            File tidak berisi data yang bisa diimport.
+                        </p>
                     </div>
                 @else
                     <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950">
@@ -133,11 +164,11 @@
 
                 <div class="mt-6 flex gap-2">
                     @if (empty($validationErrors) && !empty($previewRows))
-                        <flux:button wire:click="executeImport" variant="primary" :loading="$processing">
+                        <flux:button wire:click="executeImport" variant="primary" :loading="$processing" :disabled="$processing">
                             Import {{ count($previewRows) }} Data
                         </flux:button>
                     @endif
-                    <flux:button wire:click="resetImport" variant="ghost">
+                    <flux:button wire:click="resetImport" variant="ghost" :disabled="$processing">
                         Upload Ulang
                     </flux:button>
                 </div>

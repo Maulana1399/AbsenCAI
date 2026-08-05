@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class EventAttendance extends Model
 {
     public const STATUS_HADIR = 'hadir';
+
     public const STATUS_IZIN = 'izin';
 
     protected $fillable = [

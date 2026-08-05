@@ -1,11 +1,11 @@
 <?php
 
+use App\Models\desa;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\PengajianAttendanceService;
 use App\Services\Pengajian\PengajianIdentityService;
@@ -39,6 +39,7 @@ function pgm7_grant(Event $event, desa $desa): DesaAccessGrant
         $now->copy()->subHour(),
         $now->copy()->addHour(),
     );
+
     return $result['grant'];
 }
 

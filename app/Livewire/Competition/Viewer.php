@@ -15,8 +15,11 @@ use Livewire\Component;
 class Viewer extends Component
 {
     public Event $event;
+
     public ?string $venueId = null;
+
     public bool $tvMode = false;
+
     public ?CompetitionAnnouncement $announcement = null;
 
     public function mount(Event $event, $venue = null): void

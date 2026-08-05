@@ -35,6 +35,7 @@ class AttendanceParityService
 
             if ($participation === null) {
                 $unmappableHadir++;
+
                 continue;
             }
 
@@ -45,11 +46,13 @@ class AttendanceParityService
 
             if ($canonical === null) {
                 $missingCanonicalHadir++;
+
                 continue;
             }
 
             if ($canonical->status !== EventAttendance::STATUS_HADIR) {
                 $statusConflicts++;
+
                 continue;
             }
 
@@ -61,6 +64,7 @@ class AttendanceParityService
 
             if ($participation === null) {
                 $unmappableIzin++;
+
                 continue;
             }
 
@@ -71,11 +75,13 @@ class AttendanceParityService
 
             if ($canonical === null) {
                 $missingCanonicalIzin++;
+
                 continue;
             }
 
             if ($canonical->status !== EventAttendance::STATUS_IZIN) {
                 $statusConflicts++;
+
                 continue;
             }
 
@@ -90,10 +96,14 @@ class AttendanceParityService
             $orphanIzin = 0;
         } else {
             $orphanHadir = $canonicalHadirCount - $matchedHadir - ($statusConflicts > 0 ? 1 : 0);
-            if ($orphanHadir < 0) $orphanHadir = 0;
+            if ($orphanHadir < 0) {
+                $orphanHadir = 0;
+            }
 
             $orphanIzin = $canonicalIzinCount - $matchedIzin;
-            if ($orphanIzin < 0) $orphanIzin = 0;
+            if ($orphanIzin < 0) {
+                $orphanIzin = 0;
+            }
         }
 
         $legacyHadirCount = $legacyHadirRecords->count();

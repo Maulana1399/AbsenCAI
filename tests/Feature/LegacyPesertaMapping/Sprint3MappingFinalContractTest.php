@@ -1,11 +1,11 @@
 <?php
 
+use App\Models\Event;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
-use App\Models\Event;
-use App\Models\LegacyParticipationMapping;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

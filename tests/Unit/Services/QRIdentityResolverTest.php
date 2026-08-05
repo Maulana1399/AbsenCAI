@@ -15,7 +15,7 @@ function qrIdentityTest_makeEvent(array $overrides = []): Event
 {
     return Event::create(array_merge([
         'name' => 'Test Event',
-        'slug' => 'test-event-' . str()->random(6),
+        'slug' => 'test-event-'.str()->random(6),
         'status' => 'active',
     ], $overrides));
 }
@@ -85,7 +85,7 @@ test('resolve attendance code case insensitively', function () {
 
 test('resolve rejects wrong active event', function () {
     $eventA = qrIdentityTest_makeEvent();
-    $eventB = qrIdentityTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    $eventB = qrIdentityTest_makeEvent(['slug' => 'event-b-'.str()->random(6)]);
     [, , $participationB] = qrIdentityTest_makeMappedLegacyPeserta([
         'nama' => 'QR Person B',
         'nip' => 3003,
@@ -117,7 +117,7 @@ test('missing legacy mapping is rejected', function () {
 
 test('broken mapping is rejected', function () {
     $event = qrIdentityTest_makeEvent();
-    $other = qrIdentityTest_makeEvent(['slug' => 'other-' . str()->random(6)]);
+    $other = qrIdentityTest_makeEvent(['slug' => 'other-'.str()->random(6)]);
     $participant = peserta::create(['nama' => 'Broken', 'nip' => 3006, 'attendance_code' => 'KJA-BROKEN', 'jenis_kelamin' => 'Laki - Laki']);
     $person = Person::create(['nama' => 'Broken', 'nip' => 3006, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $other->id, 'attendance_code' => 'KJA-BROKEN', 'jenis_peserta' => 'Wajib']);
@@ -130,7 +130,7 @@ test('broken mapping is rejected', function () {
 test('same person with participations in two events resolves event specific identity', function () {
     $person = Person::create(['nama' => 'Multi Event Person', 'nip' => 3007, 'jenis_kelamin' => 'L']);
     $eventA = qrIdentityTest_makeEvent();
-    $eventB = qrIdentityTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    $eventB = qrIdentityTest_makeEvent(['slug' => 'event-b-'.str()->random(6)]);
 
     $participationA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'attendance_code' => 'KJA-MULTI-A', 'participant_number' => 'KL001', 'jenis_peserta' => 'Wajib']);
     $participationB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'attendance_code' => 'KJA-MULTI-B', 'participant_number' => 'KL002', 'jenis_peserta' => 'Wajib']);

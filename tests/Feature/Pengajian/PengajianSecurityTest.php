@@ -1,13 +1,12 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\desa;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
-use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\IdentityCorrectionService;
 use App\Services\Pengajian\PengajianAttendanceService;
@@ -54,6 +53,7 @@ function pgm9s_grant(Event $event, desa $desa, ?int $nonceTtlMinutes = 1440): De
         $now->copy()->addHour(),
         nonceTtlMinutes: $nonceTtlMinutes,
     );
+
     return $result['grant'];
 }
 

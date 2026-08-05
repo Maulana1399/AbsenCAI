@@ -2,13 +2,13 @@
 
 namespace App\Livewire\MasterData\Person;
 
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
-use App\Livewire\Traits\HasCascadingKelompok;
+use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
-use Flux\Flux;
 
 class CreatePerson extends Component
 {
@@ -17,9 +17,13 @@ class CreatePerson extends Component
     public bool $processing = false;
 
     public string $nama = '';
+
     public string $jenis_kelamin = '';
+
     public string $tanggal_lahir = '';
+
     public ?string $desa_id = null;
+
     public ?string $kelompok_id = null;
 
     public function render()

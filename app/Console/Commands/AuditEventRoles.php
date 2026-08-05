@@ -21,7 +21,7 @@ class AuditEventRoles extends Command
         $unknownCode = [];
 
         foreach ($roles as $role) {
-            $context = ($role->event->name ?? "#{$role->event_id}") . " / #{$role->id} {$role->name}";
+            $context = ($role->event->name ?? "#{$role->event_id}")." / #{$role->id} {$role->name}";
 
             if (blank($role->code)) {
                 $suggested = EventRolePermissionDefaults::suggestCodeFromName($role->name);
@@ -51,19 +51,19 @@ class AuditEventRoles extends Command
 
         if (count($withoutCode) > 0) {
             $this->newLine();
-            $this->warn('ROLE TANPA CODE (' . count($withoutCode) . '):');
+            $this->warn('ROLE TANPA CODE ('.count($withoutCode).'):');
             $this->table(['Event / Role', 'Nama', 'Code saran (dari nama)'], $withoutCode);
         }
 
         if (count($unknownCode) > 0) {
             $this->newLine();
-            $this->warn('CODE TIDAK DIKENAL (' . count($unknownCode) . '):');
+            $this->warn('CODE TIDAK DIKENAL ('.count($unknownCode).'):');
             $this->table(['Event / Role', 'Nama', 'Code'], $unknownCode);
         }
 
         if (count($withoutPermission) > 0) {
             $this->newLine();
-            $this->warn('ROLE TANPA PERMISSION (' . count($withoutPermission) . '):');
+            $this->warn('ROLE TANPA PERMISSION ('.count($withoutPermission).'):');
             $this->table(['Event / Role', 'Nama', 'Code'], $withoutPermission);
         }
 

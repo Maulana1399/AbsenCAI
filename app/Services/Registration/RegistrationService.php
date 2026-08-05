@@ -60,14 +60,14 @@ class RegistrationService
                     $reguId = $data['regu_id'] ?? null;
 
                     $participation = Participation::create([
-                    'person_id' => $person->id,
-                    'event_id' => $event->id,
-                    'participant_number' => $participantNumber,
-                    'attendance_code' => $attendanceCode,
-                    'jenis_peserta' => $data['jenis_peserta'],
-                    'status_registrasi' => $data['status_registrasi'] ?? null,
-                    'regu_id' => $reguId,
-                ]);
+                        'person_id' => $person->id,
+                        'event_id' => $event->id,
+                        'participant_number' => $participantNumber,
+                        'attendance_code' => $attendanceCode,
+                        'jenis_peserta' => $data['jenis_peserta'],
+                        'status_registrasi' => $data['status_registrasi'] ?? null,
+                        'regu_id' => $reguId,
+                    ]);
 
                     if (! $legacyPeserta) {
                         $legacyPeserta = peserta::create([
@@ -268,7 +268,7 @@ class RegistrationService
         $next = ((int) (peserta::max('participant_number') ?? 0)) + 1;
 
         do {
-            $candidate = 'KL' . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+            $candidate = 'KL'.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
             $next++;
         } while (peserta::where('participant_number', $candidate)->exists());
 

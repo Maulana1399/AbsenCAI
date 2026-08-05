@@ -10,19 +10,23 @@ use App\Services\Activity\EventCommitteeService;
 use App\Support\EventOwnership;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class CommitteeManagement extends Component
 {
     public bool $processing = false;
 
     public ?int $eventId = null;
+
     public ?string $eventName = null;
 
     public ?int $newPersonId = null;
+
     public string $newEventRoleId = '';
+
     public string $searchPerson = '';
+
     public string $selectedPersonNama = '';
 
     #[On('manageCommittee')]
@@ -55,7 +59,9 @@ class CommitteeManagement extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {
@@ -69,6 +75,7 @@ class CommitteeManagement extends Component
 
             if (! EventOwnership::belongsToEvent($role, $event)) {
                 $this->addError('newEventRoleId', 'Role harus berasal dari event yang sama.');
+
                 return;
             }
 
@@ -106,6 +113,7 @@ class CommitteeManagement extends Component
 
         if ($assignment === null) {
             session()->flash('error', 'Penugasan tidak ditemukan.');
+
             return;
         }
 
@@ -113,9 +121,7 @@ class CommitteeManagement extends Component
     }
 
     #[On('refreshCommittee')]
-    public function refresh(): void
-    {
-    }
+    public function refresh(): void {}
 
     private function resetForm(): void
     {
@@ -138,7 +144,7 @@ class CommitteeManagement extends Component
 
         $personResults = [];
         if (strlen($this->searchPerson) >= 2) {
-            $personResults = Person::where('nama', 'like', '%' . $this->searchPerson . '%')
+            $personResults = Person::where('nama', 'like', '%'.$this->searchPerson.'%')
                 ->limit(10)
                 ->get();
         }

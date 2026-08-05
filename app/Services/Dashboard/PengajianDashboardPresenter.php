@@ -14,15 +14,15 @@ class PengajianDashboardPresenter implements DashboardPresenterContract
     public function present(Event $event): array
     {
         try {
-            $summary      = $this->reportService->summary($event);
+            $summary = $this->reportService->summary($event);
             $desaBreakdown = $this->reportService->desaBreakdown($event);
         } catch (\Throwable) {
-            $summary      = [];
+            $summary = [];
             $desaBreakdown = [];
         }
 
         return [
-            'summary'       => $summary,
+            'summary' => $summary,
             'desaBreakdown' => $desaBreakdown,
         ];
     }

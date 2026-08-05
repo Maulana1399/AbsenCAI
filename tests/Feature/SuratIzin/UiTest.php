@@ -1,14 +1,14 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\SuratIzin\Create;
 use App\Livewire\SuratIzin\Index;
 use App\Models\IzinAbsensi;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
-use App\Enums\Role;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -16,10 +16,10 @@ beforeEach(function () {
     $this->actingAs($this->user);
 
     $this->peserta = peserta::create([
-        'nama'            => 'Peserta Test',
-        'nip'             => 9001,
+        'nama' => 'Peserta Test',
+        'nip' => 9001,
         'attendance_code' => 'KJA-TEST-UI',
-        'jenis_kelamin'   => 'Laki - Laki',
+        'jenis_kelamin' => 'Laki - Laki',
     ]);
 
     $this->event = \App\Models\Event::create([
@@ -90,8 +90,8 @@ test('create saves surat as draft', function () {
 
     $this->assertDatabaseHas('surat_izins', [
         'peserta_id' => $this->peserta->id,
-        'status'     => 'draft',
-        'alasan'     => 'Keperluan keluarga mendesak',
+        'status' => 'draft',
+        'alasan' => 'Keperluan keluarga mendesak',
     ]);
 });
 
@@ -109,8 +109,8 @@ test('create saves and submits surat', function () {
 
     $this->assertDatabaseHas('surat_izins', [
         'peserta_id' => $this->peserta->id,
-        'status'     => 'pending',
-        'alasan'     => 'Keperluan keluarga mendesak',
+        'status' => 'pending',
+        'alasan' => 'Keperluan keluarga mendesak',
     ]);
 });
 
@@ -127,8 +127,8 @@ test('create defaults to jenis_izin pulang', function () {
         ->call('saveDraft');
 
     $this->assertDatabaseHas('surat_izins', [
-        'peserta_id'  => $this->peserta->id,
-        'jenis_izin'  => 'pulang',
+        'peserta_id' => $this->peserta->id,
+        'jenis_izin' => 'pulang',
     ]);
 });
 
@@ -142,8 +142,8 @@ test('create saves pulang jenis_izin', function () {
         ->call('saveDraft');
 
     $this->assertDatabaseHas('surat_izins', [
-        'peserta_id'  => $this->peserta->id,
-        'jenis_izin'  => 'pulang',
+        'peserta_id' => $this->peserta->id,
+        'jenis_izin' => 'pulang',
     ]);
 });
 
@@ -157,8 +157,8 @@ test('create saves keluar jenis_izin', function () {
         ->call('saveDraft');
 
     $this->assertDatabaseHas('surat_izins', [
-        'peserta_id'  => $this->peserta->id,
-        'jenis_izin'  => 'keluar',
+        'peserta_id' => $this->peserta->id,
+        'jenis_izin' => 'keluar',
     ]);
 });
 
@@ -179,16 +179,16 @@ test('create validates jenis_izin must be pulang or keluar', function () {
 
 test('approve action creates izin absensi for sessions in range', function () {
     $sesi = SesiAbsensi::create([
-        'event_id'  => $this->event->id,
+        'event_id' => $this->event->id,
         'nama_sesi' => 'Sesi Pagi',
-        'tanggal'   => '2026-07-20',
-        'aktif'     => true,
+        'tanggal' => '2026-07-20',
+        'aktif' => true,
     ]);
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ], $this->user->id);
 
@@ -198,7 +198,7 @@ test('approve action creates izin absensi for sessions in range', function () {
         ->call('confirmApprove', $surat->id);
 
     $this->assertDatabaseHas('surat_izins', [
-        'id'     => $surat->id,
+        'id' => $surat->id,
         'status' => 'pending',
     ]);
 
@@ -207,14 +207,14 @@ test('approve action creates izin absensi for sessions in range', function () {
         ->call('approve');
 
     $this->assertDatabaseHas('surat_izins', [
-        'id'     => $surat->id,
+        'id' => $surat->id,
         'status' => 'approved',
     ]);
 
     $this->assertDatabaseHas('izin_absensis', [
-        'peserta_id'    => $this->peserta->id,
-        'sesi_id'       => $sesi->id,
-        'source'        => 'surat_izin',
+        'peserta_id' => $this->peserta->id,
+        'sesi_id' => $sesi->id,
+        'source' => 'surat_izin',
         'surat_izin_id' => $surat->id,
     ]);
 });
@@ -225,9 +225,9 @@ test('approve action creates izin absensi for sessions in range', function () {
 
 test('reject action sets status to rejected', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ], $this->user->id);
 
@@ -237,7 +237,7 @@ test('reject action sets status to rejected', function () {
         ->call('reject', $surat->id);
 
     $this->assertDatabaseHas('surat_izins', [
-        'id'     => $surat->id,
+        'id' => $surat->id,
         'status' => 'rejected',
     ]);
 
@@ -250,9 +250,9 @@ test('reject action sets status to rejected', function () {
 
 test('markReturned sets returned_at on approved surat', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
@@ -274,9 +274,9 @@ test('markReturned removes izin for sessions on and after return date', function
     SesiAbsensi::create(['event_id' => $this->event->id, 'nama_sesi' => 'Sesi 21', 'tanggal' => '2026-07-21', 'aktif' => true]);
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
@@ -295,9 +295,9 @@ test('markReturned removes izin for sessions on and after return date', function
 
 test('markReturned validates return date required', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
@@ -317,9 +317,9 @@ test('markReturned validates return date required', function () {
 
 test('index displays surat list', function () {
     app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
@@ -333,9 +333,9 @@ test('index displays surat list', function () {
 
 test('print route requires authentication', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -349,9 +349,9 @@ test('print route requires authentication', function () {
 
 test('print route returns 200 for approved surat', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -363,9 +363,9 @@ test('print route returns 200 for approved surat', function () {
 
 test('print route returns 403 for non-approved surat', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Draft',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Draft',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
@@ -379,10 +379,10 @@ test('print route returns 403 for non-approved surat', function () {
 
 test('print output contains surat and participant data', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit demam',
-        'jenis_izin'      => 'keluar',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit demam',
+        'jenis_izin' => 'keluar',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -401,9 +401,9 @@ test('print output contains surat and participant data', function () {
 
 test('print does not mutate surat state', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -421,9 +421,9 @@ test('print does not mutate surat state', function () {
 
 test('missing logo does not break print', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);

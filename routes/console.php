@@ -23,6 +23,7 @@ Artisan::command('kja:identity-backfill', function () {
 
                 if (! $needsAttendanceCode) {
                     $skipped++;
+
                     continue;
                 }
 

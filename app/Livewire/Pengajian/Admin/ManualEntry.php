@@ -17,21 +17,29 @@ class ManualEntry extends Component
     public bool $processing = false;
 
     public string $desaId = '';
+
     public string $nama = '';
+
     public string $jenisKelamin = '';
+
     public string $tanggalLahir = '';
+
     public string $kelompokId = '';
 
     public int $step = 1;
 
     public string $errorMessage = '';
+
     public string $successMessage = '';
 
     public array $potentialMatches = [];
 
     public ?string $resultPersonName = null;
+
     public ?string $resultParticipantNumber = null;
+
     public ?int $resultPersonId = null;
+
     public ?int $resultParticipationId = null;
 
     public function rules(): array
@@ -77,6 +85,7 @@ class ManualEntry extends Component
             if ($event === null) {
                 $this->errorMessage = 'Tidak ada event aktif. Silakan pilih event terlebih dahulu.';
                 $this->processing = false;
+
                 return;
             }
 
@@ -122,6 +131,7 @@ class ManualEntry extends Component
             if ($event === null) {
                 $this->errorMessage = 'Tidak ada event aktif.';
                 $this->processing = false;
+
                 return;
             }
 
@@ -165,6 +175,7 @@ class ManualEntry extends Component
             if ($event === null) {
                 $this->errorMessage = 'Tidak ada event aktif.';
                 $this->processing = false;
+
                 return;
             }
 

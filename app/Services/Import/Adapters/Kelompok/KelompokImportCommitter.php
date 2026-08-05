@@ -17,6 +17,6 @@ final class KelompokImportCommitter implements ImportCommitter
             Excel::import(new KelompokImport, $context->options['file']);
         }
 
-        return new ImportCommit($context, new ImportSummary());
+        return new ImportCommit($context, new ImportSummary);
     }
 }

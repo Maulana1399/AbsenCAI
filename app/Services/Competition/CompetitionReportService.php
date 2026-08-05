@@ -51,18 +51,18 @@ class CompetitionReportService
             'competitionClass',
         ])->whereIn('competition_class_id', $classIds);
 
-        if (!empty($filters['category_id'])) {
+        if (! empty($filters['category_id'])) {
             $query->where('competition_category_id', $filters['category_id']);
         }
-        if (!empty($filters['class_id'])) {
+        if (! empty($filters['class_id'])) {
             $query->where('competition_class_id', $filters['class_id']);
         }
-        if (!empty($filters['gender'])) {
+        if (! empty($filters['gender'])) {
             $query->whereHas('participation.person', function ($q) use ($filters) {
                 $q->where('jenis_kelamin', $filters['gender']);
             });
         }
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->whereHas('participation.person', function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%");
@@ -81,12 +81,12 @@ class CompetitionReportService
             'venue',
             'scheduleEntries',
         ])->withCount('scheduleEntries as participants_count')
-        ->whereIn('competition_class_id', $classIds);
+            ->whereIn('competition_class_id', $classIds);
 
-        if (!empty($filters['venue_id'])) {
+        if (! empty($filters['venue_id'])) {
             $query->where('venue_id', $filters['venue_id']);
         }
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
@@ -103,10 +103,10 @@ class CompetitionReportService
             'competitionRegistration.competitionClass',
         ])->whereHas('competitionRegistration', function ($q) use ($classIds, $filters) {
             $q->whereIn('competition_class_id', $classIds);
-            if (!empty($filters['category_id'])) {
+            if (! empty($filters['category_id'])) {
                 $q->where('competition_category_id', $filters['category_id']);
             }
-            if (!empty($filters['class_id'])) {
+            if (! empty($filters['class_id'])) {
                 $q->where('competition_class_id', $filters['class_id']);
             }
         });

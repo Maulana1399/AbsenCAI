@@ -12,6 +12,7 @@ use Livewire\Component;
 class OutcomeManager extends Component
 {
     public CompetitionSchedule $schedule;
+
     public array $outcomes = [];
 
     public function mount(CompetitionSchedule $schedule): void
@@ -35,9 +36,10 @@ class OutcomeManager extends Component
 
         $this->outcomes = $entries->map(function ($entry) {
             $reg = $entry->competitionRegistration;
-            if (!$reg) {
+            if (! $reg) {
                 return null;
             }
+
             return [
                 'registration_id' => $reg->id,
                 'person_name' => $reg->participation?->person?->nama ?? '-',

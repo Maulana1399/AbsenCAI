@@ -22,22 +22,19 @@ class PesertaImport implements ToModel, WithHeadingRow
             return null;
         }
 
-
         $kelompok = kelompok::whereRaw(
             'LOWER(TRIM(kelompok_asal)) = ?',
             [
-                strtolower(trim($row['kelompok'] ?? ''))
+                strtolower(trim($row['kelompok'] ?? '')),
             ]
         )->first();
-
 
         $desa = desa::whereRaw(
             'LOWER(TRIM(desa_asal)) = ?',
             [
-                strtolower(trim($row['desa'] ?? ''))
+                strtolower(trim($row['desa'] ?? '')),
             ]
         )->first();
-
 
         $jenisKelamin = $row['jenis_kelamin'] ?? null;
         $eventId = app(ActiveEventContext::class)->id();

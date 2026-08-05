@@ -8,27 +8,37 @@ use App\Services\Activity\EventCommitteeService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EventRoleManager extends Component
 {
     public bool $processing = false;
 
     public ?int $eventId = null;
+
     public ?string $eventName = null;
 
     public string $newName = '';
+
     public string $newTemplate = '';
+
     public ?string $newCode = null;
+
     public ?string $newDescription = null;
+
     public bool $newIsActive = true;
+
     public ?int $newSortOrder = null;
 
     public ?int $editRoleId = null;
+
     public string $editName = '';
+
     public ?string $editCode = null;
+
     public ?string $editDescription = null;
+
     public ?array $editPermissions = null;
 
     /**
@@ -65,7 +75,9 @@ class EventRoleManager extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {
@@ -137,10 +149,12 @@ class EventRoleManager extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->editRoleId === null) return;
+        if ($this->editRoleId === null) {
+            return;
+        }
 
         $this->validate([
-            'editName' => 'required|string|max:255|unique:event_roles,name,' . $this->editRoleId . ',id,event_id,' . $this->eventId,
+            'editName' => 'required|string|max:255|unique:event_roles,name,'.$this->editRoleId.',id,event_id,'.$this->eventId,
             'editDescription' => 'nullable|string',
         ]);
 
@@ -170,6 +184,7 @@ class EventRoleManager extends Component
 
         if ($role === null) {
             session()->flash('error', 'Role tidak ditemukan.');
+
             return;
         }
 
@@ -177,6 +192,7 @@ class EventRoleManager extends Component
 
         if ($assignmentCount > 0) {
             session()->flash('error', "Role masih digunakan oleh {$assignmentCount} panitia.");
+
             return;
         }
 
@@ -185,9 +201,7 @@ class EventRoleManager extends Component
     }
 
     #[On('refreshEventRoles')]
-    public function refresh(): void
-    {
-    }
+    public function refresh(): void {}
 
     private function resetForm(): void
     {

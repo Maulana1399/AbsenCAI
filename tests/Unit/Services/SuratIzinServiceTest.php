@@ -2,10 +2,10 @@
 
 use App\Models\Absensi;
 use App\Models\IzinAbsensi;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Models\peserta;
 use App\Services\Attendance\AttendanceExceptionService;
 use App\Services\Attendance\SuratIzinService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,18 +16,18 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 function makePeserta(int $id, string $code): peserta
 {
     return peserta::create([
-        'nama'            => 'Peserta ' . $id,
+        'nama' => 'Peserta '.$id,
         'attendance_code' => $code,
-        'jenis_kelamin'   => 'Laki - Laki',
+        'jenis_kelamin' => 'Laki - Laki',
     ]);
 }
 
 function makeSesi(string $tanggal, string $nama = 'Sesi'): SesiAbsensi
 {
     return SesiAbsensi::create([
-        'nama_sesi' => $nama . ' ' . $tanggal,
-        'tanggal'   => $tanggal,
-        'aktif'     => true,
+        'nama_sesi' => $nama.' '.$tanggal,
+        'tanggal' => $tanggal,
+        'aktif' => true,
     ]);
 }
 
@@ -39,10 +39,10 @@ function makeUser(): User
 function makeSurat(peserta $peserta, User $creator, array $overrides = []): SuratIzin
 {
     return app(SuratIzinService::class)->create(array_merge([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'jenis_izin'      => 'pulang',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'jenis_izin' => 'pulang',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $overrides), $creator->id);
 }
@@ -53,7 +53,7 @@ function makeSurat(peserta $peserta, User $creator, array $overrides = []): Sura
 
 test('create produces a draft surat izin linked to peserta and creator', function () {
     $peserta = makePeserta(6001, 'KJA-SI001');
-    $user    = makeUser();
+    $user = makeUser();
 
     $surat = makeSurat($peserta, $user);
 
@@ -67,7 +67,7 @@ test('create produces a draft surat izin linked to peserta and creator', functio
 
 test('create accepts jenis_izin pulang', function () {
     $peserta = makePeserta(6001, 'KJA-SI001');
-    $user    = makeUser();
+    $user = makeUser();
 
     $surat = makeSurat($peserta, $user, ['jenis_izin' => 'pulang']);
 
@@ -76,7 +76,7 @@ test('create accepts jenis_izin pulang', function () {
 
 test('create accepts jenis_izin keluar', function () {
     $peserta = makePeserta(6001, 'KJA-SI001');
-    $user    = makeUser();
+    $user = makeUser();
 
     $surat = makeSurat($peserta, $user, ['jenis_izin' => 'keluar']);
 
@@ -85,8 +85,8 @@ test('create accepts jenis_izin keluar', function () {
 
 test('submit transitions draft to pending', function () {
     $peserta = makePeserta(6002, 'KJA-SI002');
-    $user    = makeUser();
-    $surat   = makeSurat($peserta, $user);
+    $user = makeUser();
+    $surat = makeSurat($peserta, $user);
 
     $result = app(SuratIzinService::class)->submit($surat);
 
@@ -95,8 +95,8 @@ test('submit transitions draft to pending', function () {
 
 test('submit rejects non-draft surat', function () {
     $peserta = makePeserta(6003, 'KJA-SI003');
-    $user    = makeUser();
-    $surat   = makeSurat($peserta, $user);
+    $user = makeUser();
+    $surat = makeSurat($peserta, $user);
     $surat->update(['status' => 'pending']);
 
     expect(fn () => app(SuratIzinService::class)->submit($surat->fresh()))
@@ -108,8 +108,8 @@ test('submit rejects non-draft surat', function () {
 // ---------------------------------------------------------------------------
 
 test('approve creates IzinAbsensi for sessions within date range', function () {
-    $peserta  = makePeserta(6010, 'KJA-SI010');
-    $user     = makeUser();
+    $peserta = makePeserta(6010, 'KJA-SI010');
+    $user = makeUser();
     $approver = makeUser();
 
     makeSesi('2026-07-20', 'Pagi');
@@ -117,7 +117,7 @@ test('approve creates IzinAbsensi for sessions within date range', function () {
     makeSesi('2026-07-22', 'Sore');
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ]);
     $surat->update(['status' => 'pending']);
@@ -133,14 +133,14 @@ test('approve creates IzinAbsensi for sessions within date range', function () {
 });
 
 test('approved IzinAbsensi has source=surat_izin and correct surat_izin_id', function () {
-    $peserta  = makePeserta(6011, 'KJA-SI011');
-    $user     = makeUser();
+    $peserta = makePeserta(6011, 'KJA-SI011');
+    $user = makeUser();
     $approver = makeUser();
 
     makeSesi('2026-07-20', 'Pagi');
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ]);
     $surat->update(['status' => 'pending']);
@@ -154,20 +154,20 @@ test('approved IzinAbsensi has source=surat_izin and correct surat_izin_id', fun
 });
 
 test('approve sets nomor_surat, approved_by and approved_at', function () {
-    $peserta  = makePeserta(6012, 'KJA-SI012');
-    $user     = makeUser();
+    $peserta = makePeserta(6012, 'KJA-SI012');
+    $user = makeUser();
     $approver = makeUser();
 
     makeSesi('2026-07-20', 'Pagi');
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ]);
     $surat->update(['status' => 'pending']);
 
     $result = app(SuratIzinService::class)->approve($surat->fresh(), $approver);
-    $fresh  = $result['surat'];
+    $fresh = $result['surat'];
 
     expect($fresh->status)->toBe('approved')
         ->and($fresh->nomor_surat)->not->toBeNull()
@@ -176,14 +176,14 @@ test('approve sets nomor_surat, approved_by and approved_at', function () {
 });
 
 test('approve skips and reports session where peserta already hadir', function () {
-    $peserta  = makePeserta(6013, 'KJA-SI013');
-    $person   = \App\Models\Person::create(['nama' => 'Peserta 6013', 'jenis_kelamin' => 'L']);
-    $event    = \App\Models\Event::create(['name' => 'SI Event', 'slug' => 'si-event', 'status' => 'active']);
+    $peserta = makePeserta(6013, 'KJA-SI013');
+    $person = \App\Models\Person::create(['nama' => 'Peserta 6013', 'jenis_kelamin' => 'L']);
+    $event = \App\Models\Event::create(['name' => 'SI Event', 'slug' => 'si-event', 'status' => 'active']);
     $participation = \App\Models\Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
     \App\Models\LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
     \App\Models\LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
-    $user     = makeUser();
+    $user = makeUser();
     $approver = makeUser();
 
     $sesi = makeSesi('2026-07-20', 'Pagi');
@@ -192,15 +192,15 @@ test('approve skips and reports session where peserta already hadir', function (
 
     \App\Models\EventAttendance::create([
         'participation_id' => $participation->id,
-        'sesi_absensi_id'  => $sesi->id,
-        'event_id'         => $event->id,
-        'status'           => \App\Models\EventAttendance::STATUS_HADIR,
-        'attended_at'      => now(),
-        'method'           => 'scan',
+        'sesi_absensi_id' => $sesi->id,
+        'event_id' => $event->id,
+        'status' => \App\Models\EventAttendance::STATUS_HADIR,
+        'attended_at' => now(),
+        'method' => 'scan',
     ]);
 
     expect(fn () => makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ]))->toThrow(
         \Illuminate\Validation\ValidationException::class,
@@ -209,8 +209,8 @@ test('approve skips and reports session where peserta already hadir', function (
 });
 
 test('approve skips and reports session where peserta already izin', function () {
-    $peserta  = makePeserta(6014, 'KJA-SI014');
-    $user     = makeUser();
+    $peserta = makePeserta(6014, 'KJA-SI014');
+    $user = makeUser();
     $approver = makeUser();
 
     $sesi = makeSesi('2026-07-20', 'Pagi');
@@ -222,7 +222,7 @@ test('approve skips and reports session where peserta already izin', function ()
     );
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ]);
     $surat->update(['status' => 'pending']);
@@ -236,12 +236,12 @@ test('approve skips and reports session where peserta already izin', function ()
 });
 
 test('approve returns zero created when no sessions exist in range', function () {
-    $peserta  = makePeserta(6015, 'KJA-SI015');
-    $user     = makeUser();
+    $peserta = makePeserta(6015, 'KJA-SI015');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ]);
     $surat->update(['status' => 'pending']);
@@ -254,8 +254,8 @@ test('approve returns zero created when no sessions exist in range', function ()
 });
 
 test('double approve throws ValidationException', function () {
-    $peserta  = makePeserta(6016, 'KJA-SI016');
-    $user     = makeUser();
+    $peserta = makePeserta(6016, 'KJA-SI016');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = makeSurat($peserta, $user);
@@ -273,12 +273,12 @@ test('double approve throws ValidationException', function () {
 
 test('reject transitions pending surat to rejected without creating IzinAbsensi', function () {
     $peserta = makePeserta(6020, 'KJA-SI020');
-    $user    = makeUser();
+    $user = makeUser();
 
     makeSesi('2026-07-20', 'Pagi');
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ]);
     $surat->update(['status' => 'pending']);
@@ -291,7 +291,7 @@ test('reject transitions pending surat to rejected without creating IzinAbsensi'
 
 test('reject throws when surat is not pending', function () {
     $peserta = makePeserta(6021, 'KJA-SI021');
-    $user    = makeUser();
+    $user = makeUser();
 
     $surat = makeSurat($peserta, $user);
 
@@ -304,8 +304,8 @@ test('reject throws when surat is not pending', function () {
 // ---------------------------------------------------------------------------
 
 test('markReturned sets returned_at on approved surat with given date', function () {
-    $peserta  = makePeserta(6030, 'KJA-SI030');
-    $user     = makeUser();
+    $peserta = makePeserta(6030, 'KJA-SI030');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = makeSurat($peserta, $user);
@@ -322,16 +322,16 @@ test('markReturned sets returned_at on approved surat with given date', function
 
 test('markReturned throws when surat is not approved', function () {
     $peserta = makePeserta(6031, 'KJA-SI031');
-    $user    = makeUser();
-    $surat   = makeSurat($peserta, $user);
+    $user = makeUser();
+    $surat = makeSurat($peserta, $user);
 
     expect(fn () => app(SuratIzinService::class)->markReturned($surat, '2026-07-20'))
         ->toThrow(ValidationException::class);
 });
 
 test('markReturned throws if already marked returned', function () {
-    $peserta  = makePeserta(6032, 'KJA-SI032');
-    $user     = makeUser();
+    $peserta = makePeserta(6032, 'KJA-SI032');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = makeSurat($peserta, $user);
@@ -345,12 +345,12 @@ test('markReturned throws if already marked returned', function () {
 });
 
 test('markReturned validates return date is within surat range', function () {
-    $peserta  = makePeserta(6033, 'KJA-SI033');
-    $user     = makeUser();
+    $peserta = makePeserta(6033, 'KJA-SI033');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = makeSurat($peserta, $user, [
-        'tanggal_mulai'   => '2026-07-20',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ]);
     $surat->update(['status' => 'pending']);
@@ -365,8 +365,8 @@ test('markReturned validates return date is within surat range', function () {
 });
 
 test('markReturned removes surat-generated izin for sessions on and after return date', function () {
-    $peserta  = makePeserta(6034, 'KJA-SI034');
-    $user     = makeUser();
+    $peserta = makePeserta(6034, 'KJA-SI034');
+    $user = makeUser();
     $approver = makeUser();
 
     $sesi17 = makeSesi('2026-07-17', 'Pagi');
@@ -375,9 +375,9 @@ test('markReturned removes surat-generated izin for sessions on and after return
     $sesi20 = makeSesi('2026-07-20', 'Malam');
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -397,8 +397,8 @@ test('markReturned removes surat-generated izin for sessions on and after return
 });
 
 test('markReturned preserves historical surat-generated izin before return date', function () {
-    $peserta  = makePeserta(6035, 'KJA-SI035');
-    $user     = makeUser();
+    $peserta = makePeserta(6035, 'KJA-SI035');
+    $user = makeUser();
     $approver = makeUser();
 
     makeSesi('2026-07-17', 'Pagi');
@@ -406,9 +406,9 @@ test('markReturned preserves historical surat-generated izin before return date'
     makeSesi('2026-07-19', 'Sore');
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-19',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -422,8 +422,8 @@ test('markReturned preserves historical surat-generated izin before return date'
 });
 
 test('markReturned never deletes manual izin', function () {
-    $peserta  = makePeserta(6036, 'KJA-SI036');
-    $user     = makeUser();
+    $peserta = makePeserta(6036, 'KJA-SI036');
+    $user = makeUser();
     $approver = makeUser();
 
     $sesi19 = makeSesi('2026-07-19', 'Sore');
@@ -436,9 +436,9 @@ test('markReturned never deletes manual izin', function () {
     );
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-19',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-19',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -462,25 +462,25 @@ test('markReturned never deletes manual izin', function () {
 test('markReturned never deletes izin from another surat', function () {
     $pesertaA = makePeserta(6037, 'KJA-SI037');
     $pesertaB = makePeserta(6038, 'KJA-SI038');
-    $user     = makeUser();
+    $user = makeUser();
     $approver = makeUser();
 
     makeSesi('2026-07-19', 'Sore');
     makeSesi('2026-07-20', 'Malam');
 
     $suratA = app(SuratIzinService::class)->create([
-        'peserta_id'      => $pesertaA->id,
-        'alasan'          => 'Izin A',
-        'tanggal_mulai'   => '2026-07-19',
+        'peserta_id' => $pesertaA->id,
+        'alasan' => 'Izin A',
+        'tanggal_mulai' => '2026-07-19',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $suratA->update(['status' => 'pending']);
     app(SuratIzinService::class)->approve($suratA->fresh(), $approver);
 
     $suratB = app(SuratIzinService::class)->create([
-        'peserta_id'      => $pesertaB->id,
-        'alasan'          => 'Izin B',
-        'tanggal_mulai'   => '2026-07-19',
+        'peserta_id' => $pesertaB->id,
+        'alasan' => 'Izin B',
+        'tanggal_mulai' => '2026-07-19',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $suratB->update(['status' => 'pending']);
@@ -500,23 +500,23 @@ test('markReturned never deletes izin from another surat', function () {
 });
 
 test('markReturned never affects Hadir records', function () {
-    $peserta  = makePeserta(6038, 'KJA-SI038');
-    $user     = makeUser();
+    $peserta = makePeserta(6038, 'KJA-SI038');
+    $user = makeUser();
     $approver = makeUser();
 
     $sesi = makeSesi('2026-07-20', 'Pagi');
 
     Absensi::create([
-        'nip'      => random_int(10000, 99999),
-        'nama'     => $peserta->nama,
+        'nip' => random_int(10000, 99999),
+        'nama' => $peserta->nama,
         'jam_scan' => '2026-07-20 08:00:00',
-        'sesi_id'  => $sesi->id,
+        'sesi_id' => $sesi->id,
     ]);
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -536,14 +536,14 @@ test('markReturned never affects Hadir records', function () {
 // ---------------------------------------------------------------------------
 
 test('syncNewSession creates izin for new session inside active approved surat range', function () {
-    $peserta  = makePeserta(6040, 'KJA-SI040');
-    $user     = makeUser();
+    $peserta = makePeserta(6040, 'KJA-SI040');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -560,14 +560,14 @@ test('syncNewSession creates izin for new session inside active approved surat r
 });
 
 test('syncNewSession does not create izin for session outside surat range', function () {
-    $peserta  = makePeserta(6041, 'KJA-SI041');
-    $user     = makeUser();
+    $peserta = makePeserta(6041, 'KJA-SI041');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -581,14 +581,14 @@ test('syncNewSession does not create izin for session outside surat range', func
 });
 
 test('syncNewSession does not create izin for session on or after returned date', function () {
-    $peserta  = makePeserta(6042, 'KJA-SI042');
-    $user     = makeUser();
+    $peserta = makePeserta(6042, 'KJA-SI042');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -607,23 +607,23 @@ test('syncNewSession does not create izin for session on or after returned date'
 });
 
 test('syncNewSession does not create izin when participant already hadir', function () {
-    $peserta  = makePeserta(6043, 'KJA-SI043');
-    $person   = \App\Models\Person::create(['nama' => 'Peserta 6043', 'jenis_kelamin' => 'L']);
-    $event    = \App\Models\Event::create(['name' => 'SI Event Sync', 'slug' => 'si-event-sync', 'status' => 'active']);
+    $peserta = makePeserta(6043, 'KJA-SI043');
+    $person = \App\Models\Person::create(['nama' => 'Peserta 6043', 'jenis_kelamin' => 'L']);
+    $event = \App\Models\Event::create(['name' => 'SI Event Sync', 'slug' => 'si-event-sync', 'status' => 'active']);
     $participation = \App\Models\Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
     \App\Models\LegacyPesertaMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id]);
     \App\Models\LegacyParticipationMapping::create(['peserta_id' => $peserta->id, 'person_id' => $person->id, 'participation_id' => $participation->id, 'event_id' => $event->id, 'migrated_at' => now()]);
 
-    $user     = makeUser();
+    $user = makeUser();
     $approver = makeUser();
     $sesiBaru = makeSesi('2026-07-18', 'Baru');
     $sesiBaru->update(['event_id' => $event->id]);
     app(\App\Support\ActiveEventContext::class)->set($event);
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -640,14 +640,14 @@ test('syncNewSession does not create izin when participant already hadir', funct
 });
 
 test('syncNewSession does not create izin when participant already has izin for that session', function () {
-    $peserta  = makePeserta(6044, 'KJA-SI044');
-    $user     = makeUser();
+    $peserta = makePeserta(6044, 'KJA-SI044');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -669,13 +669,13 @@ test('syncNewSession does not create izin when participant already has izin for 
 });
 
 test('syncNewSession does nothing when surat is not approved', function () {
-    $peserta  = makePeserta(6045, 'KJA-SI045');
-    $user     = makeUser();
+    $peserta = makePeserta(6045, 'KJA-SI045');
+    $user = makeUser();
 
     app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
 
@@ -687,14 +687,14 @@ test('syncNewSession does nothing when surat is not approved', function () {
 });
 
 test('syncNewSession does nothing when surat is returned', function () {
-    $peserta  = makePeserta(6046, 'KJA-SI046');
-    $user     = makeUser();
+    $peserta = makePeserta(6046, 'KJA-SI046');
+    $user = makeUser();
     $approver = makeUser();
 
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'tanggal_mulai'   => '2026-07-17',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'tanggal_mulai' => '2026-07-17',
         'tanggal_selesai' => '2026-07-20',
     ], $user->id);
     $surat->update(['status' => 'pending']);
@@ -722,7 +722,7 @@ test('syncNewSession does nothing when surat is returned', function () {
 
 test('manual izin via AttendanceExceptionService remains surat_izin_id null', function () {
     $peserta = makePeserta(6040, 'KJA-SI040');
-    $sesi    = makeSesi('2026-07-20', 'Pagi');
+    $sesi = makeSesi('2026-07-20', 'Pagi');
 
     $izin = app(AttendanceExceptionService::class)->recordIzin($peserta->id, $sesi->id);
 

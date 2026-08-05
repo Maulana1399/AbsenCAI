@@ -20,6 +20,5 @@ final readonly class ImportCommit
         public array $skippedIds = [],
         public array $failedRows = [],
         public bool $activityLogged = false,
-    ) {
-    }
+    ) {}
 }

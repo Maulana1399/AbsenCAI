@@ -101,6 +101,7 @@ function S3_9A_makeLegacyMapping(array $overrides = []): LegacyPesertaMapping
         'event_id' => $event,
         'migrated_at' => now(),
     ], $overrides));
+
     return $mapping;
 }
 

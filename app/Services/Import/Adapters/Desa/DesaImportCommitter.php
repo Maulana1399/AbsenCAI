@@ -17,6 +17,6 @@ final class DesaImportCommitter implements ImportCommitter
             Excel::import(new DesaImport, $context->options['file']);
         }
 
-        return new ImportCommit($context, new ImportSummary());
+        return new ImportCommit($context, new ImportSummary);
     }
 }

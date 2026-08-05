@@ -17,6 +17,6 @@ final class ReguImportCommitter implements ImportCommitter
             Excel::import(new ReguImport, $context->options['file']);
         }
 
-        return new ImportCommit($context, new ImportSummary());
+        return new ImportCommit($context, new ImportSummary);
     }
 }

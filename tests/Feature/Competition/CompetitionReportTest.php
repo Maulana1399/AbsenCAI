@@ -5,15 +5,13 @@ use App\Models\CompetitionAnnouncement;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
 use App\Models\CompetitionOutcome;
-use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Models\Event;
-use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
 use App\Models\Venue;
-use App\Services\Competition\CompetitionReportService;
 use App\Services\Competition\CompetitionRegistrationService;
+use App\Services\Competition\CompetitionReportService;
 
 use function Pest\Laravel\actingAs;
 

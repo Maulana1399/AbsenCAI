@@ -2,14 +2,12 @@
 
 use App\Models\desa;
 use App\Models\Event;
-use App\Models\EventAttendance;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
-use App\Models\SuratIzin;
 use App\Services\Cai\CaiParticipantReplacementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -18,8 +16,8 @@ uses(RefreshDatabase::class);
 function cdr_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'CDR Event ' . $suffix,
-        'slug' => 'cdr-' . $suffix . '-' . str()->random(6),
+        'name' => 'CDR Event '.$suffix,
+        'slug' => 'cdr-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);

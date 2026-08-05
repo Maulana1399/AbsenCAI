@@ -5,15 +5,19 @@ namespace App\Livewire\Event;
 use App\Models\Event;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EditStatus extends Component
 {
     public ?int $eventId = null;
+
     public string $editName = '';
+
     public string $editDescription = '';
+
     public string $editStartDate = '';
+
     public string $editEndDate = '';
 
     public bool $processing = false;

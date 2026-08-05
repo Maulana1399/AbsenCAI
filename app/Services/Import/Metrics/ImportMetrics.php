@@ -17,6 +17,5 @@ final class ImportMetrics
         public int $updatedRows = 0,
         public int $skippedRows = 0,
         public ?ImportContext $context = null,
-    ) {
-    }
+    ) {}
 }

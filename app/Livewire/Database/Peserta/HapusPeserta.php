@@ -8,7 +8,6 @@ use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\SuratIzin;
-use App\Models\peserta;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Support\ActiveEventContext;
 use App\Support\EventOwnership;
@@ -21,19 +20,24 @@ use Livewire\Component;
 class HapusPeserta extends Component
 {
     public $peserta_id;
+
     public $peserta;
+
     public ?string $blockReason = null;
+
     public bool $canDelete = false;
+
     public ?int $participation_id = null;
 
-    #[On("HapusPeserta")]
+    #[On('HapusPeserta')]
     public function hapusPeserta($id)
     {
         $event = app(ActiveEventContext::class)->current();
         if ($event === null) {
             $this->blockReason = 'Tidak ada event aktif.';
             $this->canDelete = false;
-            Flux::modal("hapus-peserta")->show();
+            Flux::modal('hapus-peserta')->show();
+
             return;
         }
 
@@ -47,7 +51,8 @@ class HapusPeserta extends Component
         if ($participation === null) {
             $this->blockReason = 'Peserta tidak memiliki keanggotaan pada event aktif.';
             $this->canDelete = false;
-            Flux::modal("hapus-peserta")->show();
+            Flux::modal('hapus-peserta')->show();
+
             return;
         }
 
@@ -72,14 +77,14 @@ class HapusPeserta extends Component
         }
 
         if (! empty($reasons)) {
-            $this->blockReason = 'Peserta tidak dapat dihapus dari event ini karena:<br>' . implode('<br>', $reasons);
+            $this->blockReason = 'Peserta tidak dapat dihapus dari event ini karena:<br>'.implode('<br>', $reasons);
             $this->canDelete = false;
         } else {
             $this->blockReason = null;
             $this->canDelete = true;
         }
 
-        Flux::modal("hapus-peserta")->show();
+        Flux::modal('hapus-peserta')->show();
     }
 
     public function destroy()
@@ -118,7 +123,7 @@ class HapusPeserta extends Component
         });
 
         $this->dispatch('refreshPeserta');
-        Flux::modal("hapus-peserta")->close();
+        Flux::modal('hapus-peserta')->close();
     }
 
     public function render()

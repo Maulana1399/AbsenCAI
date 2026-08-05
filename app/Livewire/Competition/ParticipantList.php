@@ -12,6 +12,7 @@ use Livewire\Component;
 class ParticipantList extends Component
 {
     public string $competitionCategoryId = '';
+
     public string $competitionClassId = '';
 
     public function mount(): void

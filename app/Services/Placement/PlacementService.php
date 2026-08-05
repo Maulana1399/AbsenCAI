@@ -20,7 +20,7 @@ class PlacementService
             ? ((int) substr($last, 2) + 1)
             : 1;
 
-        return $prefix . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
     public static function leastFilledRegu(int $eventId, ?string $jenisKelamin = null): ?regu

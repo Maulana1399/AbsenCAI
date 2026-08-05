@@ -11,6 +11,7 @@ use Livewire\Component;
 class RekapAbsensi extends Component
 {
     public $sesi_id = '';
+
     public $regu_id = '';
 
     public function updatedSesiId(): void
@@ -53,6 +54,7 @@ class RekapAbsensi extends Component
                     ->map(function ($entry) {
                         $lp = $entry->legacyPeserta;
                         $participation = $entry->participation;
+
                         return (object) [
                             'id' => $participation->id,
                             'peserta' => $lp,

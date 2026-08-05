@@ -3,8 +3,8 @@
 namespace App\Livewire\Database\Desa;
 
 use App\Models\desa;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DataDesa extends Component
 {
@@ -18,7 +18,7 @@ class DataDesa extends Component
     public function render()
     {
         return view('livewire.database.desa.data-desa', [
-            'daftardesa' => $this->daftardesa
+            'daftardesa' => $this->daftardesa,
         ]);
     }
 
@@ -32,7 +32,7 @@ class DataDesa extends Component
         $this->dispatch('HapusDesa', id: $id);
 
     }
-    
+
     #[On('refreshDesa')]
     public function refreshDesa()
     {

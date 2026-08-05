@@ -2,25 +2,30 @@
 
 namespace App\Livewire\MasterData\Person;
 
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
-use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Person\PersonLegacySyncService;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EditPerson extends Component
 {
     use HasCascadingKelompok;
 
     public ?int $person_id = null;
+
     public string $nama = '';
+
     public string $jenis_kelamin = '';
+
     public string $tanggal_lahir = '';
+
     public ?string $desa_id = null;
+
     public ?string $kelompok_id = null;
 
     public bool $hasLegacyMapping = false;

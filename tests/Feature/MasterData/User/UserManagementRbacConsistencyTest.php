@@ -13,7 +13,6 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SesiAbsensi;
 use App\Models\User;
-use App\Services\Activity\EventCommitteeService;
 use App\Services\User\UserManagementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;

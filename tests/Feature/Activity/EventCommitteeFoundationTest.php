@@ -1,23 +1,18 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\ActivityCategory;
 use App\Models\ActivityGroup;
-use App\Models\CategoryDefinition;
 use App\Models\Event;
 use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\Rundown;
-use App\Models\RundownItem;
-use App\Models\Venue;
 use App\Models\peserta;
-use App\Models\LegacyParticipationMapping;
-use App\Services\Activity\EventCommitteeService;
-use App\Services\Activity\ActivityRegistrationService;
+use App\Models\Venue;
 use App\Services\Activity\ActivityScheduleService;
+use App\Services\Activity\EventCommitteeService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -67,18 +62,21 @@ function S3_9D_makeRole(array $overrides = []): EventRole
 function S3_9D_makeGroup(array $overrides = []): ActivityGroup
 {
     $event = $overrides['event_id'] ?? S3_9D_makeEvent()->id;
+
     return ActivityGroup::create(array_merge(['event_id' => $event, 'name' => 'Group Test'], $overrides));
 }
 
 function S3_9D_makeActivity(array $overrides = []): Activity
 {
     $event = $overrides['event_id'] ?? S3_9D_makeEvent()->id;
+
     return Activity::create(array_merge(['event_id' => $event, 'name' => 'Activity Test', 'status' => 'active', 'requires_category' => false], $overrides));
 }
 
 function S3_9D_makeVenue(array $overrides = []): Venue
 {
     $event = $overrides['event_id'] ?? S3_9D_makeEvent()->id;
+
     return app(ActivityScheduleService::class)->createVenue(array_merge(['event_id' => $event, 'name' => 'Venue Test'], $overrides));
 }
 
@@ -92,6 +90,7 @@ function S3_9D_makeAssignment(array $overrides = []): EventCommitteeAssignment
     if ($event !== null && ! array_key_exists('person_id', $overrides)) {
         $overrides['person_id'] = S3_9D_makePerson()->id;
     }
+
     return $service->assign(array_merge(['event_id' => $event ?? S3_9D_makeEvent()->id, 'person_id' => $overrides['person_id'] ?? S3_9D_makePerson()->id, 'event_role_id' => $overrides['event_role_id'] ?? S3_9D_makeRole()->id], $overrides));
 }
 

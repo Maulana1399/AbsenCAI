@@ -6,17 +6,21 @@ use App\Models\CompetitionClass;
 use App\Models\CompetitionSchedule;
 use App\Services\Competition\CompetitionWorkflowService;
 use App\Support\ActiveEventContext;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class OfficialPanel extends Component
 {
     public bool $showSubmitDialog = false;
+
     public ?int $submitScheduleId = null;
+
     public ?int $selectedWinnerId = null;
+
     public string $finishReason = '';
+
     public string $finishNotes = '';
+
     public array $availableParticipants = [];
 
     protected function rules(): array
@@ -49,6 +53,7 @@ class OfficialPanel extends Component
 
         if ($schedule->status !== 'Waiting Result') {
             session()->flash('error', 'Only Waiting Result matches can be submitted.');
+
             return;
         }
 
@@ -59,7 +64,10 @@ class OfficialPanel extends Component
 
         $this->availableParticipants = $schedule->scheduleEntries->map(function ($entry) {
             $reg = $entry->competitionRegistration;
-            if (!$reg) return null;
+            if (! $reg) {
+                return null;
+            }
+
             return [
                 'id' => $reg->id,
                 'name' => $reg->participation?->person?->nama ?? '?',
@@ -88,13 +96,15 @@ class OfficialPanel extends Component
         if ($schedule->status !== 'Waiting Result') {
             session()->flash('error', 'Match is no longer waiting for result.');
             $this->cancelSubmitDialog();
+
             return;
         }
 
         $assignedIds = $schedule->scheduleEntries->pluck('competition_registration_id')->toArray();
 
-        if (!in_array($this->selectedWinnerId, $assignedIds)) {
+        if (! in_array($this->selectedWinnerId, $assignedIds)) {
             session()->flash('error', 'Pemenang harus merupakan peserta yang bertanding.');
+
             return;
         }
 

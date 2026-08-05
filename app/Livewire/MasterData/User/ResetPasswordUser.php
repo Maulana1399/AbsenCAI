@@ -6,16 +6,19 @@ use App\Models\User;
 use App\Services\User\UserManagementService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class ResetPasswordUser extends Component
 {
     public bool $processing = false;
 
     public ?int $userId = null;
+
     public ?string $userName = null;
+
     public string $newPassword = '';
+
     public string $newPasswordConfirmation = '';
 
     #[On('resetPasswordUser')]

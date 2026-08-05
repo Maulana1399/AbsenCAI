@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Pengajian\Admin;
 
-use App\Models\DesaAccessGrant;
 use App\Models\desa;
+use App\Models\DesaAccessGrant;
 use App\Services\Audit\ActivityLogService;
 use App\Services\Pengajian\DesaAccessService;
 use App\Support\ActiveEventContext;
@@ -19,7 +19,9 @@ class AccessIndex extends Component
     public bool $showCreateForm = false;
 
     public string $desaId = '';
+
     public string $validFrom = '';
+
     public string $validUntil = '';
 
     public bool $processing = false;

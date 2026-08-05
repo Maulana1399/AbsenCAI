@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Registrasi;
 
-use App\Models\Participation;
-use App\Models\peserta;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Models\desa;
 use App\Models\kelompok;
+use App\Models\Participation;
+use App\Models\peserta;
 use App\Models\regu;
-use App\Livewire\Traits\HasCascadingKelompok;
 use App\Support\ActiveEventContext;
 use App\Support\EventOwnership;
 use Illuminate\Support\Facades\Gate;
@@ -16,16 +16,23 @@ use Livewire\Component;
 class Ulang extends Component
 {
     use HasCascadingKelompok;
+
     public string $search = '';
 
     public $showEditModal = false;
 
     public $editId;
+
     public $editNama;
+
     public $editJenisKelamin;
+
     public $editJenisPeserta;
+
     public $editDesa;
+
     public $editKelompok;
+
     public $editRegu;
 
     public function registrasiUlang(int $id): void
@@ -57,7 +64,6 @@ class Ulang extends Component
         session()->flash('success', 'Registrasi ulang berhasil.');
     }
 
-
     public function editPeserta($id)
     {
         $event = app(ActiveEventContext::class)->current();
@@ -80,7 +86,6 @@ class Ulang extends Component
 
         $this->showEditModal = true;
     }
-
 
     public function updatePeserta()
     {
@@ -110,11 +115,10 @@ class Ulang extends Component
 
         $this->showEditModal = false;
 
-        session()->flash('success','Data peserta berhasil diperbarui');
+        session()->flash('success', 'Data peserta berhasil diperbarui');
 
         $this->dispatch('$refresh');
     }
-
 
     public function render()
     {
@@ -127,13 +131,14 @@ class Ulang extends Component
             $daftarPeserta = Participation::with(['person.desa', 'person.kelompok', 'regu', 'person.legacyPesertaMapping.peserta'])
                 ->when($event, fn ($q) => $q->where('event_id', $event->id), fn ($q) => $q->whereRaw('0 = 1'))
                 ->where(function ($query) use ($search) {
-                    $query->whereHas('person', fn ($q) => $q->where('nama', 'like', '%' . $search . '%'));
+                    $query->whereHas('person', fn ($q) => $q->where('nama', 'like', '%'.$search.'%'));
                 })
                 ->orderByDesc('id')
                 ->limit(10)
                 ->get()
                 ->map(function (Participation $p) {
                     $lp = $p->person?->legacyPesertaMapping?->peserta;
+
                     return (object) [
                         'id' => $p->id,
                         'nama' => $p->person?->nama,

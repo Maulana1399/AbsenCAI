@@ -26,11 +26,11 @@ class Dashboard extends Component
         $event = app(ActiveEventContext::class)->current();
 
         $presenter = $factory->make($event);
-        $data      = $presenter->present($event);
+        $data = $presenter->present($event);
 
         return view('livewire.event.dashboard', [
-            'event'         => $event,
-            'eventName'     => $this->eventName,
+            'event' => $event,
+            'eventName' => $this->eventName,
             'presenterView' => $presenter->view(),
             'presenterData' => $data,
         ]);

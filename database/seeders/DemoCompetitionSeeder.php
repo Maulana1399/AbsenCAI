@@ -8,15 +8,12 @@ use App\Models\CompetitionClass;
 use App\Models\CompetitionOutcome;
 use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
+use App\Models\desa;
 use App\Models\Event;
+use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\Venue;
-use App\Models\desa;
-use App\Models\kelompok;
-use App\Services\Competition\CompetitionRegistrationService;
-use App\Services\Placement\PlacementService;
-use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -130,7 +127,7 @@ class DemoCompetitionSeeder extends Seeder
     {
         CompetitionAnnouncement::where('event_id', $event->id)->delete();
         CompetitionOutcome::whereHas('competitionRegistration', function ($q) use ($event) {
-            $q->whereHas('competitionClass', fn($q2) => $q2->where('event_id', $event->id));
+            $q->whereHas('competitionClass', fn ($q2) => $q2->where('event_id', $event->id));
         })->delete();
         CompetitionSchedule::whereIn('competition_class_id', CompetitionClass::where('event_id', $event->id)->pluck('id'))->delete();
         CompetitionRegistration::whereIn('competition_class_id', CompetitionClass::where('event_id', $event->id)->pluck('id'))->delete();
@@ -147,6 +144,7 @@ class DemoCompetitionSeeder extends Seeder
         foreach ($this->desaNames as $name) {
             $ids[] = desa::firstOrCreate(['desa_asal' => $name])->id;
         }
+
         return $ids;
     }
 
@@ -159,6 +157,7 @@ class DemoCompetitionSeeder extends Seeder
                 'desa_id' => $desaIds[array_rand($desaIds)],
             ])->id;
         }
+
         return $ids;
     }
 
@@ -175,7 +174,7 @@ class DemoCompetitionSeeder extends Seeder
         for ($i = 0; $i < $needed; $i++) {
             $gender = fake()->randomElement(['L', 'P']);
             $firstNames = $gender === 'L' ? $this->firstNameM : $this->firstNameF;
-            $nama = $firstNames[array_rand($firstNames)] . ' ' . $this->lastNames[array_rand($this->lastNames)];
+            $nama = $firstNames[array_rand($firstNames)].' '.$this->lastNames[array_rand($this->lastNames)];
 
             $person = Person::create([
                 'nama' => $nama,
@@ -186,6 +185,7 @@ class DemoCompetitionSeeder extends Seeder
             ]);
             $ids[] = $person->id;
         }
+
         return $ids;
     }
 
@@ -203,12 +203,13 @@ class DemoCompetitionSeeder extends Seeder
             $participation = Participation::create([
                 'person_id' => $personId,
                 'event_id' => $eventId,
-                'participant_number' => 'FSD' . str_pad((string) $counter, 4, '0', STR_PAD_LEFT),
-                'attendance_code' => 'KJA-' . Str::upper(Str::random(8)),
+                'participant_number' => 'FSD'.str_pad((string) $counter, 4, '0', STR_PAD_LEFT),
+                'attendance_code' => 'KJA-'.Str::upper(Str::random(8)),
                 'jenis_peserta' => 'Peserta',
             ]);
             $ids[] = $participation->id;
         }
+
         return $ids;
     }
 
@@ -219,12 +220,13 @@ class DemoCompetitionSeeder extends Seeder
             $cat = CompetitionCategory::create([
                 'event_id' => $eventId,
                 'name' => $name,
-                'code' => 'CAT-' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
+                'code' => 'CAT-'.str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT),
                 'sort_order' => $i + 1,
                 'is_active' => true,
             ]);
             $ids[] = $cat->id;
         }
+
         return $ids;
     }
 
@@ -240,9 +242,9 @@ class DemoCompetitionSeeder extends Seeder
             foreach ($classList as $name) {
                 $lower = mb_strtolower($name);
                 $gender = 'M';
-                if (str_contains($lower, 'putra') && !str_contains($lower, 'campuran')) {
+                if (str_contains($lower, 'putra') && ! str_contains($lower, 'campuran')) {
                     $gender = 'L';
-                } elseif (str_contains($lower, 'putri') && !str_contains($lower, 'campuran')) {
+                } elseif (str_contains($lower, 'putri') && ! str_contains($lower, 'campuran')) {
                     $gender = 'P';
                 }
 
@@ -251,7 +253,7 @@ class DemoCompetitionSeeder extends Seeder
                     'competition_category_id' => $catId,
                     'name' => $name,
                     'gender' => $gender,
-                    'code' => 'CLS-' . str_pad((string) $sort, 2, '0', STR_PAD_LEFT),
+                    'code' => 'CLS-'.str_pad((string) $sort, 2, '0', STR_PAD_LEFT),
                     'sort_order' => $sort++,
                     'is_active' => true,
                 ]);
@@ -271,7 +273,7 @@ class DemoCompetitionSeeder extends Seeder
 
         foreach ($selectedParticipations as $participationId) {
             $classId = $classIds[array_rand($classIds)];
-            $pair = $participationId . '-' . $classId;
+            $pair = $participationId.'-'.$classId;
 
             if (isset($used[$pair])) {
                 continue;
@@ -300,12 +302,13 @@ class DemoCompetitionSeeder extends Seeder
             $venue = Venue::create([
                 'event_id' => $eventId,
                 'name' => $name,
-                'code' => 'ARN-' . chr(65 + $i),
-                'location_detail' => 'Gedung Olahraga ' . $name,
+                'code' => 'ARN-'.chr(65 + $i),
+                'location_detail' => 'Gedung Olahraga '.$name,
                 'sort_order' => $i + 1,
             ]);
             $ids[] = $venue->id;
         }
+
         return $ids;
     }
 
@@ -394,15 +397,15 @@ class DemoCompetitionSeeder extends Seeder
         $this->command->info('===================================');
         $this->command->info('  DEMO COMPETITION DATA GENERATED');
         $this->command->info('===================================');
-        $this->command->info('Persons ................ ' . Person::count());
-        $this->command->info('Participations ......... ' . Participation::count());
-        $this->command->info('Categories ............. ' . CompetitionCategory::count());
-        $this->command->info('Classes ............... ' . CompetitionClass::count());
-        $this->command->info('Registrations .......... ' . CompetitionRegistration::count());
-        $this->command->info('Venues ................. ' . Venue::count());
-        $this->command->info('Schedules .............. ' . CompetitionSchedule::count());
-        $this->command->info('Outcomes ............... ' . CompetitionOutcome::count());
-        $this->command->info('Announcements .......... ' . CompetitionAnnouncement::count());
+        $this->command->info('Persons ................ '.Person::count());
+        $this->command->info('Participations ......... '.Participation::count());
+        $this->command->info('Categories ............. '.CompetitionCategory::count());
+        $this->command->info('Classes ............... '.CompetitionClass::count());
+        $this->command->info('Registrations .......... '.CompetitionRegistration::count());
+        $this->command->info('Venues ................. '.Venue::count());
+        $this->command->info('Schedules .............. '.CompetitionSchedule::count());
+        $this->command->info('Outcomes ............... '.CompetitionOutcome::count());
+        $this->command->info('Announcements .......... '.CompetitionAnnouncement::count());
         $this->command->info('===================================');
     }
 }

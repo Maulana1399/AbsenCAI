@@ -3,8 +3,8 @@
 namespace App\Services\Import\Contracts;
 
 use App\Services\Import\DTO\ImportContext;
-use App\Services\Import\Results\ImportSummary;
 use App\Services\Import\DTO\NormalizedImportRow;
+use App\Services\Import\Results\ImportSummary;
 
 interface ImportValidator
 {

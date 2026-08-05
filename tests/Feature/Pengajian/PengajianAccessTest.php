@@ -2,11 +2,10 @@
 
 use App\Livewire\Pengajian\DesaDashboard;
 use App\Livewire\Pengajian\EnterToken;
-use App\Models\DesaAccessGrant;
+use App\Models\desa;
 use App\Models\Event;
 use App\Models\Person;
 use App\Models\User;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\PengajianAttendanceService;
 use Carbon\Carbon;
@@ -40,6 +39,7 @@ function pgm3_makeUser(): User
 function pgm3_createValidGrant(Event $event, desa $desa, ?User $user = null): array
 {
     $now = Carbon::now();
+
     return app(DesaAccessService::class)->createGrant(
         $event, $desa,
         $now->copy()->subHour(),
@@ -602,8 +602,7 @@ test('searchList partial name memfilter attendanceList', function () {
         ->set('activeTab', 'list')
         ->call('searchList', 'Atta')
         ->assertSet('listSearch', 'Atta')
-        ->assertSet('attendanceList', fn ($list) =>
-            count($list) === 1 && $list[0]['nama'] === 'Atta Halilintar'
+        ->assertSet('attendanceList', fn ($list) => count($list) === 1 && $list[0]['nama'] === 'Atta Halilintar'
         );
 });
 
@@ -668,8 +667,7 @@ test('searchList + filterStatus kombinasi', function () {
         ->call('setFilterStatus', 'hadir')
         ->assertSet('listSearch', 'Atta')
         ->assertSet('filterStatus', 'hadir')
-        ->assertSet('attendanceList', fn ($list) =>
-            count($list) === 1 && $list[0]['nama'] === 'Atta Hadir'
+        ->assertSet('attendanceList', fn ($list) => count($list) === 1 && $list[0]['nama'] === 'Atta Hadir'
         );
 });
 
@@ -696,8 +694,7 @@ test('searchList + setFilterMethod kombinasi', function () {
         ->call('setFilterMethod', 'operator')
         ->assertSet('listSearch', 'Atta')
         ->assertSet('filterMethod', 'operator')
-        ->assertSet('attendanceList', fn ($list) =>
-            count($list) === 1 && $list[0]['method'] === 'operator'
+        ->assertSet('attendanceList', fn ($list) => count($list) === 1 && $list[0]['method'] === 'operator'
         );
 });
 

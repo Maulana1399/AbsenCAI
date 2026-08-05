@@ -2,7 +2,6 @@
 
 use App\Enums\Role;
 use App\Models\User;
-use App\Services\User\UserManagementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
@@ -13,7 +12,7 @@ function um_user(?string $role = null): User
 {
     return User::factory()->create([
         'role' => $role,
-        'email' => 'um-' . str()->random(10) . '@example.com',
+        'email' => 'um-'.str()->random(10).'@example.com',
     ]);
 }
 

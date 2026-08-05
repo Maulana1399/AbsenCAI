@@ -20,6 +20,7 @@ class AttendanceParity extends Command
 
         if (! in_array($mode, ['migration', 'canonical'], true)) {
             $this->error("Invalid mode: {$mode}. Use 'migration' or 'canonical'.");
+
             return 1;
         }
 
@@ -60,7 +61,7 @@ class AttendanceParity extends Command
                 $r['orphan_canonical'],
                 $r['unmappable'],
                 $r['status_conflicts'],
-                $r['parity_percentage'] . '%',
+                $r['parity_percentage'].'%',
             ];
         }
 
@@ -94,7 +95,7 @@ class AttendanceParity extends Command
             $this->line("  Missing canonical: {$totals['missing_canonical']} | Orphan canonical: {$totals['orphan_canonical']} | Unmappable: {$totals['unmappable']} | Conflicts: {$totals['status_conflicts']}");
             $this->line("  Expected mappable: {$totals['expected_mappable']}");
         } else {
-            $this->line("  Events audited: " . count($this->laravel->make(AttendanceParityService::class)->auditAll()['events']));
+            $this->line('  Events audited: '.count($this->laravel->make(AttendanceParityService::class)->auditAll()['events']));
             $this->line("  Legacy total: {$totals['legacy_total']} | Canonical total: {$totals['canonical_total']}");
             $this->line("  Matched: {$totals['matched']} | Missing: {$totals['missing_canonical']} | Orphan: {$totals['orphan_canonical']} | Unmappable: {$totals['unmappable']} | Conflicts: {$totals['status_conflicts']}");
         }

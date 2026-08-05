@@ -8,15 +8,14 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class ActivityRegistrationExport implements FromCollection, WithHeadings, ShouldAutoSize
+class ActivityRegistrationExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     public function __construct(
         public $event_id = null,
         public $activity_group_id = null,
         public $activity_id = null,
         public $category_definition_id = null,
-    ) {
-    }
+    ) {}
 
     public function collection()
     {

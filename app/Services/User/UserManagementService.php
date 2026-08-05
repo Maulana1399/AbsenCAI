@@ -3,9 +3,8 @@
 namespace App\Services\User;
 
 use App\Enums\Role;
-use App\Models\Person;
-use App\Models\User;
 use App\Models\SuratIzin;
+use App\Models\User;
 use App\Services\Audit\ActivityLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -58,7 +57,7 @@ class UserManagementService
             $this->activityLogService->log(
                 action: 'created',
                 module: 'user',
-                description: 'Akun user dibuat: ' . $user->email,
+                description: 'Akun user dibuat: '.$user->email,
                 subject: $user,
                 properties: $props,
             );
@@ -110,7 +109,7 @@ class UserManagementService
                     $this->activityLogService->log(
                         action: 'person_link_changed',
                         module: 'user',
-                        description: 'Person link user ' . $user->email . ' diubah',
+                        description: 'Person link user '.$user->email.' diubah',
                         subject: $user,
                         properties: [
                             'user_id' => $user->id,
@@ -127,7 +126,7 @@ class UserManagementService
                 $this->activityLogService->log(
                     action: 'role_changed',
                     module: 'user',
-                    description: 'Role user ' . $user->email . ' diubah dari ' . ($originalRole?->value ?? 'null') . ' ke ' . $role->value,
+                    description: 'Role user '.$user->email.' diubah dari '.($originalRole?->value ?? 'null').' ke '.$role->value,
                     subject: $user,
                     properties: [
                         'user_id' => $user->id,
@@ -140,7 +139,7 @@ class UserManagementService
             $this->activityLogService->log(
                 action: 'updated',
                 module: 'user',
-                description: 'Data user diperbarui: ' . $user->email,
+                description: 'Data user diperbarui: '.$user->email,
                 subject: $user,
                 properties: [
                     'user_id' => $user->id,
@@ -163,7 +162,7 @@ class UserManagementService
             $this->activityLogService->log(
                 action: 'password_reset',
                 module: 'user',
-                description: 'Password user direset: ' . $user->email,
+                description: 'Password user direset: '.$user->email,
                 subject: $user,
                 properties: [
                     'user_id' => $user->id,
@@ -199,7 +198,7 @@ class UserManagementService
             $this->activityLogService->log(
                 action: 'deleted',
                 module: 'user',
-                description: 'Akun user dihapus: ' . $email,
+                description: 'Akun user dihapus: '.$email,
                 properties: [
                     'email' => $email,
                 ],

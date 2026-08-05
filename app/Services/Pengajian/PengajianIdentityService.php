@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 class PengajianIdentityService
 {
     public const MIN_QUERY_LENGTH = 3;
+
     public const MAX_RESULTS = 20;
 
     private const BIRTH_DATE_FORMAT_MASKED = 'd M';

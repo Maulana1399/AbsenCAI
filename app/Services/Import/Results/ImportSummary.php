@@ -2,9 +2,6 @@
 
 namespace App\Services\Import\Results;
 
-use App\Services\Import\Results\ImportError;
-use App\Services\Import\Results\ImportWarning;
-
 final readonly class ImportSummary
 {
     /**
@@ -21,6 +18,5 @@ final readonly class ImportSummary
         public int $skippedRows = 0,
         public array $errors = [],
         public array $warnings = [],
-    ) {
-    }
+    ) {}
 }

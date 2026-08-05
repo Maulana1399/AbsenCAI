@@ -12,8 +12,8 @@ use App\Models\regu;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 

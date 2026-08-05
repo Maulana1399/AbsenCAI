@@ -112,8 +112,6 @@ test('command reports null attendance_code', function () {
         ->assertExitCode(0);
 });
 
-
-
 // ---------------------------------------------------------------------------
 // Gender variants
 // ---------------------------------------------------------------------------
@@ -200,7 +198,7 @@ test('command reports duplicate name + desa_id', function () {
     $output = Artisan::output();
 
     expect($exitCode)->toBe(0)
-        ->and($output)->toContain('siti aminah | desa_id=' . $desa->id)
+        ->and($output)->toContain('siti aminah | desa_id='.$desa->id)
         ->and($output)->toContain('count=2');
 });
 
@@ -216,7 +214,7 @@ test('command reports conflicting gender for same name + desa', function () {
     $output = Artisan::output();
 
     expect($exitCode)->toBe(0)
-        ->and($output)->toContain('alex | desa_id=' . $desa->id)
+        ->and($output)->toContain('alex | desa_id='.$desa->id)
         ->and($output)->toContain('Laki - Laki')
         ->and($output)->toContain('Perempuan');
 });

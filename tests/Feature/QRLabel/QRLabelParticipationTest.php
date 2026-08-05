@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\QRLabel\Index;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
@@ -10,14 +11,13 @@ use App\Models\peserta;
 use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Storage;
-use App\Enums\Role;
 use Livewire\Livewire;
 
 function qrLabelTest_makeEvent(array $overrides = []): Event
 {
     return Event::create(array_merge([
         'name' => 'Test Event',
-        'slug' => 'test-event-' . str()->random(6),
+        'slug' => 'test-event-'.str()->random(6),
         'status' => 'active',
     ], $overrides));
 }
@@ -48,7 +48,7 @@ beforeEach(function () {
 
 test('qr label list only shows participations from active event', function () {
     $eventA = qrLabelTest_makeEvent();
-    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-'.str()->random(6)]);
     app(ActiveEventContext::class)->set($eventA);
     [$personA] = qrLabelTest_makeParticipation(['person' => ['nama' => 'Person A', 'nip' => 5001], 'participation' => ['attendance_code' => 'KJA-QR-A', 'participant_number' => 'KL001']], $eventA);
     [$personB] = qrLabelTest_makeParticipation(['person' => ['nama' => 'Person B', 'nip' => 5002], 'participation' => ['attendance_code' => 'KJA-QR-B', 'participant_number' => 'KL002']], $eventB);
@@ -76,7 +76,7 @@ test('batch export contains only active event participations', function () {
     $user = User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($user);
     $eventA = qrLabelTest_makeEvent();
-    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-'.str()->random(6)]);
     app(ActiveEventContext::class)->set($eventA);
     qrLabelTest_makeParticipation(['person' => ['nama' => 'Export A', 'nip' => 5004], 'participation' => ['attendance_code' => 'KJA-EXP-A', 'participant_number' => 'KL201']], $eventA);
     qrLabelTest_makeParticipation(['person' => ['nama' => 'Export B', 'nip' => 5005], 'participation' => ['attendance_code' => 'KJA-EXP-B', 'participant_number' => 'KL202']], $eventB);
@@ -90,7 +90,7 @@ test('batch export contains only active event participations', function () {
 test('same person with participations in two events uses correct event specific identity', function () {
     $person = Person::create(['nama' => 'Multi Person', 'nip' => 5006, 'jenis_kelamin' => 'L']);
     $eventA = qrLabelTest_makeEvent();
-    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-'.str()->random(6)]);
 
     $participationA = Participation::create(['person_id' => $person->id, 'event_id' => $eventA->id, 'attendance_code' => 'KJA-MULTI-A', 'participant_number' => 'KL301', 'jenis_peserta' => 'Wajib']);
     $participationB = Participation::create(['person_id' => $person->id, 'event_id' => $eventB->id, 'attendance_code' => 'KJA-MULTI-B', 'participant_number' => 'KL302', 'jenis_peserta' => 'Wajib']);
@@ -107,7 +107,7 @@ test('direct print route rejects cross-event legacy participant access', functio
     $this->actingAs($user);
 
     $eventA = qrLabelTest_makeEvent();
-    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-' . str()->random(6)]);
+    $eventB = qrLabelTest_makeEvent(['slug' => 'event-b-'.str()->random(6)]);
     app(ActiveEventContext::class)->set($eventA);
 
     $person = Person::create(['nama' => 'Print Person', 'nip' => 5007, 'jenis_kelamin' => 'L']);

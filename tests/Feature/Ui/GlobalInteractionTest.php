@@ -1,16 +1,15 @@
 <?php
 
+use App\Enums\Role;
+use App\Livewire\Event\CommitteeManagement;
 use App\Livewire\Event\EditStatus;
 use App\Livewire\Event\EventRoleManager;
-use App\Livewire\Event\CommitteeManagement;
-use App\Livewire\MasterData\User\IndexUser;
-use App\Livewire\MasterData\User\EditUser;
-use App\Livewire\MasterData\User\ResetPasswordUser;
 use App\Livewire\MasterData\User\DeleteUser;
+use App\Livewire\MasterData\User\EditUser;
+use App\Livewire\MasterData\User\IndexUser;
+use App\Livewire\MasterData\User\ResetPasswordUser;
 use App\Models\User;
-use App\Enums\Role;
 use Livewire\Livewire;
-use Illuminate\Support\Facades\Gate;
 
 beforeEach(function () {
     $this->user = User::factory()->create(['role' => Role::SuperAdmin]);
@@ -53,15 +52,15 @@ test('super admin sees delete action only for other users', function () {
     $other = User::factory()->create(['name' => 'Other User', 'role' => Role::Admin]);
 
     $html = Livewire::test(IndexUser::class)->html();
-    expect($html)->toContain('data-testid="delete-user-' . $other->id . '"');
-    expect($html)->not->toContain('data-testid="delete-user-' . $this->user->id . '"');
+    expect($html)->toContain('data-testid="delete-user-'.$other->id.'"');
+    expect($html)->not->toContain('data-testid="delete-user-'.$this->user->id.'"');
 });
 
 test('super admin does not see delete action for own record', function () {
     $other = User::factory()->create(['name' => 'Other User', 'role' => Role::Admin]);
 
     $html = Livewire::test(IndexUser::class)->html();
-    expect($html)->not->toContain('data-testid="delete-user-' . $this->user->id . '"');
+    expect($html)->not->toContain('data-testid="delete-user-'.$this->user->id.'"');
 });
 
 test('super admin edit action triggers edit user modal', function () {
@@ -127,8 +126,8 @@ test('mobile dropdown hides hapus for own user', function () {
     $other = User::factory()->create(['name' => 'Other User', 'role' => Role::Admin]);
 
     $html = Livewire::test(IndexUser::class)->html();
-    expect($html)->not->toContain('data-testid="delete-user-' . $this->user->id . '"');
-    expect($html)->toContain('data-testid="delete-user-' . $other->id . '"');
+    expect($html)->not->toContain('data-testid="delete-user-'.$this->user->id.'"');
+    expect($html)->toContain('data-testid="delete-user-'.$other->id.'"');
 });
 
 test('user management row hover uses correct dark mode shade', function () {

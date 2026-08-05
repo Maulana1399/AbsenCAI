@@ -10,7 +10,6 @@ use App\Models\regu;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceReadService;
 use App\Services\Registration\RegistrationService;
-use App\Imports\PesertaImport;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

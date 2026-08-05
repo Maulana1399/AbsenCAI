@@ -3,17 +3,16 @@
 use App\Livewire\Pengajian\DesaDashboard;
 use App\Livewire\Pengajian\QrPrint;
 use App\Livewire\Pengajian\SelfAttendance;
+use App\Models\desa;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\PengajianAttendanceService;
 use App\Services\Pengajian\PengajianIdentityService;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
 // ---------------------------------------------------------------------------
@@ -39,6 +38,7 @@ function pgm6_desa(array $overrides = []): desa
 function pgm6_grant(Event $event, desa $desa, ?User $user = null): array
 {
     $now = Carbon::now();
+
     return app(DesaAccessService::class)->createGrant(
         $event, $desa,
         $now->copy()->subHour(),
@@ -506,8 +506,7 @@ test('search dari nonce Desa A hanya menemukan Person Desa A', function () {
         ->set('query', 'Jono')
         ->call('search');
 
-    $component->assertSet('searchResults', fn ($results) =>
-        count($results) === 1 && $results[0]['nama'] === 'Jono'
+    $component->assertSet('searchResults', fn ($results) => count($results) === 1 && $results[0]['nama'] === 'Jono'
     );
 });
 
@@ -617,8 +616,7 @@ test('full tanggal_lahir tidak terekspos di search result', function () {
         ->set('query', 'Jono')
         ->call('search');
 
-    $component->assertSet('searchResults', fn ($results) =>
-        ! isset($results[0]['tanggal_lahir'])
+    $component->assertSet('searchResults', fn ($results) => ! isset($results[0]['tanggal_lahir'])
             && ! str_contains($results[0]['birth_date_masked'] ?? '', '2000')
     );
 });

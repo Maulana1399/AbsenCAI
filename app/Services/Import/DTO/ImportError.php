@@ -10,6 +10,5 @@ final readonly class ImportError
         public string $message,
         public string $code = 'validation_error',
         public string $severity = 'error',
-    ) {
-    }
+    ) {}
 }

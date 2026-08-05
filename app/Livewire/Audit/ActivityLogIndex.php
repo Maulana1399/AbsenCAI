@@ -11,8 +11,11 @@ class ActivityLogIndex extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $filterModule = '';
+
     public string $filterAction = '';
+
     public ?int $expandedLogId = null;
 
     public function render()
@@ -21,7 +24,7 @@ class ActivityLogIndex extends Component
 
         if (trim($this->search) !== '') {
             $keyword = trim($this->search);
-            $query->where('description', 'like', '%' . $keyword . '%');
+            $query->where('description', 'like', '%'.$keyword.'%');
         }
 
         if ($this->filterModule !== '') {

@@ -11,12 +11,13 @@ class kelompok extends Model
         'desa_id',
     ];
 
-    public function peserta() {
+    public function peserta()
+    {
         return $this->hasMany(peserta::class);
     }
 
-    public function desa() {
+    public function desa()
+    {
         return $this->belongsTo(desa::class);
     }
 }
-

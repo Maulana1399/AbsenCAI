@@ -5,6 +5,7 @@ use App\Livewire\Registrasi\SelfRegister;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
@@ -16,7 +17,6 @@ use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
-use App\Models\LegacyParticipationMapping;
 
 uses(RefreshDatabase::class);
 
@@ -26,8 +26,9 @@ uses(RefreshDatabase::class);
 
 function mvr_event(string $suffix = ''): Event
 {
-    $slug = 'mvr-' . ($suffix ?: str()->random(6));
-    return Event::create(['name' => 'MVR Event ' . $suffix, 'slug' => $slug, 'status' => 'active']);
+    $slug = 'mvr-'.($suffix ?: str()->random(6));
+
+    return Event::create(['name' => 'MVR Event '.$suffix, 'slug' => $slug, 'status' => 'active']);
 }
 
 function mvr_fixtures(): array
@@ -35,6 +36,7 @@ function mvr_fixtures(): array
     $desa = desa::create(['desa_asal' => 'MVR Desa']);
     $kelompok = kelompok::create(['kelompok_asal' => 'MVR Kelompok', 'desa_id' => $desa->id]);
     $regu = regu::create(['regu' => 'MVR Regu', 'jenis_kelamin' => 'Laki - Laki']);
+
     return compact('desa', 'kelompok', 'regu');
 }
 
@@ -48,13 +50,13 @@ test('Case A: new Person passes validation layer and creates full record set', f
     app(ActiveEventContext::class)->set($event);
 
     $result = app(RegistrationService::class)->createParticipant([
-        'nama'             => 'New Person A',
-        'nip'              => 10001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'New Person A',
+        'nip' => 10001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -79,13 +81,13 @@ test('Case B: existing Person joining new Event passes validation layer and reac
 
     // Register for Event A (Case A — creates Person + peserta + Participation + Mapping)
     $svc->createParticipant([
-        'nama'             => 'Reuse Person',
-        'nip'              => 20001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Reuse Person',
+        'nip' => 20001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -120,13 +122,13 @@ test('Case B: existing Person joining new Event passes validation layer and reac
     // (UNIQUE(nama,desa,kelompok) on pesertas table not yet migrated for multi-event)
     try {
         $result = $svc->createParticipant([
-            'nama'             => 'Reuse Person',
-            'nip'              => $nipForCaseB,
-            'jenis_kelamin'    => 'Laki - Laki',
-            'jenis_peserta'    => 'Wajib',
-            'desa_id'          => $desa->id,
-            'kelompok_id'      => $kelompok->id,
-            'regu_id'          => $regu->id,
+            'nama' => 'Reuse Person',
+            'nip' => $nipForCaseB,
+            'jenis_kelamin' => 'Laki - Laki',
+            'jenis_peserta' => 'Wajib',
+            'desa_id' => $desa->id,
+            'kelompok_id' => $kelompok->id,
+            'regu_id' => $regu->id,
             'status_registrasi' => peserta::STATUS_SELF_REGISTER,
         ]);
 
@@ -166,13 +168,13 @@ test('Case C: existing Person same Event is rejected before reaching Registratio
 
     // First registration
     $svc->createParticipant([
-        'nama'             => 'Same Event Person',
-        'nip'              => 30001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Same Event Person',
+        'nip' => 30001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -190,13 +192,13 @@ test('Case C: existing Person same Event is rejected before reaching Registratio
 
     // The service also rejects Case C
     expect(fn () => $svc->createParticipant([
-        'nama'             => 'Same Event Person',
-        'nip'              => 30001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Same Event Person',
+        'nip' => 30001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]))->toThrow(ValidationException::class);
 
@@ -219,12 +221,12 @@ test('existing Person can join second event without NIP collision (Case B)', fun
 
     // Create Person in Event A — NIP is internally generated for legacy peserta compatibility
     $svc->createParticipant([
-        'nama'             => 'NIP Self Check',
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'NIP Self Check',
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -251,12 +253,12 @@ test('existing Person can join second event without NIP collision (Case B)', fun
 
     // Register to Event B — uses existing Person (Case B)
     $svc->createParticipant([
-        'nama'             => 'NIP Self Check',
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'NIP Self Check',
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -293,13 +295,13 @@ test('same name different desa does not merge into same Person', function () {
     $svc = app(RegistrationService::class);
 
     $svc->createParticipant([
-        'nama'             => 'Ahmad',
-        'nip'              => 60001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desaA->id,
-        'kelompok_id'      => $kelompokA->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Ahmad',
+        'nip' => 60001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desaA->id,
+        'kelompok_id' => $kelompokA->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -307,13 +309,13 @@ test('same name different desa does not merge into same Person', function () {
     app(ActiveEventContext::class)->set($eventB);
 
     $svc->createParticipant([
-        'nama'             => 'Ahmad',
-        'nip'              => 60002,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desaB->id,
-        'kelompok_id'      => $kelompokB->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Ahmad',
+        'nip' => 60002,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desaB->id,
+        'kelompok_id' => $kelompokB->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
         'participant_number' => 'KL999',
     ]);
@@ -337,13 +339,13 @@ test('Case B rollback leaves no partial Participation or Mapping if schema block
 
     // Register in Event A
     $svc->createParticipant([
-        'nama'             => 'Rollback Test',
-        'nip'              => 70001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Rollback Test',
+        'nip' => 70001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -357,13 +359,13 @@ test('Case B rollback leaves no partial Participation or Mapping if schema block
 
     try {
         $svc->createParticipant([
-            'nama'             => 'Rollback Test',
-            'nip'              => 70001,
-            'jenis_kelamin'    => 'Laki - Laki',
-            'jenis_peserta'    => 'Wajib',
-            'desa_id'          => $desa->id,
-            'kelompok_id'      => $kelompok->id,
-            'regu_id'          => $regu->id,
+            'nama' => 'Rollback Test',
+            'nip' => 70001,
+            'jenis_kelamin' => 'Laki - Laki',
+            'jenis_peserta' => 'Wajib',
+            'desa_id' => $desa->id,
+            'kelompok_id' => $kelompok->id,
+            'regu_id' => $regu->id,
             'status_registrasi' => peserta::STATUS_SELF_REGISTER,
         ]);
 
@@ -394,13 +396,13 @@ test('SelfRegister Case C rejected with user-friendly message', function () {
     $svc = app(RegistrationService::class);
 
     $svc->createParticipant([
-        'nama'             => 'Self Register Dup',
-        'nip'              => 80001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'Self Register Dup',
+        'nip' => 80001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_SELF_REGISTER,
     ]);
 
@@ -427,13 +429,13 @@ test('TambahPeserta Case C rejected with user-friendly message', function () {
     $svc = app(RegistrationService::class);
 
     $svc->createParticipant([
-        'nama'             => 'TambahPeserta Dup',
-        'nip'              => 90001,
-        'jenis_kelamin'    => 'Laki - Laki',
-        'jenis_peserta'    => 'Wajib',
-        'desa_id'          => $desa->id,
-        'kelompok_id'      => $kelompok->id,
-        'regu_id'          => $regu->id,
+        'nama' => 'TambahPeserta Dup',
+        'nip' => 90001,
+        'jenis_kelamin' => 'Laki - Laki',
+        'jenis_peserta' => 'Wajib',
+        'desa_id' => $desa->id,
+        'kelompok_id' => $kelompok->id,
+        'regu_id' => $regu->id,
         'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
     ]);
 

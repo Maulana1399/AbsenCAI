@@ -21,8 +21,8 @@ uses(RefreshDatabase::class);
 function epj_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'EPJ Event ' . $suffix,
-        'slug' => 'epj-' . $suffix . '-' . str()->random(6),
+        'name' => 'EPJ Event '.$suffix,
+        'slug' => 'epj-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);
@@ -263,6 +263,7 @@ test('existing Person search works by nama and NIP', function () {
             expect(count($results))->toBeGreaterThanOrEqual(1);
             $names = array_column($results, 'nama');
             expect(in_array('EPJ Existing Person', $names))->toBeTrue();
+
             return true;
         });
 
@@ -274,6 +275,7 @@ test('existing Person search works by nama and NIP', function () {
             expect(count($results))->toBeGreaterThanOrEqual(1);
             $names = array_column($results, 'nama');
             expect(in_array('EPJ Other Person', $names))->toBeTrue();
+
             return true;
         });
 });
@@ -393,6 +395,7 @@ test('duplicate names can be disambiguated without automatic merge', function ()
             $ids = array_column($results, 'id');
             expect(in_array($personA->id, $ids))->toBeTrue();
             expect(in_array($personB->id, $ids))->toBeTrue();
+
             return true;
         });
 

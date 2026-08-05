@@ -20,8 +20,8 @@ uses(RefreshDatabase::class);
 function pid_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'PID Event ' . $suffix,
-        'slug' => 'pid-' . $suffix . '-' . str()->random(6),
+        'name' => 'PID Event '.$suffix,
+        'slug' => 'pid-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
     ]);
 }
@@ -69,7 +69,7 @@ beforeEach(function () {
 
 test('import case A creates one full record set', function () {
     $ctx = pid_fixtures();
-    $import = new PesertaImport();
+    $import = new PesertaImport;
 
     app(ActiveEventContext::class)->set($ctx['eventA']);
     $model = $import->model([
@@ -280,7 +280,7 @@ test('existing legacy import behavior remains compatible', function () {
     $ctx = pid_fixtures();
     app(ActiveEventContext::class)->set($ctx['eventA']);
 
-    $model = (new PesertaImport())->model([
+    $model = (new PesertaImport)->model([
         'nama' => 'Legacy Compatible',
         'jenis_kelamin' => 'Perempuan',
         'kelompok' => 'PID Kelompok A',

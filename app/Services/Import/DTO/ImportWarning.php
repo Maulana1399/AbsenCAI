@@ -9,6 +9,5 @@ final readonly class ImportWarning
         public string $field,
         public string $message,
         public string $code = 'warning',
-    ) {
-    }
+    ) {}
 }

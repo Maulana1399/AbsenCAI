@@ -11,12 +11,15 @@ use Livewire\Component;
 class Index extends Component
 {
     public $search = '';
+
     public $filterStatus = '';
 
     public $approveSuratId = null;
+
     public $approveResult = null;
 
     public $returnSuratId = null;
+
     public $returnDate = '';
 
     protected $listeners = ['suratIzinSaved' => '$refresh'];
@@ -27,13 +30,13 @@ class Index extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('nomor_surat', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('peserta', function ($pq) {
-                      $pq->where('nama', 'like', '%' . $this->search . '%');
-                  })
-                  ->orWhereHas('participation.person', function ($pq) {
-                      $pq->where('nama', 'like', '%' . $this->search . '%');
-                  });
+                $q->where('nomor_surat', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('peserta', function ($pq) {
+                        $pq->where('nama', 'like', '%'.$this->search.'%');
+                    })
+                    ->orWhereHas('participation.person', function ($pq) {
+                        $pq->where('nama', 'like', '%'.$this->search.'%');
+                    });
             });
         }
 

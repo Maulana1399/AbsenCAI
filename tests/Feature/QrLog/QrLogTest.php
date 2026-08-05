@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Models\ActivityLog;
 use App\Models\Event;
@@ -9,7 +10,6 @@ use App\Models\User;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Storage;
-use App\Enums\Role;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -54,7 +54,8 @@ test('downloadPng requires selected participant', function () {
 });
 
 test('downloadPng creates activity log entry', function () {
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public function generatePng(string $attendanceCode): string
         {
             return 'png-binary';
@@ -68,16 +69,17 @@ test('downloadPng creates activity log entry', function () {
         ->call('downloadPng');
 
     $this->assertDatabaseHas('activity_logs', [
-        'module'       => 'qr',
-        'action'       => 'downloaded',
-        'user_id'      => $this->user->id,
+        'module' => 'qr',
+        'action' => 'downloaded',
+        'user_id' => $this->user->id,
         'subject_type' => Person::class,
-        'subject_id'   => $this->participant->person->id,
+        'subject_id' => $this->participant->person->id,
     ]);
 });
 
 test('downloadPng stores correct description', function () {
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public function generatePng(string $attendanceCode): string
         {
             return 'png-binary';
@@ -99,7 +101,8 @@ test('downloadPng stores correct description', function () {
 });
 
 test('downloadPng stores correct properties', function () {
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public function generatePng(string $attendanceCode): string
         {
             return 'png-binary';
@@ -118,17 +121,18 @@ test('downloadPng stores correct properties', function () {
         ->first();
 
     expect($log->properties)->toMatchArray([
-        'qr_type'            => 'single',
-        'participant_id'     => $this->participant->id,
+        'qr_type' => 'single',
+        'participant_id' => $this->participant->id,
         'participant_number' => 'QRLOG001',
-        'attendance_code'    => 'KJA-QRLOG1',
-        'format'             => 'png',
-        'filename'           => 'QRLOG001.png',
+        'attendance_code' => 'KJA-QRLOG1',
+        'format' => 'png',
+        'filename' => 'QRLOG001.png',
     ]);
 });
 
 test('downloadPng records authenticated user', function () {
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public function generatePng(string $attendanceCode): string
         {
             return 'png-binary';
@@ -150,7 +154,8 @@ test('downloadPng records authenticated user', function () {
 });
 
 test('downloadPng returns download response', function () {
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public function generatePng(string $attendanceCode): string
         {
             return 'png-binary';
@@ -166,7 +171,8 @@ test('downloadPng returns download response', function () {
 });
 
 test('downloadPng creates exactly one log entry per call', function () {
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public function generatePng(string $attendanceCode): string
         {
             return 'png-binary';
@@ -218,8 +224,8 @@ test('generateBatchExport creates activity log entry', function () {
         ->call('generateBatchExport');
 
     $this->assertDatabaseHas('activity_logs', [
-        'module'  => 'qr',
-        'action'  => 'batch_exported',
+        'module' => 'qr',
+        'action' => 'batch_exported',
         'user_id' => $this->user->id,
     ]);
 });
@@ -317,12 +323,12 @@ test('generateBatchExport stores correct properties', function () {
         ->first();
 
     expect($log->properties)->toMatchArray([
-        'qr_type'      => 'batch',
-        'format'       => 'png',
+        'qr_type' => 'batch',
+        'format' => 'png',
         'record_count' => 2,
-        'skipped'      => 0,
-        'failed'       => 0,
-        'directory'    => 'qr-exports',
+        'skipped' => 0,
+        'failed' => 0,
+        'directory' => 'qr-exports',
     ]);
 });
 

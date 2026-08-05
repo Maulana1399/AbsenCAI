@@ -6,7 +6,6 @@ use App\Services\Import\Contracts\ImportDefinition;
 use App\Services\Import\DTO\ImportContext;
 use App\Services\Import\Results\ImportPipelineResult;
 use App\Services\Import\Results\ImportPreview;
-use App\Services\Import\Results\ImportCommit;
 use App\Services\Import\Results\ImportSummary;
 use App\Services\Import\Support\PipelineStageRunner;
 
@@ -14,8 +13,7 @@ final class DefaultImportPipeline implements ImportPipeline
 {
     public function __construct(
         private readonly PipelineStageRunner $runner,
-    ) {
-    }
+    ) {}
 
     public function run(ImportDefinition $definition, ImportContext $context, mixed $source): ImportPipelineResult
     {
@@ -34,7 +32,7 @@ final class DefaultImportPipeline implements ImportPipeline
         $stages[] = 'validate';
 
         if (! $summary instanceof ImportSummary) {
-            $summary = new ImportSummary();
+            $summary = new ImportSummary;
         }
 
         $payload = $this->runner->run('duplicate', $payload, $context);

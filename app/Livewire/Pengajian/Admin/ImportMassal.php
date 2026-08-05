@@ -2,18 +2,6 @@
 
 namespace App\Livewire\Pengajian\Admin;
 
-use App\Services\Import\Adapters\Pengajian\PengajianImportCommitter;
-use App\Services\Import\Adapters\Pengajian\PengajianImportDefinition;
-use App\Services\Import\DTO\ImportContext;
-use App\Services\Import\NullObjects\NullImportActivityLogger;
-use App\Services\Import\NullObjects\NullImportDuplicateDetector;
-use App\Services\Import\NullObjects\NullImportNormalizer;
-use App\Services\Import\NullObjects\NullImportParser;
-use App\Services\Import\NullObjects\NullImportValidator;
-use App\Services\Import\Pipeline\DefaultImportPipeline;
-use App\Services\Import\Pipeline\ImportCoordinator;
-use App\Services\Import\Registry\ImportRegistry;
-use App\Services\Import\Support\ArrayPipelineStageRunner;
 use App\Services\Pengajian\PengajianImportService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +27,8 @@ class ImportMassal extends Component
     public bool $noActiveEvent = false;
 
     public ?string $eventName = null;
+
+    public ?string $uploadError = null;
 
     protected function rules(): array
     {
@@ -67,6 +57,21 @@ class ImportMassal extends Component
         $this->eventName = $event->name;
     }
 
+    public function updatedFile(): void
+    {
+        $this->resetErrorBag('file');
+        $this->uploadError = null;
+        $this->validationErrors = [];
+        $this->previewRows = [];
+        $this->importResult = [];
+        $this->step = 1;
+    }
+
+    public function uploadError(): void
+    {
+        $this->uploadError = 'Upload file gagal. Periksa ukuran file (maks 5MB) dan format yang didukung (CSV, XLSX, XLS, TXT).';
+    }
+
     public function preview(): void
     {
         Gate::authorize('manage-pengajian');
@@ -80,17 +85,23 @@ class ImportMassal extends Component
 
         try {
             $rows = $this->parseFile();
+
+            if (empty($rows)) {
+                $this->validationErrors = [
+                    ['row' => 0, 'errors' => ['File tidak berisi data. Pastikan file memiliki minimal satu baris data (di bawah header).']],
+                ];
+                $this->step = 2;
+
+                return;
+            }
+
             $this->previewRows = $rows;
 
             $service = app(PengajianImportService::class);
             $errors = $service->validate($rows);
 
-            if (! empty($errors)) {
-                $this->validationErrors = $errors;
-                $this->step = 2;
-            } else {
-                $this->step = 2;
-            }
+            $this->validationErrors = $errors;
+            $this->step = 2;
         } catch (\Throwable $e) {
             $this->validationErrors = [
                 ['row' => 0, 'errors' => ['Gagal membaca file: '.$e->getMessage()]],
@@ -105,7 +116,7 @@ class ImportMassal extends Component
     {
         Gate::authorize('manage-pengajian');
 
-        if ($this->processing || empty($this->previewRows)) {
+        if ($this->processing || empty($this->previewRows) || ! empty($this->validationErrors)) {
             return;
         }
 
@@ -114,38 +125,10 @@ class ImportMassal extends Component
         try {
             $event = app(ActiveEventContext::class)->requireCurrent();
 
-            $registry = new ImportRegistry;
-            $registry->register(new PengajianImportDefinition(
-                new NullImportParser,
-                new NullImportValidator,
-                new NullImportNormalizer,
-                new NullImportDuplicateDetector,
-                app(PengajianImportCommitter::class),
-                new NullImportActivityLogger,
-            ));
+            $service = app(PengajianImportService::class);
+            $result = $service->import($this->previewRows, $event->id);
 
-            $coordinator = new ImportCoordinator(
-                $registry,
-                new DefaultImportPipeline(new ArrayPipelineStageRunner),
-            );
-
-            $context = new ImportContext(
-                type: 'pengajian',
-                eventId: $event->id,
-                userId: auth()->id(),
-                fileName: $this->file?->getClientOriginalName(),
-                source: 'livewire',
-                mode: 'execute',
-                options: ['file' => $this->file],
-                definitionKey: 'pengajian',
-            );
-
-            $result = $coordinator->execute('pengajian', $context, $this->previewRows);
-            $this->importResult = [
-                'created_participations' => $result->commit?->summary->createdRows ?? 0,
-                'skipped_duplicates' => $result->commit?->summary->skippedRows ?? 0,
-                'errors' => $result->commit?->summary->errors ?? [],
-            ];
+            $this->importResult = $result;
             $this->step = 3;
         } catch (\Throwable $e) {
             $this->importResult = [
@@ -164,6 +147,8 @@ class ImportMassal extends Component
         $this->previewRows = [];
         $this->validationErrors = [];
         $this->importResult = [];
+        $this->uploadError = null;
+        $this->resetErrorBag('file');
     }
 
     public function render()

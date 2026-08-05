@@ -6,8 +6,8 @@ use App\Models\peserta;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -157,11 +157,11 @@ test('TambahPeserta Case C: existing Person WITH Participation in active event i
         'kelompok_id' => $this->kelompok->id,
     ]);
     Participation::create([
-        'person_id'          => $person->id,
-        'event_id'           => $this->event->id,
+        'person_id' => $person->id,
+        'event_id' => $this->event->id,
         'participant_number' => 'KL001',
-        'attendance_code'    => 'KJA-TESTTEST',
-        'jenis_peserta'      => 'Wajib',
+        'attendance_code' => 'KJA-TESTTEST',
+        'jenis_peserta' => 'Wajib',
     ]);
 
     $this->actingAs(\App\Models\User::factory()->create(['role' => 'admin']));

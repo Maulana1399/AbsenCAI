@@ -10,6 +10,5 @@ final readonly class ImportPreview
         public ImportSummary $summary,
         public bool $canCommit,
         public ?string $blockedReason = null,
-    ) {
-    }
+    ) {}
 }

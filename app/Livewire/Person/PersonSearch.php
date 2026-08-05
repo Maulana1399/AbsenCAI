@@ -8,12 +8,17 @@ use Livewire\Component;
 class PersonSearch extends Component
 {
     public string $query = '';
+
     public bool $showCreateForm = false;
 
     public string $newNama = '';
+
     public string $newJenisKelamin = '';
+
     public string $newTanggalLahir = '';
+
     public string $newDesaId = '';
+
     public string $newKelompokId = '';
 
     public ?int $selectedPersonId = null;
@@ -34,7 +39,7 @@ class PersonSearch extends Component
 
     public function toggleCreateForm(): void
     {
-        $this->showCreateForm = !$this->showCreateForm;
+        $this->showCreateForm = ! $this->showCreateForm;
         $this->reset(['newNama', 'newJenisKelamin', 'newTanggalLahir', 'newDesaId', 'newKelompokId']);
         $this->resetErrorBag();
     }
@@ -70,7 +75,7 @@ class PersonSearch extends Component
         }
 
         return Person::with(['desa', 'kelompok'])
-            ->where('nama', 'like', '%' . $this->query . '%')
+            ->where('nama', 'like', '%'.$this->query.'%')
             ->orderBy('nama')
             ->limit(10)
             ->get();

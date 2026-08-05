@@ -1,5 +1,6 @@
 <?php
 
+use App\Imports\PesertaImport;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
@@ -12,7 +13,6 @@ use App\Models\regu;
 use App\Services\Cai\CaiParticipantReplacementService;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
-use App\Imports\PesertaImport;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -95,7 +95,7 @@ test('S8A-03: PesertaImport writes canonical Participation.regu_id', function ()
     $kelompok = kelompok::create(['kelompok_asal' => 'S8A Import Kelompok', 'desa_id' => $desa->id]);
     regu::create(['regu' => 'S8A Import Regu', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $import = new PesertaImport();
+    $import = new PesertaImport;
     $row = [
         'nama' => 'S8A Import Person',
         'jenis_kelamin' => 'Laki - Laki',
@@ -458,13 +458,13 @@ test('S8A-11: ResetEventData dry-run completes without legacy regu dependency', 
 test('S8A-12: peserta model no longer has regu_id in fillable', function () {
     $fillable = (new ReflectionClass(peserta::class))
         ->getProperty('fillable')
-        ->getValue(new peserta());
+        ->getValue(new peserta);
 
     expect($fillable)->not->toContain('regu_id');
 });
 
 test('S8A-13: peserta model no longer has regu() relationship', function () {
-    expect(method_exists(new peserta(), 'regu'))->toBeFalse();
+    expect(method_exists(new peserta, 'regu'))->toBeFalse();
 });
 
 test('S8A-14: registration for existing person without regu payload creates participation with null regu', function () {

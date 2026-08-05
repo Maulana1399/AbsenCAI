@@ -23,6 +23,7 @@ return new class extends Migration
 
         if (DB::connection()->getDriverName() === 'sqlite') {
             $this->recreatePartialUniqueIndexesSqlite();
+
             return;
         }
 
@@ -153,21 +154,21 @@ return new class extends Migration
      */
     private function createLegacyKeyTriggers(): void
     {
-        DB::statement("
+        DB::statement('
             CREATE TRIGGER event_attendances_legacy_key_bi
             BEFORE INSERT ON event_attendances
             FOR EACH ROW
             SET NEW.legacy_participation_key =
                 IF(NEW.sesi_absensi_id IS NULL, NEW.participation_id, NULL)
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE TRIGGER event_attendances_legacy_key_bu
             BEFORE UPDATE ON event_attendances
             FOR EACH ROW
             SET NEW.legacy_participation_key =
                 IF(NEW.sesi_absensi_id IS NULL, NEW.participation_id, NULL)
-        ");
+        ');
     }
 
     private function dropLegacyKeyTriggers(): void

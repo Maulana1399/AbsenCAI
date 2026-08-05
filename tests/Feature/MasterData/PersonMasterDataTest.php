@@ -1,11 +1,11 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\User;
-use App\Models\Person;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
+use App\Models\Person;
+use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -18,7 +18,7 @@ uses(RefreshDatabase::class);
 function pm_person(array $overrides = []): Person
 {
     return Person::create(array_merge([
-        'nama' => 'Test Person ' . str()->random(6),
+        'nama' => 'Test Person '.str()->random(6),
         'jenis_kelamin' => 'L',
     ], $overrides));
 }
@@ -26,8 +26,8 @@ function pm_person(array $overrides = []): Person
 function pm_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
-        'name' => 'Person Test Event ' . str()->random(6),
-        'slug' => 'pt-test-' . str()->random(6),
+        'name' => 'Person Test Event '.str()->random(6),
+        'slug' => 'pt-test-'.str()->random(6),
         'event_type' => 'cai',
         'status' => 'active',
     ], $overrides));
@@ -198,7 +198,6 @@ test('person index search filters by name', function () {
         ->assertDontSee('Other Name');
 });
 
-
 test('person index shows empty state when no data', function () {
     $user = User::factory()->create(['role' => Role::SuperAdmin]);
     $this->actingAs($user);
@@ -299,7 +298,7 @@ test('person with participation cannot be deleted', function () {
 function pm_regu(): \App\Models\regu
 {
     return \App\Models\regu::create([
-        'regu' => 'Test Regu ' . str()->random(4),
+        'regu' => 'Test Regu '.str()->random(4),
         'jenis_kelamin' => 'Laki - Laki',
     ]);
 }
@@ -310,7 +309,7 @@ function pm_mappedPerson(): array
 
     $event = Event::create([
         'name' => 'Sync Test Event',
-        'slug' => 'sync-test-' . str()->random(6),
+        'slug' => 'sync-test-'.str()->random(6),
         'status' => 'active',
     ]);
 
@@ -612,7 +611,7 @@ test('RegistrationService createParticipant sets kelompok_id on Person', functio
     $regu = pm_regu();
     $desa = \App\Models\desa::create(['desa_asal' => 'Reg Test Desa']);
     $kelompok = \App\Models\kelompok::create(['kelompok_asal' => 'Reg Test Kelompok', 'desa_id' => $desa->id]);
-    $nama = 'Reg Kelompok Test ' . str()->random(6);
+    $nama = 'Reg Kelompok Test '.str()->random(6);
     app(\App\Support\ActiveEventContext::class)->set($event);
     $this->actingAs($user);
 

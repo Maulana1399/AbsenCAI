@@ -18,14 +18,14 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class PersonImportTemplateExport implements WithMultipleSheets, WithEvents
+class PersonImportTemplateExport implements WithEvents, WithMultipleSheets
 {
     public function sheets(): array
     {
         return [
-            new PersonImportDataSheet(),
-            new PersonImportInstructionsSheet(),
-            new PersonImportMasterDataSheet(),
+            new PersonImportDataSheet,
+            new PersonImportInstructionsSheet,
+            new PersonImportMasterDataSheet,
         ];
     }
 
@@ -90,7 +90,7 @@ class PersonImportTemplateExport implements WithMultipleSheets, WithEvents
                     );
                 }
 
-                $desaValidation = new DataValidation();
+                $desaValidation = new DataValidation;
                 $desaValidation->setType(DataValidation::TYPE_LIST);
                 $desaValidation->setErrorStyle(DataValidation::STYLE_STOP);
                 $desaValidation->setAllowBlank(false);
@@ -104,7 +104,7 @@ class PersonImportTemplateExport implements WithMultipleSheets, WithEvents
                 $desaValidation->setError('Pilih desa dari daftar yang tersedia.');
                 $templateSheet->setDataValidation('D2:D1000', $desaValidation);
 
-                $kelompokValidation = new DataValidation();
+                $kelompokValidation = new DataValidation;
                 $kelompokValidation->setType(DataValidation::TYPE_LIST);
                 $kelompokValidation->setErrorStyle(DataValidation::STYLE_STOP);
                 $kelompokValidation->setAllowBlank(true);
@@ -118,7 +118,7 @@ class PersonImportTemplateExport implements WithMultipleSheets, WithEvents
                 $kelompokValidation->setError('Pilih kelompok dari daftar yang tersedia.');
                 $templateSheet->setDataValidation('E2:E1000', $kelompokValidation);
 
-                $jkValidation = new DataValidation();
+                $jkValidation = new DataValidation;
                 $jkValidation->setType(DataValidation::TYPE_LIST);
                 $jkValidation->setErrorStyle(DataValidation::STYLE_STOP);
                 $jkValidation->setAllowBlank(false);
@@ -134,7 +134,7 @@ class PersonImportTemplateExport implements WithMultipleSheets, WithEvents
     }
 }
 
-class PersonImportDataSheet implements FromArray, WithHeadings, WithTitle, WithColumnWidths, WithStyles
+class PersonImportDataSheet implements FromArray, WithColumnWidths, WithHeadings, WithStyles, WithTitle
 {
     public function array(): array
     {
@@ -190,7 +190,7 @@ class PersonImportDataSheet implements FromArray, WithHeadings, WithTitle, WithC
     }
 }
 
-class PersonImportInstructionsSheet implements FromArray, WithHeadings, WithTitle, WithStyles
+class PersonImportInstructionsSheet implements FromArray, WithHeadings, WithStyles, WithTitle
 {
     public function array(): array
     {
@@ -251,7 +251,7 @@ class PersonImportInstructionsSheet implements FromArray, WithHeadings, WithTitl
     }
 }
 
-class PersonImportMasterDataSheet implements FromArray, WithHeadings, WithTitle, WithStyles
+class PersonImportMasterDataSheet implements FromArray, WithHeadings, WithStyles, WithTitle
 {
     public function array(): array
     {

@@ -7,7 +7,6 @@ use App\Models\CompetitionOutcome;
 use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Models\Event;
-use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
 use App\Models\Venue;

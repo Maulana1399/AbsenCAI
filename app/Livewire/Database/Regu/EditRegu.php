@@ -2,26 +2,28 @@
 
 namespace App\Livewire\Database\Regu;
 
+use App\Models\regu;
 use Flux\Flux;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use App\Models\regu;
-use Illuminate\Support\Facades\Schema;
 
 class EditRegu extends Component
 {
     public $regu;
+
     public $regu_id;
+
     public $jenis_kelamin = '';
 
-    #[On("editRegu")]
+    #[On('editRegu')]
     public function editRegu($id)
     {
         $data = regu::find($id);
         $this->regu_id = $data->id;
         $this->regu = $data->regu;
         $this->jenis_kelamin = $data->jenis_kelamin;
-        Flux::modal("edit-regu")->show();
+        Flux::modal('edit-regu')->show();
     }
 
     public function update()
@@ -42,6 +44,7 @@ class EditRegu extends Component
         $this->validate($rules);
 
         regu::where('id', $this->regu_id)->update($data);
+
         return redirect()->to('/regu');
     }
 

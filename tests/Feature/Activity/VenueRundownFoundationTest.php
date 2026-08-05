@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\ActivityCategory;
 use App\Models\ActivityGroup;
 use App\Models\CategoryDefinition;
 use App\Models\Event;
@@ -9,13 +8,11 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\Rundown;
 use App\Models\RundownItem;
 use App\Models\Venue;
-use App\Models\peserta;
-use App\Services\Activity\ActivityRegistrationService;
 use App\Services\Activity\ActivityScheduleService;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 
@@ -147,6 +144,7 @@ function S3_9C_makeLegacyMapping(array $overrides = []): LegacyPesertaMapping
         'event_id' => $event,
         'migrated_at' => now(),
     ], $overrides));
+
     return $mapping;
 }
 

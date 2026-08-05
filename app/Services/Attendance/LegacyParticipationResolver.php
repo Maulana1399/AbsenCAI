@@ -81,5 +81,4 @@ class LegacyParticipationResolver
         return LegacyParticipationMapping::where('peserta_id', $pesertaId)->first()?->person
             ?? LegacyPesertaMapping::where('peserta_id', $pesertaId)->first()?->person;
     }
-
 }

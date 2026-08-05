@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Absensi;
-use App\Models\SesiAbsensi;
 use Illuminate\Console\Command;
 
 class AttendanceDiagnose extends Command
@@ -42,13 +41,14 @@ class AttendanceDiagnose extends Command
             }
         });
 
-        $this->line("=== Attendance Diagnostic (READ-ONLY) ===");
+        $this->line('=== Attendance Diagnostic (READ-ONLY) ===');
         $this->line("Total legacy Absensi scanned: {$total}");
-        $this->line("Unmappable found: " . count($unmappable));
+        $this->line('Unmappable found: '.count($unmappable));
         $this->newLine();
 
         if (empty($unmappable)) {
-            $this->info("No unmappable records found.");
+            $this->info('No unmappable records found.');
+
             return 0;
         }
 
@@ -70,7 +70,7 @@ class AttendanceDiagnose extends Command
         $this->table($headers, $rows);
         $this->newLine();
 
-        $this->warn("This command is READ-ONLY. No data was modified.");
+        $this->warn('This command is READ-ONLY. No data was modified.');
 
         return 0;
     }
@@ -113,6 +113,7 @@ class AttendanceDiagnose extends Command
 
         if ($mapping === null) {
             $otherMappings = \App\Models\LegacyParticipationMapping::where('peserta_id', $peserta->id)->count();
+
             return [
                 'absensi_id' => $absensi->id,
                 'nip' => $absensi->nip,

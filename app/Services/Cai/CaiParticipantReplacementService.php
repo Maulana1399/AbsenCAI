@@ -3,16 +3,16 @@
 namespace App\Services\Cai;
 
 use App\Models\ActivityRegistration;
+use App\Models\CaiParticipantReplacement;
 use App\Models\EventAttendance;
 use App\Models\EventCommitteeAssignment;
 use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
-use App\Models\peserta;
-use App\Models\SuratIzin;
-use App\Models\CaiParticipantReplacement;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
+use App\Models\SuratIzin;
 use App\Services\Placement\PlacementService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -89,10 +89,11 @@ class CaiParticipantReplacementService
 
         return $pesertaMapping;
     }
+
     public function replace(
-    peserta $peserta,
-    array $replacementData,
-    ?string $reason = null,
+        peserta $peserta,
+        array $replacementData,
+        ?string $reason = null,
     ): array {
 
         $nama = trim((string) ($replacementData['nama'] ?? ''));
@@ -131,25 +132,25 @@ class CaiParticipantReplacementService
                 ->lockForUpdate()
                 ->findOrFail($participationMapping->participation_id);
 
-    /*
-    * Simpan identitas slot CAI.
-    *
-    * Identifier ini milik SLOT peserta pada event,
-    * bukan identitas personal orang lama.
-    */
-    $participantNumber = $peserta->participant_number;
+            /*
+            * Simpan identitas slot CAI.
+            *
+            * Identifier ini milik SLOT peserta pada event,
+            * bukan identitas personal orang lama.
+            */
+            $participantNumber = $peserta->participant_number;
 
-    if (
-        isset($replacementData['jenis_kelamin'])
-        && $replacementData['jenis_kelamin'] !== $peserta->jenis_kelamin
-    ) {
-        $participantNumber = PlacementService::generateParticipantNumber(
-            $participationMapping->event_id,
-            $replacementData['jenis_kelamin'],
-        );
-    }
+            if (
+                isset($replacementData['jenis_kelamin'])
+                && $replacementData['jenis_kelamin'] !== $peserta->jenis_kelamin
+            ) {
+                $participantNumber = PlacementService::generateParticipantNumber(
+                    $participationMapping->event_id,
+                    $replacementData['jenis_kelamin'],
+                );
+            }
 
-    $attendanceCode = $peserta->attendance_code;
+            $attendanceCode = $peserta->attendance_code;
 
             /*
             * Lepaskan identifier unik dari Participation lama terlebih dahulu
@@ -251,7 +252,7 @@ class CaiParticipantReplacementService
                 'reason' => $reason,
                 'replaced_by' => auth()->id(),
                 'replaced_at' => now(),
-            ]); 
+            ]);
 
             return [
                 'peserta' => $peserta->fresh(),

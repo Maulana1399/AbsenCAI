@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\User;
 use App\Models\Event;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use App\Models\SuratIzin;
+use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -21,8 +21,8 @@ function s5_user(string $role): User
 function s5_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
-        'name' => 'S5 Test Event ' . str()->random(6),
-        'slug' => 's5-event-' . str()->random(6),
+        'name' => 'S5 Test Event '.str()->random(6),
+        'slug' => 's5-event-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ], $overrides));

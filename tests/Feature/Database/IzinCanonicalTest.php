@@ -7,8 +7,8 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceExceptionService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +17,7 @@ uses(RefreshDatabase::class);
 
 function iz_event(): Event
 {
-    return Event::create(['name' => 'IZ Event ' . str()->random(6), 'slug' => 'iz-' . str()->random(6), 'status' => 'active']);
+    return Event::create(['name' => 'IZ Event '.str()->random(6), 'slug' => 'iz-'.str()->random(6), 'status' => 'active']);
 }
 
 function iz_session(Event $event): SesiAbsensi
@@ -30,7 +30,7 @@ function iz_mappedParticipant(Event $event): object
     $person = Person::create(['nama' => 'IZ Mapped']);
     $peserta = peserta::create([
         'nama' => 'IZ Peserta', 'nip' => random_int(70000, 79999),
-        'attendance_code' => 'KJA-IZ-' . str()->random(8),
+        'attendance_code' => 'KJA-IZ-'.str()->random(8),
         'status_registrasi' => 'Belum Registrasi',
     ]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
@@ -46,6 +46,7 @@ function iz_mappedParticipant(Event $event): object
         'participation_id' => $participation->id, 'event_id' => $event->id,
         'migrated_at' => now(),
     ]);
+
     return (object) compact('person', 'peserta', 'participation');
 }
 
@@ -55,9 +56,10 @@ function iz_canonicalOnlyParticipant(Event $event): object
     $participation = Participation::create([
         'person_id' => $person->id, 'event_id' => $event->id,
         'jenis_peserta' => 'Wajib',
-        'attendance_code' => 'KJA-IZ-CANON-' . str()->random(8),
-        'participant_number' => 'KL' . random_int(100, 999),
+        'attendance_code' => 'KJA-IZ-CANON-'.str()->random(8),
+        'participant_number' => 'KL'.random_int(100, 999),
     ]);
+
     return (object) compact('person', 'participation');
 }
 
@@ -241,7 +243,7 @@ test('duplicate canonical izin rejected', function () {
 });
 
 // ---------------------------------------------------------------------------
-// G. ATTENDANCE_LEGACY_WRITE=false canonical-only does NOT create IzinAbsensi  
+// G. ATTENDANCE_LEGACY_WRITE=false canonical-only does NOT create IzinAbsensi
 // ---------------------------------------------------------------------------
 
 test('config false canonical izin does not create IzinAbsensi', function () {

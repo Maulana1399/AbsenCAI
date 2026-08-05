@@ -1,16 +1,13 @@
 <?php
 
-use App\Enums\Role;
 use App\Models\Event;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
-use App\Models\SuratIzin;
-use App\Models\User;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
+use App\Models\User;
 use App\Services\Attendance\SuratIzinService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);

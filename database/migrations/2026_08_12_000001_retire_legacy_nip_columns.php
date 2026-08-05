@@ -20,9 +20,15 @@ return new class extends Migration
             // Drop unique index explicitly for both SQLite and MySQL.
             // SQLite's DROP COLUMN fails if a UNIQUE index references the column.
             if ($driver === 'sqlite') {
-                try { DB::statement('DROP INDEX IF EXISTS people_nip_unique'); } catch (Throwable) {}
+                try {
+                    DB::statement('DROP INDEX IF EXISTS people_nip_unique');
+                } catch (Throwable) {
+                }
             } else {
-                try { Schema::table('people', fn (Blueprint $t) => $t->dropUnique(['nip'])); } catch (Throwable) {}
+                try {
+                    Schema::table('people', fn (Blueprint $t) => $t->dropUnique(['nip']));
+                } catch (Throwable) {
+                }
             }
             Schema::table('people', function (Blueprint $table) {
                 $table->dropColumn('nip');
@@ -34,7 +40,10 @@ return new class extends Migration
         //    On MySQL, drop unique then column.
         if (Schema::hasColumn('pesertas', 'nip')) {
             if ($driver !== 'sqlite') {
-                try { Schema::table('pesertas', fn (Blueprint $t) => $t->dropUnique(['nip'])); } catch (Throwable) {}
+                try {
+                    Schema::table('pesertas', fn (Blueprint $t) => $t->dropUnique(['nip']));
+                } catch (Throwable) {
+                }
                 Schema::table('pesertas', function (Blueprint $table) {
                     $table->dropColumn('nip');
                 });
@@ -44,7 +53,8 @@ return new class extends Migration
                 // Drop the index first, then drop the column.
                 try {
                     DB::statement('DROP INDEX IF EXISTS pesertas_sprint8b_nip_unique');
-                } catch (Throwable) {}
+                } catch (Throwable) {
+                }
 
                 DB::statement('PRAGMA foreign_keys = OFF');
                 Schema::table('pesertas', function (Blueprint $table) {
@@ -58,13 +68,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('people', function (Blueprint $table) {
-            if (!Schema::hasColumn('people', 'nip')) {
+            if (! Schema::hasColumn('people', 'nip')) {
                 $table->integer('nip')->nullable()->unique();
             }
         });
 
         Schema::table('pesertas', function (Blueprint $table) {
-            if (!Schema::hasColumn('pesertas', 'nip')) {
+            if (! Schema::hasColumn('pesertas', 'nip')) {
                 $table->integer('nip');
                 $table->unique('nip');
             }

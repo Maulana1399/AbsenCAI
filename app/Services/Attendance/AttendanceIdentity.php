@@ -9,8 +9,11 @@ use App\Models\peserta;
 class AttendanceIdentity
 {
     public readonly ?int $pesertaId;
+
     public readonly ?int $participationId;
+
     public readonly ?int $personId;
+
     public readonly ?string $nama;
 
     public function __construct(

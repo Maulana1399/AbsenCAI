@@ -11,6 +11,5 @@ final readonly class NormalizedImportRow
         public array $warnings = [],
         public ?string $duplicateKey = null,
         public bool $isDuplicateCandidate = false,
-    ) {
-    }
+    ) {}
 }

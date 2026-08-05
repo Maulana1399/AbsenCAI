@@ -17,24 +17,33 @@ class ManualEntry extends Component
     public bool $processing = false;
 
     public string $nama = '';
+
     public string $jenisKelamin = '';
+
     public string $tanggalLahir = '';
+
     public string $kelompokId = '';
 
     public ?string $eventName = null;
+
     public ?string $desaName = null;
 
     public int $step = 1;
 
     public string $errorMessage = '';
+
     public string $successMessage = '';
 
     public array $potentialMatches = [];
+
     public bool $creatingNew = false;
 
     public ?string $resultPersonName = null;
+
     public ?string $resultParticipantNumber = null;
+
     public ?int $resultPersonId = null;
+
     public ?int $resultParticipationId = null;
 
     public array $daftarKelompok = [];
@@ -45,6 +54,7 @@ class ManualEntry extends Component
 
         if ($session === null || ! isset($session['grant_id'], $session['event_id'], $session['desa_id'])) {
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -53,12 +63,14 @@ class ManualEntry extends Component
         if ($grant === null || $grant->revoked_at !== null || now()->greaterThan($grant->valid_until) || now()->lessThan($grant->valid_from)) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
         if ((int) $grant->event_id !== (int) $session['event_id'] || (int) $grant->desa_id !== (int) $session['desa_id']) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 

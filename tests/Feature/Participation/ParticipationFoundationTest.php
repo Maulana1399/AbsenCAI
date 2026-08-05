@@ -18,7 +18,7 @@ function ParticipationFoundation_makeEvent(array $overrides = []): Event
 {
     return Event::create(array_merge([
         'name' => 'Test Event',
-        'slug' => 'test-event-' . str()->random(6),
+        'slug' => 'test-event-'.str()->random(6),
         'status' => 'active',
     ], $overrides));
 }

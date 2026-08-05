@@ -2,9 +2,9 @@
 
 namespace App\Services\Person;
 
+use App\Models\LegacyPesertaMapping;
 use App\Models\Person;
 use App\Models\peserta;
-use App\Models\LegacyPesertaMapping;
 use App\Services\Placement\PlacementService;
 use Illuminate\Support\Facades\DB;
 
@@ -43,5 +43,4 @@ class PersonLegacySyncService
     {
         return $person->legacyPesertaMapping()->exists();
     }
-
 }

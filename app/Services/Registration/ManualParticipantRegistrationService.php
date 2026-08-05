@@ -3,9 +3,9 @@
 namespace App\Services\Registration;
 
 use App\Models\Event;
+use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\kelompok;
 use App\Services\Placement\PlacementService;
 use Illuminate\Support\Facades\DB;
 
@@ -35,11 +35,13 @@ class ManualParticipantRegistrationService
             if ($forcePersonId !== null) {
                 $person = Person::lockForUpdate()->findOrFail($forcePersonId);
                 $this->assertPersonBelongsToDesa($person, $desaId);
+
                 return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'matched');
             }
 
             if ($forceCreateNew) {
                 $person = $this->createPerson($nama, $jenisKelamin, $tanggalLahir, $desaId, $kelompokId);
+
                 return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'created');
             }
 
@@ -52,8 +54,7 @@ class ManualParticipantRegistrationService
                 $hasBirthDate = $tanggalLahir !== null && $tanggalLahir !== '';
 
                 if ($hasBirthDate) {
-                    $exact = $candidates->first(fn (Person $p) =>
-                        $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
+                    $exact = $candidates->first(fn (Person $p) => $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
                     );
 
                     if ($exact !== null) {
@@ -78,6 +79,7 @@ class ManualParticipantRegistrationService
             }
 
             $person = $this->createPerson($nama, $jenisKelamin, $tanggalLahir, $desaId, $kelompokId);
+
             return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'created');
         });
     }

@@ -16,29 +16,49 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $filterCategoryId = '';
+
     public string $filterClassId = '';
+
     public string $filterVenueId = '';
+
     public string $filterStatus = '';
 
     public bool $showCreateForm = false;
+
     public string $newCompetitionClassId = '';
+
     public string $newVenueId = '';
+
     public string $newStartAt = '';
+
     public string $newEndAt = '';
+
     public string $newStatus = 'Scheduled';
+
     public string $newRequiredParticipants = '1';
+
     public string $newNotes = '';
+
     public string $newSortOrder = '';
 
     public ?int $editId = null;
+
     public string $editCompetitionClassId = '';
+
     public string $editVenueId = '';
+
     public string $editStartAt = '';
+
     public string $editEndAt = '';
+
     public string $editStatus = '';
+
     public string $editRequiredParticipants = '1';
+
     public string $editNotes = '';
+
     public string $editSortOrder = '';
 
     public bool $processing = false;
@@ -58,7 +78,7 @@ class Index extends Component
 
     public function toggleCreateForm(): void
     {
-        $this->showCreateForm = !$this->showCreateForm;
+        $this->showCreateForm = ! $this->showCreateForm;
         $this->reset(['newCompetitionClassId', 'newVenueId', 'newStartAt', 'newEndAt', 'newStatus', 'newRequiredParticipants', 'newNotes', 'newSortOrder']);
         $this->newStatus = 'Scheduled';
         $this->newRequiredParticipants = '1';
@@ -69,7 +89,9 @@ class Index extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {
@@ -195,8 +217,8 @@ class Index extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->whereHas('competitionClass', fn($q) => $q->where('name', 'like', "%{$this->search}%"))
-                  ->orWhereHas('venue', fn($q) => $q->where('name', 'like', "%{$this->search}%"));
+                $q->whereHas('competitionClass', fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+                    ->orWhereHas('venue', fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
             });
         }
 

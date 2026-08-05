@@ -2,7 +2,6 @@
 
 use App\Exports\ActivityRegistrationExport;
 use App\Exports\PesertaExport;
-use App\Livewire\Rekap\Activity\ActivityRegistrationReport;
 use App\Models\Activity;
 use App\Models\ActivityCategory;
 use App\Models\ActivityGroup;
@@ -11,19 +10,17 @@ use App\Models\CategoryDefinition;
 use App\Models\Event;
 use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
+use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\Rundown;
-use App\Models\RundownItem;
-use App\Models\Venue;
 use App\Models\peserta;
-use App\Models\LegacyParticipationMapping;
-use App\Services\Activity\EventCommitteeService;
+use App\Models\Rundown;
+use App\Models\Venue;
 use App\Services\Activity\ActivityRegistrationService;
 use App\Services\Activity\ActivityScheduleService;
+use App\Services\Activity\EventCommitteeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Maatwebsite\Excel\Facades\Excel;
 
 uses(RefreshDatabase::class);
 
@@ -41,48 +38,56 @@ function S3_9E_makeParticipation(array $overrides = []): Participation
 {
     $person = $overrides['person_id'] ?? S3_9E_makePerson()->id;
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return Participation::create(array_merge(['person_id' => $person, 'event_id' => $event, 'jenis_peserta' => 'Wajib'], $overrides));
 }
 
 function S3_9E_makeGroup(array $overrides = []): ActivityGroup
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return ActivityGroup::create(array_merge(['event_id' => $event, 'name' => 'Group Test'], $overrides));
 }
 
 function S3_9E_makeCategory(array $overrides = []): CategoryDefinition
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return CategoryDefinition::create(array_merge(['event_id' => $event, 'name' => 'SMA', 'is_active' => true], $overrides));
 }
 
 function S3_9E_makeActivity(array $overrides = []): Activity
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return Activity::create(array_merge(['event_id' => $event, 'name' => 'Activity Test', 'status' => 'active', 'requires_category' => false], $overrides));
 }
 
 function S3_9E_makeVenue(array $overrides = []): Venue
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return app(ActivityScheduleService::class)->createVenue(array_merge(['event_id' => $event, 'name' => 'Venue Test'], $overrides));
 }
 
 function S3_9E_makeRundown(array $overrides = []): Rundown
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return app(ActivityScheduleService::class)->createRundown(array_merge(['event_id' => $event, 'name' => 'Rundown Test'], $overrides));
 }
 
 function S3_9E_makeRole(array $overrides = []): EventRole
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return app(EventCommitteeService::class)->createRole(array_merge(['event_id' => $event, 'name' => 'Ketua Panitia', 'code' => 'ketua_event', 'scope' => 'event'], $overrides));
 }
 
 function S3_9E_makeAssignment(array $overrides = []): EventCommitteeAssignment
 {
     $event = $overrides['event_id'] ?? S3_9E_makeEvent()->id;
+
     return app(EventCommitteeService::class)->assign(array_merge(['event_id' => $event, 'person_id' => S3_9E_makePerson()->id, 'event_role_id' => S3_9E_makeRole(['event_id' => $event])->id], $overrides));
 }
 
@@ -104,6 +109,7 @@ function S3_9E_makeLegacyMapping(array $overrides = []): LegacyPesertaMapping
         'event_id' => $event,
         'migrated_at' => now(),
     ], $overrides));
+
     return $mapping;
 }
 

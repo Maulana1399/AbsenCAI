@@ -21,15 +21,15 @@ class ActivityLogService
         $request = request();
 
         return ActivityLog::create([
-            'user_id'      => $user?->id,
-            'action'       => $action,
-            'module'       => $module,
-            'description'  => $description,
+            'user_id' => $user?->id,
+            'action' => $action,
+            'module' => $module,
+            'description' => $description,
             'subject_type' => $subject ? get_class($subject) : null,
-            'subject_id'   => $subject?->getKey(),
-            'properties'   => empty($properties) ? null : $properties,
-            'ip_address'   => $request?->ip(),
-            'user_agent'   => $request?->userAgent(),
+            'subject_id' => $subject?->getKey(),
+            'properties' => empty($properties) ? null : $properties,
+            'ip_address' => $request?->ip(),
+            'user_agent' => $request?->userAgent(),
         ]);
     }
 }

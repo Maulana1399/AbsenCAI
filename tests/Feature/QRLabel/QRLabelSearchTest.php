@@ -2,8 +2,8 @@
 
 use App\Livewire\QRLabel\Index;
 use App\Models\Event;
-use App\Models\Person;
 use App\Models\Participation;
+use App\Models\Person;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -13,8 +13,8 @@ uses(RefreshDatabase::class);
 function qr_search_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'QR Search ' . $suffix,
-        'slug' => 'qr-search-' . $suffix . '-' . str()->random(6),
+        'name' => 'QR Search '.$suffix,
+        'slug' => 'qr-search-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
     ]);
 }

@@ -2,16 +2,13 @@
 
 namespace App\Services\Import\Support;
 
-use App\Services\Import\DTO\ImportContext;
-
 final readonly class ImportVersion
 {
     public function __construct(
         public string $current,
         public string $minimum,
         public string $supported,
-    ) {
-    }
+    ) {}
 
     public function currentVersion(): string
     {

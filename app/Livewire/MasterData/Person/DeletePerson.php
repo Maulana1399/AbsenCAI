@@ -3,16 +3,19 @@
 namespace App\Livewire\MasterData\Person;
 
 use App\Models\Person;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DeletePerson extends Component
 {
     public ?int $person_id = null;
+
     public ?string $person_nama = null;
+
     public ?string $blockReason = null;
+
     public bool $canDelete = false;
 
     #[On('deletePerson')]
@@ -34,7 +37,7 @@ class DeletePerson extends Component
         $reasons = [];
 
         if ($hasParticipations) {
-            $reasons[] = 'Person ini terdaftar sebagai peserta di ' . $person->participations_count . ' event.';
+            $reasons[] = 'Person ini terdaftar sebagai peserta di '.$person->participations_count.' event.';
         }
 
         if ($hasLegacyMapping) {
@@ -42,11 +45,11 @@ class DeletePerson extends Component
         }
 
         if ($hasCommitteeAssignments) {
-            $reasons[] = 'Person ini memiliki ' . $person->committee_assignments_count . ' penugasan kepanitiaan.';
+            $reasons[] = 'Person ini memiliki '.$person->committee_assignments_count.' penugasan kepanitiaan.';
         }
 
         if (! empty($reasons)) {
-            $this->blockReason = 'Person tidak dapat dihapus karena:<br>' . implode('<br>', $reasons);
+            $this->blockReason = 'Person tidak dapat dihapus karena:<br>'.implode('<br>', $reasons);
             $this->canDelete = false;
         } else {
             $this->blockReason = null;
@@ -68,6 +71,7 @@ class DeletePerson extends Component
 
         if (! $person) {
             Flux::modal('hapus-person')->close();
+
             return;
         }
 

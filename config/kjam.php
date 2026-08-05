@@ -30,5 +30,5 @@ return [
 
     'event_name' => env('KJAM_EVENT_NAME', 'CAI'),
     'event_logo' => env('KJAM_EVENT_LOGO', 'images/logo-cai.png'),
-    'org_logo'   => env('KJAM_ORG_LOGO', 'images/logo-org.png'),
+    'org_logo' => env('KJAM_ORG_LOGO', 'images/logo-org.png'),
 ];

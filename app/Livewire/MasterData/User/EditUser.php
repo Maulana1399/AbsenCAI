@@ -7,22 +7,29 @@ use App\Models\User;
 use App\Services\User\UserManagementService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EditUser extends Component
 {
     public bool $processing = false;
 
     public ?int $userId = null;
+
     public string $name = '';
+
     public ?string $email = null;
+
     public string $role = '';
+
     public ?int $person_id = null;
+
     public string $selectedPersonNama = '';
+
     public string $searchPerson = '';
 
     public bool $roleLocked = false;
+
     public ?string $roleLockReason = null;
 
     #[On('editUser')]
@@ -96,13 +103,13 @@ class EditUser extends Component
         $uniqueRule = 'unique:users,email';
 
         if ($this->userId !== null) {
-            $uniqueRule .= ',' . $this->userId;
+            $uniqueRule .= ','.$this->userId;
         }
 
         return [
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|' . $uniqueRule,
-            'role' => 'required|in:' . implode(',', Role::platformValues()),
+            'email' => 'nullable|email|max:255|'.$uniqueRule,
+            'role' => 'required|in:'.implode(',', Role::platformValues()),
         ];
     }
 

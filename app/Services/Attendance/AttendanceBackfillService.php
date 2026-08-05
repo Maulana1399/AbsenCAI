@@ -108,11 +108,13 @@ class AttendanceBackfillService
 
                 if ($eventId === null) {
                     $stats['unmappable']++;
+
                     continue;
                 }
 
                 if ($eventId === false) {
                     $stats['ambiguous']++;
+
                     continue;
                 }
 

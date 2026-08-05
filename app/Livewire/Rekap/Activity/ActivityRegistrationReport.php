@@ -12,10 +12,13 @@ use Maatwebsite\Excel\Facades\Excel;
 class ActivityRegistrationReport extends Component
 {
     public $activity_group_id = '';
+
     public $activity_id = '';
+
     public $category_definition_id = '';
 
     public $daftarActivityGroups = [];
+
     public $daftarCategories = [];
 
     public function mount()

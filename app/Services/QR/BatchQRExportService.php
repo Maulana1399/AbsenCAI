@@ -10,8 +10,7 @@ class BatchQRExportService
 {
     public function __construct(
         private readonly QRService $qrService,
-    ) {
-    }
+    ) {}
 
     public function export(Collection $participants, string $format = 'png', string $directory = 'qr-exports'): array
     {
@@ -25,11 +24,13 @@ class BatchQRExportService
         foreach ($participants as $participant) {
             if (! $participant instanceof Participation) {
                 $failed++;
+
                 continue;
             }
 
             if (blank($participant->attendance_code) || blank($participant->participant_number)) {
                 $skipped++;
+
                 continue;
             }
 

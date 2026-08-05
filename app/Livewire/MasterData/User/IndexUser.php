@@ -14,6 +14,7 @@ class IndexUser extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $filterRole = '';
 
     protected $queryString = [
@@ -29,8 +30,8 @@ class IndexUser extends Component
 
         if ($this->search !== '') {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -73,6 +74,7 @@ class IndexUser extends Component
         foreach ($users as $user) {
             if ($user->person_id === null) {
                 $labelsByUser[$user->id] = '—';
+
                 continue;
             }
 
@@ -102,6 +104,7 @@ class IndexUser extends Component
 
         if ($user->id === auth()->id()) {
             session()->flash('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
+
             return;
         }
 

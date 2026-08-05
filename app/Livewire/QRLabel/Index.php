@@ -2,9 +2,8 @@
 
 namespace App\Livewire\QRLabel;
 
-use App\Models\Participation;
-use App\Models\peserta;
 use App\Livewire\Traits\HasCascadingKelompok;
+use App\Models\Participation;
 use App\Services\Audit\ActivityLogService;
 use App\Services\Print\PrintEngine;
 use App\Services\QR\BatchQRExportService;
@@ -17,25 +16,39 @@ use Livewire\Component;
 class Index extends Component
 {
     use HasCascadingKelompok;
+
     public string $search = '';
+
     public string $mode = 'individual';
+
     public ?int $selectedParticipantId = null;
 
     public $selectedParticipant;
 
     public $filterDesa = '';
+
     public $filterKelompok = '';
+
     public $filterRegu = '';
+
     public $filterGender = '';
+
     public string $filterKeyword = '';
 
     public $daftarDesa = [];
+
     public $daftarKelompok = [];
+
     public $daftarRegu = [];
+
     public $batchPreview = [];
+
     public $batchParticipants = [];
+
     public $labelPreview = [];
+
     public ?int $selectedLabelParticipantId = null;
+
     public string $labelPreviewHtml = '';
 
     public function mount(): void
@@ -64,6 +77,7 @@ class Index extends Component
     {
         if (! $participantId) {
             $this->labelPreviewHtml = '';
+
             return;
         }
 
@@ -72,6 +86,7 @@ class Index extends Component
 
         if (! $participant) {
             $this->labelPreviewHtml = '';
+
             return;
         }
 
@@ -112,12 +127,12 @@ class Index extends Component
             description: 'Mengunduh QR peserta '.$subject->nama,
             subject: $subject,
             properties: [
-                'qr_type'           => 'single',
-                'participant_id'    => $participant->id,
+                'qr_type' => 'single',
+                'participant_id' => $participant->id,
                 'participant_number' => $participant->participant_number,
-                'attendance_code'   => $participant->attendance_code,
-                'format'            => 'png',
-                'filename'          => $filename,
+                'attendance_code' => $participant->attendance_code,
+                'format' => 'png',
+                'filename' => $filename,
             ],
         );
 
@@ -140,12 +155,12 @@ class Index extends Component
             module: 'qr',
             description: 'Membuat batch QR peserta',
             properties: [
-                'qr_type'      => 'batch',
-                'format'       => $summary['format'],
+                'qr_type' => 'batch',
+                'format' => $summary['format'],
                 'record_count' => $summary['generated'],
-                'skipped'      => $summary['skipped'],
-                'failed'       => $summary['failed'],
-                'directory'    => $summary['directory'],
+                'skipped' => $summary['skipped'],
+                'failed' => $summary['failed'],
+                'directory' => $summary['directory'],
             ],
         );
 
@@ -186,6 +201,7 @@ class Index extends Component
         if ($participants->isEmpty()) {
             $this->selectedLabelParticipantId = null;
             $this->labelPreviewHtml = '';
+
             return;
         }
 
@@ -260,8 +276,8 @@ class Index extends Component
                 $builder->whereHas('person', function ($personQuery) use ($keyword) {
                     $personQuery->where('nama', 'like', '%'.$keyword.'%');
                 })
-                ->orWhere('participant_number', 'like', '%'.$keyword.'%')
-                ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
+                    ->orWhere('participant_number', 'like', '%'.$keyword.'%')
+                    ->orWhere('attendance_code', 'like', '%'.$keyword.'%');
             });
         }
 

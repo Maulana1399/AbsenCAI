@@ -2,21 +2,19 @@
 
 use App\Models\Absensi;
 use App\Models\Event;
-use App\Models\EventAttendance;
-use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 function ad_event(): Event
 {
-    return Event::create(['name' => 'AD Event ' . str()->random(6), 'slug' => 'ad-' . str()->random(6), 'status' => 'active']);
+    return Event::create(['name' => 'AD Event '.str()->random(6), 'slug' => 'ad-'.str()->random(6), 'status' => 'active']);
 }
 
 function ad_session(Event $event): SesiAbsensi

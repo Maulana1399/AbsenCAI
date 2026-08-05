@@ -39,27 +39,27 @@ class AttendanceStatus extends Command
             ? 'DUAL-WRITE (canonical + legacy)'
             : 'CANONICAL-WRITE + LEGACY-FALLBACK';
 
-        $this->line("Legacy write config: " . ($legacyWriteEnabled ? 'ENABLED' : 'DISABLED'));
+        $this->line('Legacy write config: '.($legacyWriteEnabled ? 'ENABLED' : 'DISABLED'));
         $this->line("Operating mode:     {$mode}");
-        $this->line("");
+        $this->line('');
 
-        $this->line("--- EventAttendance (canonical) ---");
+        $this->line('--- EventAttendance (canonical) ---');
         $this->line("  Total:     {$canonicalCount}");
         $this->line("  CAI:       {$caiCanonicalCount} (sesi_absensi_id IS NOT NULL)");
         $this->line("  Pengajian: {$pengajianCanonicalCount} (sesi_absensi_id IS NULL)");
-        $this->line("");
+        $this->line('');
 
-        $this->line("--- Legacy Tables ---");
+        $this->line('--- Legacy Tables ---');
         $this->line("  Absensi (hadir):    {$legacyAbsensiCount}");
         $this->line("  IzinAbsensi (izin): {$legacyIzinCount}");
-        $this->line("");
+        $this->line('');
 
-        $this->line("--- Fallback ---");
-        $this->line("  Legacy fallback reads: ACTIVE (AttendanceReadService)");
-        $this->line("  Historical data:       PRESERVED (no legacy tables deleted)");
-        $this->line("");
+        $this->line('--- Fallback ---');
+        $this->line('  Legacy fallback reads: ACTIVE (AttendanceReadService)');
+        $this->line('  Historical data:       PRESERVED (no legacy tables deleted)');
+        $this->line('');
 
-        $this->warn("This command is READ-ONLY. No data was modified.");
+        $this->warn('This command is READ-ONLY. No data was modified.');
 
         return 0;
     }

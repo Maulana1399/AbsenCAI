@@ -15,7 +15,9 @@ use Livewire\Component;
 class OperatorDashboard extends Component
 {
     public string $announcementMessage = '';
+
     public bool $showAnnouncementForm = false;
+
     public bool $processing = false;
 
     private function workflow(): CompetitionWorkflowService
@@ -33,6 +35,7 @@ class OperatorDashboard extends Component
             $user = auth()->user();
             if (! $user->can('manage-events')) {
                 session()->flash('error', 'Jadwal ini belum dimulai. Silakan tunggu waktu yang ditentukan.');
+
                 return;
             }
         }
@@ -42,12 +45,14 @@ class OperatorDashboard extends Component
 
             if ($nextStatus === 'Waiting Result') {
                 session()->flash('info', 'Pertandingan menunggu hasil official.');
+
                 return;
             }
 
             if ($nextStatus !== 'Finished') {
                 session()->flash('error', 'Gagal menyelesaikan pertandingan.');
             }
+
             return;
         }
 
@@ -57,9 +62,9 @@ class OperatorDashboard extends Component
             default => false,
         };
 
-        if (!$result && $schedule->status === 'Scheduled' && !$schedule->canAutoReady()) {
+        if (! $result && $schedule->status === 'Scheduled' && ! $schedule->canAutoReady()) {
             session()->flash('error', 'Tidak dapat mengubah ke Ready: peserta belum lengkap.');
-        } elseif (!$result && $schedule->status === 'Ready' && !$schedule->isReadyForStart()) {
+        } elseif (! $result && $schedule->status === 'Ready' && ! $schedule->isReadyForStart()) {
             session()->flash('error', 'Tidak dapat memulai pertandingan: peserta belum lengkap.');
         }
     }
@@ -75,7 +80,7 @@ class OperatorDashboard extends Component
 
     public function toggleAnnouncementForm(): void
     {
-        $this->showAnnouncementForm = !$this->showAnnouncementForm;
+        $this->showAnnouncementForm = ! $this->showAnnouncementForm;
         $this->reset(['announcementMessage']);
         $this->resetErrorBag();
     }
@@ -84,7 +89,9 @@ class OperatorDashboard extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {
@@ -127,6 +134,7 @@ class OperatorDashboard extends Component
                 $schedule->has_outcome = CompetitionOutcome::whereHas('competitionRegistration', function ($q) use ($schedule) {
                     $q->where('competition_class_id', $schedule->competition_class_id);
                 })->exists();
+
                 return $schedule;
             });
 

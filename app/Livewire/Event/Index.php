@@ -4,7 +4,6 @@ namespace App\Livewire\Event;
 
 use App\Models\Event;
 use App\Support\ActiveEventContext;
-use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -13,10 +12,15 @@ class Index extends Component
     public bool $showCreateForm = false;
 
     public string $newName = '';
+
     public string $newSlug = '';
+
     public string $newEventType = 'cai';
+
     public string $newDescription = '';
+
     public string $newStartDate = '';
+
     public string $newEndDate = '';
 
     public bool $processing = false;

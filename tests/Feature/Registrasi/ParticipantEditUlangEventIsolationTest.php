@@ -2,14 +2,14 @@
 
 use App\Livewire\Database\Peserta\EditPeserta;
 use App\Livewire\Registrasi\Ulang;
+use App\Models\desa;
 use App\Models\Event;
+use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
-use App\Models\desa;
-use App\Models\kelompok;
 use App\Models\regu;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,8 +20,8 @@ uses(RefreshDatabase::class);
 function pe_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'PE Event ' . $suffix,
-        'slug' => 'pe-' . $suffix . '-' . str()->random(6),
+        'name' => 'PE Event '.$suffix,
+        'slug' => 'pe-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
     ]);
 }

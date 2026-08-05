@@ -1,17 +1,16 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\ActivityLog;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Enums\Role;
-use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
-use App\Support\ActiveEventContext;
 
 function printLog_createMappedPeserta(Event $event, array $overrides = []): peserta
 {
@@ -60,10 +59,10 @@ beforeEach(function () {
     $this->actingAs($this->user);
 
     $this->peserta = peserta::create([
-        'nama'            => 'Peserta Print Test',
-        'nip'             => 8001,
+        'nama' => 'Peserta Print Test',
+        'nip' => 8001,
         'attendance_code' => 'KJA-PRINT-TEST',
-        'jenis_kelamin'   => 'Laki - Laki',
+        'jenis_kelamin' => 'Laki - Laki',
     ]);
     $this->event = Event::create([
         'name' => 'Print QR Event',
@@ -105,9 +104,9 @@ beforeEach(function () {
 
 test('surat izin print creates print_viewed activity log entry', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -116,19 +115,19 @@ test('surat izin print creates print_viewed activity log entry', function () {
     $this->get(route('surat-izin.print', ['event' => $this->event, 'surat' => $surat->id]));
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'print_viewed',
-        'module'       => 'print',
+        'action' => 'print_viewed',
+        'module' => 'print',
         'subject_type' => SuratIzin::class,
-        'subject_id'   => $surat->id,
-        'user_id'      => $this->user->id,
+        'subject_id' => $surat->id,
+        'user_id' => $this->user->id,
     ]);
 });
 
 test('surat izin print stores correct properties', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -142,18 +141,18 @@ test('surat izin print stores correct properties', function () {
         ->first();
 
     expect($log->properties)->toMatchArray([
-        'print_type'    => 'surat_izin',
-        'peserta_id'    => $this->peserta->id,
+        'print_type' => 'surat_izin',
+        'peserta_id' => $this->peserta->id,
         'surat_izin_id' => $surat->id,
-        'nomor_surat'   => $surat->nomor_surat,
+        'nomor_surat' => $surat->nomor_surat,
     ]);
 });
 
 test('surat izin print stores correct description', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -171,9 +170,9 @@ test('surat izin print stores correct description', function () {
 
 test('forbidden surat izin print does not create activity log entry', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Draft',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Draft',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
 
@@ -181,17 +180,17 @@ test('forbidden surat izin print does not create activity log entry', function (
         ->assertStatus(403);
 
     $this->assertDatabaseMissing('activity_logs', [
-        'module'     => 'print',
-        'action'     => 'print_viewed',
+        'module' => 'print',
+        'action' => 'print_viewed',
         'subject_id' => $surat->id,
     ]);
 });
 
 test('repeated surat izin print requests create separate activity log entries', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -208,9 +207,9 @@ test('repeated surat izin print requests create separate activity log entries', 
 
 test('surat izin print response remains successful', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);
@@ -230,11 +229,11 @@ test('qr label single print creates print_viewed activity log entry', function (
     $this->get(route('qr-label.print.selected', ['event' => $this->event, 'participant' => $this->participation->id]));
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'print_viewed',
-        'module'       => 'print',
+        'action' => 'print_viewed',
+        'module' => 'print',
         'subject_type' => App\Models\Person::class,
-        'subject_id'   => $this->person->id,
-        'user_id'      => $this->user->id,
+        'subject_id' => $this->person->id,
+        'user_id' => $this->user->id,
     ]);
 });
 
@@ -247,8 +246,8 @@ test('qr label single print stores correct properties', function () {
         ->first();
 
     expect($log->properties)->toMatchArray([
-        'print_type'      => 'qr_label_single',
-        'peserta_id'      => $this->peserta->id,
+        'print_type' => 'qr_label_single',
+        'peserta_id' => $this->peserta->id,
         'attendance_code' => $this->peserta->attendance_code,
     ]);
 });
@@ -340,9 +339,9 @@ test('qr label batch a4 print response remains successful', function () {
 
 test('surat izin print does not affect surat izin lifecycle logs', function () {
     $surat = app(SuratIzinService::class)->create([
-        'peserta_id'      => $this->peserta->id,
-        'alasan'          => 'Sakit',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $this->peserta->id,
+        'alasan' => 'Sakit',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $this->user->id);
     $surat->update(['status' => 'pending']);

@@ -3,11 +3,10 @@
 namespace App\Livewire\Rekap\Peserta;
 
 use App\Exports\PesertaExport;
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Models\desa;
-use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\regu;
-use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Audit\ActivityLogService;
 use App\Support\ActiveEventContext;
 use Illuminate\Support\Facades\Gate;
@@ -17,14 +16,21 @@ use Maatwebsite\Excel\Facades\Excel;
 class RekapPeserta extends Component
 {
     use HasCascadingKelompok;
+
     public $regu_id = '';
+
     public $kelompok_id = '';
+
     public $desa_id = '';
+
     public $jenis_kelamin = '';
+
     public $jenis_peserta = '';
 
     public $daftarRegu = [];
+
     public $daftarKelompok = [];
+
     public $daftarDesa = [];
 
     public function mount()
@@ -91,10 +97,10 @@ class RekapPeserta extends Component
         })->values();
 
         $total = $daftar->count();
-        $totalLaki = $daftar->where('jenis_kelamin','L')->count();
-        $totalPerempuan = $daftar->where('jenis_kelamin','P')->count();
-        $sudahRegUlang = $daftar->where('status_registrasi','Registrasi Ulang')->count();
-        $belumRegUlang = $daftar->where('status_registrasi','Belum Registrasi')->count();
+        $totalLaki = $daftar->where('jenis_kelamin', 'L')->count();
+        $totalPerempuan = $daftar->where('jenis_kelamin', 'P')->count();
+        $sudahRegUlang = $daftar->where('status_registrasi', 'Registrasi Ulang')->count();
+        $belumRegUlang = $daftar->where('status_registrasi', 'Belum Registrasi')->count();
 
         return view('livewire.rekap.peserta.rekap-peserta', [
             'daftarPeserta' => $daftar,
@@ -142,9 +148,9 @@ class RekapPeserta extends Component
             description: 'Mengekspor data peserta',
             properties: [
                 'export_type' => 'peserta',
-                'format'      => 'xlsx',
-                'filename'    => $fileName,
-                'filters'     => $filters,
+                'format' => 'xlsx',
+                'filename' => $fileName,
+                'filters' => $filters,
             ],
         );
 

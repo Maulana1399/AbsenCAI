@@ -16,8 +16,8 @@ uses(RefreshDatabase::class);
 function pd_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'PD Event ' . $suffix,
-        'slug' => 'pd-' . $suffix . '-' . str()->random(6),
+        'name' => 'PD Event '.$suffix,
+        'slug' => 'pd-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);

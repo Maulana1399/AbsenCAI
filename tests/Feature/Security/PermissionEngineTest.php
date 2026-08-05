@@ -289,8 +289,8 @@ test('DIAG 1: unknown code cannot be created → no silent empty permissions', f
     // kini dilarang dibuat — harus memakai code sistem yang valid.
     expect(fn () => EventRole::create([
         'event_id' => $event->id,
-        'name'    => 'Panitia',
-        'code'    => null,
+        'name' => 'Panitia',
+        'code' => null,
     ]))->toThrow(\App\Exceptions\UnknownEventRoleCodeException::class);
 
     expect(EventRole::count())->toBe(0, 'Role tidak jadi dibuat (fail-closed)');
@@ -306,13 +306,13 @@ test('DIAG 2: same user/event with code=ketua_event → permissions OK → 200',
 
     $role = EventRole::create([
         'event_id' => $event->id,
-        'name'    => 'Ketua',
-        'code'    => 'ketua_event',
+        'name' => 'Ketua',
+        'code' => 'ketua_event',
     ]);
 
     app(EventCommitteeService::class)->assign([
-        'event_id'      => $event->id,
-        'person_id'     => $person->id,
+        'event_id' => $event->id,
+        'person_id' => $person->id,
         'event_role_id' => $role->id,
     ]);
 
@@ -333,13 +333,13 @@ test('DIAG 3: user with assignment + code-driven permissions → 200', function 
 
     $role = EventRole::create([
         'event_id' => $event->id,
-        'name'    => 'Sekretaris Acara',
-        'code'    => 'sekretariat',
+        'name' => 'Sekretaris Acara',
+        'code' => 'sekretariat',
     ]);
 
     app(EventCommitteeService::class)->assign([
-        'event_id'      => $event->id,
-        'person_id'     => $person->id,
+        'event_id' => $event->id,
+        'person_id' => $person->id,
         'event_role_id' => $role->id,
     ]);
 

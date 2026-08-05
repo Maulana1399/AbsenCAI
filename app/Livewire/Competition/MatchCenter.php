@@ -16,8 +16,11 @@ class MatchCenter extends Component
     public ?string $filterVenueId = null;
 
     public bool $showOfficialDialog = false;
+
     public ?int $officialScheduleId = null;
+
     public string $newOfficialUserId = '';
+
     public string $newOfficialRole = 'referee';
 
     protected function rules(): array
@@ -54,10 +57,11 @@ class MatchCenter extends Component
 
         $schedule = CompetitionSchedule::withCount('scheduleEntries as participants_count')->findOrFail($scheduleId);
 
-        if (!$this->workflow()->startMatch($schedule)) {
+        if (! $this->workflow()->startMatch($schedule)) {
             $required = $schedule->required_participants ?? 1;
             $current = $schedule->participants_count ?? 0;
             session()->flash('error', "Cannot start match: need {$required} participant(s), currently {$current} assigned.");
+
             return;
         }
 
@@ -74,6 +78,7 @@ class MatchCenter extends Component
 
         if ($nextStatus !== 'Waiting Result') {
             session()->flash('error', 'Only Playing matches can be sent to Waiting Result.');
+
             return;
         }
 
@@ -141,7 +146,7 @@ class MatchCenter extends Component
             ->withCount('scheduleEntries as participants_count')
             ->whereIn('competition_class_id', $classIds)
             ->whereIn('status', ['Ready', 'Playing', 'Waiting Result'])
-            ->when($this->filterVenueId, fn($q) => $q->where('venue_id', $this->filterVenueId))
+            ->when($this->filterVenueId, fn ($q) => $q->where('venue_id', $this->filterVenueId))
             ->orderByRaw("CASE WHEN status = 'Playing' THEN 0 WHEN status = 'Waiting Result' THEN 1 ELSE 2 END")
             ->orderBy('sort_order')
             ->orderBy('start_at')

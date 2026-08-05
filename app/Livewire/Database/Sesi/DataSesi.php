@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Database\Sesi;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DataSesi extends Component
 {
@@ -45,6 +45,7 @@ class DataSesi extends Component
 
         if ($eventId === null) {
             $this->daftarSesi = collect();
+
             return;
         }
 

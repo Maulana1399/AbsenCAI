@@ -32,6 +32,7 @@ class EnterToken extends Component
             $seconds = RateLimiter::availableIn($throttleKey);
             $this->processing = false;
             $this->addError('token', 'Terlalu banyak percobaan. Silakan coba kembali dalam '.$seconds.' detik.');
+
             return;
         }
 
@@ -41,6 +42,7 @@ class EnterToken extends Component
             RateLimiter::hit($throttleKey, 60);
             $this->processing = false;
             $this->addError('token', 'Token tidak valid atau sudah tidak berlaku.');
+
             return;
         }
 

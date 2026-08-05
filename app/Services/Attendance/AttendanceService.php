@@ -4,8 +4,6 @@ namespace App\Services\Attendance;
 
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
-
-use App\Services\Attendance\LegacyParticipationResolver;
 use App\Models\Participation;
 use App\Models\peserta;
 use App\Models\SesiAbsensi;
@@ -18,7 +16,7 @@ class AttendanceService
 {
     public function processScan(string $identifier, ?int $sesiId = null, string $method = 'scan'): array
     {
-        if (!in_array($method, ['scan', 'manual'], true)) {
+        if (! in_array($method, ['scan', 'manual'], true)) {
             throw new \InvalidArgumentException("Invalid attendance method: {$method}");
         }
 
@@ -27,7 +25,7 @@ class AttendanceService
 
         $identity = $this->resolveIdentity($identifier, $activeEvent->id);
 
-        if (!$identity->isResolved()) {
+        if (! $identity->isResolved()) {
             return [
                 'status' => 'not_found',
                 'message' => 'Data peserta tidak ditemukan!',
@@ -47,7 +45,7 @@ class AttendanceService
                 ->where('aktif', true)
                 ->first();
 
-        if (!$sesi) {
+        if (! $sesi) {
             return [
                 'status' => 'session_required',
                 'message' => 'Pilih sesi absensi terlebih dahulu',
@@ -122,6 +120,7 @@ class AttendanceService
 
         if ($participation) {
             $peserta = $resolver->resolvePesertaByParticipation($participation->id, $eventId);
+
             return new AttendanceIdentity(
                 participation: $participation,
                 peserta: $peserta,
@@ -136,6 +135,7 @@ class AttendanceService
 
             if ($participationByCode) {
                 $pesertaByCodeResolved = $resolver->resolvePesertaByParticipation($participationByCode->id, $eventId);
+
                 return new AttendanceIdentity(
                     participation: $participationByCode,
                     peserta: $pesertaByCodeResolved ?? $pesertaByCode,
@@ -147,6 +147,7 @@ class AttendanceService
         $participationByLegacyCode = $resolver->resolveByLegacyAttendanceCode($identifier, $eventId);
         if ($participationByLegacyCode) {
             $pesertaByLegacy = $resolver->resolvePesertaByParticipation($participationByLegacyCode->id, $eventId);
+
             return new AttendanceIdentity(
                 participation: $participationByLegacyCode,
                 peserta: $pesertaByLegacy,

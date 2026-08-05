@@ -1,21 +1,21 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\Event\Dashboard as EventDashboard;
 use App\Livewire\Rekap\Absensi\RekapAbsensi;
 use App\Models\Absensi;
+use App\Models\desa;
 use App\Models\Event;
 use App\Models\IzinAbsensi;
+use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
-use App\Models\desa;
-use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Models\SesiAbsensi;
 use App\Models\User;
-use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Livewire\Livewire;
 
@@ -116,7 +116,7 @@ it('dashboard counts active event participants', function () {
     Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL701', 'attendance_code' => 'KJA-DASH701', 'jenis_peserta' => 'Wajib']);
 
     Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1)
+        ->assertViewHas('presenterData', fn ($d) => $d['totalPeserta'] === 1)
         ->assertSee('Total Peserta');
 });
 
@@ -131,11 +131,11 @@ it('dashboard excludes participations from other events', function () {
 
     app(ActiveEventContext::class)->set($eventA);
     Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventA])
-        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1);
+        ->assertViewHas('presenterData', fn ($d) => $d['totalPeserta'] === 1);
 
     app(ActiveEventContext::class)->set($eventB);
     Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventB])
-        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1);
+        ->assertViewHas('presenterData', fn ($d) => $d['totalPeserta'] === 1);
 });
 
 it('dashboard counts remain safe without active event', function () {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\CaiParticipantReplacement;
 use App\Models\desa;
 use App\Models\Event;
@@ -11,10 +12,8 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
-use App\Enums\Role;
 use App\Models\User;
 use App\Services\Cai\CaiParticipantReplacementService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -179,7 +178,7 @@ test('replacement preserves cai slot and moves mapping to new identity', functio
         // Person lama tidak dihapus.
         ->and(Person::find($fixture['oldPerson']->id))->not->toBeNull()
         ->and($oldPerson->nip)->toBeNull()
-        ->and($result['person']->nip)->toBeNull()   
+        ->and($result['person']->nip)->toBeNull()
 
         // Participation lama tetap ada tetapi identifier operasional dilepas.
         ->and($oldParticipation)->not->toBeNull()

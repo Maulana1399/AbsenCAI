@@ -16,8 +16,8 @@ uses(RefreshDatabase::class);
 function sprint2MappingEvent(string $suffix): Event
 {
     return Event::create([
-        'name' => 'S2 Event ' . $suffix,
-        'slug' => 's2-' . $suffix . '-' . str()->random(6),
+        'name' => 'S2 Event '.$suffix,
+        'slug' => 's2-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);

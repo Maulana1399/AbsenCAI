@@ -5,7 +5,6 @@ use App\Models\CompetitionBracket;
 use App\Models\CompetitionBracketMatch;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
-use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Models\CompetitionScheduleEntry;
 use App\Models\Event;

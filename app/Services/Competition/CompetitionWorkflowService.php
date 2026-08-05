@@ -37,11 +37,11 @@ class CompetitionWorkflowService
 
     public function prepareMatch(CompetitionSchedule $schedule): bool
     {
-        if (!$this->canTransitionTo($schedule, 'Ready')) {
+        if (! $this->canTransitionTo($schedule, 'Ready')) {
             return false;
         }
 
-        if (!$schedule->canAutoReady()) {
+        if (! $schedule->canAutoReady()) {
             return false;
         }
 
@@ -52,11 +52,11 @@ class CompetitionWorkflowService
 
     public function startMatch(CompetitionSchedule $schedule): bool
     {
-        if (!$this->canTransitionTo($schedule, 'Playing')) {
+        if (! $this->canTransitionTo($schedule, 'Playing')) {
             return false;
         }
 
-        if (!$schedule->isReadyForStart()) {
+        if (! $schedule->isReadyForStart()) {
             return false;
         }
 
@@ -68,14 +68,15 @@ class CompetitionWorkflowService
     public function completeMatch(CompetitionSchedule $schedule): string
     {
         if ($this->requiresOfficial($schedule)) {
-            if (!$this->canTransitionTo($schedule, 'Waiting Result')) {
+            if (! $this->canTransitionTo($schedule, 'Waiting Result')) {
                 return $schedule->status;
             }
             $schedule->update(['status' => 'Waiting Result']);
+
             return 'Waiting Result';
         }
 
-        if (!$this->canTransitionTo($schedule, 'Finished')) {
+        if (! $this->canTransitionTo($schedule, 'Finished')) {
             return $schedule->status;
         }
 
@@ -92,7 +93,7 @@ class CompetitionWorkflowService
             return false;
         }
 
-        if (!$this->canTransitionTo($schedule, 'Finished')) {
+        if (! $this->canTransitionTo($schedule, 'Finished')) {
             return false;
         }
 
@@ -105,7 +106,7 @@ class CompetitionWorkflowService
 
     public function moveToWaitingResult(CompetitionSchedule $schedule): bool
     {
-        if (!$this->canTransitionTo($schedule, 'Waiting Result')) {
+        if (! $this->canTransitionTo($schedule, 'Waiting Result')) {
             return false;
         }
 
@@ -120,7 +121,7 @@ class CompetitionWorkflowService
         string $finishReason,
         ?string $finishNotes
     ): void {
-        if (!$this->canTransitionTo($schedule, 'Finished')) {
+        if (! $this->canTransitionTo($schedule, 'Finished')) {
             throw new \RuntimeException('Cannot submit result: match status does not allow transition to Finished.');
         }
 
@@ -143,23 +144,23 @@ class CompetitionWorkflowService
     public function advanceWinner(CompetitionSchedule $schedule): void
     {
         $bracketMatch = $schedule->bracketMatch;
-        if (!$bracketMatch) {
+        if (! $bracketMatch) {
             return;
         }
 
         $winnerRegId = $schedule->winner_registration_id;
-        if (!$winnerRegId) {
+        if (! $winnerRegId) {
             return;
         }
 
         $nextMatch = CompetitionBracketMatch::where(function ($q) use ($bracketMatch) {
-                $q->where('source_match_a_id', $bracketMatch->id)
-                  ->orWhere('source_match_b_id', $bracketMatch->id);
-            })
+            $q->where('source_match_a_id', $bracketMatch->id)
+                ->orWhere('source_match_b_id', $bracketMatch->id);
+        })
             ->with('schedule')
             ->first();
 
-        if (!$nextMatch || !$nextMatch->schedule) {
+        if (! $nextMatch || ! $nextMatch->schedule) {
             return;
         }
 
@@ -200,23 +201,23 @@ class CompetitionWorkflowService
     public function rollbackAdvancement(CompetitionSchedule $schedule): void
     {
         $bracketMatch = $schedule->bracketMatch;
-        if (!$bracketMatch) {
+        if (! $bracketMatch) {
             return;
         }
 
         $winnerRegId = $schedule->winner_registration_id;
-        if (!$winnerRegId) {
+        if (! $winnerRegId) {
             return;
         }
 
         $nextMatch = CompetitionBracketMatch::where(function ($q) use ($bracketMatch) {
-                $q->where('source_match_a_id', $bracketMatch->id)
-                  ->orWhere('source_match_b_id', $bracketMatch->id);
-            })
+            $q->where('source_match_a_id', $bracketMatch->id)
+                ->orWhere('source_match_b_id', $bracketMatch->id);
+        })
             ->with('schedule')
             ->first();
 
-        if (!$nextMatch || !$nextMatch->schedule) {
+        if (! $nextMatch || ! $nextMatch->schedule) {
             return;
         }
 
@@ -226,7 +227,7 @@ class CompetitionWorkflowService
             ->where('competition_registration_id', $winnerRegId)
             ->first();
 
-        if (!$entry) {
+        if (! $entry) {
             return;
         }
 
@@ -245,7 +246,7 @@ class CompetitionWorkflowService
 
     public function resetMatch(CompetitionSchedule $schedule): void
     {
-        if (!$this->canTransitionTo($schedule, 'Scheduled')) {
+        if (! $this->canTransitionTo($schedule, 'Scheduled')) {
             return;
         }
 
@@ -292,7 +293,7 @@ class CompetitionWorkflowService
 
         if ($schedule->status === 'Scheduled' && $schedule->canAutoReady()) {
             $schedule->update(['status' => 'Ready']);
-        } elseif (in_array($schedule->status, ['Ready', 'Scheduled'], true) && !$schedule->canAutoReady()) {
+        } elseif (in_array($schedule->status, ['Ready', 'Scheduled'], true) && ! $schedule->canAutoReady()) {
             $assignedCount = $schedule->scheduleEntries()->count();
             if ($assignedCount < $schedule->required_participants) {
                 $schedule->update(['status' => 'Scheduled']);
@@ -305,7 +306,7 @@ class CompetitionWorkflowService
     public function promoteReadyMatch(?int $venueId): void
     {
         $event = app(ActiveEventContext::class)->current();
-        if (!$event) {
+        if (! $event) {
             return;
         }
 

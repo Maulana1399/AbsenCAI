@@ -1,13 +1,12 @@
 <?php
 
-use App\Models\Absensi;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
-use App\Models\peserta;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceService;
 use App\Support\ActiveEventContext;
@@ -134,7 +133,8 @@ test('process scan accepts legacy attendance code through mapping and stays even
 });
 
 test('process scan rejects missing legacy mapping in CAI', function () {
-    $event = attendanceTest_makeEvent(); app(ActiveEventContext::class)->set($event);
+    $event = attendanceTest_makeEvent();
+    app(ActiveEventContext::class)->set($event);
     peserta::create(['nama' => 'Peserta Tanpa Mapping', 'nip' => 2001, 'attendance_code' => 'KJA-NOMAP1', 'jenis_kelamin' => 'Laki - Laki']);
     SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Sesi No Mapping', 'tanggal' => '2026-07-15', 'aktif' => true]);
     expect(app(AttendanceService::class)->processScan('KJA-NOMAP1')['status'])->toBe('not_found');
@@ -142,7 +142,9 @@ test('process scan rejects missing legacy mapping in CAI', function () {
 });
 
 test('process scan rejects wrong-event legacy mapping', function () {
-    $eventA = attendanceTest_makeEvent(); $eventB = Event::create(['name' => 'Other Event', 'slug' => 'other-event-' . str()->random(6), 'status' => 'active']); app(ActiveEventContext::class)->set($eventA);
+    $eventA = attendanceTest_makeEvent();
+    $eventB = Event::create(['name' => 'Other Event', 'slug' => 'other-event-'.str()->random(6), 'status' => 'active']);
+    app(ActiveEventContext::class)->set($eventA);
     [$participant] = attendanceTest_makeMappedLegacyPeserta(['nama' => 'Peserta Wrong Event', 'nip' => 2002, 'attendance_code' => 'KJA-WRONG1'], $eventB);
     SesiAbsensi::create(['event_id' => $eventA->id, 'nama_sesi' => 'Sesi Wrong Event', 'tanggal' => '2026-07-15', 'aktif' => true]);
     expect(app(AttendanceService::class)->processScan('KJA-WRONG1')['status'])->toBe('not_found');
@@ -150,8 +152,9 @@ test('process scan rejects wrong-event legacy mapping', function () {
 });
 
 test('process scan rejects broken legacy mapping', function () {
-    $event = attendanceTest_makeEvent(); app(ActiveEventContext::class)->set($event);
-    $otherEvent = Event::create(['name' => 'Other Event 2', 'slug' => 'other-event-2-' . str()->random(6), 'status' => 'active']);
+    $event = attendanceTest_makeEvent();
+    app(ActiveEventContext::class)->set($event);
+    $otherEvent = Event::create(['name' => 'Other Event 2', 'slug' => 'other-event-2-'.str()->random(6), 'status' => 'active']);
     $participant = peserta::create(['nama' => 'Peserta Broken Mapping', 'nip' => 2003, 'attendance_code' => 'KJA-BROKEN1', 'jenis_kelamin' => 'Laki - Laki']);
     $person = Person::create(['nama' => $participant->nama, 'nip' => $participant->nip, 'jenis_kelamin' => 'L']);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $otherEvent->id, 'attendance_code' => $participant->attendance_code, 'jenis_peserta' => 'Wajib']);
@@ -166,7 +169,7 @@ test('process scan allows explicit session from active event only', function () 
     $eventA = attendanceTest_makeEvent();
     $eventB = Event::create([
         'name' => 'Other Event Explicit',
-        'slug' => 'other-event-explicit-' . str()->random(6),
+        'slug' => 'other-event-explicit-'.str()->random(6),
         'status' => 'active',
     ]);
 
@@ -195,7 +198,7 @@ test('failed cross-event explicit session creates zero absensi', function () {
     $eventA = attendanceTest_makeEvent();
     $eventB = Event::create([
         'name' => 'Other Event Explicit Two',
-        'slug' => 'other-event-explicit-two-' . str()->random(6),
+        'slug' => 'other-event-explicit-two-'.str()->random(6),
         'status' => 'active',
     ]);
 
@@ -223,7 +226,7 @@ test('cross-event duplicate detection stays isolated by session', function () {
     $eventA = attendanceTest_makeEvent();
     $eventB = Event::create([
         'name' => 'Other Event Same Nip',
-        'slug' => 'other-event-same-nip-' . str()->random(6),
+        'slug' => 'other-event-same-nip-'.str()->random(6),
         'status' => 'active',
     ]);
 

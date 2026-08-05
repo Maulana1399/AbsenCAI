@@ -11,17 +11,27 @@ use Livewire\Component;
 class Index extends Component
 {
     public bool $showCreateForm = false;
+
     public string $newName = '';
+
     public string $newGender = '';
+
     public string $newCode = '';
+
     public string $newSortOrder = '';
+
     public string $newCompetitionCategoryId = '';
 
     public ?int $editId = null;
+
     public string $editName = '';
+
     public string $editGender = '';
+
     public string $editCode = '';
+
     public string $editSortOrder = '';
+
     public string $editCompetitionCategoryId = '';
 
     public bool $processing = false;
@@ -33,7 +43,7 @@ class Index extends Component
 
     public function toggleCreateForm(): void
     {
-        $this->showCreateForm = !$this->showCreateForm;
+        $this->showCreateForm = ! $this->showCreateForm;
         $this->reset(['newName', 'newGender', 'newCode', 'newSortOrder', 'newCompetitionCategoryId']);
         $this->resetErrorBag();
     }
@@ -42,7 +52,9 @@ class Index extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {
@@ -90,7 +102,7 @@ class Index extends Component
 
         $this->validate([
             'editName' => 'required|string|max:255',
-                'editGender' => 'required|in:L,P,M',
+            'editGender' => 'required|in:L,P,M',
             'editCode' => 'nullable|string|max:50',
             'editSortOrder' => 'nullable|integer|min:0',
             'editCompetitionCategoryId' => 'required|exists:competition_categories,id',
@@ -119,7 +131,7 @@ class Index extends Component
         Gate::authorize('manage-events');
 
         $class = CompetitionClass::findOrFail($id);
-        $class->update(['is_active' => !$class->is_active]);
+        $class->update(['is_active' => ! $class->is_active]);
     }
 
     public function render()

@@ -8,9 +8,8 @@ use App\Services\Import\Results\ImportWarning;
 final readonly class ImportSummary
 {
     /**
- * @param  array<int, ImportError>  $errors
- * @param  array<int, ImportWarning>  $warnings
-
+     * @param  array<int, ImportError>  $errors
+     * @param  array<int, ImportWarning>  $warnings
      */
     public function __construct(
         public int $totalRows = 0,
@@ -22,6 +21,5 @@ final readonly class ImportSummary
         public int $skippedRows = 0,
         public array $errors = [],
         public array $warnings = [],
-    ) {
-    }
+    ) {}
 }

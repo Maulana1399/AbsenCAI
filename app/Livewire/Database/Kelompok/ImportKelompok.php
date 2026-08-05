@@ -21,6 +21,7 @@ use Livewire\WithFileUploads;
 class ImportKelompok extends Component
 {
     use WithFileUploads;
+
     public $file;
 
     public function import()

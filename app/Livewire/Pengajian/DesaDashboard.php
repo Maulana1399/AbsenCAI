@@ -3,7 +3,6 @@
 namespace App\Livewire\Pengajian;
 
 use App\Models\DesaAccessGrant;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\PengajianAttendanceService;
 use App\Services\Pengajian\PengajianDesaReportService;
@@ -17,12 +16,17 @@ use Livewire\Component;
 class DesaDashboard extends Component
 {
     public ?string $eventName = null;
+
     public ?string $desaName = null;
+
     public ?string $validFrom = null;
+
     public ?string $validUntil = null;
 
     public ?string $nonce = null;
+
     public ?string $qrUrl = null;
+
     public ?string $qrBase64 = null;
 
     public bool $processing = false;
@@ -30,25 +34,37 @@ class DesaDashboard extends Component
     public string $activeTab = 'attendance';
 
     public string $query = '';
+
     public array $searchResults = [];
+
     public bool $searching = false;
 
     public bool $showingConfirmation = false;
+
     public ?int $selectedPersonId = null;
+
     public ?string $selectedPersonName = null;
+
     public ?string $selectedPersonNumber = null;
+
     public ?string $selectedPersonKelompok = null;
+
     public bool $selectedPersonHadir = false;
+
     public bool $selectedPersonIzin = false;
 
     public ?string $successMessage = null;
+
     public ?string $errorMessage = null;
 
     public array $summary = [];
 
     public array $attendanceList = [];
+
     public ?string $filterStatus = null;
+
     public ?string $filterMethod = null;
+
     public string $listSearch = '';
 
     public ?DesaAccessGrant $grant = null;
@@ -59,6 +75,7 @@ class DesaDashboard extends Component
 
         if ($session === null || ! isset($session['grant_id'], $session['event_id'], $session['desa_id'])) {
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -67,6 +84,7 @@ class DesaDashboard extends Component
         if ($grant === null) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -77,6 +95,7 @@ class DesaDashboard extends Component
             || (int) $this->grant->desa_id !== (int) $session['desa_id']) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -84,6 +103,7 @@ class DesaDashboard extends Component
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Sesi akses telah dicabut. Silakan hubungi Operator Daerah.');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -91,6 +111,7 @@ class DesaDashboard extends Component
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Masa berlaku akses telah habis. Silakan minta token baru.');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -98,6 +119,7 @@ class DesaDashboard extends Component
             session()->forget('pengajian_access');
             session()->flash('pengajian_expired', 'Token belum dapat digunakan. Periksa kembali masa berlaku.');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -121,6 +143,7 @@ class DesaDashboard extends Component
 
         if (mb_strlen($trimmed) < 3) {
             $this->searchResults = [];
+
             return;
         }
 
@@ -154,6 +177,7 @@ class DesaDashboard extends Component
             $this->errorMessage = 'Peserta tidak valid.';
             $this->selectedPersonId = null;
             $this->selectedPersonName = null;
+
             return;
         }
 
@@ -170,6 +194,7 @@ class DesaDashboard extends Component
     {
         if ($this->grant === null || $this->selectedPersonId === null) {
             $this->errorMessage = 'Sesi tidak valid. Silakan refresh halaman.';
+
             return;
         }
 
@@ -180,12 +205,14 @@ class DesaDashboard extends Component
         if ($this->selectedPersonHadir) {
             $this->errorMessage = 'Peserta sudah tercatat hadir.';
             $this->processing = false;
+
             return;
         }
 
         if ($this->selectedPersonIzin) {
             $this->errorMessage = 'Peserta sudah tercatat izin.';
             $this->processing = false;
+
             return;
         }
 
@@ -195,6 +222,7 @@ class DesaDashboard extends Component
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak valid.';
             $this->processing = false;
+
             return;
         }
 
@@ -234,6 +262,7 @@ class DesaDashboard extends Component
     {
         if ($this->grant === null || $this->selectedPersonId === null) {
             $this->errorMessage = 'Sesi tidak valid. Silakan refresh halaman.';
+
             return;
         }
 
@@ -244,12 +273,14 @@ class DesaDashboard extends Component
         if ($this->selectedPersonHadir) {
             $this->errorMessage = 'Peserta sudah tercatat hadir.';
             $this->processing = false;
+
             return;
         }
 
         if ($this->selectedPersonIzin) {
             $this->errorMessage = 'Peserta sudah tercatat izin.';
             $this->processing = false;
+
             return;
         }
 
@@ -259,6 +290,7 @@ class DesaDashboard extends Component
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak valid.';
             $this->processing = false;
+
             return;
         }
 
@@ -392,6 +424,7 @@ class DesaDashboard extends Component
         if ($grant === null || ! $grant->isValid()) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 

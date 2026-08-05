@@ -3,12 +3,10 @@
 use App\Livewire\Dashboard\Scan;
 use App\Models\Event;
 use App\Models\EventAttendance;
-use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SesiAbsensi;
 use App\Models\User;
-use App\Models\peserta;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -17,12 +15,12 @@ uses(RefreshDatabase::class);
 
 function scan_test_event(string $suffix): Event
 {
-    return Event::create(['name' => 'Scan ' . $suffix, 'slug' => 'scan-' . $suffix . '-' . str()->random(6), 'status' => 'active']);
+    return Event::create(['name' => 'Scan '.$suffix, 'slug' => 'scan-'.$suffix.'-'.str()->random(6), 'status' => 'active']);
 }
 
 function scan_test_session(Event $event): SesiAbsensi
 {
-    return SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Session ' . str()->random(4), 'tanggal' => '2026-08-22', 'aktif' => true]);
+    return SesiAbsensi::create(['event_id' => $event->id, 'nama_sesi' => 'Session '.str()->random(4), 'tanggal' => '2026-08-22', 'aktif' => true]);
 }
 
 test('manual search returns active event participant and attendance can be recorded', function () {

@@ -4,17 +4,21 @@ namespace App\Livewire\Database\Sesi;
 
 use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EditSesi extends Component
 {
     public $sesi;
+
     public $sesi_id;
+
     public $nama_sesi = '';
+
     public $tanggal = '';
+
     public $aktif = false;
 
     #[On('editSesi')]

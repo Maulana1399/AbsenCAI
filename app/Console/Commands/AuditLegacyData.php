@@ -48,9 +48,9 @@ class AuditLegacyData extends Command
                 $q->where('nip', '<', 1000)->orWhere('nip', '>', 2999);
             })->count();
             $this->line('  NIP distribution:');
-            $this->line('    1000–1999: ' . $rangeM);
-            $this->line('    2000–2999: ' . $rangeF);
-            $this->line('    outside expected range: ' . $rangeOther);
+            $this->line('    1000–1999: '.$rangeM);
+            $this->line('    2000–2999: '.$rangeF);
+            $this->line('    outside expected range: '.$rangeOther);
         } else {
             $this->line($this->keyValue('NIP column', 'retired (not present in schema)'));
         }
@@ -101,12 +101,12 @@ class AuditLegacyData extends Command
             ->get();
 
         $this->line('  Duplicate normalized names:');
-        $this->line('    Total groups: ' . $dupNames->count());
+        $this->line('    Total groups: '.$dupNames->count());
         $dupNames->take(20)->each(function ($row) {
             $this->line("    {$row->normalized_name} | count={$row->cnt}");
         });
         if ($dupNames->count() > 20) {
-            $this->line('    ... and ' . ($dupNames->count() - 20) . ' more groups');
+            $this->line('    ... and '.($dupNames->count() - 20).' more groups');
         }
 
         $dupNameDesa = DB::table('pesertas')
@@ -119,18 +119,18 @@ class AuditLegacyData extends Command
             ->get();
 
         $this->line('  Duplicate normalized name + desa_id:');
-        $this->line('    Total groups: ' . $dupNameDesa->count());
+        $this->line('    Total groups: '.$dupNameDesa->count());
         $dupNameDesa->take(20)->each(function ($row) {
             $this->line("    {$row->normalized_name} | desa_id={$row->desa_id} | count={$row->cnt}");
         });
         if ($dupNameDesa->count() > 20) {
-            $this->line('    ... and ' . ($dupNameDesa->count() - 20) . ' more groups');
+            $this->line('    ... and '.($dupNameDesa->count() - 20).' more groups');
         }
 
         $conflictingGenders = DB::table('pesertas')
             ->whereNotNull('desa_id')
             ->whereNotNull('jenis_kelamin')
-            ->selectRaw("LOWER(TRIM(nama)) as normalized_name, desa_id, GROUP_CONCAT(DISTINCT jenis_kelamin) as genders, COUNT(*) as cnt")
+            ->selectRaw('LOWER(TRIM(nama)) as normalized_name, desa_id, GROUP_CONCAT(DISTINCT jenis_kelamin) as genders, COUNT(*) as cnt')
             ->groupByRaw('LOWER(TRIM(nama))')
             ->groupBy('desa_id')
             ->havingRaw('COUNT(DISTINCT jenis_kelamin) > 1')
@@ -138,12 +138,12 @@ class AuditLegacyData extends Command
             ->get();
 
         $this->line('  Conflicting gender for same normalized name + desa_id:');
-        $this->line('    Total groups: ' . $conflictingGenders->count());
+        $this->line('    Total groups: '.$conflictingGenders->count());
         $conflictingGenders->take(20)->each(function ($row) {
             $this->line("    {$row->normalized_name} | desa_id={$row->desa_id} | genders={$row->genders} | count={$row->cnt}");
         });
         if ($conflictingGenders->count() > 20) {
-            $this->line('    ... and ' . ($conflictingGenders->count() - 20) . ' more groups');
+            $this->line('    ... and '.($conflictingGenders->count() - 20).' more groups');
         }
 
         $this->section('NEW DOMAIN STATE');

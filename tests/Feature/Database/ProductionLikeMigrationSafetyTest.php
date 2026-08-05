@@ -8,10 +8,10 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Models\peserta;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

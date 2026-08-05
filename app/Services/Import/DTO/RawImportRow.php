@@ -11,6 +11,5 @@ final readonly class RawImportRow
         public array $originalValues,
         public ?string $sourceFileName = null,
         public array $errors = [],
-    ) {
-    }
+    ) {}
 }

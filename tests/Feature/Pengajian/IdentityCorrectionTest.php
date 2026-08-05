@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\desa;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
@@ -10,7 +11,6 @@ use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\User;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\IdentityCorrectionService;
 use Carbon\Carbon;
@@ -43,6 +43,7 @@ function pgm8_grant(Event $event, desa $desa): DesaAccessGrant
         $now->copy()->subHour(),
         $now->copy()->addHour(),
     );
+
     return $result['grant'];
 }
 

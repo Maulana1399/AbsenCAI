@@ -1,11 +1,10 @@
 <?php
 
-use App\Enums\Role;
-use App\Models\User;
-use App\Models\Person;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
+use App\Models\Person;
+use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -23,7 +22,7 @@ function s2_user(string $role): User
 function s2_person(): Person
 {
     return Person::create([
-        'nama' => 'S2 Test Person ' . str()->random(6),
+        'nama' => 'S2 Test Person '.str()->random(6),
         'jenis_kelamin' => 'L',
     ]);
 }
@@ -31,8 +30,8 @@ function s2_person(): Person
 function s2_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
-        'name' => 'S2 Test Event ' . str()->random(6),
-        'slug' => 's2-event-' . str()->random(6),
+        'name' => 'S2 Test Event '.str()->random(6),
+        'slug' => 's2-event-'.str()->random(6),
         'status' => 'active',
     ], $overrides));
 }

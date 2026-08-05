@@ -13,19 +13,26 @@ use Livewire\Component;
 class Create extends Component
 {
     public $searchPeserta = '';
+
     public $selectedPesertaId = null;
+
     public $selectedPesertaNama = '';
+
     public $alasan = '';
+
     public $jenisIzin = 'pulang';
+
     public $tanggal_mulai = '';
+
     public $tanggal_selesai = '';
+
     public bool $processing = false;
 
     public function render()
     {
         $results = [];
         if (strlen($this->searchPeserta) >= 2) {
-            $search = '%' . $this->searchPeserta . '%';
+            $search = '%'.$this->searchPeserta.'%';
 
             $event = app(ActiveEventContext::class)->current();
             $resolver = app(LegacyParticipationResolver::class);
@@ -34,31 +41,31 @@ class Create extends Component
                 ->limit(10)
                 ->get()
                 ->map(function ($person) use ($event, $resolver) {
-                $participation = $event ? $resolver->resolveByPersonAndEvent($person->id, $event->id) : null;
+                    $participation = $event ? $resolver->resolveByPersonAndEvent($person->id, $event->id) : null;
 
-                return (object) [
-                    'id' => $person->id,
-                    'nama' => $person->nama,
-                    'source' => 'canonical',
-                    'peserta_id' => $participation ? $resolver->resolvePesertaByParticipation($participation->id, $event?->id)?->id : null,
-                ];
+                    return (object) [
+                        'id' => $person->id,
+                        'nama' => $person->nama,
+                        'source' => 'canonical',
+                        'peserta_id' => $participation ? $resolver->resolvePesertaByParticipation($participation->id, $event?->id)?->id : null,
+                    ];
                 });
 
             $personNames = $persons->pluck('nama');
 
             $legacyPesertas = peserta::where(function ($q) use ($search) {
-                    $q->where('nama', 'like', $search)
-                      ->orWhere('attendance_code', 'like', $search);
-                })
+                $q->where('nama', 'like', $search)
+                    ->orWhere('attendance_code', 'like', $search);
+            })
                 ->whereNotIn('nama', $personNames)
                 ->limit(10)
                 ->get()
                 ->map(fn ($p) => (object) [
-                    'id' => $p->id,
-                    'nama' => $p->nama,
-                    'source' => 'legacy',
-                    'peserta_id' => $p->id,
-                ]);
+                'id' => $p->id,
+                'nama' => $p->nama,
+                'source' => 'legacy',
+                'peserta_id' => $p->id,
+            ]);
 
             $results = $persons->merge($legacyPesertas)->take(10);
         }
@@ -83,6 +90,7 @@ class Create extends Component
                         $this->selectedPesertaId = $selectedPeserta->id;
                         $this->selectedPesertaNama = $person->nama;
                         $this->searchPeserta = '';
+
                         return;
                     }
                 }
@@ -97,6 +105,7 @@ class Create extends Component
                     $this->selectedPesertaId = $selectedPeserta->id;
                     $this->selectedPesertaNama = $participation->person->nama;
                     $this->searchPeserta = '';
+
                     return;
                 }
             }
@@ -114,16 +123,18 @@ class Create extends Component
     {
         Gate::authorize('manage-secretariat');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
         try {
             $this->validate();
             app(SuratIzinService::class)->create(
                 [
-                    'peserta_id'      => $this->selectedPesertaId,
-                    'alasan'          => $this->alasan,
-                    'jenis_izin'      => $this->jenisIzin,
-                    'tanggal_mulai'   => $this->tanggal_mulai,
+                    'peserta_id' => $this->selectedPesertaId,
+                    'alasan' => $this->alasan,
+                    'jenis_izin' => $this->jenisIzin,
+                    'tanggal_mulai' => $this->tanggal_mulai,
                     'tanggal_selesai' => $this->tanggal_selesai,
                 ],
                 auth()->id()
@@ -147,17 +158,19 @@ class Create extends Component
     {
         Gate::authorize('manage-secretariat');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
         try {
             $this->validate();
             $service = app(SuratIzinService::class);
             $surat = $service->create(
                 [
-                    'peserta_id'      => $this->selectedPesertaId,
-                    'alasan'          => $this->alasan,
-                    'jenis_izin'      => $this->jenisIzin,
-                    'tanggal_mulai'   => $this->tanggal_mulai,
+                    'peserta_id' => $this->selectedPesertaId,
+                    'alasan' => $this->alasan,
+                    'jenis_izin' => $this->jenisIzin,
+                    'tanggal_mulai' => $this->tanggal_mulai,
                     'tanggal_selesai' => $this->tanggal_selesai,
                 ],
                 auth()->id()
@@ -188,10 +201,10 @@ class Create extends Component
     {
         return [
             'selectedPesertaId' => 'required|exists:pesertas,id',
-            'alasan'            => 'required|min:5',
-            'jenisIzin'         => 'required|in:pulang,keluar',
-            'tanggal_mulai'     => 'required|date',
-            'tanggal_selesai'   => 'required|date|after_or_equal:tanggal_mulai',
+            'alasan' => 'required|min:5',
+            'jenisIzin' => 'required|in:pulang,keluar',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
         ];
     }
 

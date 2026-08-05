@@ -11,6 +11,7 @@ use Livewire\Component;
 class EventSwitcher extends Component
 {
     public ?string $currentEventName = null;
+
     public ?int $currentEventId = null;
 
     public function mount(ActiveEventContext $context): void
@@ -53,6 +54,7 @@ class EventSwitcher extends Component
 
         if (! $user->isPlatformUser()) {
             $assignedEventIds = app(EventAccessService::class)->getAssignedEventIds($user);
+
             return Event::active()->whereIn('id', $assignedEventIds)->orderBy('name')->get();
         }
 

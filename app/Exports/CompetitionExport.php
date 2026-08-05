@@ -2,8 +2,8 @@
 
 namespace App\Exports;
 
-use App\Services\Competition\CompetitionReportService;
 use App\Models\Event;
+use App\Services\Competition\CompetitionReportService;
 use Illuminate\Support\Collection;
 
 class CompetitionExport
@@ -15,18 +15,21 @@ class CompetitionExport
     public function registrationCsv(Event $event, array $filters = []): string
     {
         $data = $this->reportService->registrationReport($event, $filters);
+
         return $this->toCsv($this->formatRegistrationRows($data));
     }
 
     public function outcomeCsv(Event $event, array $filters = []): string
     {
         $data = $this->reportService->outcomeReport($event, $filters);
+
         return $this->toCsv($this->formatOutcomeRows($data));
     }
 
     public function scheduleCsv(Event $event, array $filters = []): string
     {
         $data = $this->reportService->scheduleReport($event, $filters);
+
         return $this->toCsv($this->formatScheduleRows($data));
     }
 

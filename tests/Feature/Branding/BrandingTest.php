@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Enums\Role;
-use App\Models\Event;
 use App\Models\desa;
+use App\Models\Event;
+use App\Models\User;
 use App\Services\Pengajian\DesaAccessService;
 use App\Support\ActiveEventContext;
 use Carbon\Carbon;
@@ -18,8 +18,8 @@ uses(RefreshDatabase::class);
 function branding_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
-        'name' => 'Test Event ' . str()->random(6),
-        'slug' => 'test-' . str()->random(6),
+        'name' => 'Test Event '.str()->random(6),
+        'slug' => 'test-'.str()->random(6),
         'status' => 'active',
     ], $overrides));
 }
@@ -27,7 +27,7 @@ function branding_event(array $overrides = []): Event
 function branding_desa(array $overrides = []): desa
 {
     return desa::create(array_merge([
-        'desa_asal' => 'Desa Test ' . str()->random(4),
+        'desa_asal' => 'Desa Test '.str()->random(4),
     ], $overrides));
 }
 

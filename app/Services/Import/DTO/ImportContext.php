@@ -14,6 +14,5 @@ final readonly class ImportContext
         public array $options = [],
         public ?string $definitionKey = null,
         public ?string $transactionId = null,
-    ) {
-    }
+    ) {}
 }

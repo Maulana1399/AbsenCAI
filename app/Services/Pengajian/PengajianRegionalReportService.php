@@ -46,7 +46,7 @@ class PengajianRegionalReportService
             ->join('participations', 'participations.id', '=', 'event_attendances.participation_id')
             ->where('participations.event_id', $eventId)
             ->where('event_attendances.status', EventAttendance::STATUS_HADIR)
-            ->selectRaw("method, COUNT(*) as cnt")
+            ->selectRaw('method, COUNT(*) as cnt')
             ->groupBy('method')
             ->pluck('cnt', 'method');
 

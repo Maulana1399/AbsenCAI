@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Role;
 use App\Models\CompetitionAnnouncement;
 use App\Models\CompetitionBracket;
 use App\Models\CompetitionBracketMatch;
@@ -12,23 +11,20 @@ use App\Models\CompetitionOutcome;
 use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Models\CompetitionScheduleEntry;
+use App\Models\desa;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
+use App\Models\kelompok;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\SesiAbsensi;
 use App\Models\User;
 use App\Models\Venue;
-use App\Models\desa;
-use App\Models\kelompok;
 use App\Support\ActiveEventContext;
-use Database\Seeders\DesaSeeder;
-use Database\Seeders\KelompokSeeder;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UatSeeder extends Seeder
@@ -141,18 +137,31 @@ class UatSeeder extends Seeder
     ];
 
     private int $totalPersons = 0;
+
     private int $totalParticipations = 0;
+
     private int $totalCategories = 0;
+
     private int $totalClasses = 0;
+
     private int $totalRegistrations = 0;
+
     private int $totalVenues = 0;
+
     private int $totalSchedules = 0;
+
     private int $totalScheduleEntries = 0;
+
     private int $totalBrackets = 0;
+
     private int $totalBracketMatches = 0;
+
     private int $totalOutcomes = 0;
+
     private int $totalSesi = 0;
+
     private int $totalAttendances = 0;
+
     private int $totalCommitteeAssignments = 0;
 
     public function run(): void
@@ -271,7 +280,7 @@ class UatSeeder extends Seeder
                 'name' => $r['name'],
                 'code' => $r['code'],
                 'scope' => $r['scope'],
-                'description' => 'Event role for ' . $r['name'],
+                'description' => 'Event role for '.$r['name'],
                 'sort_order' => $r['sort_order'],
                 'is_active' => true,
             ]);
@@ -294,10 +303,10 @@ class UatSeeder extends Seeder
 
             $nama = '';
             do {
-                $nama = $firstNames[array_rand($firstNames)] . ' ' . $this->lastNames[array_rand($this->lastNames)];
+                $nama = $firstNames[array_rand($firstNames)].' '.$this->lastNames[array_rand($this->lastNames)];
                 $attempt = 0;
                 while (isset($usedNames[strtolower($nama)]) && $attempt < 20) {
-                    $nama = $firstNames[array_rand($firstNames)] . ' ' . $this->lastNames[array_rand($this->lastNames)];
+                    $nama = $firstNames[array_rand($firstNames)].' '.$this->lastNames[array_rand($this->lastNames)];
                     $attempt++;
                 }
             } while (isset($usedNames[strtolower($nama)]));
@@ -316,6 +325,7 @@ class UatSeeder extends Seeder
         }
 
         $this->totalPersons = count($ids);
+
         return $ids;
     }
 
@@ -333,8 +343,8 @@ class UatSeeder extends Seeder
             $participation = Participation::create([
                 'person_id' => $personId,
                 'event_id' => $eventId,
-                'participant_number' => 'FPS' . str_pad((string) $counter, 4, '0', STR_PAD_LEFT),
-                'attendance_code' => 'KJA-' . Str::upper(Str::random(8)),
+                'participant_number' => 'FPS'.str_pad((string) $counter, 4, '0', STR_PAD_LEFT),
+                'attendance_code' => 'KJA-'.Str::upper(Str::random(8)),
                 'jenis_peserta' => 'Peserta',
                 'status_registrasi' => fake()->randomElement(['registered', 'registered', 'registered', 'checked_in']),
             ]);
@@ -342,6 +352,7 @@ class UatSeeder extends Seeder
         }
 
         $this->totalParticipations = count($ids);
+
         return $ids;
     }
 
@@ -368,7 +379,7 @@ class UatSeeder extends Seeder
                     'person_id' => $personId,
                     'event_role_id' => $eventRoles[$a['role']],
                     'assigned_at' => now(),
-                    'notes' => 'Committee assignment for ' . $a['role'],
+                    'notes' => 'Committee assignment for '.$a['role'],
                 ]);
 
                 $this->totalCommitteeAssignments++;
@@ -399,7 +410,7 @@ class UatSeeder extends Seeder
                     'competition_category_id' => $category->id,
                     'name' => $classDef['name'],
                     'gender' => $classDef['gender'],
-                    'code' => $catDef['code'] . '-' . str_pad((string) $sortClass, 2, '0', STR_PAD_LEFT),
+                    'code' => $catDef['code'].'-'.str_pad((string) $sortClass, 2, '0', STR_PAD_LEFT),
                     'sort_order' => $sortClass++,
                     'is_active' => true,
                 ]);
@@ -452,7 +463,7 @@ class UatSeeder extends Seeder
             $selectedClasses = (array) fake()->randomElements($eligibleClasses, $numRegistrations);
 
             foreach ($selectedClasses as $classId) {
-                $pair = $participation->id . '-' . $classId;
+                $pair = $participation->id.'-'.$classId;
                 if (isset($used[$pair])) {
                     continue;
                 }
@@ -469,6 +480,7 @@ class UatSeeder extends Seeder
         }
 
         $this->totalRegistrations = count($ids);
+
         return $ids;
     }
 
@@ -479,13 +491,14 @@ class UatSeeder extends Seeder
             $venue = Venue::create([
                 'event_id' => $eventId,
                 'name' => $name,
-                'code' => 'ARN-' . chr(65 + $i),
-                'location_detail' => 'Gedung Olahraga ' . $name,
+                'code' => 'ARN-'.chr(65 + $i),
+                'location_detail' => 'Gedung Olahraga '.$name,
                 'sort_order' => $i + 1,
             ]);
             $ids[] = $venue->id;
         }
         $this->totalVenues = count($ids);
+
         return $ids;
     }
 
@@ -656,7 +669,7 @@ class UatSeeder extends Seeder
 
             $bracket = CompetitionBracket::create([
                 'competition_class_id' => $classId,
-                'name' => 'Bracket ' . ($classInfo['classInfo'][$classId]['name'] ?? ''),
+                'name' => 'Bracket '.($classInfo['classInfo'][$classId]['name'] ?? ''),
                 'participant_count' => min($count, $bracketSize),
                 'status' => 'active',
             ]);
@@ -846,7 +859,7 @@ class UatSeeder extends Seeder
 
         foreach ($participationIds as $participationId) {
             $participation = Participation::find($participationId);
-            if (!$participation) {
+            if (! $participation) {
                 continue;
             }
 
@@ -891,21 +904,21 @@ class UatSeeder extends Seeder
         $this->command->info('============================================');
         $this->command->info('Event ................. 1');
         $this->command->info('Event Roles ........... 5');
-        $this->command->info('Committee Assignments.. ' . $this->totalCommitteeAssignments);
-        $this->command->info('Persons .............. ' . Person::count());
-        $this->command->info('Participations ....... ' . Participation::where('event_id', Event::where('slug', 'festival-pencak-silat-2026')->first()?->id)->count());
-        $this->command->info('Categories ........... ' . $this->totalCategories);
-        $this->command->info('Classes .............. ' . $this->totalClasses);
-        $this->command->info('Registrations ........ ' . $this->totalRegistrations);
-        $this->command->info('Venues ............... ' . $this->totalVenues);
-        $this->command->info('Schedules ............ ' . $this->totalSchedules);
-        $this->command->info('Schedule Entries ..... ' . $this->totalScheduleEntries);
-        $this->command->info('Brackets ............. ' . $this->totalBrackets);
-        $this->command->info('Bracket Matches ...... ' . $this->totalBracketMatches);
-        $this->command->info('Outcomes ............. ' . $this->totalOutcomes);
-        $this->command->info('Sesi Absensi ......... ' . $this->totalSesi);
-        $this->command->info('Attendances .......... ' . $this->totalAttendances);
-        $this->command->info('Announcements ........ ' . CompetitionAnnouncement::count());
+        $this->command->info('Committee Assignments.. '.$this->totalCommitteeAssignments);
+        $this->command->info('Persons .............. '.Person::count());
+        $this->command->info('Participations ....... '.Participation::where('event_id', Event::where('slug', 'festival-pencak-silat-2026')->first()?->id)->count());
+        $this->command->info('Categories ........... '.$this->totalCategories);
+        $this->command->info('Classes .............. '.$this->totalClasses);
+        $this->command->info('Registrations ........ '.$this->totalRegistrations);
+        $this->command->info('Venues ............... '.$this->totalVenues);
+        $this->command->info('Schedules ............ '.$this->totalSchedules);
+        $this->command->info('Schedule Entries ..... '.$this->totalScheduleEntries);
+        $this->command->info('Brackets ............. '.$this->totalBrackets);
+        $this->command->info('Bracket Matches ...... '.$this->totalBracketMatches);
+        $this->command->info('Outcomes ............. '.$this->totalOutcomes);
+        $this->command->info('Sesi Absensi ......... '.$this->totalSesi);
+        $this->command->info('Attendances .......... '.$this->totalAttendances);
+        $this->command->info('Announcements ........ '.CompetitionAnnouncement::count());
         $this->command->info('============================================');
         $this->command->info('');
         $this->command->info('Reusing existing users from SuperUserSeeder & UserSeeder.');

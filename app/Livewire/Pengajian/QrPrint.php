@@ -11,8 +11,11 @@ use Livewire\Component;
 class QrPrint extends Component
 {
     public ?string $eventName = null;
+
     public ?string $desaName = null;
+
     public ?string $qrBase64 = null;
+
     public ?string $qrUrl = null;
 
     public function mount(): void
@@ -21,6 +24,7 @@ class QrPrint extends Component
 
         if ($session === null || ! isset($session['grant_id'], $session['event_id'], $session['desa_id'])) {
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
@@ -29,12 +33,14 @@ class QrPrint extends Component
         if ($grant === null || $grant->revoked_at !== null || now()->greaterThan($grant->valid_until) || now()->lessThan($grant->valid_from)) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 
         if ((int) $grant->event_id !== (int) $session['event_id'] || (int) $grant->desa_id !== (int) $session['desa_id']) {
             session()->forget('pengajian_access');
             $this->redirect($this->enterTokenRoute(), navigate: true);
+
             return;
         }
 

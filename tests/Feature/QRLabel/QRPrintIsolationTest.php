@@ -1,11 +1,11 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Enums\Role;
 use App\Models\peserta;
 use App\Models\User;
 use App\Support\ActiveEventContext;

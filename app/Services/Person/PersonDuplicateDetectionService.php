@@ -7,6 +7,7 @@ use App\Models\Person;
 class PersonDuplicateDetectionService
 {
     const STRONG_SIMILARITY = 100;
+
     const POSSIBLE_SIMILARITY = 80;
 
     public function normalizeName(string $name): string
@@ -44,6 +45,7 @@ class PersonDuplicateDetectionService
                 } else {
                     $possible[] = $person;
                 }
+
                 continue;
             }
 
@@ -59,6 +61,7 @@ class PersonDuplicateDetectionService
                         : $person->tanggal_lahir;
                     if ($tlInput === $tlPerson) {
                         $possible[] = $person;
+
                         continue;
                     }
                 }

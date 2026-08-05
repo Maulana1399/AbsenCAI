@@ -8,8 +8,8 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceParityService;
 use App\Services\Attendance\AttendanceReadService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -65,6 +65,7 @@ function mv_participant(Event $event): object
     $peserta = mv_peserta();
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
     mv_mapping($peserta, $person, $participation, $event);
+
     return (object) compact('person', 'peserta', 'participation');
 }
 
@@ -205,8 +206,10 @@ test('ReadService canonical hadir wins over legacy izin', function () {
 // ---------------------------------------------------------------------------
 
 test('ReadService does not mix Event A and Event B attendance', function () {
-    $eventA = mv_event(); $eventB = mv_event();
-    $sessionA = mv_session($eventA); $sessionB = mv_session($eventB);
+    $eventA = mv_event();
+    $eventB = mv_event();
+    $sessionA = mv_session($eventA);
+    $sessionB = mv_session($eventB);
     $mA = mv_participant($eventA);
     Absensi::create(['nip' => $mA->person->id, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
     EventAttendance::create([
@@ -227,9 +230,12 @@ test('ReadService does not mix Event A and Event B attendance', function () {
 // ---------------------------------------------------------------------------
 
 test('auditAll returns summary across events', function () {
-    $eventA = mv_event(); $eventB = mv_event();
-    $sessionA = mv_session($eventA); $sessionB = mv_session($eventB);
-    $mA = mv_participant($eventA); $mB = mv_participant($eventB);
+    $eventA = mv_event();
+    $eventB = mv_event();
+    $sessionA = mv_session($eventA);
+    $sessionB = mv_session($eventB);
+    $mA = mv_participant($eventA);
+    $mB = mv_participant($eventB);
     Absensi::create(['nip' => $mA->person->id, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
     EventAttendance::create([
         'participation_id' => $mA->participation->id, 'sesi_absensi_id' => $sessionA->id,
@@ -272,9 +278,12 @@ test('Pengajian attendance excluded from CAI parity', function () {
 // ---------------------------------------------------------------------------
 
 test('parity per-event isolation', function () {
-    $eventA = mv_event(); $eventB = mv_event();
-    $sessionA = mv_session($eventA); $sessionB = mv_session($eventB);
-    $mA = mv_participant($eventA); $mB = mv_participant($eventB);
+    $eventA = mv_event();
+    $eventB = mv_event();
+    $sessionA = mv_session($eventA);
+    $sessionB = mv_session($eventB);
+    $mA = mv_participant($eventA);
+    $mB = mv_participant($eventB);
     Absensi::create(['nip' => $mA->person->id, 'nama' => 'A', 'jam_scan' => now(), 'sesi_id' => $sessionA->id]);
     EventAttendance::create([
         'participation_id' => $mA->participation->id, 'sesi_absensi_id' => $sessionA->id,

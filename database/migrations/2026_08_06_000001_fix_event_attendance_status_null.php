@@ -10,7 +10,5 @@ return new class extends Migration
         EventAttendance::whereNull('status')->update(['status' => EventAttendance::STATUS_HADIR]);
     }
 
-    public function down(): void
-    {
-    }
+    public function down(): void {}
 };

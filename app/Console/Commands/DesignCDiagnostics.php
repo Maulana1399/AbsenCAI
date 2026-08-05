@@ -33,12 +33,12 @@ class DesignCDiagnostics extends Command
         ];
 
         foreach ($checks as $label => $count) {
-            $this->line(str_pad($label, 56) . ': ' . $count);
+            $this->line(str_pad($label, 56).': '.$count);
         }
 
         $problemCount = array_sum($checks);
         $this->newLine();
-        $this->line('problem_total: ' . $problemCount);
+        $this->line('problem_total: '.$problemCount);
 
         return Command::SUCCESS;
     }

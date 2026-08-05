@@ -11,7 +11,9 @@ use Livewire\Component;
 class Outcome extends Component
 {
     public string $filterCategoryId = '';
+
     public string $filterClassId = '';
+
     public string $filterVenueId = '';
 
     public function updatedFilterCategoryId(): void

@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class regu extends Model
 {
     protected $fillable = [
-    'regu',
-    'jenis_kelamin',
+        'regu',
+        'jenis_kelamin',
     ];
 
-    public function participations() {
+    public function participations()
+    {
         return $this->hasMany(Participation::class);
     }
 }

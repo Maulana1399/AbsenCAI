@@ -2,38 +2,48 @@
 
 namespace App\Livewire\Database\Peserta;
 
-use Livewire\Component;
-use App\Models\Participation;
-use App\Models\peserta;
-use Livewire\Attributes\On;
-use Flux\Flux;
-use App\Models\desa;
-use App\Models\regu;
 use App\Livewire\Traits\HasCascadingKelompok;
+use App\Models\desa;
+use App\Models\Participation;
+use App\Models\regu;
 use App\Services\Attendance\LegacyParticipationResolver;
 use App\Services\Person\PersonLegacySyncService;
 use App\Support\ActiveEventContext;
 use App\Support\EventOwnership;
+use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EditPeserta extends Component
 {
     use HasCascadingKelompok;
 
     public $peserta;
-    public $nama;
-    public $jenis_kelamin;
-    public $jenis_peserta;
-    public $desa_id;
-    public $kelompok_id;
-    public $regu_id;
-    public $peserta_id;
-    public $participation_id;
-    public $person_id;
-    public $daftarDesa = [];
-    public $daftarKelompok = [];
-    public $daftarRegu = [];
 
+    public $nama;
+
+    public $jenis_kelamin;
+
+    public $jenis_peserta;
+
+    public $desa_id;
+
+    public $kelompok_id;
+
+    public $regu_id;
+
+    public $peserta_id;
+
+    public $participation_id;
+
+    public $person_id;
+
+    public $daftarDesa = [];
+
+    public $daftarKelompok = [];
+
+    public $daftarRegu = [];
 
     public function mount()
     {
@@ -42,7 +52,7 @@ class EditPeserta extends Component
         $this->daftarRegu = regu::all();
     }
 
-    #[On("editPeserta")]
+    #[On('editPeserta')]
     public function editPeserta($id)
     {
         $event = app(ActiveEventContext::class)->current();
@@ -72,8 +82,9 @@ class EditPeserta extends Component
         $this->desa_id = $participation->person?->desa_id;
         $this->kelompok_id = $participation->person?->kelompok_id;
         $this->regu_id = $participation->regu_id;
-        Flux::modal("edit-peserta")->show();
+        Flux::modal('edit-peserta')->show();
     }
+
     public function update()
     {
         Gate::authorize('manage-participants');

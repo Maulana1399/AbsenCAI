@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\User;
 use App\Models\Event;
+use App\Models\User;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -15,8 +15,8 @@ uses(RefreshDatabase::class);
 function md_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
-        'name' => 'Master Data Test Event ' . str()->random(6),
-        'slug' => 'md-test-' . str()->random(6),
+        'name' => 'Master Data Test Event '.str()->random(6),
+        'slug' => 'md-test-'.str()->random(6),
         'event_type' => 'cai',
         'status' => 'active',
     ], $overrides));

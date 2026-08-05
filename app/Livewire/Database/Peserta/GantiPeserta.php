@@ -7,9 +7,9 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Services\Cai\CaiParticipantReplacementService;
 use App\Services\Placement\PlacementService;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\DB;
 use Flux\Flux;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use RuntimeException;
@@ -18,17 +18,25 @@ use Throwable;
 class GantiPeserta extends Component
 {
     public ?int $participation_id = null;
+
     public ?int $event_id = null;
 
     public string $nama_lama = '';
+
     public string $participant_number = '';
+
     public string $desa = '-';
+
     public string $kelompok = '-';
+
     public string $regu = '-';
 
     public string $nama = '';
+
     public string $jenis_kelamin = '';
+
     public ?string $tanggal_lahir = null;
+
     public string $reason = '';
 
     public string $errorMessage = '';
@@ -45,6 +53,7 @@ class GantiPeserta extends Component
         if (! $event || ! $event->isCai()) {
             $this->errorMessage = 'Penggantian peserta hanya dapat dilakukan pada event CAI.';
             Flux::modal('ganti-peserta-error')->show();
+
             return;
         }
 
@@ -60,6 +69,7 @@ class GantiPeserta extends Component
             } catch (RuntimeException $e) {
                 $this->errorMessage = $e->getMessage();
                 Flux::modal('ganti-peserta-error')->show();
+
                 return;
             }
 

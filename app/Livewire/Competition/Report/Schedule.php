@@ -10,6 +10,7 @@ use Livewire\Component;
 class Schedule extends Component
 {
     public string $filterVenueId = '';
+
     public string $filterStatus = '';
 
     public function render()

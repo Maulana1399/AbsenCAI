@@ -7,10 +7,10 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Models\peserta;
 use App\Services\Attendance\SuratIzinBackfillService;
 use App\Services\Attendance\SuratIzinService;
 use App\Support\ActiveEventContext;
@@ -20,7 +20,7 @@ uses(RefreshDatabase::class);
 
 function si_event(): Event
 {
-    return Event::create(['name' => 'SI Event ' . str()->random(6), 'slug' => 'si-' . str()->random(6), 'status' => 'active']);
+    return Event::create(['name' => 'SI Event '.str()->random(6), 'slug' => 'si-'.str()->random(6), 'status' => 'active']);
 }
 
 function si_session(Event $event): SesiAbsensi
@@ -33,8 +33,8 @@ function si_participant(Event $event): object
     $person = Person::create(['nama' => 'SI Person']);
     $peserta = peserta::create([
         'nama' => 'SI Peserta', 'nip' => random_int(90000, 99999),
-        'attendance_code' => 'KJA-SI-' . str()->random(8),
-        'participant_number' => 'KL' . random_int(100, 999),
+        'attendance_code' => 'KJA-SI-'.str()->random(8),
+        'participant_number' => 'KL'.random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
     ]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
@@ -50,6 +50,7 @@ function si_participant(Event $event): object
         'participation_id' => $participation->id, 'event_id' => $event->id,
         'migrated_at' => now(),
     ]);
+
     return (object) compact('person', 'peserta', 'participation');
 }
 

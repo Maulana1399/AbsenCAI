@@ -3,16 +3,12 @@
 use App\Livewire\Database\Peserta\HapusPeserta;
 use App\Models\desa;
 use App\Models\Event;
-use App\Models\EventAttendance;
-use App\Models\IzinAbsensi;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
-use App\Models\SesiAbsensi;
-use App\Models\SuratIzin;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -22,8 +18,8 @@ uses(RefreshDatabase::class);
 function per_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'PER Event ' . $suffix,
-        'slug' => 'per-' . $suffix . '-' . str()->random(6),
+        'name' => 'PER Event '.$suffix,
+        'slug' => 'per-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);
@@ -83,4 +79,3 @@ test('single last participation can be removed', function () {
         ->and(LegacyParticipationMapping::where('peserta_id', $fixture['legacy']->id)->count())->toBe(0)
         ->and(LegacyPesertaMapping::find($fixture['mapping']->id))->not->toBeNull();
 });
-

@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class peserta extends Model
 {
     public const STATUS_BELUM_REGISTRASI = 'Belum Registrasi';
+
     public const STATUS_SELF_REGISTER = 'Self Register';
+
     public const STATUS_REGISTRASI_ULANG = 'Registrasi Ulang';
 
     public const JENIS_WAJIB = 'Wajib';
+
     public const JENIS_KIRIMAN = 'Kiriman';
+
     public const JENIS_PERSON = 'Person';
 
     protected $fillable = [

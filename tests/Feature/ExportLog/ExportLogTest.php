@@ -1,19 +1,19 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\Rekap\Peserta\RekapPeserta;
 use App\Models\ActivityLog;
+use App\Models\desa;
 use App\Models\Event;
+use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\User;
-use App\Models\desa;
-use App\Models\kelompok;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Models\User;
 use App\Support\ActiveEventContext;
-use App\Enums\Role;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -80,8 +80,8 @@ test('export peserta creates activity log entry', function () {
         ->call('exportExcel');
 
     $this->assertDatabaseHas('activity_logs', [
-        'module'  => 'export',
-        'action'  => 'exported',
+        'module' => 'export',
+        'action' => 'exported',
         'user_id' => $this->user->id,
     ]);
 });

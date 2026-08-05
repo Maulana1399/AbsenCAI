@@ -67,8 +67,11 @@ class AttendanceReadService
 
             $attendance->push($attendanceEntry);
 
-            if ($status === 'hadir') $hadirCount++;
-            elseif ($status === 'izin') $izinCount++;
+            if ($status === 'hadir') {
+                $hadirCount++;
+            } elseif ($status === 'izin') {
+                $izinCount++;
+            }
         }
 
         $total = $participations->count();

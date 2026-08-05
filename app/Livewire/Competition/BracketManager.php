@@ -14,6 +14,7 @@ use Livewire\Component;
 class BracketManager extends Component
 {
     public string $filterClassId = '';
+
     public ?int $selectedBracketId = null;
 
     public string $newParticipantCount = '8';
@@ -25,12 +26,12 @@ class BracketManager extends Component
 
     public function updatedFilterClassId(): void
     {
-        if (!$this->filterClassId) {
+        if (! $this->filterClassId) {
             return;
         }
 
         $class = CompetitionClass::find($this->filterClassId);
-        if (!$class) {
+        if (! $class) {
             return;
         }
 
@@ -51,8 +52,9 @@ class BracketManager extends Component
         $class = CompetitionClass::findOrFail($classId);
         $count = (int) $this->newParticipantCount;
 
-        if (!in_array($count, [4, 8, 16, 32])) {
+        if (! in_array($count, [4, 8, 16, 32])) {
             session()->flash('error', 'Participant count must be 4, 8, 16, or 32.');
+
             return;
         }
 
@@ -62,6 +64,7 @@ class BracketManager extends Component
 
         if ($existing) {
             session()->flash('error', 'An active bracket already exists for this class.');
+
             return;
         }
 
@@ -71,17 +74,19 @@ class BracketManager extends Component
         if ($registrationCount > 0) {
             if ($count < $suggested) {
                 session()->flash('error', "Bracket size {$count} is too small for {$registrationCount} participants. Minimum suggested size: {$suggested}.");
+
                 return;
             }
             if ($count > $suggested * 2) {
                 session()->flash('error', "Bracket size {$count} is too large for {$registrationCount} participants. Suggested size: {$suggested}.");
+
                 return;
             }
         }
 
         $bracket = CompetitionBracket::create([
             'competition_class_id' => $classId,
-            'name' => $class->name . ' Bracket',
+            'name' => $class->name.' Bracket',
             'participant_count' => $count,
             'status' => 'active',
         ]);
@@ -128,6 +133,7 @@ class BracketManager extends Component
 
         if ($this->bracketHasPlayedMatches($bracket)) {
             session()->flash('error', 'Bracket tidak dapat dihapus karena sudah ada pertandingan yang dimainkan.');
+
             return;
         }
 
@@ -145,6 +151,7 @@ class BracketManager extends Component
 
         if ($this->bracketHasPlayedMatches($bracket)) {
             session()->flash('error', 'Bracket tidak dapat dibuat ulang karena sudah ada pertandingan yang dimainkan.');
+
             return;
         }
 
@@ -164,6 +171,7 @@ class BracketManager extends Component
     private function bracketHasPlayedMatches(CompetitionBracket $bracket): bool
     {
         $scheduleIds = $bracket->bracketMatches()->pluck('competition_schedule_id');
+
         return CompetitionSchedule::whereIn('id', $scheduleIds)
             ->where('status', '!=', 'Scheduled')
             ->exists();
@@ -171,9 +179,16 @@ class BracketManager extends Component
 
     private function suggestBracketSize(int $participantCount): int
     {
-        if ($participantCount <= 4) return 4;
-        if ($participantCount <= 8) return 8;
-        if ($participantCount <= 16) return 16;
+        if ($participantCount <= 4) {
+            return 4;
+        }
+        if ($participantCount <= 8) {
+            return 8;
+        }
+        if ($participantCount <= 16) {
+            return 16;
+        }
+
         return 32;
     }
 
@@ -183,16 +198,24 @@ class BracketManager extends Component
             ->where('round', $round)
             ->where('position', $position)
             ->first();
+
         return $match?->id;
     }
 
     private function getRoundLabel(int $round, int $totalRounds): string
     {
-        if ($round === 1) return 'Final';
-        if ($round === 2) return 'Semi Final';
-        if ($round === 3) return 'Quarter Final';
+        if ($round === 1) {
+            return 'Final';
+        }
+        if ($round === 2) {
+            return 'Semi Final';
+        }
+        if ($round === 3) {
+            return 'Quarter Final';
+        }
         $roundNum = $totalRounds - $round + 1;
-        return "Round of " . pow(2, $totalRounds - $round + 1);
+
+        return 'Round of '.pow(2, $totalRounds - $round + 1);
     }
 
     public function render()

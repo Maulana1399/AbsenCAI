@@ -8,8 +8,8 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceBackfillService;
 use App\Services\Attendance\AttendanceParityService;
 use App\Services\Attendance\AttendanceService;
@@ -23,12 +23,12 @@ function ap_next(string $prefix): string
 
     $counter++;
 
-    return $prefix . str_pad((string) $counter, 4, '0', STR_PAD_LEFT);
+    return $prefix.str_pad((string) $counter, 4, '0', STR_PAD_LEFT);
 }
 
 function ap_event(): Event
 {
-    return Event::create(['name' => ap_next('AP Event '), 'slug' => 'ap-' . ap_next('evt-'), 'status' => 'active']);
+    return Event::create(['name' => ap_next('AP Event '), 'slug' => 'ap-'.ap_next('evt-'), 'status' => 'active']);
 }
 
 function ap_person(): Person
@@ -46,9 +46,9 @@ function ap_peserta(array $overrides = []): peserta
     $seq = ap_next('');
 
     return peserta::create(array_merge([
-        'nama' => 'AP ' . $seq,
-        'attendance_code' => 'KJA-AP-' . $seq,
-        'participant_number' => 'KL' . str_pad((string) (1000 + (int) substr($seq, -4)), 3, '0', STR_PAD_LEFT),
+        'nama' => 'AP '.$seq,
+        'attendance_code' => 'KJA-AP-'.$seq,
+        'participant_number' => 'KL'.str_pad((string) (1000 + (int) substr($seq, -4)), 3, '0', STR_PAD_LEFT),
         'status_registrasi' => 'Belum Registrasi',
     ], $overrides));
 }
@@ -77,6 +77,7 @@ function ap_mappedParticipant(Event $event): object
     $peserta = ap_peserta();
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
     ap_mapping($peserta, $person, $participation, $event);
+
     return (object) compact('person', 'peserta', 'participation');
 }
 
@@ -84,6 +85,7 @@ function ap_legacyHadir(Event $event, peserta $peserta, SesiAbsensi $session): A
 {
     $mapping = \App\Models\LegacyPesertaMapping::where('peserta_id', $peserta->id)->first();
     $nipValue = $mapping?->legacy_nip ?? $peserta->id;
+
     return Absensi::create(['nip' => $nipValue, 'nama' => $peserta->nama, 'jam_scan' => now(), 'sesi_id' => $session->id]);
 }
 
@@ -165,8 +167,10 @@ test('multiple participants all matched is 100% parity', function () {
     $session = ap_session($event);
     $mA = ap_mappedParticipant($event);
     $mB = ap_mappedParticipant($event);
-    ap_legacyHadir($event, $mA->peserta, $session); ap_canonicalHadir($mA->participation, $session, $event);
-    ap_legacyHadir($event, $mB->peserta, $session); ap_canonicalHadir($mB->participation, $session, $event);
+    ap_legacyHadir($event, $mA->peserta, $session);
+    ap_canonicalHadir($mA->participation, $session, $event);
+    ap_legacyHadir($event, $mB->peserta, $session);
+    ap_canonicalHadir($mB->participation, $session, $event);
 
     expect(app(AttendanceParityService::class)->audit($event->id)['parity_percentage'])->toBe(100.0);
 });
@@ -234,11 +238,16 @@ test('unmappable legacy hadir counted correctly', function () {
 // ---------------------------------------------------------------------------
 
 test('cross-event records isolated', function () {
-    $eventA = ap_event(); $eventB = ap_event();
-    $sessionA = ap_session($eventA); $sessionB = ap_session($eventB);
-    $mA = ap_mappedParticipant($eventA); $mB = ap_mappedParticipant($eventB);
-    ap_legacyHadir($eventA, $mA->peserta, $sessionA); ap_canonicalHadir($mA->participation, $sessionA, $eventA);
-    ap_legacyHadir($eventB, $mB->peserta, $sessionB); ap_canonicalHadir($mB->participation, $sessionB, $eventB);
+    $eventA = ap_event();
+    $eventB = ap_event();
+    $sessionA = ap_session($eventA);
+    $sessionB = ap_session($eventB);
+    $mA = ap_mappedParticipant($eventA);
+    $mB = ap_mappedParticipant($eventB);
+    ap_legacyHadir($eventA, $mA->peserta, $sessionA);
+    ap_canonicalHadir($mA->participation, $sessionA, $eventA);
+    ap_legacyHadir($eventB, $mB->peserta, $sessionB);
+    ap_canonicalHadir($mB->participation, $sessionB, $eventB);
 
     $resultA = app(AttendanceParityService::class)->audit($eventA->id);
     $resultB = app(AttendanceParityService::class)->audit($eventB->id);
@@ -255,10 +264,13 @@ test('cross-event records isolated', function () {
 
 test('same participant multiple sessions all matched', function () {
     $event = ap_event();
-    $sessionA = ap_session($event); $sessionB = ap_session($event);
+    $sessionA = ap_session($event);
+    $sessionB = ap_session($event);
     $m = ap_mappedParticipant($event);
-    ap_legacyHadir($event, $m->peserta, $sessionA); ap_canonicalHadir($m->participation, $sessionA, $event);
-    ap_legacyHadir($event, $m->peserta, $sessionB); ap_canonicalHadir($m->participation, $sessionB, $event);
+    ap_legacyHadir($event, $m->peserta, $sessionA);
+    ap_canonicalHadir($m->participation, $sessionA, $event);
+    ap_legacyHadir($event, $m->peserta, $sessionB);
+    ap_canonicalHadir($m->participation, $sessionB, $event);
 
     expect(app(AttendanceParityService::class)->audit($event->id)['parity_percentage'])->toBe(100.0);
 });
@@ -372,11 +384,16 @@ test('EventAttendance status defaults correctly after migration', function () {
 // ---------------------------------------------------------------------------
 
 test('auditAll returns results for all CAI events', function () {
-    $eventA = ap_event(); $eventB = ap_event();
-    $sessionA = ap_session($eventA); $sessionB = ap_session($eventB);
-    $mA = ap_mappedParticipant($eventA); $mB = ap_mappedParticipant($eventB);
-    ap_legacyHadir($eventA, $mA->peserta, $sessionA); ap_canonicalHadir($mA->participation, $sessionA, $eventA);
-    ap_legacyHadir($eventB, $mB->peserta, $sessionB); ap_canonicalHadir($mB->participation, $sessionB, $eventB);
+    $eventA = ap_event();
+    $eventB = ap_event();
+    $sessionA = ap_session($eventA);
+    $sessionB = ap_session($eventB);
+    $mA = ap_mappedParticipant($eventA);
+    $mB = ap_mappedParticipant($eventB);
+    ap_legacyHadir($eventA, $mA->peserta, $sessionA);
+    ap_canonicalHadir($mA->participation, $sessionA, $eventA);
+    ap_legacyHadir($eventB, $mB->peserta, $sessionB);
+    ap_canonicalHadir($mB->participation, $sessionB, $eventB);
 
     $all = app(AttendanceParityService::class)->auditAll();
 

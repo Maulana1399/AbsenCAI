@@ -6,17 +6,20 @@ use App\Models\desa;
 use App\Models\kelompok;
 use App\Models\Person;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class IndexPerson extends Component
 {
     use WithPagination;
 
     public string $search = '';
+
     public string $desaId = '';
+
     public string $kelompokId = '';
+
     public string $jenisKelamin = '';
 
     protected $updatesQueryString = ['search', 'desaId', 'kelompokId', 'jenisKelamin'];

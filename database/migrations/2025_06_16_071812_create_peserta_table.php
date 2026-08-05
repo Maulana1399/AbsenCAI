@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->integer('nip');
-            $table->enum('jenis_kelamin',['Laki - Laki', 'Perempuan']);
-            $table->foreignId('kelompok_id')->nullable()->constrained('kelompoks')->onDelete('cascade'); 
+            $table->enum('jenis_kelamin', ['Laki - Laki', 'Perempuan']);
+            $table->foreignId('kelompok_id')->nullable()->constrained('kelompoks')->onDelete('cascade');
             $table->foreignId('desa_id')->nullable()->constrained('desas')->onDelete('cascade');
             $table->foreignId('regu_id')->nullable()->constrained('regus')->onDelete('cascade');
             $table->timestamps();

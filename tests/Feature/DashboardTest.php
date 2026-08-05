@@ -1,18 +1,18 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\Event\Dashboard as EventDashboard;
-use App\Models\Event;
-use App\Models\SesiAbsensi;
-use App\Models\Participation;
-use App\Models\Person;
-use App\Models\EventAttendance;
 use App\Models\desa;
+use App\Models\Event;
+use App\Models\EventAttendance;
 use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Models\SesiAbsensi;
 use App\Models\User;
-use App\Enums\Role;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -27,7 +27,7 @@ function ds_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
         'name' => 'CAI Test',
-        'slug' => 'cai-test-' . str()->random(6),
+        'slug' => 'cai-test-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ], $overrides));
@@ -37,7 +37,7 @@ function ds_sesi(Event $event, array $overrides = []): SesiAbsensi
 {
     return SesiAbsensi::create(array_merge([
         'event_id' => $event->id,
-        'nama_sesi' => 'Sesi ' . str()->random(4),
+        'nama_sesi' => 'Sesi '.str()->random(4),
         'tanggal' => now()->format('Y-m-d'),
         'aktif' => true,
     ], $overrides));
@@ -45,13 +45,13 @@ function ds_sesi(Event $event, array $overrides = []): SesiAbsensi
 
 function ds_desa(): desa
 {
-    return desa::create(['desa_asal' => 'Desa ' . str()->random(4)]);
+    return desa::create(['desa_asal' => 'Desa '.str()->random(4)]);
 }
 
 function ds_regu(string $gender = 'L'): regu
 {
     return regu::create([
-        'regu' => 'Regu ' . str()->random(4),
+        'regu' => 'Regu '.str()->random(4),
         'jenis_kelamin' => $gender === 'L' ? 'Laki - Laki' : 'Perempuan',
     ]);
 }
@@ -59,7 +59,7 @@ function ds_regu(string $gender = 'L'): regu
 function ds_kelompok(desa $desa): kelompok
 {
     return kelompok::create([
-        'kelompok_asal' => 'Kelompok ' . str()->random(4),
+        'kelompok_asal' => 'Kelompok '.str()->random(4),
         'desa_id' => $desa->id,
     ]);
 }
@@ -93,15 +93,15 @@ function ds_participation(Event $event, Person $person): Participation
     return Participation::create([
         'event_id' => $event->id,
         'person_id' => $person->id,
-        'participant_number' => 'KL' . str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT),
-        'attendance_code' => 'KJA-' . str()->random(8),
+        'participant_number' => 'KL'.str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT),
+        'attendance_code' => 'KJA-'.str()->random(8),
     ]);
 }
 
 function ds_person(desa $desa, string $gender = 'L'): Person
 {
     return Person::create([
-        'nama' => 'Person ' . str()->random(6),
+        'nama' => 'Person '.str()->random(6),
         'jenis_kelamin' => $gender,
         'desa_id' => $desa->id,
         'nip' => $gender === 'L' ? (string) random_int(1001, 1999) : (string) random_int(2001, 2999),
@@ -141,10 +141,10 @@ test('dashboard shows Alfa count when session is active and no one attended', fu
 
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 1)
-        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 1)
-        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 0)
-        ->assertViewHas('presenterData', fn($d) => $d['izinCount'] === 0);
+        ->assertViewHas('presenterData', fn ($d) => $d['totalPeserta'] === 1)
+        ->assertViewHas('presenterData', fn ($d) => $d['belumAbsenCount'] === 1)
+        ->assertViewHas('presenterData', fn ($d) => $d['sudahAbsenCount'] === 0)
+        ->assertViewHas('presenterData', fn ($d) => $d['izinCount'] === 0);
 });
 
 test('dashboard Alfa count decreases when participant attends', function () {
@@ -174,9 +174,9 @@ test('dashboard Alfa count decreases when participant attends', function () {
 
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('presenterData', fn($d) => $d['totalPeserta'] === 2)
-        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 1)
-        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 1);
+        ->assertViewHas('presenterData', fn ($d) => $d['totalPeserta'] === 2)
+        ->assertViewHas('presenterData', fn ($d) => $d['sudahAbsenCount'] === 1)
+        ->assertViewHas('presenterData', fn ($d) => $d['belumAbsenCount'] === 1);
 });
 
 test('dashboard Alfa shows 0 when all participants attended', function () {
@@ -203,8 +203,8 @@ test('dashboard Alfa shows 0 when all participants attended', function () {
 
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 0)
-        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 1);
+        ->assertViewHas('presenterData', fn ($d) => $d['belumAbsenCount'] === 0)
+        ->assertViewHas('presenterData', fn ($d) => $d['sudahAbsenCount'] === 1);
 });
 
 test('dashboard Belum Absen table shows correct names', function () {
@@ -252,6 +252,6 @@ test('dashboard attendance from other session does not affect Alfa count', funct
     // Person should still show as belum absen because they're not in the active session
     Livewire::actingAs($user)
         ->test(EventDashboard::class, ['event' => $event])
-        ->assertViewHas('presenterData', fn($d) => $d['belumAbsenCount'] === 1)
-        ->assertViewHas('presenterData', fn($d) => $d['sudahAbsenCount'] === 0);
+        ->assertViewHas('presenterData', fn ($d) => $d['belumAbsenCount'] === 1)
+        ->assertViewHas('presenterData', fn ($d) => $d['sudahAbsenCount'] === 0);
 });

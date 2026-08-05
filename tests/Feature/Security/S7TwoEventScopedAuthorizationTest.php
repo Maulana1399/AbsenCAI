@@ -4,7 +4,6 @@ use App\Enums\Role;
 use App\Models\Event;
 use App\Models\Person;
 use App\Models\User;
-use App\Models\SesiAbsensi;
 use App\Services\Activity\EventCommitteeService;
 use App\Services\Event\EventAccessService;
 use App\Support\ActiveEventContext;
@@ -42,6 +41,7 @@ function s7e_user(string $role, ?int $personId = null): User
     if ($personId !== null) {
         $attrs['person_id'] = $personId;
     }
+
     return User::factory()->create($attrs);
 }
 
@@ -68,6 +68,7 @@ function s7e_ketuaEventAssignedTo(Event $event): User
     $person = s7e_person();
     $user = s7e_user('ketua_event', $person->id);
     s7e_assignPersonToEvent($person, $event);
+
     return $user;
 }
 

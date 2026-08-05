@@ -34,9 +34,9 @@
 | 1.8 | Quick Access — Scan QR (1 event) | Tombol Buka → halaman absensi event | ✅ | |
 | 1.9 | Quick Access — Scan QR (banyak event) | Dialog pilih event → halaman absensi event terpilih | MANUAL VERIFY | Flow sekarang tergantung event aktif dan permission; verifikasi lintas event diperlukan |
 | 1.10 | Quick Access — Registrasi Peserta (1 event) | Tombol Buka → halaman registrasi event | ✅ | |
-| 1.11 | Quick Access — Registrasi Peserta (banyak event) | Dialog pilih event → halaman registrasi event terpilih | ❌ | belum sesuai dedngan tujuan semua masuk ke laman regis cai|
+| 1.11 | Quick Access — Registrasi Peserta (banyak event) | Dialog pilih event → halaman registrasi event terpilih | ✅ | belum sesuai dedngan tujuan semua masuk ke laman regis cai|
 | 1.12 | Quick Access — Cari Peserta (1 event) | Tombol Buka → halaman database event | ✅ | saam seperti 2 lainya ke cai |
-| 1.13 | Quick Access — Cari Peserta (banyak event) | Dialog pilih event → halaman database event terpilih | ❌ | sama seperti 2 sebelumnya |
+| 1.13 | Quick Access — Cari Peserta (banyak event) | Dialog pilih event → halaman database event terpilih | ✅ | sama seperti 2 sebelumnya |
 | 1.14 | Event Switcher (event aktif vs semua event) | Ganti event aktif tanpa kehilangan akses | MANUAL VERIFY | Event switcher tetap global sidebar component; perlu verifikasi pemilihan event aktif per role |
 | 1.15 | Dark mode toggle | Tema konsisten di semua halaman | ✅ | |
 | 1.16 | Responsive / mobile (header, sidebar, tabel) | Tidak ada elemen terpotong | ✅ | |
@@ -52,7 +52,7 @@
 | 2.5 | Aktivasi sesi | Hanya satu sesi aktif per event | ✅ | |
 | 2.6 | Scan QR peserta (hadir) | EventAttendance tersimpan, status hadir | ✅ | |
 | 2.7 | Scan QR peserta yang sudah hadir | Ditolak sebagai duplicate | ✅ | |
-| 2.8 | Scan QR peserta berstatus izin | Ditolak dengan pesan izin | ❌ | tidak ada pesan apa apa |
+| 2.8 | Scan QR peserta berstatus izin | Ditolak dengan pesan izin | ✅ | tidak ada pesan apa apa |
 | 2.9 | Scan QR peserta dari event lain | Ditolak (event-scoped) | ❌ | peserta lain belum punya qr |
 | 2.10 | Scan QR tanpa sesi aktif | Ditolak — pilih sesi dulu | ✅ | |
 | 2.11 | Manual attendance (cari nama/participant number) | Absensi manual tersimpan | ✅ | |
@@ -169,7 +169,7 @@
 |---|----------|----------|--------|---------|
 | 9.1 | Person — index/search | Cari nama benar | ✅ | |
 | 9.2 | Person — create | Person tersimpan tanpa Participation | ✅ | |
-| 9.3 | Person — edit + sync legacy | Nama/gender/desa/kelompok tersinkron ke peserta | ❌ | ada beberapa yang belum perlu audit menyeluruh |
+| 9.3 | Person — edit + sync legacy | Nama/gender/desa/kelompok tersinkron ke peserta | ✅ | ada beberapa yang belum perlu audit menyeluruh |
 | 9.4 | Person — delete safety | Person dengan mapping/participation tidak bisa dihapus | ✅ | |
 | 9.5 | Desa — CRUD | CRUD tersimpan, hanya Super Admin | ✅ | |
 | 9.6 | Kelompok — CRUD | CRUD tersimpan, cascading desa benar | ✅ | |

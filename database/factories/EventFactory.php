@@ -12,7 +12,7 @@ class EventFactory extends Factory
 
     public function definition(): array
     {
-        $name = fake()->unique()->company() . ' Event';
+        $name = fake()->unique()->company().' Event';
 
         return [
             'name' => $name,

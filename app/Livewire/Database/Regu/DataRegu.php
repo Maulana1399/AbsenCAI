@@ -3,22 +3,22 @@
 namespace App\Livewire\Database\Regu;
 
 use App\Models\regu;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DataRegu extends Component
 {
-
     public $daftarregu;
 
-    public function mount(){
+    public function mount()
+    {
         $this->daftarregu = regu::all();
     }
 
-    public function render()    
+    public function render()
     {
-         return view('livewire.database.regu.data-regu', [
-            'daftarregu' => $this->daftarregu
+        return view('livewire.database.regu.data-regu', [
+            'daftarregu' => $this->daftarregu,
         ]);
     }
 
@@ -32,7 +32,7 @@ class DataRegu extends Component
         $this->dispatch('HapusRegu', id: $id);
 
     }
-    
+
     #[On('refreshRegu')]
     public function refreshRegu()
     {

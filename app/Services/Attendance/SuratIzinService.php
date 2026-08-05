@@ -7,8 +7,8 @@ use App\Models\IzinAbsensi;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Support\ActiveEventContext;
 use App\Services\Audit\ActivityLogService;
+use App\Support\ActiveEventContext;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -47,29 +47,29 @@ class SuratIzinService
         }
 
         $surat = SuratIzin::create([
-            'peserta_id'        => $data['peserta_id'],
-            'participation_id'  => $participationId,
-            'event_id'          => $eventId,
-            'alasan'            => $data['alasan'],
-            'jenis_izin'        => $data['jenis_izin'] ?? 'pulang',
-            'tanggal_mulai'     => $data['tanggal_mulai'],
-            'tanggal_selesai'   => $data['tanggal_selesai'],
-            'status'            => 'draft',
-            'created_by'        => $createdBy,
+            'peserta_id' => $data['peserta_id'],
+            'participation_id' => $participationId,
+            'event_id' => $eventId,
+            'alasan' => $data['alasan'],
+            'jenis_izin' => $data['jenis_izin'] ?? 'pulang',
+            'tanggal_mulai' => $data['tanggal_mulai'],
+            'tanggal_selesai' => $data['tanggal_selesai'],
+            'status' => 'draft',
+            'created_by' => $createdBy,
         ]);
 
         $this->activityLogService->log(
             action: 'created',
             module: 'surat_izin',
-            description: 'Surat izin dibuat untuk ' . ($surat->peserta->nama ?? 'Peserta #' . $surat->peserta_id),
+            description: 'Surat izin dibuat untuk '.($surat->peserta->nama ?? 'Peserta #'.$surat->peserta_id),
             subject: $surat,
             properties: [
-                'nomor_surat'     => $surat->nomor_surat,
-                'peserta_id'      => $surat->peserta_id,
-                'status'          => 'draft',
-                'tanggal_mulai'   => $surat->tanggal_mulai?->toDateString(),
+                'nomor_surat' => $surat->nomor_surat,
+                'peserta_id' => $surat->peserta_id,
+                'status' => 'draft',
+                'tanggal_mulai' => $surat->tanggal_mulai?->toDateString(),
                 'tanggal_selesai' => $surat->tanggal_selesai?->toDateString(),
-                'jenis_izin'      => $surat->jenis_izin,
+                'jenis_izin' => $surat->jenis_izin,
             ],
         );
 
@@ -91,15 +91,15 @@ class SuratIzinService
         $this->activityLogService->log(
             action: 'submitted',
             module: 'surat_izin',
-            description: 'Surat izin diajukan untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            description: 'Surat izin diajukan untuk '.($fresh->peserta->nama ?? 'Peserta #'.$fresh->peserta_id),
             subject: $fresh,
             properties: [
-                'nomor_surat'     => $fresh->nomor_surat,
-                'peserta_id'      => $fresh->peserta_id,
-                'status'          => 'pending',
-                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'nomor_surat' => $fresh->nomor_surat,
+                'peserta_id' => $fresh->peserta_id,
+                'status' => 'pending',
+                'tanggal_mulai' => $fresh->tanggal_mulai?->toDateString(),
                 'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
-                'jenis_izin'      => $fresh->jenis_izin,
+                'jenis_izin' => $fresh->jenis_izin,
             ],
         );
 
@@ -124,9 +124,9 @@ class SuratIzinService
                 ->whereBetween('tanggal', [$mulai, $selesai])
                 ->get();
 
-            $created      = [];
+            $created = [];
             $skippedHadir = [];
-            $skippedIzin  = [];
+            $skippedIzin = [];
 
             foreach ($sesis as $sesi) {
                 if ($surat->peserta_id && IzinAbsensi::where('peserta_id', $surat->peserta_id)
@@ -134,6 +134,7 @@ class SuratIzinService
                     ->exists()
                 ) {
                     $skippedIzin[] = $sesi;
+
                     continue;
                 }
 
@@ -142,26 +143,27 @@ class SuratIzinService
                     ->exists()
                 ) {
                     $skippedHadir[] = $sesi;
+
                     continue;
                 }
 
                 if ($surat->participation_id && $surat->event_id === $sesi->event_id) {
                     $canonical = \App\Models\EventAttendance::create([
                         'participation_id' => $surat->participation_id,
-                        'sesi_absensi_id'  => $sesi->id,
-                        'event_id'         => $sesi->event_id,
-                        'status'           => \App\Models\EventAttendance::STATUS_IZIN,
-                        'attended_at'      => now(),
-                        'method'           => 'surat_izin',
-                        'recorded_by'      => auth()->id(),
+                        'sesi_absensi_id' => $sesi->id,
+                        'event_id' => $sesi->event_id,
+                        'status' => \App\Models\EventAttendance::STATUS_IZIN,
+                        'attended_at' => now(),
+                        'method' => 'surat_izin',
+                        'recorded_by' => auth()->id(),
                     ]);
                     $created[] = $canonical;
                 } elseif ($surat->peserta_id) {
                     try {
                         $izin = $this->exceptionService->recordIzin(
-                            pesertaId:   $surat->peserta_id,
-                            sesiId:      $sesi->id,
-                            source:      'surat_izin',
+                            pesertaId: $surat->peserta_id,
+                            sesiId: $sesi->id,
+                            source: 'surat_izin',
                             suratIzinId: $surat->id,
                         );
                         $created[] = $izin;
@@ -174,18 +176,18 @@ class SuratIzinService
             $nomorSurat = $this->generateNomorSurat($surat->id);
 
             $surat->update([
-                'status'      => 'approved',
+                'status' => 'approved',
                 'nomor_surat' => $nomorSurat,
                 'approved_by' => $approver->id,
                 'approved_at' => now(),
             ]);
 
             return [
-                'surat'          => $surat->fresh(),
-                'created'        => $created,
-                'skipped_hadir'  => $skippedHadir,
-                'skipped_izin'   => $skippedIzin,
-                'sesi_found'     => $sesis->count(),
+                'surat' => $surat->fresh(),
+                'created' => $created,
+                'skipped_hadir' => $skippedHadir,
+                'skipped_izin' => $skippedIzin,
+                'sesi_found' => $sesis->count(),
             ];
         });
 
@@ -194,17 +196,17 @@ class SuratIzinService
         $this->activityLogService->log(
             action: 'approved',
             module: 'surat_izin',
-            description: 'Surat izin disetujui untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            description: 'Surat izin disetujui untuk '.($fresh->peserta->nama ?? 'Peserta #'.$fresh->peserta_id),
             subject: $fresh,
             properties: [
-                'nomor_surat'     => $fresh->nomor_surat,
-                'peserta_id'      => $fresh->peserta_id,
-                'status'          => 'approved',
-                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'nomor_surat' => $fresh->nomor_surat,
+                'peserta_id' => $fresh->peserta_id,
+                'status' => 'approved',
+                'tanggal_mulai' => $fresh->tanggal_mulai?->toDateString(),
                 'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
-                'jenis_izin'      => $fresh->jenis_izin,
-                'sesi_count'      => $result['sesi_found'],
-                'izin_created'    => count($result['created']),
+                'jenis_izin' => $fresh->jenis_izin,
+                'sesi_count' => $result['sesi_found'],
+                'izin_created' => count($result['created']),
             ],
         );
 
@@ -226,15 +228,15 @@ class SuratIzinService
         $this->activityLogService->log(
             action: 'rejected',
             module: 'surat_izin',
-            description: 'Surat izin ditolak untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            description: 'Surat izin ditolak untuk '.($fresh->peserta->nama ?? 'Peserta #'.$fresh->peserta_id),
             subject: $fresh,
             properties: [
-                'nomor_surat'     => $fresh->nomor_surat,
-                'peserta_id'      => $fresh->peserta_id,
-                'status'          => 'rejected',
-                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'nomor_surat' => $fresh->nomor_surat,
+                'peserta_id' => $fresh->peserta_id,
+                'status' => 'rejected',
+                'tanggal_mulai' => $fresh->tanggal_mulai?->toDateString(),
                 'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
-                'jenis_izin'      => $fresh->jenis_izin,
+                'jenis_izin' => $fresh->jenis_izin,
             ],
         );
 
@@ -259,9 +261,9 @@ class SuratIzinService
 
         if ($tanggalKembaliCarbon->lt($surat->tanggal_mulai->startOfDay()) || $tanggalKembaliCarbon->gt($surat->tanggal_selesai->endOfDay())) {
             throw ValidationException::withMessages([
-                'tanggal_kembali' => 'Tanggal kembali harus dalam rentang tanggal surat izin (' .
-                    $surat->tanggal_mulai->format('d/m/Y') . ' — ' .
-                    $surat->tanggal_selesai->format('d/m/Y') . ').',
+                'tanggal_kembali' => 'Tanggal kembali harus dalam rentang tanggal surat izin ('.
+                    $surat->tanggal_mulai->format('d/m/Y').' — '.
+                    $surat->tanggal_selesai->format('d/m/Y').').',
             ]);
         }
 
@@ -278,16 +280,16 @@ class SuratIzinService
         $this->activityLogService->log(
             action: 'returned',
             module: 'surat_izin',
-            description: 'Surat izin ditandai kembali untuk ' . ($fresh->peserta->nama ?? 'Peserta #' . $fresh->peserta_id),
+            description: 'Surat izin ditandai kembali untuk '.($fresh->peserta->nama ?? 'Peserta #'.$fresh->peserta_id),
             subject: $fresh,
             properties: [
-                'nomor_surat'     => $fresh->nomor_surat,
-                'peserta_id'      => $fresh->peserta_id,
-                'status'          => 'approved',
-                'tanggal_mulai'   => $fresh->tanggal_mulai?->toDateString(),
+                'nomor_surat' => $fresh->nomor_surat,
+                'peserta_id' => $fresh->peserta_id,
+                'status' => 'approved',
+                'tanggal_mulai' => $fresh->tanggal_mulai?->toDateString(),
                 'tanggal_selesai' => $fresh->tanggal_selesai?->toDateString(),
                 'tanggal_kembali' => $tanggalKembali,
-                'jenis_izin'      => $fresh->jenis_izin,
+                'jenis_izin' => $fresh->jenis_izin,
             ],
         );
 
@@ -323,18 +325,18 @@ class SuratIzinService
             if ($surat->participation_id && $surat->event_id === $sesi->event_id) {
                 \App\Models\EventAttendance::create([
                     'participation_id' => $surat->participation_id,
-                    'sesi_absensi_id'  => $sesi->id,
-                    'event_id'         => $sesi->event_id,
-                    'status'           => \App\Models\EventAttendance::STATUS_IZIN,
-                    'attended_at'      => now(),
-                    'method'           => 'surat_izin',
+                    'sesi_absensi_id' => $sesi->id,
+                    'event_id' => $sesi->event_id,
+                    'status' => \App\Models\EventAttendance::STATUS_IZIN,
+                    'attended_at' => now(),
+                    'method' => 'surat_izin',
                 ]);
             } elseif ($surat->peserta_id) {
                 try {
                     $this->exceptionService->recordIzin(
-                        pesertaId:  $surat->peserta_id,
-                        sesiId:     $sesi->id,
-                        source:     'surat_izin',
+                        pesertaId: $surat->peserta_id,
+                        sesiId: $sesi->id,
+                        source: 'surat_izin',
                         suratIzinId: $surat->id,
                     );
                 } catch (\Illuminate\Validation\ValidationException $e) {

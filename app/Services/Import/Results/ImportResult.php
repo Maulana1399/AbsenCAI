@@ -11,6 +11,5 @@ final readonly class ImportResult
         public ?ImportPreview $preview = null,
         public ?ImportCommit $commit = null,
         public string $status = 'pending',
-    ) {
-    }
+    ) {}
 }

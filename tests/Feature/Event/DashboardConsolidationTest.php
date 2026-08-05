@@ -24,9 +24,9 @@ uses(RefreshDatabase::class);
 function dch_event(array $overrides = []): Event
 {
     return Event::create(array_merge([
-        'name'       => 'DCH Event '.str()->random(6),
-        'slug'       => 'dch-'.str()->random(8),
-        'status'     => 'active',
+        'name' => 'DCH Event '.str()->random(6),
+        'slug' => 'dch-'.str()->random(8),
+        'status' => 'active',
         'event_type' => 'cai',
     ], $overrides));
 }
@@ -41,21 +41,21 @@ function dc_admin(): User
 // ---------------------------------------------------------------------------
 
 test('factory returns CaiDashboardPresenter for cai event', function () {
-    $event   = dch_event(['event_type' => 'cai']);
+    $event = dch_event(['event_type' => 'cai']);
     $factory = app(DashboardPresenterFactory::class);
 
     expect($factory->make($event))->toBeInstanceOf(CaiDashboardPresenter::class);
 });
 
 test('factory returns CompetitionDashboardPresenter for competition event', function () {
-    $event   = dch_event(['event_type' => 'competition']);
+    $event = dch_event(['event_type' => 'competition']);
     $factory = app(DashboardPresenterFactory::class);
 
     expect($factory->make($event))->toBeInstanceOf(CompetitionDashboardPresenter::class);
 });
 
 test('factory returns PengajianDashboardPresenter for pengajian event', function () {
-    $event   = dch_event(['event_type' => 'pengajian']);
+    $event = dch_event(['event_type' => 'pengajian']);
     $factory = app(DashboardPresenterFactory::class);
 
     expect($factory->make($event))->toBeInstanceOf(PengajianDashboardPresenter::class);
@@ -89,7 +89,7 @@ test('PengajianDashboardPresenter returns pengajian partial view', function () {
 
 test('CAI dashboard does not render competition widgets', function () {
     $event = dch_event(['event_type' => 'cai']);
-    $user  = dc_admin();
+    $user = dc_admin();
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -103,7 +103,7 @@ test('CAI dashboard does not render competition widgets', function () {
 
 test('CAI dashboard does not render Quick Action competition shortcuts', function () {
     $event = dch_event(['event_type' => 'cai']);
-    $user  = dc_admin();
+    $user = dc_admin();
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -120,7 +120,7 @@ test('CAI dashboard does not render Quick Action competition shortcuts', functio
 
 test('competition dashboard does not render CAI attendance widgets', function () {
     $event = dch_event(['event_type' => 'competition']);
-    $user  = dc_admin();
+    $user = dc_admin();
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -136,7 +136,7 @@ test('competition dashboard does not render CAI attendance widgets', function ()
 
 test('pengajian dashboard does not render competition widgets', function () {
     $event = dch_event(['event_type' => 'pengajian']);
-    $user  = dc_admin();
+    $user = dc_admin();
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -148,7 +148,7 @@ test('pengajian dashboard does not render competition widgets', function () {
 
 test('pengajian dashboard does not render CAI attendance widgets', function () {
     $event = dch_event(['event_type' => 'pengajian']);
-    $user  = dc_admin();
+    $user = dc_admin();
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -195,7 +195,7 @@ test('competition.dashboard legacy route still returns 200', function () {
 
 test('Competition\\Dashboard component renders without CAI data', function () {
     $event = dch_event(['event_type' => 'competition']);
-    $user  = dc_admin();
+    $user = dc_admin();
     app(ActiveEventContext::class)->set($event);
 
     Livewire::actingAs($user)
@@ -213,7 +213,7 @@ test('CaiDashboardPresenter present() returns cai keys only', function () {
     $event = dch_event(['event_type' => 'cai']);
 
     $presenter = app(CaiDashboardPresenter::class);
-    $data      = $presenter->present($event);
+    $data = $presenter->present($event);
 
     expect($data)->toHaveKeys(['totalPeserta', 'sesiAktif', 'sudahAbsenCount', 'izinCount', 'belumAbsenCount', 'pesertaBelumAbsen', 'daftarSesi'])
         ->not->toHaveKey('overview')
@@ -229,7 +229,7 @@ test('CompetitionDashboardPresenter present() returns competition keys only', fu
     $event = dch_event(['event_type' => 'competition']);
 
     $presenter = app(CompetitionDashboardPresenter::class);
-    $data      = $presenter->present($event);
+    $data = $presenter->present($event);
 
     expect($data)->toHaveKeys(['overview', 'liveMatches', 'todaySchedules', 'recentRegistrations', 'recentResults'])
         ->not->toHaveKey('sesiAktif')
@@ -245,7 +245,7 @@ test('PengajianDashboardPresenter present() returns pengajian keys only', functi
     $event = dch_event(['event_type' => 'pengajian']);
 
     $presenter = app(PengajianDashboardPresenter::class);
-    $data      = $presenter->present($event);
+    $data = $presenter->present($event);
 
     expect($data)->toHaveKeys(['summary', 'desaBreakdown'])
         ->not->toHaveKey('sesiAktif')
@@ -262,11 +262,11 @@ test('EventDashboard presenterData contains totalPeserta for event with one part
 
     $person = Person::create(['nama' => 'DC Person']);
     Participation::create([
-        'person_id'          => $person->id,
-        'event_id'           => $event->id,
+        'person_id' => $person->id,
+        'event_id' => $event->id,
         'participant_number' => 'KL001',
-        'attendance_code'    => 'KJA-DC001',
-        'jenis_peserta'      => 'Wajib',
+        'attendance_code' => 'KJA-DC001',
+        'jenis_peserta' => 'Wajib',
     ]);
 
     $user = dc_admin();
@@ -286,17 +286,17 @@ test('EventDashboard presenterData excludes participants from other events', fun
 
     $person = Person::create(['nama' => 'DC Shared']);
     Participation::create([
-        'person_id'          => $person->id,
-        'event_id'           => $eventA->id,
+        'person_id' => $person->id,
+        'event_id' => $eventA->id,
         'participant_number' => 'KL002',
-        'attendance_code'    => 'KJA-DC002',
-        'jenis_peserta'      => 'Wajib',
+        'attendance_code' => 'KJA-DC002',
+        'jenis_peserta' => 'Wajib',
     ]);
 
     $user = dc_admin();
     app(ActiveEventContext::class)->set($eventB);
 
-    $result        = Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventB]);
+    $result = Livewire::actingAs($user)->test(EventDashboard::class, ['event' => $eventB]);
     $presenterData = $result->viewData('presenterData');
 
     expect($presenterData['totalPeserta'])->toBe(0);

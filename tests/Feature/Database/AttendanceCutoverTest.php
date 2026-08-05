@@ -8,22 +8,20 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\SesiAbsensi;
 use App\Models\peserta;
-use App\Livewire\Rekap\Absensi\RekapAbsensi;
+use App\Models\SesiAbsensi;
 use App\Services\Attendance\AttendanceExceptionService;
 use App\Services\Attendance\AttendanceParityService;
 use App\Services\Attendance\AttendanceReadService;
 use App\Services\Attendance\AttendanceService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
 function ct_event(): Event
 {
-    return Event::create(['name' => 'CT Event ' . str()->random(6), 'slug' => 'ct-' . str()->random(6), 'status' => 'active']);
+    return Event::create(['name' => 'CT Event '.str()->random(6), 'slug' => 'ct-'.str()->random(6), 'status' => 'active']);
 }
 
 function ct_session(Event $event): SesiAbsensi
@@ -37,8 +35,8 @@ function ct_participant(Event $event): object
     $nipValue = random_int(90000, 99999);
     $peserta = peserta::create([
         'nama' => 'CT Peserta',
-        'attendance_code' => 'KJA-CT-' . str()->random(8),
-        'participant_number' => 'KL' . random_int(100, 999),
+        'attendance_code' => 'KJA-CT-'.str()->random(8),
+        'participant_number' => 'KL'.random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
     ]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
@@ -54,6 +52,7 @@ function ct_participant(Event $event): object
         'participation_id' => $participation->id, 'event_id' => $event->id,
         'migrated_at' => now(),
     ]);
+
     return (object) compact('person', 'peserta', 'participation');
 }
 

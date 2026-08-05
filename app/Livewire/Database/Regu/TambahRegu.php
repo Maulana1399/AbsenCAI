@@ -9,16 +9,18 @@ use Livewire\Component;
 class TambahRegu extends Component
 {
     public bool $processing = false;
-    
-    public $regu = '';  
-    public $jenis_kelamin = '';  
-    
+
+    public $regu = '';
+
+    public $jenis_kelamin = '';
+
     public function render()
     {
         return view('livewire.database.regu.tambah-regu');
     }
-    
-    public function simpan(){
+
+    public function simpan()
+    {
         if ($this->processing) {
             return;
         }
@@ -41,7 +43,7 @@ class TambahRegu extends Component
             $this->validate($rules);
 
             regu::create($data);
-            
+
             return redirect()->to('/regu');
         } finally {
             $this->processing = false;

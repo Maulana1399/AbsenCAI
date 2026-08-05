@@ -1,15 +1,14 @@
 <?php
 
-use App\Console\Commands\AttendanceParity;
-use App\Models\Event;
-use App\Models\Participation;
-use App\Models\Person;
-use App\Models\SesiAbsensi;
 use App\Models\Absensi;
+use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
+use App\Models\Participation;
+use App\Models\Person;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

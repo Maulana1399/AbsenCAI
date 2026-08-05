@@ -13,7 +13,9 @@ use Livewire\Component;
 class EntryManager extends Component
 {
     public CompetitionSchedule $schedule;
+
     public array $available = [];
+
     public array $assigned = [];
 
     public function mount(CompetitionSchedule $schedule): void
@@ -29,21 +31,21 @@ class EntryManager extends Component
             'participation.person.desa',
             'participation.person.kelompok',
         ])->where('competition_class_id', $this->schedule->competition_class_id)
-          ->orderBy('id')
-          ->get();
+            ->orderBy('id')
+            ->get();
 
         $assignedIds = CompetitionScheduleEntry::where('competition_schedule_id', $this->schedule->id)
             ->pluck('competition_registration_id')
             ->toArray();
 
-        $this->assigned = $allRegs->filter(fn($r) => in_array($r->id, $assignedIds))
+        $this->assigned = $allRegs->filter(fn ($r) => in_array($r->id, $assignedIds))
             ->values()
-            ->map(fn($r) => $this->formatEntry($r))
+            ->map(fn ($r) => $this->formatEntry($r))
             ->toArray();
 
-        $this->available = $allRegs->filter(fn($r) => !in_array($r->id, $assignedIds))
+        $this->available = $allRegs->filter(fn ($r) => ! in_array($r->id, $assignedIds))
             ->values()
-            ->map(fn($r) => $this->formatEntry($r))
+            ->map(fn ($r) => $this->formatEntry($r))
             ->toArray();
 
         $this->updateOrderNumbers();

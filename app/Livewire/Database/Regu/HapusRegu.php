@@ -2,23 +2,24 @@
 
 namespace App\Livewire\Database\Regu;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Models\regu;
 use Flux\Flux;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class HapusRegu extends Component
 {
     public $regu_id;
+
     public $regu;
 
-    #[On("HapusRegu")]
+    #[On('HapusRegu')]
     public function hapusRegu($id)
     {
         $data = regu::find($id);
         $this->regu_id = $data->id;
         $this->regu = $data->regu;
-        Flux::modal("hapus-regu")->show();
+        Flux::modal('hapus-regu')->show();
     }
 
     public function destroy()
@@ -27,7 +28,7 @@ class HapusRegu extends Component
         if ($regu) {
             $regu->delete();
             $this->dispatch('refreshRegu');
-            Flux::modal("hapus-regu")->close();
+            Flux::modal('hapus-regu')->close();
         }
     }
 

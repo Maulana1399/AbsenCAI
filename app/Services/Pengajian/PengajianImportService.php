@@ -97,6 +97,7 @@ class PengajianImportService
                 'row' => $index + 2,
                 'message' => 'Nama wajib diisi.',
             ];
+
             return;
         }
 
@@ -106,6 +107,7 @@ class PengajianImportService
                 'row' => $index + 2,
                 'message' => 'Jenis kelamin harus L atau P.',
             ];
+
             return;
         }
 
@@ -115,6 +117,7 @@ class PengajianImportService
                 'row' => $index + 2,
                 'message' => 'Tanggal lahir wajib diisi dengan format YYYY-MM-DD yang valid.',
             ];
+
             return;
         }
 
@@ -124,6 +127,7 @@ class PengajianImportService
                 'row' => $index + 2,
                 'message' => 'Desa wajib diisi.',
             ];
+
             return;
         }
 
@@ -135,6 +139,7 @@ class PengajianImportService
                 'row' => $index + 2,
                 'message' => "Desa '{$desaName}' tidak ditemukan.",
             ];
+
             return;
         }
 
@@ -175,8 +180,7 @@ class PengajianImportService
             $person = null;
             $isNewPerson = false;
 
-            $existingPerson = $candidates->first(fn (Person $p) =>
-                $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
+            $existingPerson = $candidates->first(fn (Person $p) => $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
             );
 
             if ($existingPerson !== null) {
@@ -201,6 +205,7 @@ class PengajianImportService
 
             if ($existingParticipation !== null) {
                 $result['skipped_duplicates']++;
+
                 return;
             }
 
@@ -227,6 +232,7 @@ class PengajianImportService
     private function isValidDate(string $date): bool
     {
         $d = \DateTime::createFromFormat('Y-m-d', $date);
+
         return $d && $d->format('Y-m-d') === $date;
     }
 }

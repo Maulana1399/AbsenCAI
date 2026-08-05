@@ -1,11 +1,9 @@
 <?php
 
-use App\Enums\Role;
-use App\Models\User;
-use App\Models\Event;
 use App\Models\desa;
-use App\Models\DesaAccessGrant;
+use App\Models\Event;
 use App\Models\Person;
+use App\Models\User;
 use App\Services\Pengajian\DesaAccessService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,8 +19,8 @@ function s4_user(string $role): User
 function s4_event(): Event
 {
     return Event::create([
-        'name' => 'S4 Test Event ' . str()->random(6),
-        'slug' => 's4-event-' . str()->random(6),
+        'name' => 'S4 Test Event '.str()->random(6),
+        'slug' => 's4-event-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'pengajian',
     ]);
@@ -30,7 +28,7 @@ function s4_event(): Event
 
 function s4_desa(): desa
 {
-    return desa::create(['desa_asal' => 'S4 Desa ' . str()->random(6)]);
+    return desa::create(['desa_asal' => 'S4 Desa '.str()->random(6)]);
 }
 
 // ---------------------------------------------------------------------------

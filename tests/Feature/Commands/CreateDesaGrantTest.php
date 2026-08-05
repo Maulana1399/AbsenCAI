@@ -1,9 +1,8 @@
 <?php
 
-use App\Models\Event;
 use App\Models\desa;
 use App\Models\DesaAccessGrant;
-use App\Services\Pengajian\DesaAccessService;
+use App\Models\Event;
 use Carbon\Carbon;
 
 function pgm10_event(array $overrides = []): Event

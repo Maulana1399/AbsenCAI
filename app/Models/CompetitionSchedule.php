@@ -72,6 +72,7 @@ class CompetitionSchedule extends Model
         if ($this->status !== 'Ready') {
             return false;
         }
+
         return $this->scheduleEntries()->count() >= $this->required_participants;
     }
 
@@ -80,6 +81,7 @@ class CompetitionSchedule extends Model
         if ($this->status !== 'Scheduled') {
             return false;
         }
+
         return $this->scheduleEntries()->count() >= $this->required_participants;
     }
 

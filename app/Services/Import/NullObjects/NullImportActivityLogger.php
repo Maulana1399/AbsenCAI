@@ -9,11 +9,7 @@ use App\Services\Import\Results\ImportPreview;
 
 final class NullImportActivityLogger implements ImportActivityLogger
 {
-    public function logPreview(ImportContext $context, ImportPreview $preview): void
-    {
-    }
+    public function logPreview(ImportContext $context, ImportPreview $preview): void {}
 
-    public function logCommit(ImportContext $context, ImportCommit $commit): void
-    {
-    }
+    public function logCommit(ImportContext $context, ImportCommit $commit): void {}
 }

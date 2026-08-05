@@ -2,13 +2,12 @@
 
 namespace App\Livewire\Database\Peserta;
 
+use App\Livewire\Traits\HasCascadingKelompok;
 use App\Models\desa;
-use App\Models\kelompok;
 use App\Models\LegacyParticipationMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
-use App\Livewire\Traits\HasCascadingKelompok;
 use App\Services\Person\PersonDuplicateDetectionService;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
@@ -20,32 +19,51 @@ use Livewire\Component;
 class TambahPeserta extends Component
 {
     use HasCascadingKelompok;
+
     public bool $processing = false;
 
     public string $mode = 'baru';
 
     public $nama = '';
+
     public $tanggal_lahir = null;
+
     public $daftarDesa = [];
+
     public $desa_id;
+
     public $daftarKelompok = [];
+
     public $kelompok_id;
+
     public $regu_id;
+
     public string $regu_nama = '-';
+
     public $jenis_kelamin = 'Laki - Laki';
+
     public $daftarJenisKelamin = ['Laki - Laki', 'Perempuan'];
+
     public $jenis_peserta = 'Wajib';
 
     public $searchPerson = '';
+
     public $searchResults = [];
+
     public $selectedPersonId = null;
+
     public $selectedPerson = null;
+
     public $existingJenisPeserta = 'Wajib';
+
     public $errorMessage = '';
 
     public bool $showDuplicateWarning = false;
+
     public array $duplicateCandidates = [];
+
     public ?int $duplicateTargetId = null;
+
     public bool $bypassDuplicateCheck = false;
 
     public function mount()
@@ -99,13 +117,13 @@ class TambahPeserta extends Component
             $this->generateAutoFields();
 
             $this->validate([
-                'nama'          => ['required', 'string', 'max:255'],
+                'nama' => ['required', 'string', 'max:255'],
                 'tanggal_lahir' => ['nullable', 'date'],
                 'jenis_kelamin' => 'required|in:Laki - Laki,Perempuan',
                 'jenis_peserta' => 'required|in:Wajib,Kiriman,Person',
-                'desa_id'       => 'required|exists:desas,id',
-                'kelompok_id'   => 'required|exists:kelompoks,id',
-                'regu_id'       => 'nullable|exists:regus,id',
+                'desa_id' => 'required|exists:desas,id',
+                'kelompok_id' => 'required|exists:kelompoks,id',
+                'regu_id' => 'nullable|exists:regus,id',
             ]);
 
             if ($this->showDuplicateWarning && $this->duplicateTargetId) {
@@ -115,16 +133,17 @@ class TambahPeserta extends Component
             if ($this->bypassDuplicateCheck) {
                 $this->bypassDuplicateCheck = false;
                 app(RegistrationService::class)->createParticipant([
-                    'nama'              => $this->nama,
-                    'tanggal_lahir'     => $this->tanggal_lahir ?: null,
-                    'jenis_kelamin'     => $this->jenis_kelamin,
-                    'jenis_peserta'     => $this->jenis_peserta,
-                    'desa_id'           => $this->desa_id,
-                    'kelompok_id'       => $this->kelompok_id,
-                    'regu_id'           => $this->regu_id,
+                    'nama' => $this->nama,
+                    'tanggal_lahir' => $this->tanggal_lahir ?: null,
+                    'jenis_kelamin' => $this->jenis_kelamin,
+                    'jenis_peserta' => $this->jenis_peserta,
+                    'desa_id' => $this->desa_id,
+                    'kelompok_id' => $this->kelompok_id,
+                    'regu_id' => $this->regu_id,
                     'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
-                    '_force_new_person'  => true,
+                    '_force_new_person' => true,
                 ]);
+
                 return redirect()->to('/database');
             }
 
@@ -133,13 +152,13 @@ class TambahPeserta extends Component
             }
 
             app(RegistrationService::class)->createParticipant([
-                'nama'             => $this->nama,
-                'tanggal_lahir'    => $this->tanggal_lahir ?: null,
-                'jenis_kelamin'    => $this->jenis_kelamin,
-                'jenis_peserta'    => $this->jenis_peserta,
-                'desa_id'          => $this->desa_id,
-                'kelompok_id'      => $this->kelompok_id,
-                'regu_id'          => $this->regu_id,
+                'nama' => $this->nama,
+                'tanggal_lahir' => $this->tanggal_lahir ?: null,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'jenis_peserta' => $this->jenis_peserta,
+                'desa_id' => $this->desa_id,
+                'kelompok_id' => $this->kelompok_id,
+                'regu_id' => $this->regu_id,
                 'status_registrasi' => peserta::STATUS_BELUM_REGISTRASI,
             ]);
 
@@ -147,7 +166,7 @@ class TambahPeserta extends Component
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            $this->errorMessage = 'Terjadi kesalahan: ' . $e->getMessage();
+            $this->errorMessage = 'Terjadi kesalahan: '.$e->getMessage();
         } finally {
             $this->processing = false;
         }
@@ -157,6 +176,7 @@ class TambahPeserta extends Component
     {
         if ($this->bypassDuplicateCheck) {
             $this->bypassDuplicateCheck = false;
+
             return false;
         }
 
@@ -185,7 +205,8 @@ class TambahPeserta extends Component
             }
 
             $this->errorMessage = 'Orang dengan nama dan tanggal lahir yang sama sudah terdaftar. '
-                . 'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.';
+                .'Gunakan fitur "Tambahkan Peserta yang Sudah Ada" untuk menambahkan ke event ini.';
+
             return true;
         }
 
@@ -200,6 +221,7 @@ class TambahPeserta extends Component
             ], $result['possible']);
 
             $this->showDuplicateWarning = true;
+
             return true;
         }
 
@@ -245,6 +267,7 @@ class TambahPeserta extends Component
         $activeEvent = app(ActiveEventContext::class)->current();
         if (! $activeEvent) {
             $this->errorMessage = 'Tidak ada event aktif.';
+
             return redirect()->to('/database');
         }
 
@@ -254,6 +277,7 @@ class TambahPeserta extends Component
 
         if ($alreadyRegistered) {
             $this->errorMessage = 'Peserta ini sudah terdaftar pada event aktif.';
+
             return redirect()->to('/database');
         }
 
@@ -292,18 +316,20 @@ class TambahPeserta extends Component
 
         if (strlen($query) < 2) {
             $this->searchResults = [];
+
             return;
         }
 
         $results = Person::where(function ($q) use ($query) {
             $q->where('nama', 'like', "%{$query}%");
         })
-        ->with(['desa', 'kelompok', 'participations' => fn ($q) => $q->with('regu')->latest()->limit(1)])
-        ->limit(10)
-        ->get();
+            ->with(['desa', 'kelompok', 'participations' => fn ($q) => $q->with('regu')->latest()->limit(1)])
+            ->limit(10)
+            ->get();
 
         $this->searchResults = $results->map(function ($p) {
             $latestRegu = $p->participations->first()?->regu?->regu;
+
             return [
                 'id' => $p->id,
                 'nama' => $p->nama,
@@ -346,11 +372,13 @@ class TambahPeserta extends Component
 
             if (! $activeEvent) {
                 $this->errorMessage = 'Tidak ada event aktif.';
+
                 return null;
             }
 
             if (! $this->selectedPersonId) {
                 $this->errorMessage = 'Pilih peserta terlebih dahulu.';
+
                 return null;
             }
 
@@ -358,6 +386,7 @@ class TambahPeserta extends Component
 
             if (! $person) {
                 $this->errorMessage = 'Peserta tidak ditemukan.';
+
                 return null;
             }
 
@@ -367,6 +396,7 @@ class TambahPeserta extends Component
 
             if ($alreadyRegistered) {
                 $this->errorMessage = 'Peserta ini sudah terdaftar pada event aktif.';
+
                 return null;
             }
 

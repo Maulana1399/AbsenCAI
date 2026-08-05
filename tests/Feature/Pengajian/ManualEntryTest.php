@@ -1,19 +1,18 @@
 <?php
 
+use App\Models\desa;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\EventAttendance;
+use App\Models\kelompok;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
-use App\Models\desa;
-use App\Models\kelompok;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Registration\ManualParticipantRegistrationService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -53,6 +52,7 @@ function pme_grant(Event $event, desa $desa): DesaAccessGrant
         $now->copy()->subHour(),
         $now->copy()->addHour(),
     );
+
     return $result['grant'];
 }
 
@@ -68,6 +68,7 @@ $pme_randomCounter = 0;
 beforeEach(function () use (&$pme_randomCounter) {
     Str::createRandomStringsUsing(function ($length) use (&$pme_randomCounter) {
         $pme_randomCounter++;
+
         return substr(str_pad((string) $pme_randomCounter, $length, '0', STR_PAD_LEFT), 0, $length);
     });
 });
@@ -709,7 +710,7 @@ test('26. ManualEntry revalidateGrant compares DB grant against session, not pri
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -736,7 +737,7 @@ test('27. Session grant with mismatched event_id is rejected by revalidateGrant 
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -744,7 +745,7 @@ test('27. Session grant with mismatched event_id is rejected by revalidateGrant 
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $eventB->id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component->set('nama', 'Wrong Event');
@@ -767,7 +768,7 @@ test('28. Session grant with mismatched desa_id is rejected by revalidateGrant o
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -775,7 +776,7 @@ test('28. Session grant with mismatched desa_id is rejected by revalidateGrant o
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $desaB->id,
+        'desa_id' => $desaB->id,
     ]);
 
     $component->set('nama', 'Wrong Desa');
@@ -795,14 +796,14 @@ test('29. Incomplete session (missing grant_id) is rejected by revalidateGrant o
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
 
     session()->put('pengajian_access', [
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component->set('nama', 'No Grant ID');
@@ -820,7 +821,7 @@ test('30. Incomplete session (missing event_id) is rejected on mount', function 
 
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
-        'desa_id'  => $desa->id,
+        'desa_id' => $desa->id,
     ]);
 
     app(\App\Support\ActiveEventContext::class)->set($event);
@@ -839,7 +840,7 @@ test('31. Revoked grant is rejected on submit', function () {
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     app(\App\Support\ActiveEventContext::class)->set($event);
@@ -858,7 +859,7 @@ test('32. submit() uses eventId and desaId from validated grant, not from public
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -926,7 +927,7 @@ test('35. Kelompok is required on ManualEntry component submit', function () {
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -949,7 +950,7 @@ test('36. Tanggal lahir is required on ManualEntry component submit', function (
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -972,7 +973,7 @@ test('37. Invalid tanggal lahir format is rejected on ManualEntry component', fu
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);
@@ -996,7 +997,7 @@ test('38. Full submit flow includes kelompok_id on created Person', function () 
     session()->put('pengajian_access', [
         'grant_id' => $grant->id,
         'event_id' => $grant->event_id,
-        'desa_id'  => $grant->desa_id,
+        'desa_id' => $grant->desa_id,
     ]);
 
     $component = Livewire::test(App\Livewire\Pengajian\ManualEntry::class);

@@ -17,6 +17,6 @@ final class PesertaImportCommitter implements ImportCommitter
             Excel::import(new PesertaImport, $context->options['file']);
         }
 
-        return new ImportCommit($context, new ImportSummary());
+        return new ImportCommit($context, new ImportSummary);
     }
 }

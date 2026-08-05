@@ -14,12 +14,19 @@ class CreateUser extends Component
     public bool $processing = false;
 
     public string $name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $passwordConfirmation = '';
+
     public string $role = '';
+
     public ?int $person_id = null;
+
     public string $searchPerson = '';
+
     public string $selectedPersonNama = '';
 
     public function render()
@@ -28,7 +35,7 @@ class CreateUser extends Component
         if (strlen($this->searchPerson) >= 2) {
             $linkedIds = User::whereNotNull('person_id')->pluck('person_id');
             $personResults = Person::whereNotIn('id', $linkedIds)
-                ->where('nama', 'like', '%' . $this->searchPerson . '%')
+                ->where('nama', 'like', '%'.$this->searchPerson.'%')
                 ->limit(10)
                 ->get();
         }
@@ -96,7 +103,7 @@ class CreateUser extends Component
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'passwordConfirmation' => 'required|string|same:password',
-            'role' => 'required|in:' . implode(',', Role::platformValues()),
+            'role' => 'required|in:'.implode(',', Role::platformValues()),
             'person_id' => 'nullable|exists:people,id',
         ];
     }

@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Pengajian;
 
+use App\Models\desa;
 use App\Models\DesaAccessGrant;
 use App\Models\Event;
 use App\Models\Person;
-use App\Models\desa;
 use App\Services\Pengajian\DesaAccessService;
 use App\Services\Pengajian\IdentityCorrectionService;
 use App\Services\Pengajian\PengajianAttendanceService;
@@ -19,30 +19,41 @@ class SelfAttendance extends Component
     public string $nonce;
 
     public ?string $eventName = null;
+
     public ?string $desaName = null;
 
     public int $step = 1;
 
     public string $query = '';
+
     public array $searchResults = [];
+
     public bool $searching = false;
 
     public ?int $selectedPersonId = null;
+
     public ?string $selectedPersonName = null;
 
     public string $birthDate = '';
+
     public bool $birthDateVerified = false;
+
     public bool $verificationFailed = false;
 
     public bool $showingCorrectionForm = false;
+
     public string $correctionBirthDate = '';
+
     public string $correctionReason = '';
+
     public bool $correctionSubmitted = false;
 
     public ?string $errorMessage = null;
 
     public bool $processing = false;
+
     public bool $attendanceDone = false;
+
     public bool $attendanceAlreadyExists = false;
 
     public function mount(string $nonce): void
@@ -53,6 +64,7 @@ class SelfAttendance extends Component
 
         if ($resolved === null) {
             $this->errorMessage = 'QR absen tidak valid atau sudah kedaluwarsa.';
+
             return;
         }
 
@@ -61,6 +73,7 @@ class SelfAttendance extends Component
 
         if ($event === null || $desa === null) {
             $this->errorMessage = 'Data event atau desa tidak ditemukan.';
+
             return;
         }
 
@@ -108,6 +121,7 @@ class SelfAttendance extends Component
         if ($resolved === null) {
             $this->errorMessage = 'Sesi QR sudah kedaluwarsa. Silakan scan QR ulang.';
             $this->selectedPersonId = null;
+
             return;
         }
 
@@ -117,6 +131,7 @@ class SelfAttendance extends Component
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak valid.';
             $this->selectedPersonId = null;
+
             return;
         }
 
@@ -137,6 +152,7 @@ class SelfAttendance extends Component
 
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak ditemukan.';
+
             return;
         }
 
@@ -172,16 +188,19 @@ class SelfAttendance extends Component
     {
         if ($this->selectedPersonId === null) {
             $this->errorMessage = 'Sesi tidak valid.';
+
             return;
         }
 
         if (trim($this->correctionBirthDate) === '') {
             $this->errorMessage = 'Tanggal lahir yang benar wajib diisi.';
+
             return;
         }
 
         if (trim($this->correctionReason) === '') {
             $this->errorMessage = 'Alasan perubahan wajib diisi.';
+
             return;
         }
 
@@ -196,6 +215,7 @@ class SelfAttendance extends Component
 
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak valid.';
+
             return;
         }
 
@@ -231,6 +251,7 @@ class SelfAttendance extends Component
     {
         if ($this->selectedPersonId === null) {
             $this->errorMessage = 'Sesi tidak valid. Silakan scan QR ulang.';
+
             return;
         }
 
@@ -238,6 +259,7 @@ class SelfAttendance extends Component
 
         if ($grant === null) {
             $this->errorMessage = 'Sesi QR tidak valid. Silakan scan QR ulang.';
+
             return;
         }
 
@@ -246,6 +268,7 @@ class SelfAttendance extends Component
 
         if ($person === null) {
             $this->errorMessage = 'Data peserta tidak valid.';
+
             return;
         }
 
@@ -318,6 +341,7 @@ class SelfAttendance extends Component
 
         if (strlen($nonce) < 10) {
             $this->errorMessage = 'Sesi tidak valid. Silakan scan QR ulang.';
+
             return null;
         }
 
@@ -325,11 +349,13 @@ class SelfAttendance extends Component
 
         if ($grant === null) {
             $this->errorMessage = 'Sesi tidak valid. Silakan scan QR ulang.';
+
             return null;
         }
 
         if (! $grant->isNonceValid()) {
             $this->errorMessage = 'Sesi QR sudah kedaluwarsa. Silakan scan QR ulang.';
+
             return null;
         }
 

@@ -4,14 +4,15 @@ namespace App\Livewire\Database\Sesi;
 
 use App\Models\SesiAbsensi;
 use App\Support\ActiveEventContext;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class HapusSesi extends Component
 {
     public $sesi_id;
+
     public $sesi_nama;
 
     #[On('HapusSesi')]

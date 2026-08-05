@@ -42,7 +42,7 @@ class PersonFactory extends Factory
     {
         $gender = fake()->randomElement(['L', 'P']);
         $firstNames = $gender === 'L' ? self::$firstNameM : self::$firstNameF;
-        $nama = $firstNames[array_rand($firstNames)] . ' ' . self::$lastNames[array_rand(self::$lastNames)];
+        $nama = $firstNames[array_rand($firstNames)].' '.self::$lastNames[array_rand(self::$lastNames)];
 
         $desa = desa::inRandomOrder()->first();
         $kelompok = $desa ? kelompok::where('desa_id', $desa->id)->inRandomOrder()->first() : null;

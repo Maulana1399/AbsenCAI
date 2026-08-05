@@ -13,13 +13,19 @@ class Index extends Component
     use WithPagination;
 
     public bool $showCreateForm = false;
+
     public string $newName = '';
+
     public string $newCode = '';
+
     public string $newSortOrder = '';
 
     public ?int $editId = null;
+
     public string $editName = '';
+
     public string $editCode = '';
+
     public string $editSortOrder = '';
 
     public bool $processing = false;
@@ -31,7 +37,7 @@ class Index extends Component
 
     public function toggleCreateForm(): void
     {
-        $this->showCreateForm = !$this->showCreateForm;
+        $this->showCreateForm = ! $this->showCreateForm;
         $this->reset(['newName', 'newCode', 'newSortOrder']);
         $this->resetErrorBag();
     }
@@ -40,7 +46,9 @@ class Index extends Component
     {
         Gate::authorize('manage-events');
 
-        if ($this->processing) return;
+        if ($this->processing) {
+            return;
+        }
         $this->processing = true;
 
         try {
@@ -107,7 +115,7 @@ class Index extends Component
         Gate::authorize('manage-events');
 
         $category = CompetitionCategory::findOrFail($id);
-        $category->update(['is_active' => !$category->is_active]);
+        $category->update(['is_active' => ! $category->is_active]);
     }
 
     public function render()

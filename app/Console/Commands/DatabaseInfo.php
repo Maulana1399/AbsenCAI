@@ -20,11 +20,11 @@ class DatabaseInfo extends Command
         if ($connection === 'sqlite') {
             $path = $config['database'];
             $this->line("Database path: {$path}");
-            $this->line("");
-            $this->warn("Backup command:");
+            $this->line('');
+            $this->warn('Backup command:');
             $this->line("  cp {$path} {$path}.backup.$(date +%Y%m%d_%H%M%S)");
-            $this->line("");
-            $this->line("Restore command:");
+            $this->line('');
+            $this->line('Restore command:');
             $this->line("  cp {$path}.backup.<timestamp> {$path}");
         } else {
             $this->line("Host: {$config['host']}");

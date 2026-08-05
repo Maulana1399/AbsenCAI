@@ -2,23 +2,28 @@
 
 namespace App\Livewire\Database\Peserta;
 
-use Livewire\Component;
-use App\Models\kelompok;
 use App\Models\desa;
-use App\Models\regu;
-use App\Models\peserta;
-use Livewire\Attributes\On;
+use App\Models\kelompok;
 use App\Models\Participation;
+use App\Models\regu;
 use App\Support\ActiveEventContext;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Database extends Component
 {
     public $daftarkelompok = [];
+
     public $kelompok_id;
+
     public $daftarDesa = [];
+
     public $desa_id;
+
     public $daftarRegu = [];
+
     public $regu_id;
+
     public $search = '';
 
     public function mount()
@@ -68,7 +73,7 @@ class Database extends Component
             'daftarPeserta' => $daftarPeserta,
             'daftarkelompok' => $this->daftarkelompok,
             'daftarDesa' => $this->daftarDesa,
-            'daftarRegu' => $this->daftarRegu
+            'daftarRegu' => $this->daftarRegu,
         ]);
     }
 
@@ -95,7 +100,5 @@ class Database extends Component
         $this->daftarRegu = regu::all();
     }
 
-    public function cari()
-    {
-    }
+    public function cari() {}
 }

@@ -22,13 +22,13 @@ class CompetitionDashboardPresenter implements DashboardPresenterContract
         $schedules = CompetitionSchedule::whereIn('competition_class_id', $classIds);
 
         $overview = [
-            'participants'  => CompetitionRegistration::whereIn('competition_class_id', $classIds)->count(),
-            'classes'       => $classIds->count(),
-            'venues'        => $venueIds->count(),
+            'participants' => CompetitionRegistration::whereIn('competition_class_id', $classIds)->count(),
+            'classes' => $classIds->count(),
+            'venues' => $venueIds->count(),
             'today_matches' => (clone $schedules)->whereDate('start_at', Carbon::today())->count(),
-            'running'       => (clone $schedules)->where('status', 'Playing')->count(),
-            'finished'      => (clone $schedules)->where('status', 'Finished')->count(),
-            'pending'       => CompetitionRegistration::whereIn('competition_class_id', $classIds)
+            'running' => (clone $schedules)->where('status', 'Playing')->count(),
+            'finished' => (clone $schedules)->where('status', 'Finished')->count(),
+            'pending' => CompetitionRegistration::whereIn('competition_class_id', $classIds)
                 ->whereDoesntHave('scheduleEntries')
                 ->count(),
         ];
@@ -56,7 +56,7 @@ class CompetitionDashboardPresenter implements DashboardPresenterContract
             ->orderByRaw("CASE WHEN status = 'Playing' THEN 0 WHEN status = 'Waiting Result' THEN 1 ELSE 2 END")
             ->orderBy('sort_order')
             ->get()
-            ->groupBy(fn($s) => $s->venue?->name ?? 'Tanpa Venue');
+            ->groupBy(fn ($s) => $s->venue?->name ?? 'Tanpa Venue');
 
         $recentRegistrations = CompetitionRegistration::with([
             'participation.person',
@@ -80,11 +80,11 @@ class CompetitionDashboardPresenter implements DashboardPresenterContract
             ->get();
 
         return [
-            'overview'            => $overview,
-            'todaySchedules'      => $todaySchedules,
-            'liveMatches'         => $liveMatches,
+            'overview' => $overview,
+            'todaySchedules' => $todaySchedules,
+            'liveMatches' => $liveMatches,
             'recentRegistrations' => $recentRegistrations,
-            'recentResults'       => $recentResults,
+            'recentResults' => $recentResults,
         ];
     }
 

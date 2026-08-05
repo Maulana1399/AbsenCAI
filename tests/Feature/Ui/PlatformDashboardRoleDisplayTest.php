@@ -6,7 +6,6 @@ use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
 use App\Models\Person;
 use App\Models\User;
-use App\Services\Activity\EventCommitteeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 

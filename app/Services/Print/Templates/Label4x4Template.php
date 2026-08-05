@@ -9,8 +9,7 @@ class Label4x4Template
 {
     public function __construct(
         private readonly QRService $qrService,
-    ) {
-    }
+    ) {}
 
     public function render(Participation $participant): string
     {

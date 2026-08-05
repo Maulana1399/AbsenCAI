@@ -113,9 +113,9 @@ class ResetEventData extends Command
                 $this->line("  {$table}: {$count} rows (unchanged)");
             }
             $this->line('');
-            $this->info("Operational data to be DELETED: {$totalDeleted} rows across " . count($deletePlan) . " tables");
+            $this->info("Operational data to be DELETED: {$totalDeleted} rows across ".count($deletePlan).' tables');
             $this->line('');
-            $this->info('System tables NOT touched: ' . implode(', ', $this->systemTables));
+            $this->info('System tables NOT touched: '.implode(', ', $this->systemTables));
             $this->line('');
             $this->warn('No changes were made. Run without --dry-run to execute the reset.');
             $this->line('');
@@ -146,7 +146,7 @@ class ResetEventData extends Command
             DB::rollBack();
             $this->error('');
             $this->error('============================================');
-            $this->error('  ROLLBACK: ' . $e->getMessage());
+            $this->error('  ROLLBACK: '.$e->getMessage());
             $this->error('============================================');
 
             return 1;
@@ -248,12 +248,13 @@ class ResetEventData extends Command
 
             if ($count === 0) {
                 $this->line("  {$table}: 0 rows (skipped)");
+
                 continue;
             }
 
             if ($table === 'surat_izins') {
                 DB::table('surat_izins')->update(['participation_id' => null]);
-                $this->line("  surat_izins: SET NULL participation_id (FK SET NULL)");
+                $this->line('  surat_izins: SET NULL participation_id (FK SET NULL)');
             }
 
             DB::table($table)->delete();
@@ -285,8 +286,9 @@ class ResetEventData extends Command
 
         foreach ($snapshot['pesertas_fields'] as $id => $before) {
             $after = $pesertasNow->get($id);
-            if (!$after) {
+            if (! $after) {
                 $errors[] = "Peserta id={$id} is MISSING!";
+
                 continue;
             }
             $after = (array) $after;
@@ -332,7 +334,7 @@ class ResetEventData extends Command
         }
 
         // 4. Operational tables must be 0 (only during actual execution)
-        if (!$dryRun) {
+        if (! $dryRun) {
             $mustBeZero = [
                 'absensis', 'event_attendances', 'sesi_absensis', 'izin_absensis',
                 'surat_izins', 'desa_access_grants', 'cai_participant_replacements',
@@ -364,8 +366,8 @@ class ResetEventData extends Command
             }
         }
 
-        if (!empty($errors)) {
-            $msg = "Validation FAILED:\n" . implode("\n", array_map(fn ($e) => "  - {$e}", $errors));
+        if (! empty($errors)) {
+            $msg = "Validation FAILED:\n".implode("\n", array_map(fn ($e) => "  - {$e}", $errors));
             throw new \RuntimeException($msg);
         }
 

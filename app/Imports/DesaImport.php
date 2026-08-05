@@ -7,8 +7,7 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-
-class DesaImport implements ToModel, WithHeadingRow, WithCustomCsvSettings
+class DesaImport implements ToModel, WithCustomCsvSettings, WithHeadingRow
 {
     public function getCsvSettings(): array
     {
@@ -18,10 +17,8 @@ class DesaImport implements ToModel, WithHeadingRow, WithCustomCsvSettings
     }
 
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
     public function model(array $row)
     {
         return new Desa([

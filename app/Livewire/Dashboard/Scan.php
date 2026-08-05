@@ -17,21 +17,26 @@ use Livewire\Component;
 class Scan extends Component
 {
     public $nama;
+
     public $jam_scan;
+
     public $message;
 
     public string $messageType = 'error';
 
     public $manualSearch = '';
+
     public $manualResults = [];
+
     public $selectedManualParticipantId = null;
+
     public $selectedSource = null;
 
     public $sesi_id = '';
+
     public $daftarSesi;
 
     public $restartScanner = false;
-
 
     public function mount()
     {
@@ -58,23 +63,23 @@ class Scan extends Component
         }
     }
 
-
     public function updatedManualSearch(): void
     {
         $event = app(ActiveEventContext::class)->current();
         if (! $event) {
             $this->manualResults = [];
+
             return;
         }
 
-        $search = '%' . trim($this->manualSearch) . '%';
+        $search = '%'.trim($this->manualSearch).'%';
 
         // 1. Canonical: Participation + Person scoped to active event
         $participations = Participation::with(['person', 'legacyParticipationMapping.peserta'])
             ->where('event_id', $event->id)
             ->where(function ($q) use ($search) {
                 $q->whereHas('person', fn ($pq) => $pq->where('nama', 'like', $search))
-                  ->orWhere('participant_number', 'like', $search);
+                    ->orWhere('participant_number', 'like', $search);
             })
             ->limit(10)
             ->get()
@@ -91,9 +96,9 @@ class Scan extends Component
         // 2. Legacy fallback: event-aware bridge-first resolution
         $resolver = app(LegacyParticipationResolver::class);
         $searchPeserta = \App\Models\peserta::where(function ($q) use ($search) {
-                $q->where('nama', 'like', $search)
-                  ->orWhere('participant_number', 'like', $search);
-            })
+            $q->where('nama', 'like', $search)
+                ->orWhere('participant_number', 'like', $search);
+        })
             ->limit(20)
             ->get()
             ->map(function ($p) use ($event, $resolver) {
@@ -136,7 +141,7 @@ class Scan extends Component
             $this->selectedManualParticipantId = $part->id;
             $this->selectedSource = 'canonical';
             $this->nama = $part->person?->nama;
-            $this->manualSearch = ($part->person?->nama ?? '') . ' · ' . ($part->participant_number ?? '-');
+            $this->manualSearch = ($part->person?->nama ?? '').' · '.($part->participant_number ?? '-');
             $this->message = null;
 
             return;
@@ -149,7 +154,7 @@ class Scan extends Component
                 $this->selectedManualParticipantId = $participation->id;
                 $this->selectedSource = 'canonical';
                 $this->nama = $participation->person?->nama ?? $peserta->nama;
-                $this->manualSearch = ($participation->person?->nama ?? $peserta->nama) . ' · ' . ($participation->participant_number ?? '-');
+                $this->manualSearch = ($participation->person?->nama ?? $peserta->nama).' · '.($participation->participant_number ?? '-');
                 $this->message = null;
 
                 return;
@@ -165,6 +170,7 @@ class Scan extends Component
         if (! $event) {
             $this->message = 'Tidak ada event aktif';
             $this->messageType = 'error';
+
             return;
         }
 
@@ -173,6 +179,7 @@ class Scan extends Component
             $this->messageType = 'error';
             $this->nama = null;
             $this->jam_scan = null;
+
             return;
         }
 
@@ -205,6 +212,7 @@ class Scan extends Component
             $this->messageType = 'error';
             $this->nama = null;
             $this->jam_scan = null;
+
             return;
         }
 
@@ -228,6 +236,7 @@ class Scan extends Component
         if ($result['status'] === 'not_found' || $result['status'] === 'session_required' || $result['status'] === 'wrong_event') {
             $this->nama = null;
             $this->jam_scan = null;
+
             return;
         }
 
@@ -240,17 +249,21 @@ class Scan extends Component
         Gate::authorize('manage-attendance');
 
         $event = app(ActiveEventContext::class)->current();
-        if (! $event) return;
+        if (! $event) {
+            return;
+        }
 
         if (! $this->validateSessionForEvent($event->id)) {
             $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
             $this->messageType = 'error';
+
             return;
         }
 
         if (! $this->sesi_id) {
             $this->message = 'Pilih sesi absensi terlebih dahulu';
             $this->messageType = 'error';
+
             return;
         }
 
@@ -269,12 +282,15 @@ class Scan extends Component
             }
         } else {
             $p = \App\Models\peserta::find($this->selectedManualParticipantId);
-            if ($p) $pesertaId = $p->id;
+            if ($p) {
+                $pesertaId = $p->id;
+            }
         }
 
         if (! $pesertaId && ! $participationId) {
             $this->message = 'Pilih peserta terlebih dahulu';
             $this->messageType = 'error';
+
             return;
         }
 
@@ -306,6 +322,7 @@ class Scan extends Component
         if ($event && $this->sesi_id && ! $this->validateSessionForEvent($event->id)) {
             $this->message = 'Sesi absensi tidak valid atau bukan milik event ini.';
             $this->messageType = 'error';
+
             return;
         }
 
@@ -344,12 +361,12 @@ class Scan extends Component
         };
     }
 
-
     private function validateSessionForEvent(?int $eventId): bool
     {
         if ($this->sesi_id === '' || $this->sesi_id === null) {
             return false;
         }
+
         return SesiAbsensi::where('id', $this->sesi_id)
             ->where('event_id', $eventId)
             ->exists();
@@ -368,7 +385,6 @@ class Scan extends Component
 
         $this->dispatch('restartScanner');
     }
-
 
     public function render()
     {

@@ -17,7 +17,8 @@ class TambahDesa extends Component
         return view('livewire.database.desa.tambah-desa');
     }
 
-    public function simpan(){
+    public function simpan()
+    {
         Gate::authorize('manage-master-data');
 
         if ($this->processing) {
@@ -27,13 +28,13 @@ class TambahDesa extends Component
 
         try {
             $this->validate([
-                "Desa" => "required|unique:desas,desa_asal"
+                'Desa' => 'required|unique:desas,desa_asal',
             ]);
 
             desa::create([
                 'desa_asal' => $this->Desa,
             ]);
-            
+
             return redirect()->to('/desa');
         } finally {
             $this->processing = false;

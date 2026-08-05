@@ -22,8 +22,23 @@ class LegacyParticipationMapping extends Model
         ];
     }
 
-    public function peserta(){ return $this->belongsTo(peserta::class); }
-    public function person(){ return $this->belongsTo(Person::class); }
-    public function participation(){ return $this->belongsTo(Participation::class); }
-    public function event(){ return $this->belongsTo(Event::class); }
+    public function peserta()
+    {
+        return $this->belongsTo(peserta::class);
+    }
+
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
+
+    public function participation()
+    {
+        return $this->belongsTo(Participation::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
 }

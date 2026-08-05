@@ -51,7 +51,7 @@ class PublicEventController extends Controller
             'running' => $running,
             'finished' => $finished,
             'pengajianEvent' => Event::active()->where('event_type', 'pengajian')->orderBy('start_date')->first(),
-            'metaTitle' => config('app.name') . ' – Portal Informasi Event',
+            'metaTitle' => config('app.name').' – Portal Informasi Event',
             'metaDescription' => 'Lihat jadwal, bracket, dan hasil pertandingan event KJA terbaru.',
         ]);
     }
@@ -72,8 +72,8 @@ class PublicEventController extends Controller
             'bracketCount' => $bracketCount,
             'announcementCount' => $announcementCount,
             'venues' => Venue::where('event_id', $event->id)->orderBy('sort_order')->orderBy('name')->get(),
-            'metaTitle' => $event->name . ' – ' . config('app.name'),
-            'metaDescription' => 'Informasi event ' . $event->name . ' – jadwal, bracket, dan hasil pertandingan.',
+            'metaTitle' => $event->name.' – '.config('app.name'),
+            'metaDescription' => 'Informasi event '.$event->name.' – jadwal, bracket, dan hasil pertandingan.',
         ]);
     }
 
@@ -99,9 +99,15 @@ class PublicEventController extends Controller
             ->withCount('scheduleEntries as participants_count')
             ->whereIn('competition_class_id', $classIds);
 
-        if ($venueId) $query->where('venue_id', $venueId);
-        if ($classId) $query->where('competition_class_id', $classId);
-        if ($status) $query->where('status', $status);
+        if ($venueId) {
+            $query->where('venue_id', $venueId);
+        }
+        if ($classId) {
+            $query->where('competition_class_id', $classId);
+        }
+        if ($status) {
+            $query->where('status', $status);
+        }
 
         $schedules = $query->orderBy('sort_order')->orderBy('start_at')->paginate(20);
 
@@ -110,12 +116,12 @@ class PublicEventController extends Controller
             'schedules' => $schedules,
             'venues' => $venues,
             'classes' => $classes,
-            'metaTitle' => 'Jadwal – ' . $event->name . ' – ' . config('app.name'),
-            'metaDescription' => 'Jadwal pertandingan ' . $event->name,
+            'metaTitle' => 'Jadwal – '.$event->name.' – '.config('app.name'),
+            'metaDescription' => 'Jadwal pertandingan '.$event->name,
         ]);
     }
 
-    public function bracket(Event $event, CompetitionBracket $bracket = null)
+    public function bracket(Event $event, ?CompetitionBracket $bracket = null)
     {
         abort_unless($event->isActive(), 404);
 
@@ -125,7 +131,7 @@ class PublicEventController extends Controller
             ->whereIn('competition_class_id', $classIds)
             ->get();
 
-        if (!$bracket && $brackets->isNotEmpty()) {
+        if (! $bracket && $brackets->isNotEmpty()) {
             $bracket = $brackets->first();
         }
 
@@ -147,7 +153,7 @@ class PublicEventController extends Controller
                     1 => 'Final',
                     2 => 'Semi Final',
                     3 => 'Quarter Final',
-                    default => 'Round ' . ($totalRounds - $round + 1),
+                    default => 'Round '.($totalRounds - $round + 1),
                 };
                 $bracketRounds[] = [
                     'label' => $label,
@@ -162,8 +168,8 @@ class PublicEventController extends Controller
             'brackets' => $brackets,
             'selectedBracket' => $bracket,
             'bracketRounds' => $bracketRounds,
-            'metaTitle' => 'Bracket – ' . $event->name . ' – ' . config('app.name'),
-            'metaDescription' => 'Bracket pertandingan ' . $event->name,
+            'metaTitle' => 'Bracket – '.$event->name.' – '.config('app.name'),
+            'metaDescription' => 'Bracket pertandingan '.$event->name,
         ]);
     }
 
@@ -178,8 +184,8 @@ class PublicEventController extends Controller
         return view('public.announcements', [
             'event' => $event,
             'announcements' => $announcements,
-            'metaTitle' => 'Pengumuman – ' . $event->name . ' – ' . config('app.name'),
-            'metaDescription' => 'Pengumuman event ' . $event->name,
+            'metaTitle' => 'Pengumuman – '.$event->name.' – '.config('app.name'),
+            'metaDescription' => 'Pengumuman event '.$event->name,
         ]);
     }
 
@@ -204,9 +210,9 @@ class PublicEventController extends Controller
             description: 'Membuka tampilan cetak label QR '.$participant->person->nama,
             subject: $participant->person,
             properties: [
-                'print_type'      => 'qr_label_single',
-                'peserta_id'      => $mapping?->peserta_id,
-                'participant_id'  => $participant->id,
+                'print_type' => 'qr_label_single',
+                'peserta_id' => $mapping?->peserta_id,
+                'participant_id' => $participant->id,
                 'attendance_code' => $participant->attendance_code,
             ],
         );
@@ -245,8 +251,8 @@ class PublicEventController extends Controller
             description: 'Membuka tampilan cetak batch label QR sebanyak '.$participants->count().' peserta',
             properties: [
                 'print_type' => 'qr_label_filtered',
-                'count'      => $participants->count(),
-                'format'     => '4x4_single',
+                'count' => $participants->count(),
+                'format' => '4x4_single',
             ],
         );
 
@@ -361,9 +367,9 @@ HTML;
             description: 'Membuka tampilan cetak label QR A4 sebanyak '.$participants->count().' peserta',
             properties: [
                 'print_type' => 'qr_label_a4',
-                'count'      => $participants->count(),
-                'format'     => 'a4_grid',
-                'event_id'   => $event->id,
+                'count' => $participants->count(),
+                'format' => 'a4_grid',
+                'event_id' => $event->id,
             ],
         );
 
@@ -508,10 +514,10 @@ HTML;
             description: 'Membuka tampilan cetak surat izin '.$surat->nomor_surat,
             subject: $surat,
             properties: [
-                'print_type'    => 'surat_izin',
-                'peserta_id'    => $surat->peserta_id,
+                'print_type' => 'surat_izin',
+                'peserta_id' => $surat->peserta_id,
                 'surat_izin_id' => $surat->id,
-                'nomor_surat'   => $surat->nomor_surat,
+                'nomor_surat' => $surat->nomor_surat,
             ],
         );
 
@@ -528,8 +534,7 @@ HTML;
             ->whereNotNull('attendance_code');
 
         if ($request->filled('desa')) {
-            $query->whereHas('person', fn ($q) =>
-                $q->where('desa_id', $request->input('desa'))
+            $query->whereHas('person', fn ($q) => $q->where('desa_id', $request->input('desa'))
             );
         }
 
@@ -544,8 +549,7 @@ HTML;
         }
 
         if ($request->filled('gender')) {
-            $query->whereHas('person', fn ($q) =>
-                $q->where('jenis_kelamin', $request->input('gender'))
+            $query->whereHas('person', fn ($q) => $q->where('jenis_kelamin', $request->input('gender'))
             );
         }
 
@@ -554,8 +558,7 @@ HTML;
         if ($keyword !== '') {
             $query->where(function ($builder) use ($keyword) {
                 $builder
-                    ->whereHas('person', fn ($q) =>
-                        $q->where('nama', 'like', '%'.$keyword.'%')
+                    ->whereHas('person', fn ($q) => $q->where('nama', 'like', '%'.$keyword.'%')
                     )
                     ->orWhere('participant_number', 'like', '%'.$keyword.'%')
                     ->orWhere('attendance_code', 'like', '%'.$keyword.'%');

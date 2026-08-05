@@ -13,8 +13,8 @@ uses(RefreshDatabase::class);
 function dc_event(string $suffix): Event
 {
     return Event::create([
-        'name' => 'DC Event ' . $suffix,
-        'slug' => 'dc-' . $suffix . '-' . str()->random(6),
+        'name' => 'DC Event '.$suffix,
+        'slug' => 'dc-'.$suffix.'-'.str()->random(6),
         'status' => 'active',
         'event_type' => 'cai',
     ]);
@@ -66,7 +66,7 @@ test('legacy peserta mapping with null participation id is not counted as proble
     LegacyPesertaMapping::create(['peserta_id' => $legacy->id, 'person_id' => $person->id, 'legacy_nip' => $legacy->nip, 'legacy_participant_number' => $legacy->participant_number, 'legacy_attendance_code' => $legacy->attendance_code, 'migrated_at' => now()]);
 
     $this->artisan('diagnose:design-c')
-        ->expectsOutput(str_pad('legacy_participation_missing_participation', 56) . ': 0')
+        ->expectsOutput(str_pad('legacy_participation_missing_participation', 56).': 0')
         ->assertExitCode(0);
 });
 

@@ -127,8 +127,8 @@ test('dashboardRoute returns pengajian.report for pengajian events', function ()
 test('competition and pengajian routes are consolidated under events event prefix', function () {
     $content = file_get_contents(base_path('routes/web.php'));
 
-    expect($content)->toContain("events/{event}/competition")
-        ->and($content)->toContain("events/{event}/pengajian");
+    expect($content)->toContain('events/{event}/competition')
+        ->and($content)->toContain('events/{event}/pengajian');
 });
 
 test('competition routes generate event-prefixed urls', function () {

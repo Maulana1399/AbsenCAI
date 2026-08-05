@@ -1,30 +1,29 @@
 <?php
 
 use App\Models\ActivityLog;
-use App\Models\IzinAbsensi;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
 use Illuminate\Validation\ValidationException;
 
 function makeActivityLogPeserta(int $nip, string $code): peserta
 {
     return peserta::create([
-        'nama'            => 'Peserta ' . $nip,
-        'nip'             => $nip,
+        'nama' => 'Peserta '.$nip,
+        'nip' => $nip,
         'attendance_code' => $code,
-        'jenis_kelamin'   => 'Laki - Laki',
+        'jenis_kelamin' => 'Laki - Laki',
     ]);
 }
 
 function makeActivityLogSesi(string $tanggal, string $nama = 'Sesi'): SesiAbsensi
 {
     return SesiAbsensi::create([
-        'nama_sesi' => $nama . ' ' . $tanggal,
-        'tanggal'   => $tanggal,
-        'aktif'     => true,
+        'nama_sesi' => $nama.' '.$tanggal,
+        'tanggal' => $tanggal,
+        'aktif' => true,
     ]);
 }
 
@@ -36,10 +35,10 @@ function makeActivityLogUser(): User
 function makeActivityLogSurat(peserta $peserta, User $creator, array $overrides = []): SuratIzin
 {
     return app(SuratIzinService::class)->create(array_merge([
-        'peserta_id'      => $peserta->id,
-        'alasan'          => 'Keperluan keluarga',
-        'jenis_izin'      => 'pulang',
-        'tanggal_mulai'   => '2026-07-20',
+        'peserta_id' => $peserta->id,
+        'alasan' => 'Keperluan keluarga',
+        'jenis_izin' => 'pulang',
+        'tanggal_mulai' => '2026-07-20',
         'tanggal_selesai' => '2026-07-21',
     ], $overrides), $creator->id);
 }
@@ -50,17 +49,17 @@ function makeActivityLogSurat(peserta $peserta, User $creator, array $overrides 
 
 test('create surat izin produces activity log', function () {
     $peserta = makeActivityLogPeserta(6001, 'KJA-SI001');
-    $user    = makeActivityLogUser();
+    $user = makeActivityLogUser();
     $this->actingAs($user);
 
     $surat = makeActivityLogSurat($peserta, $user);
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'created',
-        'module'       => 'surat_izin',
+        'action' => 'created',
+        'module' => 'surat_izin',
         'subject_type' => SuratIzin::class,
-        'subject_id'   => $surat->id,
-        'user_id'      => $user->id,
+        'subject_id' => $surat->id,
+        'user_id' => $user->id,
     ]);
 });
 
@@ -70,18 +69,18 @@ test('create surat izin produces activity log', function () {
 
 test('submit surat izin produces activity log', function () {
     $peserta = makeActivityLogPeserta(6002, 'KJA-SI002');
-    $user    = makeActivityLogUser();
+    $user = makeActivityLogUser();
     $this->actingAs($user);
     $surat = makeActivityLogSurat($peserta, $user);
 
     app(SuratIzinService::class)->submit($surat);
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'submitted',
-        'module'       => 'surat_izin',
+        'action' => 'submitted',
+        'module' => 'surat_izin',
         'subject_type' => SuratIzin::class,
-        'subject_id'   => $surat->id,
-        'user_id'      => $user->id,
+        'subject_id' => $surat->id,
+        'user_id' => $user->id,
     ]);
 });
 
@@ -102,10 +101,10 @@ test('approve surat izin produces activity log', function () {
     app(SuratIzinService::class)->approve($surat, $approver);
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'approved',
-        'module'       => 'surat_izin',
+        'action' => 'approved',
+        'module' => 'surat_izin',
         'subject_type' => SuratIzin::class,
-        'user_id'      => $approver->id,
+        'user_id' => $approver->id,
     ]);
 });
 
@@ -124,11 +123,11 @@ test('reject surat izin produces activity log', function () {
     app(SuratIzinService::class)->reject($surat);
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'rejected',
-        'module'       => 'surat_izin',
+        'action' => 'rejected',
+        'module' => 'surat_izin',
         'subject_type' => SuratIzin::class,
-        'subject_id'   => $surat->id,
-        'user_id'      => $rejector->id,
+        'subject_id' => $surat->id,
+        'user_id' => $rejector->id,
     ]);
 });
 
@@ -150,11 +149,11 @@ test('markReturned produces activity log', function () {
     app(SuratIzinService::class)->markReturned($surat, '2026-07-21');
 
     $this->assertDatabaseHas('activity_logs', [
-        'action'       => 'returned',
-        'module'       => 'surat_izin',
+        'action' => 'returned',
+        'module' => 'surat_izin',
         'subject_type' => SuratIzin::class,
-        'subject_id'   => $surat->id,
-        'user_id'      => $approver->id,
+        'subject_id' => $surat->id,
+        'user_id' => $approver->id,
     ]);
 });
 
@@ -164,7 +163,7 @@ test('markReturned produces activity log', function () {
 
 test('failed submit on already submitted surat does not create activity log', function () {
     $peserta = makeActivityLogPeserta(6006, 'KJA-SI006');
-    $user    = makeActivityLogUser();
+    $user = makeActivityLogUser();
     $this->actingAs($user);
     $surat = makeActivityLogSurat($peserta, $user);
 

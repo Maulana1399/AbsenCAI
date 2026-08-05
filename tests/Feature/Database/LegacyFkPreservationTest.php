@@ -7,10 +7,10 @@ use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
+use App\Models\peserta;
 use App\Models\SesiAbsensi;
 use App\Models\SuratIzin;
 use App\Models\User;
-use App\Models\peserta;
 use App\Services\Attendance\SuratIzinService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,7 +19,7 @@ uses(RefreshDatabase::class);
 
 function fl_event(): Event
 {
-    return Event::create(['name' => 'FL Event ' . str()->random(6), 'slug' => 'fl-' . str()->random(6), 'status' => 'active']);
+    return Event::create(['name' => 'FL Event '.str()->random(6), 'slug' => 'fl-'.str()->random(6), 'status' => 'active']);
 }
 
 function fl_session(Event $event): SesiAbsensi
@@ -32,8 +32,8 @@ function fl_participant(Event $event): object
     $person = Person::create(['nama' => 'FL Person']);
     $peserta = peserta::create([
         'nama' => 'FL Peserta', 'nip' => random_int(90000, 99999),
-        'attendance_code' => 'KJA-FL-' . str()->random(8),
-        'participant_number' => 'KL' . random_int(100, 999),
+        'attendance_code' => 'KJA-FL-'.str()->random(8),
+        'participant_number' => 'KL'.random_int(100, 999),
         'status_registrasi' => 'Belum Registrasi',
     ]);
     $participation = Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'jenis_peserta' => 'Wajib']);
@@ -44,6 +44,7 @@ function fl_participant(Event $event): object
         'peserta_id' => $peserta->id, 'person_id' => $person->id,
         'participation_id' => $participation->id, 'event_id' => $event->id,
     ]);
+
     return (object) compact('person', 'peserta', 'participation');
 }
 
@@ -133,7 +134,7 @@ test('canonical display uses participation when peserta_id is null', function ()
 });
 
 // ---------------------------------------------------------------------------
-// C. Legacy fallback display works while peserta exists  
+// C. Legacy fallback display works while peserta exists
 // ---------------------------------------------------------------------------
 
 test('legacy fallback display works while peserta exists', function () {

@@ -6,7 +6,6 @@ use App\Models\CompetitionBracketMatch;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
 use App\Models\CompetitionOutcome;
-use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Models\CompetitionScheduleEntry;
 use App\Models\Event;
@@ -46,7 +45,7 @@ beforeEach(function () {
         Participation::create([
             'person_id' => $person->id,
             'event_id' => $this->event->id,
-            'participant_number' => 'TST' . str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT),
+            'participant_number' => 'TST'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT),
             'jenis_peserta' => 'Peserta',
         ]);
         $reg = $regService->registerForPerson(

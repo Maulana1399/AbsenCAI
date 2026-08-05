@@ -1,17 +1,16 @@
 <?php
 
+use App\Enums\Role;
 use App\Livewire\QRLabel\Index as QRLabelIndex;
 use App\Models\Event;
 use App\Models\LegacyParticipationMapping;
 use App\Models\LegacyPesertaMapping;
 use App\Models\Participation;
 use App\Models\Person;
-use App\Models\User;
 use App\Models\peserta;
+use App\Models\User;
 use App\Services\QR\QRService;
 use App\Support\ActiveEventContext;
-
-use App\Enums\Role;
 use Livewire\Livewire;
 
 it('QR label print route encodes attendance code and keeps participant number as label only', function () {
@@ -36,7 +35,8 @@ it('QR label print route encodes attendance code and keeps participant number as
         'jenis_peserta' => 'Wajib',
     ]);
 
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public array $calls = [];
 
         public function generatePng(string $attendanceCode): string
@@ -102,7 +102,8 @@ it('QR label Livewire download uses attendance code payload', function () {
         'jenis_peserta' => 'Wajib',
     ]);
 
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public array $calls = [];
 
         public function generatePng(string $attendanceCode): string
@@ -147,7 +148,8 @@ it('QR label print preview uses attendance code payload and participant number l
         'jenis_peserta' => 'Wajib',
     ]);
 
-    $fake = new class extends QRService {
+    $fake = new class extends QRService
+    {
         public array $calls = [];
 
         public function generatePng(string $attendanceCode): string

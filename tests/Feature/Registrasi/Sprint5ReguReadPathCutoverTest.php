@@ -8,7 +8,6 @@ use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Services\Attendance\AttendanceReadService;
-use App\Services\Registration\RegistrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

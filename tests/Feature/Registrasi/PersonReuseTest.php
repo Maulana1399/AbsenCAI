@@ -193,5 +193,5 @@ test('legacy mapping points to correct Participation and Event', function () {
     expect($mapping)->not->toBeNull();
     $bridge = LegacyParticipationMapping::where('person_id', $person->id)->first();
     expect($bridge)->not->toBeNull();
-    expect((int)$bridge->participation->event_id)->toBe((int)$this->eventA->id);
+    expect((int) $bridge->participation->event_id)->toBe((int) $this->eventA->id);
 });

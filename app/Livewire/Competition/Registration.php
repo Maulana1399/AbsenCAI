@@ -15,22 +15,33 @@ use Livewire\Component;
 class Registration extends Component
 {
     public bool $stepSearch = true;
+
     public bool $stepRegister = false;
+
     public bool $stepSuccess = false;
 
     public ?int $selectedPersonId = null;
+
     public string $nama = '';
+
     public string $jenisKelamin = '';
+
     public string $tanggalLahir = '';
+
     public string $desaId = '';
+
     public string $kelompokId = '';
 
     public string $competitionCategoryId = '';
+
     public string $competitionClassId = '';
+
     public bool $processing = false;
+
     public bool $alreadyRegistered = false;
 
     public ?array $successData = null;
+
     public ?array $personParticipations = null;
 
     public function mount(): void
@@ -65,14 +76,13 @@ class Registration extends Component
     }
 
     #[On('personCreated')]
-    public function onPersonCreated(): void
-    {
-    }
+    public function onPersonCreated(): void {}
 
     public function loadParticipations(): void
     {
-        if (!$this->selectedPersonId) {
+        if (! $this->selectedPersonId) {
             $this->personParticipations = null;
+
             return;
         }
 
@@ -97,7 +107,7 @@ class Registration extends Component
     {
         $this->alreadyRegistered = false;
 
-        if (!$this->selectedPersonId || !$this->competitionClassId) {
+        if (! $this->selectedPersonId || ! $this->competitionClassId) {
             return;
         }
 

@@ -5,8 +5,8 @@ namespace App\Services\Attendance;
 use App\Models\EventAttendance;
 use App\Models\IzinAbsensi;
 use App\Models\Participation;
-use App\Models\SesiAbsensi;
 use App\Models\peserta;
+use App\Models\SesiAbsensi;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 class AttendanceExceptionService
 {
     public function recordIzin(
-        ?int $pesertaId = null,
+        ?int $pesertaId,
         int $sesiId,
         string $source = 'manual',
         ?int $suratIzinId = null,
@@ -57,7 +57,7 @@ class AttendanceExceptionService
                 $eventMapping = \App\Models\LegacyParticipationMapping::where('peserta_id', $peserta->id)
                     ->where('event_id', $eventId)
                     ->exists();
-                if ($anyMapping && !$eventMapping) {
+                if ($anyMapping && ! $eventMapping) {
                     throw ValidationException::withMessages([
                         'peserta' => 'Peserta tidak terdaftar pada event sesi ini.',
                     ]);
@@ -93,12 +93,12 @@ class AttendanceExceptionService
                 if ($resolvedParticipation !== null) {
                     EventAttendance::create([
                         'participation_id' => $resolvedParticipation->id,
-                        'sesi_absensi_id'  => $sesi->id,
-                        'event_id'         => $eventId,
-                        'status'           => EventAttendance::STATUS_IZIN,
-                        'attended_at'      => now(),
-                        'method'           => $source === 'surat_izin' ? 'surat_izin' : 'izin',
-                        'recorded_by'      => auth()->id(),
+                        'sesi_absensi_id' => $sesi->id,
+                        'event_id' => $eventId,
+                        'status' => EventAttendance::STATUS_IZIN,
+                        'attended_at' => now(),
+                        'method' => $source === 'surat_izin' ? 'surat_izin' : 'izin',
+                        'recorded_by' => auth()->id(),
                     ]);
 
                     return EventAttendance::where('participation_id', $resolvedParticipation->id)
@@ -108,10 +108,10 @@ class AttendanceExceptionService
 
                 if ($pesertaId) {
                     return IzinAbsensi::create([
-                        'peserta_id'    => $pesertaId,
-                        'sesi_id'       => $sesi->id,
-                        'status'        => 'izin',
-                        'source'        => $source,
+                        'peserta_id' => $pesertaId,
+                        'sesi_id' => $sesi->id,
+                        'status' => 'izin',
+                        'source' => $source,
                         'surat_izin_id' => $suratIzinId,
                     ]);
                 }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Role;
 use App\Models\Event;
 use App\Models\EventCommitteeAssignment;
 use App\Models\EventRole;
@@ -12,7 +11,6 @@ use App\Services\User\UserManagementService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -40,8 +38,13 @@ function s73_person(array $overrides = []): Person
 function s73_user(?string $role = null, ?int $personId = null): User
 {
     $attrs = ['email' => 's73-'.str()->random(10).'@example.com'];
-    if ($role !== null) $attrs['role'] = $role;
-    if ($personId !== null) $attrs['person_id'] = $personId;
+    if ($role !== null) {
+        $attrs['role'] = $role;
+    }
+    if ($personId !== null) {
+        $attrs['person_id'] = $personId;
+    }
+
     return User::factory()->create($attrs);
 }
 

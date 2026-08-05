@@ -11,6 +11,7 @@ return new class extends Migration
     {
         if (DB::connection()->getDriverName() === 'sqlite') {
             $this->makeNullableSqlite();
+
             return;
         }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         if (DB::connection()->getDriverName() === 'sqlite') {
             $this->restoreNonNullableSqlite();
+
             return;
         }
 

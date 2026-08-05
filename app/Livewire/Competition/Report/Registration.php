@@ -14,8 +14,11 @@ class Registration extends Component
     use WithPagination;
 
     public string $filterCategoryId = '';
+
     public string $filterClassId = '';
+
     public string $filterGender = '';
+
     public string $search = '';
 
     public function updatedFilterCategoryId(): void

@@ -7,13 +7,18 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
+class PesertaExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     public $event_id;
+
     public $regu_id;
+
     public $kelompok_id;
+
     public $desa_id;
+
     public $jenis_kelamin;
+
     public $jenis_peserta;
 
     public function __construct(
@@ -23,8 +28,7 @@ class PesertaExport implements FromCollection, WithHeadings, ShouldAutoSize
         $desa_id = null,
         $jenis_kelamin = null,
         $jenis_peserta = null
-    )
-    {
+    ) {
         $this->event_id = $event_id;
         $this->regu_id = $regu_id;
         $this->kelompok_id = $kelompok_id;
