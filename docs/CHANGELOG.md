@@ -7,6 +7,31 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## IF-07 (Import Framework — Participation Import, Design C — 2026-08-06)
+
+Migrasi **Import Participation** sebagai domain Design C kedua (Person → Participation → Attendance). **Pengajian/Competition/Attendance tidak diubah.** Tidak ada perubahan database, migration, maupun business rule. Baseline hijau.
+
+- **`ManualParticipantRegistrationService` di-extend (backward-compatible)** — public `resolvePerson()` (nama + desa + tanggal lahir) + param opsional `jenisPeserta/statusRegistrasi/reguId` pada `register()`/`createParticipation()`.
+- **`Support/PersonIdentityNormalizer`** — logika normalisasi Person di-extract & dipakai bersama (`PersonImportNormalizer` & `ParticipationImportNormalizer`), tanpa duplikasi.
+- **`ParticipationImportDefinition`** (metadata + capability) — parameter `event_id` (required); collaborator nyata: parser (header `nama, jenis_kelamin, desa` wajib), normalizer (reuse PersonIdentityNormalizer + resolusi regu), validator (required + FK desa/kelompok/regu), **duplicate detector** (Person dicari via `resolvePerson`; duplicate = Participation existing utk (person, event target); ambiguous → warning), **committer** (per-baris `ManualParticipantRegistrationService::register()`).
+- **`ParticipationImportTemplateExport`** — `template_import_participation.xlsx` (kolom identity + jenis_peserta/status_registrasi/regu; REFERENSI = daftar event); route `GET /events/{event}/registrasi/import-participation/template`.
+- **Wizard** — `ImportParticipation extends ImportWizardBase` (parameter default = active event), dipasang di halaman Registrasi. `SummaryStage` kini menggabungkan warning duplicate ke summary final (warning tampil di wizard).
+- **Test** — +17 test: 9 unit (metadata, parameter, duplicate per event, ambiguous warning, committer via service) + 8 feature (wizard, template route). `ImportServiceProvider` + `participation` di registry.
+- **Verifikasi:** full suite → **2120 passed / 5345 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError, di luar scope).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md`, `docs/import-audit.md` disinkronkan.
+
+## IF-06 (Import Framework — Person Import, Design C — 2026-08-06)
+
+Migrasi **Import Person** sebagai domain canonical pertama di atas Import Framework (Design C: Person → Participation → Attendance). **Pengajian/Competition/Attendance tidak diubah.** Tidak ada perubahan database, migration, business rule Person, maupun Design C. **NIP tidak dihidupkan kembali.** Baseline hijau.
+
+- **Audit Person** — model `people` (nama, jenis_kelamin L/P, tanggal_lahir, desa_id, kelompok_id), relasi, identity canonical (nama + desa + tanggal lahir); NIP & attendance_code tidak dipakai sebagai identitas.
+- **`PersonImportDefinition`** (metadata + capability API) — **tanpa parameter** (Person global). Collaborator nyata: `PersonImportParser` (FileParser, header `nama, jenis_kelamin` wajib; `tanggal_lahir, desa, kelompok` opsional), `PersonImportNormalizer` (trim, collapse multiple/unicode spaces, gender → `L`/`P`, tanggal YYYY-MM-DD, resolusi desa/kelompok FK), `PersonImportValidator` (required + FK check), `PersonImportDuplicateDetector` (**reuses `PersonDuplicateDetectionService`** — name + tanggal lahir; intra-file via duplicateKey; kandidat mirip → warning), `PersonImportCommitter` (duplicate via service; create via `Person::create()` jalur golden — tidak ada PersonService standalone), `PersonImportActivityLogger`.
+- **Template generator** — `PersonImportTemplateExport` (`template_import_person.xlsx`, kolom nama/jenis_kelamin/tanggal_lahir/desa/kelompok, REFERENSI = enum gender + daftar desa); route `GET /import/person/template`.
+- **Wizard** — `ImportPerson extends ImportWizardBase` (tanpa parameter); summary kini menampilkan **Warning** (base + view generik); POST route `import.person` via adapter, error per-field.
+- **Test** — +21 test: 10 unit (metadata, normalisasi gender/spasi/unicode, FK, duplicate via service, committer) + 11 feature (POST route, wizard, template). `ImportServiceProvider` + `person` di registry.
+- **Verifikasi:** full suite → **2103 passed / 5250 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError, di luar scope).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md`, `docs/import-audit.md` disinkronkan.
+
 ## IF-05 (Import Framework — Regu + Reusable Wizard Base — 2026-08-06)
 
 Migrasi **Import Regu** sebagai modul ketiga di atas Import Framework. **Pengajian/Peserta tidak diubah.** Business rule Regu dipertahankan. Tidak ada perubahan database, migration, maupun permission. Baseline hijau.

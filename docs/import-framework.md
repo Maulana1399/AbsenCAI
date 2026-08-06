@@ -1,11 +1,12 @@
 # Import Framework — Arsitektur & Roadmap
 
-> Status: **IF-05 COMPLETE — Regu = modul ketiga di atas framework.**
+> Status: **IF-07 COMPLETE — Participation = domain Design C kedua di atas framework.**
 > IF-01 (audit & GAP) → `docs/import-audit.md`.
 > Golden Standard: Import Massal Pengajian.
-> IF-02 engine. **IF-03 Desa.** **IF-04 Kelompok** (metadata + parameter). **IF-05 Regu**
-> (+ reusable wizard base `ImportWizardBase`). Import Pengajian/Peserta tetap memakai
-> implementasi lama.
+> IF-02 engine. IF-03 Desa. IF-04 Kelompok. IF-05 Regu. IF-06 Person.
+> **IF-07 Participation** (Design C: Person → Participation → Attendance; commit via
+> `ManualParticipantRegistrationService`).
+> Import Pengajian/Peserta tetap memakai implementasi lama.
 
 ---
 
@@ -62,7 +63,9 @@ app/Services/Import/
     ├── ImportAdapter.php            ← adapter reusable (preview/commit/definition/metadata/template + parameters)
     ├── Desa/                        ← REAL collaborator penuh
     ├── Kelompok/                    ← REAL collaborator penuh + metadata
-    ├── Regu/                        ← REAL collaborator penuh (IF-05) + metadata
+    ├── Regu/                        ← REAL collaborator penuh + metadata
+    ├── Person/                      ← REAL collaborator penuh + metadata + PersonDuplicateDetectionService
+    ├── Participation/               ← REAL collaborator penuh (IF-07) + metadata + ManualParticipantRegistrationService
     ├── Peserta/                     ← committer legacy (belum dimigrasi)
     └── Pengajian/                   ← committer legacy (belum dimigrasi)
 ```
@@ -209,6 +212,21 @@ template()               // → ImportTemplate (generator)
 - `ReguImportDuplicateDetector` — duplikat **by unique regu name** (`unique:regus,regu`).
 - `ReguImportCommitter` — create `regu` + `jenis_kelamin`, skip duplikat nama, catat `failedRows`.
 
+**Person (IF-06):** *Design C — Person = identitas global; legacy peserta & NIP TIDAK dipakai; tanpa parameter.*
+- `PersonImportParser` — baca file via `FileParser`, header `nama, jenis_kelamin` (wajib); `tanggal_lahir, desa, kelompok` opsional.
+- `PersonImportNormalizer` — delegasi ke `Support/PersonIdentityNormalizer` (trim + collapse spasi/unicode + gender → `L`/`P` + tanggal + resolusi desa/kelompok).
+- `PersonImportValidator` — required nama/gender, gender in `[L,P]`, tanggal valid, **desa/kelompok FK check**.
+- `PersonImportDuplicateDetector` — **reuses `PersonDuplicateDetectionService`**; intra-file via duplicateKey; kandidat mirip → warning.
+- `PersonImportCommitter` — duplicate via `PersonDuplicateDetectionService`; create via `Person::create()` (jalur golden).
+
+**Participation (IF-07):** *Design C penghubung Person → Event; commit via `ManualParticipantRegistrationService`.*
+- `ParticipationImportParser` — header `nama, jenis_kelamin, desa` (wajib); `tanggal_lahir, kelompok, jenis_peserta, status_registrasi, regu` opsional.
+- `ParticipationImportNormalizer` — **reuses `PersonIdentityNormalizer`** (Person logic, tidak diduplikasi) + resolusi regu.
+- `ParticipationImportValidator` — required nama/gender/desa + FK check (desa/kelompok/regu).
+- `ParticipationImportDuplicateDetector` — **reuses `ManualParticipantRegistrationService::resolvePerson()`**; duplicate = Participation existing utk (person, event) → hanya event target.
+- `ParticipationImportCommitter` — per-baris `ManualParticipantRegistrationService::register()` (lookup Person dulu; duplicate event → skip; ambiguous → warning).
+- `ManualParticipantRegistrationService` di-extend: public `resolvePerson()` + param opsional `jenisPeserta/statusRegistrasi/reguId` (backward-compatible).
+
 ---
 
 ## 6. Wizard & Komponen UI (TERIMPLEMENTASI)
@@ -232,10 +250,12 @@ template()               // → ImportTemplate (generator)
 definition, template route `route('import.{key}.template')`). Dipakai oleh:
 - **`ImportKelompok`** (IF-04): parameter `desa_id`.
 - **`ImportRegu`** (IF-05): tanpa parameter (regu global).
+- **`ImportPerson`** (IF-06): tanpa parameter (Person global).
+- **`ImportParticipation`** (IF-07): parameter `event_id` (default = active event); dipasang di halaman Registrasi.
 
 View generik: `resources/views/livewire/import/import-wizard.blade.php` (parameter select dari
 `meta['parameters']`, kolom preview dari `meta['columns']`, summary Total/Valid/Invalid/
-Duplicate/Akan Dibuat). Blade **tidak hardcode** detail modul.
+Duplicate/**Warning**/Akan Dibuat). Blade **tidak hardcode** detail modul.
 
 File: `resources/views/components/import/*.blade.php` + `livewire/database/{desa,kelompok}/import-*.blade.php`.
 
@@ -251,13 +271,15 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 |-------|-----|
 | **DATA** | Header kolom + baris contoh |
 | **PETUNJUK** | Cara import, contoh, aturan duplicate |
-| **REFERENSI** | Nilai referensi (Desa: kosong; **Kelompok: daftar desa**; **Regu: nilai enum gender**) |
+| **REFERENSI** | Nilai referensi (Desa: kosong; Kelompok: desa; Regu: gender; Person: gender+desa; **Participation: daftar event**) |
 
 - `DesaImportTemplateExport` → `template_import_desa.xlsx` (kolom `desa`).
 - `KelompokImportTemplateExport` → `template_import_kelompok.xlsx` (kolom `kelompok`, REFERENSI = daftar desa).
-- `ReguImportTemplateExport` → `template_import_regu.xlsx` (kolom `regu, jenis_kelamin`, REFERENSI = `Laki - Laki`/`Perempuan`).
-- Route `GET /import/{desa|kelompok|regu}/template` → `ImportDataController::*Template()` (via `ImportAdapter::template`).
-- Template statis `public/templates/*` **tidak lagi dipakai** untuk Desa/Kelompok/Regu (retire menyeluruh saat IF-08).
+- `ReguImportTemplateExport` → `template_import_regu.xlsx` (kolom `regu, jenis_kelamin`, REFERENSI = enum gender).
+- `PersonImportTemplateExport` → `template_import_person.xlsx` (kolom identity Person, REFERENSI = gender + desa).
+- `ParticipationImportTemplateExport` → `template_import_participation.xlsx` (kolom identity + jenis_peserta/status/regu, REFERENSI = daftar event).
+- Route `GET /import/{desa|kelompok|regu|person}/template` + `GET /events/{event}/registrasi/import-participation/template`.
+- Template statis `public/templates/*` **tidak lagi dipakai** untuk modul yang dimigrasi (retire menyeluruh saat IF-09).
 
 ---
 
@@ -286,11 +308,11 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 | **IF-03** | **Migrasi Desa** — adapter reusable, definition penuh, template generator, wizard + komponen UI | Desa di atas framework + 36 test | ✅ COMPLETE |
 | **IF-04** | **Migrasi Kelompok** — metadata definition (`ImportDefinitionMetadata`), parameter engine (desa_id), wizard 5-langkah otomatis, template REFERENSI desa | Kelompok via framework + 25 test | ✅ COMPLETE |
 | **IF-05** | **Migrasi Regu** — collaborator nyata (normalisasi gender sesuai business rule), duplicate by unique name, reusable wizard base `ImportWizardBase`, template REFERENSI gender | Regu via framework + 19 test | ✅ COMPLETE |
-| **IF-06** | Migrasi Peserta | Peserta via framework | 🔲 |
-| **IF-07** | Migrasi Pengajian ke framework (UX identik, parity golden) | Pengajian via framework | 🔲 |
-| **IF-08** | Template Engine lanjutan (REFERENSI dropdown/data validation) + retire `public/templates/*` | Generator universal | 🔲 |
-| **IF-09** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
-| **IF-10** | Import Person (master data) | Person via framework | 🔲 |
+| **IF-06** | **Migrasi Person (Design C)** — identitas global (bukan peserta/NIP), reuses `PersonDuplicateDetectionService`, normalisasi gender/date/spasi, template REFERENSI gender+desa | Person via framework + 21 test | ✅ COMPLETE |
+| **IF-07** | **Migrasi Participation (Design C)** — parameter event_id, lookup Person (tanpa create sembarangan), duplicate Participation per event, commit via `ManualParticipantRegistrationService` (+ `resolvePerson` & param opsional), template REFERENSI event | Participation via framework + 17 test | ✅ COMPLETE |
+| **IF-08** | Migrasi Pengajian ke framework (UX identik, parity golden; Pengajian jadi orchestrator saja) | Pengajian via framework | 🔲 |
+| **IF-09** | Template Engine lanjutan (REFERENSI dropdown/data validation) + retire `public/templates/*` | Generator universal | 🔲 |
+| **IF-10** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
 | **IF-11** | Import Competition (cabang & kelas kompetisi) | Competition via framework | 🔲 |
 | **IF-12** | Import Venue | Venue via framework | 🔲 |
 | **IF-13** | Import Schedule | Schedule via framework | 🔲 |
@@ -300,8 +322,8 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 | **IF-17** | Import Access Grant | Access Grant via framework | 🔲 |
 | **IF-18** | Regression penuh + parity audit seluruh import vs golden standard | Baseline hijau | 🔲 |
 
-**Urutan prioritas:** IF-05–06 (legacy master data) → IF-07 (golden migration) → IF-08–09
-(template & audit trail) → IF-10+ (modul baru sesuai kebutuhan operasional).
+**Urutan prioritas:** IF-08 (Pengajian = orchestrator) → IF-09–10 (template & audit trail)
+→ IF-11+ (modul baru sesuai kebutuhan operasional).
 
 ---
 
@@ -310,12 +332,14 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 - [x] (IF-02) Engine pipeline nyata, runner dispatch, stage order configurable, exception khusus, DI.
 - [x] (IF-03) **Desa memakai framework production** (adapter + definition + pipeline + template + wizard).
 - [x] (IF-04) **Kelompok memakai framework production** (metadata + parameter + template + wizard).
-- [x] (IF-04) Metadata definition: displayName/description/icon/parameters/columns/rules/template/summary.
-- [x] (IF-04) Parameter engine: wizard membaca parameter dari definition (tidak hardcode di blade).
 - [x] (IF-05) **Regu memakai framework production** (metadata + reusable wizard base).
-- [x] (IF-05) **Business rule Regu dipertahankan** — normalisasi gender & unique name duplicate (`unique:regus,regu`); framework mengikuti Regu.
-- [x] (IF-05) **Wizard reusable** — `ImportWizardBase` + view generik dipakai Kelompok & Regu.
-- [x] (IF-05) Perilaku modul lain tidak berubah — baseline hijau (2082 passed, 5 failure pre-existing).
+- [x] (IF-06) **Person memakai framework production (Design C)** — identitas global, tanpa peserta/NIP.
+- [x] (IF-07) **Participation memakai framework production (Design C)** — penghubung Person → Event.
+- [x] (IF-07) Person **dicari dulu** (via `resolvePerson`), tidak pernah create sembarangan; ambiguous → warning.
+- [x] (IF-07) Duplicate = Participation existing utk (person, event) — event lain boleh.
+- [x] (IF-07) Commit via `ManualParticipantRegistrationService` (service canonical, backward-compatible extension).
+- [x] (IF-07) Normalisasi reuse `PersonIdentityNormalizer` (tidak diduplikasi).
+- [x] (IF-07) Perilaku modul lain tidak berubah — baseline hijau (2120 passed, 5 failure pre-existing).
 - [ ] Validasi, duplicate detection, transaction, dan partial-success konsisten di semua modul.
-- [ ] Activity log tercatat untuk setiap import yang sukses (IF-09).
+- [ ] Activity log tercatat untuk setiap import yang sukses (IF-10).
 - [ ] Test: unit pipeline + feature wizard + regression parity — baseline hijau.

@@ -44,7 +44,7 @@ Commercial Platform (Future)
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
-| Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — **IF-05 REGU** — IF-06+ NOT STARTED (lihat `docs/import-framework.md`) |
+| Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — IF-05 REGU — IF-06 PERSON — **IF-07 PARTICIPATION (Design C)** — IF-08+ NOT STARTED (lihat `docs/import-framework.md`) |
 | Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | Stage | **Pre-UAT** |
 
@@ -1259,7 +1259,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 16. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired
 17. **Sprint 3.3** ✅ COMPLETE — Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`)
 18. **Sprint 4** 🔲 NOT STARTED — rekomendasi di bawah
-19. **Import Framework (IF series)** 🔲 IF-01 (audit) COMPLETE; **IF-02 (engine) COMPLETE**; **IF-03 (Desa) COMPLETE**; **IF-04 (Kelompok) COMPLETE**; **IF-05 (Regu) COMPLETE**; IF-06+ NOT STARTED — lihat `docs/import-framework.md`
+19. **Import Framework (IF series)** 🔲 IF-01 (audit) COMPLETE; IF-02 (engine) COMPLETE; IF-03 (Desa) COMPLETE; IF-04 (Kelompok) COMPLETE; IF-05 (Regu) COMPLETE; IF-06 (Person) COMPLETE; **IF-07 (Participation) COMPLETE**; IF-08+ NOT STARTED — lihat `docs/import-framework.md`
 20. **Competition** (future sprint — V2 generic engine)
 21. **Commercial** (future sprint)
 ```
@@ -1270,7 +1270,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 
 ## Status
 
-🔲 **IF-01 COMPLETE (audit & desain)** — ✅ **IF-02 COMPLETE (engine)** — ✅ **IF-03 COMPLETE (Desa)** — ✅ **IF-04 COMPLETE (Kelompok)** — ✅ **IF-05 COMPLETE (Regu)** — IF-06+ NOT STARTED.
+🔲 **IF-01 COMPLETE (audit & desain)** — ✅ **IF-02 COMPLETE (engine)** — ✅ **IF-03 COMPLETE (Desa)** — ✅ **IF-04 COMPLETE (Kelompok)** — ✅ **IF-05 COMPLETE (Regu)** — ✅ **IF-06 COMPLETE (Person)** — ✅ **IF-07 COMPLETE (Participation)** — IF-08+ NOT STARTED.
 
 ## Goal
 
@@ -1314,15 +1314,39 @@ UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sa
 - ✅ **POST route** `import.regu` via adapter; error per-field (`jenis_kelamin`); hapus `app/Imports/ReguImport.php` (Maatwebsite).
 - ✅ **19 test baru** (8 unit + 11 feature). Baseline hijau (2082 passed; 5 failure pre-existing).
 
+## Deliverables Fase IF-06 (2026-08-06 — Person Import, Design C)
+
+- ✅ **Import Person = domain canonical pertama** di atas framework (Design C: Person → Participation → Attendance; **tanpa tabel legacy peserta sebagai entitas utama**).
+- ✅ **Audit Person** — model (`people`: nama, jenis_kelamin L/P, tanggal_lahir, desa_id, kelompok_id), relasi (desa, kelompok, participations, legacyPesertaMapping), identity canonical (nama + desa + tanggal lahir); NIP retired (PGM.20) tidak dipakai; attendance_code tidak dipakai untuk identitas.
+- ✅ **Duplicate reuses `PersonDuplicateDetectionService`** (name + tanggal lahir, canonical) — tidak ada algoritma baru; intra-file via duplicateKey; kandidat mirip → warning.
+- ✅ **Normalisasi** — trim, multiple & unicode spaces, gender → `L`/`P` (L/P/Laki - Laki/Perempuan/variant), tanggal lahir YYYY-MM-DD, resolusi desa/kelompok (FK).
+- ✅ **`PersonImportDefinition`** — metadata lengkap (displayName/description/icon/parameters[]/columns/rules/template/summary) + collaborator nyata; `PersonImportCommitter` create via `Person::create()` (jalur golden; tidak ada PersonService standalone) + duplicate via service.
+- ✅ **Template generator** — `template_import_person.xlsx` (kolom nama, jenis_kelamin, tanggal_lahir, desa, kelompok; REFERENSI = enum gender + daftar desa); route `GET /import/person/template`.
+- ✅ **Wizard** — `ImportPerson` extends `ImportWizardBase` (tanpa parameter); POST route `import.person` via adapter; error per-field.
+- ✅ **21 test baru** (10 unit + 11 feature). Baseline hijau (2103 passed; 5 failure pre-existing).
+
+## Deliverables Fase IF-07 (2026-08-06 — Participation Import, Design C)
+
+- ✅ **Import Participation** = domain Design C kedua (`Person → Participation → Attendance`); **Design C lengkap untuk Person & Participation**.
+- ✅ **Audit Participation** — model (`participations`: person_id, event_id, participant_number, attendance_code, jenis_peserta, status_registrasi, regu_id), relasi (person, event, regu), registrasi flow canonical (`ManualParticipantRegistrationService`), status registrasi, duplicate per (person, event).
+- ✅ **Person dicari dulu** — `ManualParticipantRegistrationService::resolvePerson()` (nama + desa + tanggal lahir); Person tidak pernah dibuat sembarangan; ambiguous → warning.
+- ✅ **Duplicate = Participation existing utk (person, event target)** — event lain boleh; intra-file via duplicateKey.
+- ✅ **Commit via `ManualParticipantRegistrationService::register()`** (service canonical) + param opsional `jenisPeserta/statusRegistrasi/reguId` (backward-compatible).
+- ✅ **Normalisasi reuse `PersonIdentityNormalizer`** (Person logic, tidak diduplikasi) + resolusi regu.
+- ✅ **`ParticipationImportDefinition`** — metadata lengkap + parameter `event_id` (required); `ParticipationImportTemplateExport` (`template_import_participation.xlsx`, REFERENSI = daftar event).
+- ✅ **Wizard** — `ImportParticipation extends ImportWizardBase` (parameter default = active event), dipasang di halaman Registrasi; template route event-scoped `GET /events/{event}/registrasi/import-participation/template`.
+- ✅ **SummaryStage** — merge warning duplicate ke summary final (warning tampil di wizard).
+- ✅ **17 test baru** (9 unit + 8 feature). Baseline hijau (2120 passed; 5 failure pre-existing).
+
 ## Ringkasan Audit
 
-- **Import aktif:** Desa (🟢 framework), Kelompok (🟢 framework), Regu (🟢 framework), Pengajian (golden, legacy), Peserta (legacy).
-- **Skeleton `app/Services/Import/`:** engine + adapter + template + metadata + reusable wizard hidup; Desa/Kelompok/Regu memakai penuh.
-- **Kandidat baru tanpa import:** Person, Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity, Rundown, Access Grant.
+- **Import aktif:** Desa (🟢), Kelompok (🟢), Regu (🟢), Person (🟢), **Participation (🟢 Design C)**, Pengajian (golden, legacy), Peserta (legacy).
+- **Design C:** Person ✅ → Participation ✅ → Attendance (belum dimigrasi).
+- **Kandidat baru tanpa import:** Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity, Rundown, Access Grant.
 
 ## Roadmap
 
-IF-06 Peserta → IF-07 Pengajian (parity golden) → IF-08 Template lanjutan + retire statis → IF-09 Activity Log → IF-10+ modul baru → IF-18 Regression parity.
+IF-08 Pengajian (orchestrator) → IF-09 Template lanjutan + retire statis → IF-10 Activity Log → IF-11+ modul baru → IF-18 Regression parity.
 
 Detail lengkap: `docs/import-framework.md`.
 

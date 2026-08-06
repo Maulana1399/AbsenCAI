@@ -24,8 +24,11 @@ class ManualParticipantRegistrationService
         ?int $kelompokId = null,
         ?int $forcePersonId = null,
         bool $forceCreateNew = false,
+        ?string $jenisPeserta = 'Wajib',
+        ?string $statusRegistrasi = null,
+        ?int $reguId = null,
     ): array {
-        return DB::transaction(function () use ($nama, $jenisKelamin, $tanggalLahir, $desaId, $eventId, $kelompokId, $forcePersonId, $forceCreateNew) {
+        return DB::transaction(function () use ($nama, $jenisKelamin, $tanggalLahir, $desaId, $eventId, $kelompokId, $forcePersonId, $forceCreateNew, $jenisPeserta, $statusRegistrasi, $reguId) {
             Event::lockForUpdate()->findOrFail($eventId);
 
             if ($kelompokId !== null) {
@@ -36,55 +39,80 @@ class ManualParticipantRegistrationService
                 $person = Person::lockForUpdate()->findOrFail($forcePersonId);
                 $this->assertPersonBelongsToDesa($person, $desaId);
 
-                return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'matched');
+                return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'matched', $jenisPeserta, $statusRegistrasi, $reguId);
             }
 
             if ($forceCreateNew) {
                 $person = $this->createPerson($nama, $jenisKelamin, $tanggalLahir, $desaId, $kelompokId);
 
-                return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'created');
+                return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'created', $jenisPeserta, $statusRegistrasi, $reguId);
             }
 
-            $normalized = $this->normalizeNama($nama);
-            $candidates = Person::where('desa_id', $desaId)
-                ->whereRaw('LOWER(TRIM(nama)) = ?', [$normalized])
-                ->get();
+            $resolution = $this->resolvePerson($nama, $desaId, $tanggalLahir);
 
-            if ($candidates->isNotEmpty()) {
-                $hasBirthDate = $tanggalLahir !== null && $tanggalLahir !== '';
+            if ($resolution['status'] === 'exact') {
+                return $this->resolveParticipation($resolution['person'], $eventId, $jenisKelamin, 'matched', $jenisPeserta, $statusRegistrasi, $reguId);
+            }
 
-                if ($hasBirthDate) {
-                    $exact = $candidates->first(fn (Person $p) => $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
-                    );
-
-                    if ($exact !== null) {
-                        return $this->resolveParticipation($exact, $eventId, $jenisKelamin, 'matched');
-                    }
-                } else {
-                    $potential = $candidates->map(fn (Person $p) => [
+            if ($resolution['status'] === 'ambiguous') {
+                $potential = collect($resolution['potential_matches'])
+                    ->map(fn (Person $p) => [
                         'id' => $p->id,
                         'nama' => $p->nama,
                         'jenis_kelamin' => $p->jenis_kelamin,
                         'tanggal_lahir' => $p->tanggal_lahir?->format('Y-m-d'),
-                    ])->toArray();
+                    ])
+                    ->toArray();
 
-                    return [
-                        'status' => 'ambiguous',
-                        'person' => null,
-                        'participation' => null,
-                        'message' => 'Ditemukan peserta dengan nama yang mirip. Verifikasi data.',
-                        'potential_matches' => $potential,
-                    ];
-                }
+                return [
+                    'status' => 'ambiguous',
+                    'person' => null,
+                    'participation' => null,
+                    'message' => 'Ditemukan peserta dengan nama yang mirip. Verifikasi data.',
+                    'potential_matches' => $potential,
+                ];
             }
 
             $person = $this->createPerson($nama, $jenisKelamin, $tanggalLahir, $desaId, $kelompokId);
 
-            return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'created');
+            return $this->resolveParticipation($person, $eventId, $jenisKelamin, 'created', $jenisPeserta, $statusRegistrasi, $reguId);
         });
     }
 
-    private function resolveParticipation(Person $person, int $eventId, string $jenisKelamin, string $status): array
+    /**
+     * Resolve an existing Person by canonical identity (normalized nama + desa
+     * + tanggal lahir) following the Design C business rule.
+     *
+     * @return array{person: ?Person, status: string, potential_matches?: \Illuminate\Support\Collection<int, Person>}
+     */
+    public function resolvePerson(string $nama, int $desaId, ?string $tanggalLahir): array
+    {
+        $normalized = $this->normalizeNama($nama);
+        $candidates = Person::where('desa_id', $desaId)
+            ->whereRaw('LOWER(TRIM(nama)) = ?', [$normalized])
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return ['person' => null, 'status' => 'new'];
+        }
+
+        $hasBirthDate = $tanggalLahir !== null && $tanggalLahir !== '';
+
+        if (! $hasBirthDate) {
+            return ['person' => null, 'status' => 'ambiguous', 'potential_matches' => $candidates];
+        }
+
+        $exact = $candidates->first(fn (Person $p) => $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
+        );
+
+        if ($exact !== null) {
+            return ['person' => $exact, 'status' => 'exact'];
+        }
+
+        return ['person' => null, 'status' => 'new'];
+    }
+
+    private function resolveParticipation(Person $person, int $eventId, string $jenisKelamin, string $status, string $jenisPeserta = 'Wajib', ?string $statusRegistrasi = null, ?int $reguId = null): array
     {
         $existing = Participation::where('person_id', $person->id)
             ->where('event_id', $eventId)
@@ -100,7 +128,7 @@ class ManualParticipantRegistrationService
             ];
         }
 
-        $participation = $this->createParticipation($person, $eventId, $jenisKelamin);
+        $participation = $this->createParticipation($person, $eventId, $jenisKelamin, $jenisPeserta, $statusRegistrasi, $reguId);
 
         $message = $status === 'created'
             ? 'Peserta baru berhasil ditambahkan.'
@@ -115,7 +143,7 @@ class ManualParticipantRegistrationService
         ];
     }
 
-    private function createParticipation(Person $person, int $eventId, string $jenisKelamin): Participation
+    private function createParticipation(Person $person, int $eventId, string $jenisKelamin, string $jenisPeserta = 'Wajib', ?string $statusRegistrasi = null, ?int $reguId = null): Participation
     {
         $gender = PlacementService::normalizePersonGender($person->jenis_kelamin ?? $jenisKelamin);
         $participantNumber = PlacementService::generateParticipantNumber($eventId, $gender);
@@ -126,7 +154,9 @@ class ManualParticipantRegistrationService
             'event_id' => $eventId,
             'participant_number' => $participantNumber,
             'attendance_code' => $attendanceCode,
-            'jenis_peserta' => 'Wajib',
+            'jenis_peserta' => $jenisPeserta,
+            'status_registrasi' => $statusRegistrasi,
+            'regu_id' => $reguId,
         ]);
     }
 

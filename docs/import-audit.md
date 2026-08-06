@@ -1,8 +1,9 @@
 # Import Framework — Audit & GAP Analysis (Phase IF-01)
 
 > Status: **AUDIT / DESIGN** — IF-01 (2026-08-05). IF-02 menghidupkan skeleton.
-> **IF-03 memigrasi Desa**, **IF-04 memigrasi Kelompok**, **IF-05 memigrasi Regu** ke
-> framework (status inventori untuk Desa/Kelompok/Regu di bawah sudah kedaluwarsa: kini 🟢 framework).
+> **IF-03 Desa, IF-04 Kelompok, IF-05 Regu, IF-06 Person, IF-07 Participation** sudah
+> dimigrasi ke framework (status inventori untuk modul tersebut di bawah sudah kedaluwarsa:
+> kini 🟢 framework). Design C: Person ✅ → Participation ✅ → Attendance (belum).
 > Bagian 4 di bawah (audit skeleton) kini historis: seluruh stage no-op sudah digantikan
 > implementasi nyata.
 > Golden Standard: **Import Massal Pengajian** (`ImportMassal` + `PengajianImportService`).
@@ -44,7 +45,7 @@ Legend Status: 🟢 = Golden Standard | 🟡 = Berjalan tapi belum sesuai standa
 
 | Modul | Model/Table | Keterangan |
 |-------|-------------|------------|
-| Person | `Person` (`people`) | Hanya CRUD (`MasterData/Person`); import tidak ada (Person import lama dihapus saat PGM.20). |
+| Person | `Person` (`people`) | Hanya CRUD dulu — **kini import via framework (IF-06, Design C)**. |
 | Competition | `Competition*` | Tidak ada import peserta/cabang/kelas kompetisi. |
 | Kategori | `CompetitionCategory` | CRUD `Competition/Category/Index`; tanpa import. |
 | Kelas | `CompetitionClass` | CRUD `Competition/Class/Index`; tanpa import. |

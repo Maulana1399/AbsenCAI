@@ -7,7 +7,10 @@
 
     <div class="flex items-center justify-between mb-6">
         <livewire:database.peserta.tambah-peserta />
-        <livewire:database.peserta.import-peserta />
+        <div class="flex gap-2">
+            <livewire:registrasi.import-participation />
+            <livewire:database.peserta.import-peserta />
+        </div>
     </div>
 
     <livewire:database.peserta.database />

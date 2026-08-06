@@ -57,7 +57,7 @@ final class SummaryStage implements ImportPipelineStage
             updatedRows: $commit?->summary->updatedRows ?? 0,
             skippedRows: $commit?->summary->skippedRows ?? 0,
             errors: $errors,
-            warnings: $validation->warnings,
+            warnings: array_merge($validation->warnings, $duplicate->warnings),
         );
 
         return $payload;

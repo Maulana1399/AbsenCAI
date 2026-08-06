@@ -60,6 +60,64 @@ class ImportDataController extends Controller
         return Excel::download($template->toExport(), $template->fileName());
     }
 
+    public function person(Request $request): RedirectResponse
+    {
+        Gate::authorize('manage-master-data');
+
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            $result = app(ImportAdapter::class)->commit('person', $request->file('file'));
+        } catch (ImportException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $errors = $result->summary?->errors ?? [];
+
+        if (! empty($errors)) {
+            $messages = [];
+
+            foreach ($errors as $error) {
+                $field = $error instanceof ImportError ? $error->field : 'file';
+                $message = $error instanceof ImportError ? $error->message : ($error['message'] ?? 'Baris tidak valid.');
+
+                $messages[$field] = $message;
+            }
+
+            return back()->withErrors($messages);
+        }
+
+        $summary = $result->summary;
+        $failed = count($result->commit?->failedRows ?? []);
+
+        return back()->with('success', sprintf(
+            'Data person berhasil diimpor: %d dibuat, %d duplikat dilewati, %d gagal.',
+            $summary?->createdRows ?? 0,
+            $summary?->skippedRows ?? 0,
+            $failed,
+        ));
+    }
+
+    public function personTemplate(): BinaryFileResponse
+    {
+        Gate::authorize('manage-master-data');
+
+        $template = app(ImportAdapter::class)->template('person');
+
+        return Excel::download($template->toExport(), $template->fileName());
+    }
+
+    public function participationTemplate(): BinaryFileResponse
+    {
+        Gate::authorize('manage-registration');
+
+        $template = app(ImportAdapter::class)->template('participation');
+
+        return Excel::download($template->toExport(), $template->fileName());
+    }
+
     public function kelompok(Request $request): RedirectResponse
     {
         Gate::authorize('manage-master-data');

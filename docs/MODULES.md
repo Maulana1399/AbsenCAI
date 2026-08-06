@@ -116,19 +116,21 @@ Future (V2 Roadmap Remaining)
 
 # Import Framework
 
-🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — IF-06+ NOT STARTED.
+🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — IF-08+ NOT STARTED.
 
-Standard tunggal untuk seluruh import aplikasi (UI/UX, lifecycle, validation, preview, summary, commit, testing). Golden standard = Import Massal Pengajian. IF-02 engine; IF-03 Desa; IF-04 Kelompok (metadata + parameter); **IF-05 Regu** (+ reusable wizard base `ImportWizardBase`). Modul lain belum dimigrasi.
+Standard tunggal untuk seluruh import aplikasi (UI/UX, lifecycle, validation, preview, summary, commit, testing). Golden standard = Import Massal Pengajian. IF-02 engine; IF-03 Desa; IF-04 Kelompok; IF-05 Regu; IF-06 Person; **IF-07 Participation (Design C: Person → Participation → Attendance; commit via `ManualParticipantRegistrationService`)**. Modul lain belum dimigrasi.
 
 | Import | Status | Route |
 |--------|--------|-------|
 | **Desa** | 🟢 **FRAMEWORK** (IF-03) | `POST /import/desa` + `GET /import/desa/template` |
 | **Kelompok** | 🟢 **FRAMEWORK** (IF-04 — parameter desa) | `POST /import/kelompok` + `GET /import/kelompok/template` |
 | **Regu** | 🟢 **FRAMEWORK** (IF-05) | `POST /import/regu` + `GET /import/regu/template` |
-| **Peserta** | 🟡 legacy form POST — migrasi IF-06 | `POST /import/peserta` |
-| **Pengajian (Import Massal)** | 🟢 golden standard — migrasi ke framework IF-07 | `/pengajian/admin/import-massal` |
+| **Person** | 🟢 **FRAMEWORK** (IF-06 — Design C) | `POST /import/person` + `GET /import/person/template` |
+| **Participation** | 🟢 **FRAMEWORK** (IF-07 — parameter event) | wizard di halaman Registrasi + `GET /events/{event}/registrasi/import-participation/template` |
+| **Peserta** | 🟡 legacy form POST — migrasi lanjutan | `POST /import/peserta` |
+| **Pengajian (Import Massal)** | 🟢 golden standard — migrasi ke framework IF-08 | `/pengajian/admin/import-massal` |
 
-Kandidat baru (IF-10+): Person, Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity/Rundown, Access Grant.
+Kandidat baru (IF-11+): Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity/Rundown, Access Grant.
 
 Detail: `docs/import-audit.md`, `docs/import-framework.md`.
 

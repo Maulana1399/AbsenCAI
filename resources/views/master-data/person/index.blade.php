@@ -7,6 +7,7 @@
 
     <div class="flex items-center justify-between mb-6">
         <livewire:master-data.person.create-person />
+        <livewire:master-data.person.import-person />
     </div>
 
     @livewire('master-data.person.index-person')

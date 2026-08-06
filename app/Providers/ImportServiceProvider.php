@@ -17,6 +17,20 @@ use App\Services\Import\Adapters\Kelompok\KelompokImportDuplicateDetector;
 use App\Services\Import\Adapters\Kelompok\KelompokImportNormalizer;
 use App\Services\Import\Adapters\Kelompok\KelompokImportParser;
 use App\Services\Import\Adapters\Kelompok\KelompokImportValidator;
+use App\Services\Import\Adapters\Participation\ParticipationImportActivityLogger;
+use App\Services\Import\Adapters\Participation\ParticipationImportCommitter;
+use App\Services\Import\Adapters\Participation\ParticipationImportDefinition;
+use App\Services\Import\Adapters\Participation\ParticipationImportDuplicateDetector;
+use App\Services\Import\Adapters\Participation\ParticipationImportNormalizer;
+use App\Services\Import\Adapters\Participation\ParticipationImportParser;
+use App\Services\Import\Adapters\Participation\ParticipationImportValidator;
+use App\Services\Import\Adapters\Person\PersonImportActivityLogger;
+use App\Services\Import\Adapters\Person\PersonImportCommitter;
+use App\Services\Import\Adapters\Person\PersonImportDefinition;
+use App\Services\Import\Adapters\Person\PersonImportDuplicateDetector;
+use App\Services\Import\Adapters\Person\PersonImportNormalizer;
+use App\Services\Import\Adapters\Person\PersonImportParser;
+use App\Services\Import\Adapters\Person\PersonImportValidator;
 use App\Services\Import\Adapters\Peserta\PesertaImportCommitter;
 use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
 use App\Services\Import\Adapters\Regu\ReguImportActivityLogger;
@@ -99,6 +113,24 @@ class ImportServiceProvider extends ServiceProvider
             DesaImportActivityLogger::class,
         ]);
 
+        $this->bindDefinition('person', PersonImportDefinition::class, [
+            PersonImportParser::class,
+            PersonImportValidator::class,
+            PersonImportNormalizer::class,
+            PersonImportDuplicateDetector::class,
+            PersonImportCommitter::class,
+            PersonImportActivityLogger::class,
+        ]);
+
+        $this->bindDefinition('participation', ParticipationImportDefinition::class, [
+            ParticipationImportParser::class,
+            ParticipationImportValidator::class,
+            ParticipationImportNormalizer::class,
+            ParticipationImportDuplicateDetector::class,
+            ParticipationImportCommitter::class,
+            ParticipationImportActivityLogger::class,
+        ]);
+
         $this->bindDefinition('kelompok', KelompokImportDefinition::class, [
             KelompokImportParser::class,
             KelompokImportValidator::class,
@@ -131,7 +163,7 @@ class ImportServiceProvider extends ServiceProvider
     {
         $registry = $this->app->make(ImportRegistry::class);
 
-        foreach (['desa', 'kelompok', 'regu', 'peserta'] as $key) {
+        foreach (['desa', 'kelompok', 'regu', 'peserta', 'person', 'participation'] as $key) {
             $definition = $this->app->make('import.definition.'.$key);
 
             if ($definition !== null && $registry->resolve($key) === null) {

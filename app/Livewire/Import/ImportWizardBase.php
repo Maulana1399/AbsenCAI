@@ -265,6 +265,7 @@ abstract class ImportWizardBase extends Component
             'invalid' => $invalid,
             'duplicate' => $duplicate,
             'will_create' => max(0, $valid - $duplicate),
+            'warning' => count($summary?->warnings ?? []),
         ];
     }
 

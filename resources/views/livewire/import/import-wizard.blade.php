@@ -88,11 +88,12 @@
             {{-- Step 4: Import (confirmation) --}}
             @if ($step === 4)
                 <x-import.wizard title="Import" :step="4" :steps="$steps">
-                    <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                    <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                         <x-import.summary-card label="Total" :value="$summary['total'] ?? 0" tone="zinc" />
                         <x-import.summary-card label="Valid" :value="$summary['valid'] ?? 0" tone="emerald" />
                         <x-import.summary-card label="Invalid" :value="$summary['invalid'] ?? 0" tone="red" />
                         <x-import.summary-card label="Duplicate" :value="$summary['duplicate'] ?? 0" tone="amber" />
+                        <x-import.summary-card label="Warning" :value="$summary['warning'] ?? 0" tone="purple" />
                         <x-import.summary-card label="Akan Dibuat" :value="$summary['will_create'] ?? 0" tone="blue" />
                     </div>
 

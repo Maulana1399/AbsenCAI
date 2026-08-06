@@ -39,6 +39,10 @@ Route::get('events/{event}/registrasi/self', SelfRegister::class)
     ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-registration'])
     ->name('registrasi.self');
 
+Route::get('events/{event}/registrasi/import-participation/template', [ImportDataController::class, 'participationTemplate'])
+    ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-registration'])
+    ->name('import.participation.template');
+
 Route::view('events/{event}/registrasi/ulang', 'registrasi.ulang')
     ->middleware(['auth', 'verified', 'resolve.active-event', 'can:manage-registration'])
     ->name('registrasi.ulang');
@@ -155,6 +159,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('import/regu/template', [ImportDataController::class, 'reguTemplate'])
         ->middleware('can:manage-participants')
         ->name('import.regu.template');
+
+    Route::get('import/person/template', [ImportDataController::class, 'personTemplate'])
+        ->middleware('can:manage-master-data')
+        ->name('import.person.template');
+
+    Route::post('import/person', [ImportDataController::class, 'person'])
+        ->middleware('can:manage-master-data')
+        ->name('import.person');
 
     Route::post('import/kelompok', [ImportDataController::class, 'kelompok'])
         ->middleware('can:manage-master-data')
