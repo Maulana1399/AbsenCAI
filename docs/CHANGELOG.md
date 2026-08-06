@@ -7,6 +7,18 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## IF-09 (Import Framework — Peserta, Final Legacy Migration — 2026-08-06)
+
+Migrasi **Peserta** (modul legacy terakhir) ke Import Framework. **Seluruh 7 modul import kini memakai SATU Import Framework.** Tidak ada lagi Maatwebsite import, `Excel::import()`, manual coordinator/registry/pipeline, maupun bypass `ImportAdapter`. Tidak ada perubahan business rule, database, migration, permission, template, maupun UI. Baseline hijau.
+
+- **`PesertaImportCommitter`** — port persis `PesertaImport::model()`: skip baris nama kosong, resolve desa/kelompok (case-insensitive), auto-place regu (`PlacementService::autoPlacement`), delegasi `RegistrationService::createParticipant` (peserta + Person + Participation + LegacyPesertaMapping + LegacyParticipationMapping), per-baris catch → failedRows. **TANPA `Excel::import`.**
+- **Real collaborators** — `PesertaImportParser` (`FileParser`), `PesertaImportNormalizer` (raw-preserving), `PesertaImportValidator` (required nama/JK), `PesertaImportDuplicateDetector` (no-op — duplicate via RegistrationService), `PesertaImportActivityLogger`, `PesertaImportDefinition implements ImportDefinitionMetadata` (+ `PesertaImportTemplateExport` metadata).
+- **`ImportDataController::peserta()` → `ImportAdapter::commit('peserta', ...)`**; helper `executeImport()` dihapus.
+- **Cleanup** — hapus `app/Imports/PesertaImport.php` (Maatwebsite), `ImportPeserta` Livewire vestigial + view → partial form `partials/import-peserta` (UI identik), konstruksi manual `ImportCoordinator`/`ImportRegistry`/`DefaultImportPipeline`/`ArrayPipelineStageRunner` untuk import.
+- **Test** — +10: 7 unit definition + 3 parity route (full canonical record set, duplicate guard, second-event join). Test Design C / Otomatisasi / Sprint8A di-rewrite ke committer (behavior sama). 45+ test golden tetap hijau.
+- **Verifikasi:** full suite → **2148 passed / 5500 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md`, `docs/ARCHITECTURE.md`, `docs/import-audit.md` disinkronkan.
+
 ## IF-08 (Import Framework — Pengajian, Behavior-Preserving — 2026-08-06)
 
 Migrasi **Pengajian (golden standard)** ke Import Framework — **behavior 100% dipertahankan** (output, UI, summary, preview, validation, counter, template, error message, database write IDENTIK). Tidak ada perubahan business rule, database, migration, permission, policy, template, maupun UX. Baseline hijau.

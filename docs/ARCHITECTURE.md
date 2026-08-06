@@ -178,13 +178,12 @@ TrueNAS
 
 ## Import Framework
 
-> Status: 🔲 **IF-01–IF-08 COMPLETE** — seluruh import memakai SATU Import Framework (backend + frontend). Pengajian (golden) dimigrasi tanpa mengubah behavior.
+> Status: 🔲 **IF-01–IF-09 COMPLETE** — **SELURUH import memakai SATU Import Framework** (backend + frontend). Peserta (legacy terakhir) dimigrasi; tidak ada lagi `Excel::import`/manual coordinator/registry/pipeline/bypass.
 > Audit & GAP: `docs/import-audit.md` | Arsitektur & roadmap: `docs/import-framework.md`
 
-Seluruh fitur import (Desa, Kelompok, Regu, Person, Participation, Pengajian) distandarisasi:
-UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sama.
-**Import Massal Pengajian** adalah golden standard yang kini berjalan di atas framework
-(wizard extends `ImportWizardBase`, `PengajianImportService` = orchestrator).
+Seluruh 7 fitur import (Desa, Kelompok, Regu, Person, Participation, Pengajian, Peserta)
+distandarisasi: UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sama.
+**Import Massal Pengajian** adalah golden standard yang berjalan di atas framework.
 
 ```
 app/Services/Import/
@@ -198,12 +197,12 @@ app/Services/Import/
 ├── Results/          (summary, preview, commit [+metrics], result, pipelineResult)
 ├── Exceptions/       (typed import exceptions)
 ├── NullObjects/      (no-op defaults)
-├── Template/         (generator framework DATA/PETUNJUK/REFERENSI + wrapper Pengajian)
-└── Adapters/         (desa/kelompok/regu/person/participation/pengajian — REAL; peserta legacy)
+├── Template/         (generator framework DATA/PETUNJUK/REFERENSI + wrapper)
+└── Adapters/         (desa/kelompok/regu/person/participation/pengajian/peserta — ALL REAL)
 ```
 
-Wizard reusable: `ImportWizardBase` (livecycle base) + komponen `<x-import.*>`. Wiring DI:
-`ImportServiceProvider`. Baseline hijau — seluruh import memakai framework yang sama.
+Wizard reusable: `ImportWizardBase` (lifecycle base) + komponen `<x-import.*>` + partial form Peserta.
+Wiring DI: `ImportServiceProvider`. Baseline hijau — tidak ada jalur import di luar `ImportAdapter`.
 
 ---
 

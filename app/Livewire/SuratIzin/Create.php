@@ -61,11 +61,11 @@ class Create extends Component
                 ->limit(10)
                 ->get()
                 ->map(fn ($p) => (object) [
-                'id' => $p->id,
-                'nama' => $p->nama,
-                'source' => 'legacy',
-                'peserta_id' => $p->id,
-            ]);
+                    'id' => $p->id,
+                    'nama' => $p->nama,
+                    'source' => 'legacy',
+                    'peserta_id' => $p->id,
+                ]);
 
             $results = $persons->merge($legacyPesertas)->take(10);
         }

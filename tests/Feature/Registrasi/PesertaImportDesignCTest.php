@@ -1,6 +1,5 @@
 <?php
 
-use App\Imports\PesertaImport;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
@@ -10,6 +9,9 @@ use App\Models\Participation;
 use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
+use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
+use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\Results\ImportCommit;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,6 +40,15 @@ function pid_fixtures(): array
     $eventB = pid_event('b');
 
     return compact('desaA', 'desaB', 'kelompokA', 'kelompokB', 'reguL', 'reguP', 'eventA', 'eventB');
+}
+
+function pid_commit(array $rawRow): ImportCommit
+{
+    $definition = app(PesertaImportDefinition::class);
+    $context = new ImportContext(type: 'peserta', source: 'test', mode: 'execute', options: ['rows' => [$rawRow]], definitionKey: 'peserta');
+    $rows = $definition->normalize($definition->parser()->parse([$rawRow], $context), $context);
+
+    return $definition->commit($rows, $context);
 }
 
 function pid_create_case_a(array $ctx): array
@@ -69,10 +80,9 @@ beforeEach(function () {
 
 test('import case A creates one full record set', function () {
     $ctx = pid_fixtures();
-    $import = new PesertaImport;
 
     app(ActiveEventContext::class)->set($ctx['eventA']);
-    $model = $import->model([
+    $commit = pid_commit([
         'nama' => 'Import Alpha',
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_WAJIB,
@@ -80,7 +90,7 @@ test('import case A creates one full record set', function () {
         'kelompok' => 'PID Kelompok A',
     ]);
 
-    expect($model)->toBeInstanceOf(peserta::class)
+    expect($commit->createdIds)->toHaveCount(1)
         ->and(Person::count())->toBe(1)
         ->and(peserta::count())->toBe(1)
         ->and(Participation::count())->toBe(1)
@@ -101,7 +111,7 @@ test('import case B reuses person peserta and creates only event membership brid
     ];
 
     app(ActiveEventContext::class)->set($ctx['eventB']);
-    $model = app(PesertaImport::class)->model([
+    $commit = pid_commit([
         'nama' => 'Import Alpha',
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_KIRIMAN,
@@ -109,7 +119,7 @@ test('import case B reuses person peserta and creates only event membership brid
         'kelompok' => 'PID Kelompok A',
     ]);
 
-    expect($model)->toBeInstanceOf(peserta::class)
+    expect($commit->createdIds)->toHaveCount(1)
         ->and(Person::count())->toBe($before['people'])
         ->and(peserta::count())->toBe($before['peserta'])
         ->and(LegacyPesertaMapping::count())->toBe($before['legacy_peserta'])
@@ -122,13 +132,18 @@ test('import case C same event does not duplicate membership', function () {
     pid_create_case_a($ctx);
     app(ActiveEventContext::class)->set($ctx['eventA']);
 
-    expect(fn () => app(PesertaImport::class)->model([
+    $commit = pid_commit([
         'nama' => 'Import Alpha',
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa' => 'PID Desa A',
         'kelompok' => 'PID Kelompok A',
-    ]))->toThrow(ValidationException::class);
+    ]);
+
+    // createParticipant raises a ValidationException → the committer records a failed row.
+    expect($commit->failedRows)->toHaveCount(1)
+        ->and(Participation::where('event_id', $ctx['eventA']->id)->count())->toBe(1)
+        ->and(peserta::count())->toBe(1);
 });
 
 test('import case B reuses the same Person', function () {
@@ -267,26 +282,34 @@ test('case B bridge failure rolls back attempted membership', function () {
 test('missing event context fails safely', function () {
     app(ActiveEventContext::class)->clear();
 
-    expect(fn () => app(PesertaImport::class)->model([
+    $commit = pid_commit([
         'nama' => 'Import Alpha',
         'jenis_kelamin' => 'Laki - Laki',
         'jenis_peserta' => peserta::JENIS_WAJIB,
         'desa' => 'PID Desa A',
         'kelompok' => 'PID Kelompok A',
-    ]))->toThrow(RuntimeException::class);
+    ]);
+
+    // createParticipant raises RuntimeException (no active event) → recorded as failed row.
+    expect($commit->failedRows)->toHaveCount(1)
+        ->and(Person::count())->toBe(0)
+        ->and(peserta::count())->toBe(0);
 });
 
 test('existing legacy import behavior remains compatible', function () {
     $ctx = pid_fixtures();
     app(ActiveEventContext::class)->set($ctx['eventA']);
 
-    $model = (new PesertaImport)->model([
+    $commit = pid_commit([
         'nama' => 'Legacy Compatible',
         'jenis_kelamin' => 'Perempuan',
         'kelompok' => 'PID Kelompok A',
         'desa' => 'PID Desa A',
     ]);
 
-    expect($model)->toBeInstanceOf(peserta::class)
+    expect($commit->createdIds)->toHaveCount(1);
+
+    $model = peserta::where('nama', 'Legacy Compatible')->first();
+    expect($model)->not->toBeNull()
         ->and($model->status_registrasi)->toBe(peserta::STATUS_BELUM_REGISTRASI);
 });

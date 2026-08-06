@@ -9,7 +9,7 @@
         <livewire:database.peserta.tambah-peserta />
         <div class="flex gap-2">
             <livewire:registrasi.import-participation />
-            <livewire:database.peserta.import-peserta />
+            @include('partials.import-peserta')
         </div>
     </div>
 

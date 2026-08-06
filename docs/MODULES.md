@@ -116,9 +116,9 @@ Future (V2 Roadmap Remaining)
 
 # Import Framework
 
-🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — ✅ **IF-08 (Pengajian/behavior-preserving) COMPLETE** — IF-09+ NOT STARTED.
+🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — ✅ **IF-08 (Pengajian) COMPLETE** — ✅ **IF-09 (Peserta — final legacy) COMPLETE** — IF-10+ NOT STARTED.
 
-**Seluruh import kini memakai SATU Import Framework (backend + frontend).** Golden standard Pengajian dimigrasi tanpa mengubah behavior (wizard extends `ImportWizardBase`, service → orchestrator, template IDENTIK).
+**SELURUH 7 modul import memakai SATU Import Framework (backend + frontend).** Tidak ada lagi Maatwebsite import, `Excel::import`, manual coordinator/registry/pipeline, maupun bypass `ImportAdapter`.
 
 | Import | Status | Route |
 |--------|--------|-------|
@@ -128,9 +128,9 @@ Future (V2 Roadmap Remaining)
 | **Person** | 🟢 **FRAMEWORK** (IF-06 — Design C) | `POST /import/person` + `GET /import/person/template` |
 | **Participation** | 🟢 **FRAMEWORK** (IF-07 — parameter event) | wizard di halaman Registrasi + `GET /events/{event}/registrasi/import-participation/template` |
 | **Pengajian (Import Massal)** | 🟢 **FRAMEWORK** (IF-08 — behavior-preserving) | `/pengajian/admin/import-massal` (+ template route tetap) |
-| **Peserta** | 🟡 legacy committer — belum dimigrasi | `POST /import/peserta` |
+| **Peserta** | 🟢 **FRAMEWORK** (IF-09 — via `RegistrationService`) | `POST /import/peserta` (form partial, UI identik) |
 
-Kandidat baru (IF-11+): Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity/Rundown, Access Grant.
+Kandidat baru (IF-12+): Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity/Rundown, Access Grant.
 
 Detail: `docs/import-audit.md`, `docs/import-framework.md`.
 

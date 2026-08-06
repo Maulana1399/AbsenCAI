@@ -7,7 +7,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <livewire:database.peserta.tambah-peserta />
-    <livewire:database.peserta.import-peserta />
+    @include('partials.import-peserta')
 </div>
 <livewire:database.peserta.database />
 <livewire:database.peserta.edit-peserta />

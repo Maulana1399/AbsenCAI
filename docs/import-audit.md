@@ -1,13 +1,14 @@
 # Import Framework — Audit & GAP Analysis (Phase IF-01)
 
 > Status: **AUDIT / DESIGN** — IF-01 (2026-08-05). IF-02 menghidupkan skeleton.
-> **IF-03 Desa, IF-04 Kelompok, IF-05 Regu, IF-06 Person, IF-07 Participation, IF-08 Pengajian**
-> sudah dimigrasi ke framework (status inventori di bawah kedaluwarsa: kini 🟢 framework).
-> **Seluruh import memakai SATU Import Framework; Pengajian behavior 100% dipertahankan.**
+> **IF-03 Desa, IF-04 Kelompok, IF-05 Regu, IF-06 Person, IF-07 Participation, IF-08 Pengajian,
+> IF-09 Peserta** sudah dimigrasi ke framework (status inventori di bawah kedaluwarsa).
+> **SELURUH 7 modul import memakai SATU Import Framework** — tidak ada lagi Maatwebsite import,
+> `Excel::import()` untuk proses import, manual coordinator/registry/pipeline, maupun bypass adapter.
 > Design C: Person ✅ → Participation ✅ → Attendance (belum).
 > Bagian 4 di bawah (audit skeleton) kini historis: seluruh stage no-op sudah digantikan
 > implementasi nyata.
-> Golden Standard: **Import Massal Pengajian** (kini di atas framework, behavior-preserving).
+> Golden Standard: **Import Massal Pengajian** (di atas framework, behavior-preserving).
 > Desain arsitektur & roadmap: `docs/import-framework.md`.
 
 ---
@@ -39,7 +40,7 @@ Legend Status: 🟢 = Golden Standard | 🟡 = Berjalan tapi belum sesuai standa
 | 1 | **Desa** | `POST /import/desa` (`import.desa`) | `ImportDesa` (wizard IF-03) | `ImportDataController@desa` | HTML POST + Livewire wizard | ✅ | ✅ | ✅ | `DesaImportCommitter` (create + skip duplikat) | **generator** `DesaImportTemplateExport` (DATA/PETUNJUK/REFERENSI) | `ImportDataTest` (1) + `DesaImportFrameworkTest` (14) + unit | 🟢 **FRAMEWORK (IF-03)** |
 | 2 | **Kelompok** | `POST /import/kelompok` (`import.kelompok`) | `ImportKelompok` (wizard IF-04) | `ImportDataController@kelompok` | Livewire wizard + HTML POST (desa_id) | ✅ | ✅ | ✅ | `KelompokImportCommitter` (create + skip duplikat, scoped desa) | **generator** `KelompokImportTemplateExport` (REFERENSI = desa) | `ImportDataTest` (1) + `KelompokImportFrameworkTest` (14) + unit | 🟢 **FRAMEWORK (IF-04)** |
 | 3 | **Regu** | `POST /import/regu` (`import.regu`) | `ImportRegu` (wizard base IF-05) | `ImportDataController@regu` | Livewire wizard + HTML POST | ✅ | ✅ | ✅ | `ReguImportCommitter` (create + skip duplikat nama) | **generator** `ReguImportTemplateExport` (REFERENSI = enum gender) | `ImportDataTest` (3) + `ReguImportFrameworkTest` (11) + unit | 🟢 **FRAMEWORK (IF-05)** |
-| 4 | **Peserta** | `POST /import/peserta` (`import.peserta`) | `ImportPeserta` (vestigial) | `ImportDataController@peserta` | HTML POST | ❌ | ❌ | ❌ | `Excel::import(new PesertaImport)` via `PesertaImportCommitter` | statis `template_peserta.xlsx` | `ImportDataTest` (1 happy path) | 🟡 C |
+| 4 | **Peserta** | `POST /import/peserta` (`import.peserta`) | partial form (UI identik; `ImportPeserta` Livewire vestigial dihapus IF-09) | `ImportDataController@peserta` | HTML POST (xlsx,xls,csv) | ❌ (tanpa preview, seperti legacy) | ✅ minimal (nama/JK) | ❌ (tanpa summary, seperti legacy) | `PesertaImportCommitter` (via `RegistrationService`, tanpa Excel::import) | statis `public/templates/template_peserta.xlsx` (tetap) | `ImportDataTest` (1) + `PesertaImportParityTest` (3) + unit (7) + DesignC/Otomatisasi/Sprint8A | 🟢 **FRAMEWORK (IF-09)** |
 | 5 | **Pengajian (Import Massal)** | `GET /events/{event}/pengajian/admin/import-massal` (+ template route) | `ImportMassal` (extends `ImportWizardBase`, 3 langkah) | n/a (Livewire) | `WithFileUploads` (csv,txt,xlsx,xls, max 5MB) | ✅ tabel + error per baris | ✅ per-baris (nama, JK, TTL, desa, kelompok) | ✅ created/matched/participation/duplicate/failed + errors | `PengajianImportCommitter` (port processRow + metrics) | `PersonImportTemplateExport` (3 sheet: Template/Petunjuk/Master Data + dropdown) — IDENTIK | `ImportMassalFeatureTest` (17), `ImportMassalUploadEndpointTest` (2), `PengajianImportTest` (26), `PengajianImportParityTest` (10), unit (8) | 🟢 **FRAMEWORK (IF-08, behavior-preserving)** |
 
 ### 2.1. Modul yang BELUM punya import (kandidat migrasi/baru)

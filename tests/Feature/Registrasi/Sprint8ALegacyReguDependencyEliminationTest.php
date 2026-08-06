@@ -1,6 +1,5 @@
 <?php
 
-use App\Imports\PesertaImport;
 use App\Models\desa;
 use App\Models\Event;
 use App\Models\kelompok;
@@ -11,6 +10,8 @@ use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Services\Cai\CaiParticipantReplacementService;
+use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
+use App\Services\Import\DTO\ImportContext;
 use App\Services\Placement\PlacementService;
 use App\Services\Registration\RegistrationService;
 use App\Support\ActiveEventContext;
@@ -95,16 +96,24 @@ test('S8A-03: PesertaImport writes canonical Participation.regu_id', function ()
     $kelompok = kelompok::create(['kelompok_asal' => 'S8A Import Kelompok', 'desa_id' => $desa->id]);
     regu::create(['regu' => 'S8A Import Regu', 'jenis_kelamin' => 'Laki - Laki']);
 
-    $import = new PesertaImport;
-    $row = [
-        'nama' => 'S8A Import Person',
-        'jenis_kelamin' => 'Laki - Laki',
-        'kelompok' => $kelompok->kelompok_asal,
-        'desa' => $desa->desa_asal,
-        'jenis_peserta' => peserta::JENIS_KIRIMAN,
-    ];
-    $result = $import->model($row);
+    $definition = app(PesertaImportDefinition::class);
+    $context = new ImportContext(type: 'peserta', source: 'test', mode: 'execute', options: ['rows' => []], definitionKey: 'peserta');
 
+    $rows = $definition->normalize($definition->parser()->parse([
+        [
+            'nama' => 'S8A Import Person',
+            'jenis_kelamin' => 'Laki - Laki',
+            'kelompok' => $kelompok->kelompok_asal,
+            'desa' => $desa->desa_asal,
+            'jenis_peserta' => peserta::JENIS_KIRIMAN,
+        ],
+    ], $context), $context);
+
+    $commit = $definition->commit($rows, $context);
+
+    expect($commit->createdIds)->toHaveCount(1);
+
+    $result = peserta::find($commit->createdIds[0]);
     expect($result)->toBeInstanceOf(peserta::class);
 
     $partMapping = LegacyParticipationMapping::with('participation')

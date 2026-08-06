@@ -38,8 +38,13 @@ use App\Services\Import\Adapters\Person\PersonImportDuplicateDetector;
 use App\Services\Import\Adapters\Person\PersonImportNormalizer;
 use App\Services\Import\Adapters\Person\PersonImportParser;
 use App\Services\Import\Adapters\Person\PersonImportValidator;
+use App\Services\Import\Adapters\Peserta\PesertaImportActivityLogger;
 use App\Services\Import\Adapters\Peserta\PesertaImportCommitter;
 use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
+use App\Services\Import\Adapters\Peserta\PesertaImportDuplicateDetector;
+use App\Services\Import\Adapters\Peserta\PesertaImportNormalizer;
+use App\Services\Import\Adapters\Peserta\PesertaImportParser;
+use App\Services\Import\Adapters\Peserta\PesertaImportValidator;
 use App\Services\Import\Adapters\Regu\ReguImportActivityLogger;
 use App\Services\Import\Adapters\Regu\ReguImportCommitter;
 use App\Services\Import\Adapters\Regu\ReguImportDefinition;
@@ -48,12 +53,7 @@ use App\Services\Import\Adapters\Regu\ReguImportNormalizer;
 use App\Services\Import\Adapters\Regu\ReguImportParser;
 use App\Services\Import\Adapters\Regu\ReguImportValidator;
 use App\Services\Import\Contracts\ImportLogger;
-use App\Services\Import\NullObjects\NullImportActivityLogger;
-use App\Services\Import\NullObjects\NullImportDuplicateDetector;
 use App\Services\Import\NullObjects\NullImportLogger;
-use App\Services\Import\NullObjects\NullImportNormalizer;
-use App\Services\Import\NullObjects\NullImportParser;
-use App\Services\Import\NullObjects\NullImportValidator;
 use App\Services\Import\Pipeline\DefaultImportPipeline;
 use App\Services\Import\Pipeline\ImportCoordinator;
 use App\Services\Import\Pipeline\ImportPipeline;
@@ -166,12 +166,12 @@ class ImportServiceProvider extends ServiceProvider
         ]);
 
         $this->bindDefinition('peserta', PesertaImportDefinition::class, [
-            NullImportParser::class,
-            NullImportValidator::class,
-            NullImportNormalizer::class,
-            NullImportDuplicateDetector::class,
+            PesertaImportParser::class,
+            PesertaImportValidator::class,
+            PesertaImportNormalizer::class,
+            PesertaImportDuplicateDetector::class,
             PesertaImportCommitter::class,
-            NullImportActivityLogger::class,
+            PesertaImportActivityLogger::class,
         ]);
     }
 

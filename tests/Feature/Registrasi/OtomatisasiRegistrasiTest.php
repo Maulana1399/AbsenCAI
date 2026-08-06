@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\Role;
-use App\Imports\PesertaImport;
 use App\Livewire\Database\Peserta\TambahPeserta;
 use App\Livewire\Registrasi\SelfRegister;
 use App\Models\desa;
@@ -12,6 +11,8 @@ use App\Models\Person;
 use App\Models\peserta;
 use App\Models\regu;
 use App\Models\User;
+use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
+use App\Services\Import\DTO\ImportContext;
 use App\Services\Placement\PlacementService;
 use App\Support\ActiveEventContext;
 use Livewire\Livewire;
@@ -126,13 +127,18 @@ test('database peserta form uses automatic nip and least filled regu', function 
 });
 
 test('import peserta uses automatic nip and least filled regu', function () {
-    $model = (new PesertaImport)->model([
-        'nama' => 'Peserta Import',
-        'jenis_kelamin' => 'Perempuan',
-        'kelompok' => 'Kelompok A',
-        'desa' => 'Desa A',
-    ]);
+    $definition = app(PesertaImportDefinition::class);
+    $context = new ImportContext(type: 'peserta', source: 'test', mode: 'execute', options: ['rows' => []], definitionKey: 'peserta');
 
+    $rows = $definition->normalize($definition->parser()->parse([
+        ['nama' => 'Peserta Import', 'jenis_kelamin' => 'Perempuan', 'kelompok' => 'Kelompok A', 'desa' => 'Desa A'],
+    ], $context), $context);
+
+    $commit = $definition->commit($rows, $context);
+
+    expect($commit->createdIds)->toHaveCount(1);
+
+    $model = peserta::where('nama', 'Peserta Import')->first();
     expect($model->nip)->toBeNull()
         ->and($model->participant_number)->toBe('KP001')
         ->and($model->attendance_code)->toStartWith('KJA-')
