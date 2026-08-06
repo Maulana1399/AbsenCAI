@@ -32,6 +32,8 @@
 21. `PENGAJIAN_MVP_OPERATIONAL.md` — Pengajian operational guide
 22. `UAT_CHECKLIST.md` — UAT checklist (Platform, CAI, Competition, Pengajian, Permission, Import, Export, Print, Master Data)
 23. `LEGACY_RETIREMENT_PLAN.md` — Legacy retirement plan
+24. `import-audit.md` — Import audit & GAP analysis (IF-01)
+25. `import-framework.md` — Import framework architecture & roadmap (IF-01)
 
 ---
 
@@ -47,6 +49,7 @@
 | Sprint 6A (Import Architecture) | ✅ COMPLETE 100% |
 | Sprint 6A.1 (Release Stabilization) | 🟡 IN PROGRESS |
 | Sprint 4 | 🔲 NOT STARTED |
+| Import Framework (IF series) | 🔲 **IF-01 COMPLETE** (audit & desain) — IF-02+ NOT STARTED |
 | Foundation (S01–S04) | ✅ COMPLETE 100% |
 | Multi Event (S3.0–S3.10) | ✅ COMPLETE/VERIFIED |
 | RBAC (S1–S7) | ✅ COMPLETE — 9 roles, 18 gates |

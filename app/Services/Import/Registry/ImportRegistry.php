@@ -21,6 +21,19 @@ final class ImportRegistry
         return $this->definitions[$key] ?? null;
     }
 
+    public function has(string $key): bool
+    {
+        return isset($this->definitions[$key]);
+    }
+
+    /**
+     * @return array<string, ImportDefinition>
+     */
+    public function all(): array
+    {
+        return $this->definitions;
+    }
+
     /**
      * @return array<string, ImportDefinition>
      */

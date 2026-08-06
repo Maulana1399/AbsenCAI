@@ -5,16 +5,16 @@ namespace App\Services\Import\Pipeline;
 use App\Services\Import\Contracts\ImportDefinition;
 use App\Services\Import\Contracts\ImportPipelineStage;
 use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\Exceptions\ImportParseException;
 
 /**
- * Cleans raw rows (trim, casing, gender/date formats, FK resolution) into
- * NormalizedImportRow[] — without touching the database.
+ * Turns the raw source (uploaded file / array) into RawImportRow[].
  */
-final class NormalizeStage implements ImportPipelineStage
+final class ParseStage implements ImportPipelineStage
 {
     public function name(): string
     {
-        return 'normalize';
+        return 'parse';
     }
 
     public function supports(ImportContext $context, ImportDefinition $definition): bool
@@ -28,9 +28,17 @@ final class NormalizeStage implements ImportPipelineStage
         ImportDefinition $definition,
         ImportPipelineState $state,
     ): mixed {
-        $rows = $definition->normalizer()->normalize($state->rows ?? [], $context);
+        try {
+            $rows = $definition->parser()->parse($payload, $context);
+        } catch (\Throwable $e) {
+            throw new ImportParseException(
+                "Gagal membaca file untuk import '{$definition->key()}': {$e->getMessage()}",
+                previous: $e,
+            );
+        }
 
         $state->rows = $rows;
+        $state->statistics['parsed_rows'] = count($rows);
 
         return $rows;
     }

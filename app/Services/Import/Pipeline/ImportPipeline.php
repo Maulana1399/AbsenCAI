@@ -9,4 +9,11 @@ use App\Services\Import\Results\ImportPipelineResult;
 interface ImportPipeline
 {
     public function run(ImportDefinition $definition, ImportContext $context, mixed $source): ImportPipelineResult;
+
+    /**
+     * Ordered list of stage names executed by the pipeline.
+     *
+     * @return array<int, string>
+     */
+    public function stageOrder(): array;
 }

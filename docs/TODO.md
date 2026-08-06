@@ -18,9 +18,36 @@
 ## Sprint 4 (Rekomendasi — NOT STARTED)
 
 - [ ] **Legacy retirement** — Eksekusi Phase 1–4 di `docs/LEGACY_RETIREMENT_PLAN.md` (fallback write izin/scan, dual-write peserta, read-path legacy, physical retirement)
+- [ ] **Import Framework (IF series)** — IF-01 & IF-02 COMPLETE (audit+engine); lanjut IF-03+; lihat `docs/import-framework.md` & `docs/import-audit.md`
 - [ ] **Roadmap V2** — Blueprint Event (fondasi Roadmap V2)
 - [ ] **Scoring Engine** — generic scoring
 - [ ] **Certificate Engine** — generate sertifikat otomatis
+
+---
+
+## Import Framework (IF series)
+
+> IF-01 (audit & desain) ✅ COMPLETE. **IF-02 (engine infrastructure) ✅ COMPLETE 2026-08-06** — infra siap, belum dipakai modul.
+
+- [x] **IF-02** — Bangun Import Engine: stage pipeline nyata, runner dispatch, DTO konsolidasi, exceptions, DI registry/coordinator, version guard, logging hook (+37 unit test)
+- [ ] **IF-03** — Bangun Import Wizard reusable (5 langkah: Upload → Preview → Validation → Import → Result)
+- [ ] **IF-03** — Bangun Import Wizard reusable (5 langkah: Upload → Preview → Validation → Import → Result)
+- [ ] **IF-04** — Migrasi Pengajian Import ke framework (UX identik; parity test golden)
+- [ ] **IF-05** — Migrasi Desa Import
+- [ ] **IF-06** — Migrasi Kelompok Import
+- [ ] **IF-07** — Migrasi Regu Import (pertahankan normalizer gender)
+- [ ] **IF-08** — Migrasi Peserta Import
+- [ ] **IF-09** — Template Engine standar (DATA/PETUNJUK/REFERENSI) + retire `public/templates/*`
+- [ ] **IF-10** — Import Activity Log + gate/ability audit (`manage-import`)
+- [ ] **IF-11** — Import Person
+- [ ] **IF-12** — Import Competition (cabang & kelas)
+- [ ] **IF-13** — Import Venue
+- [ ] **IF-14** — Import Schedule
+- [ ] **IF-15** — Import Committee (Event Role / Committee Assignment)
+- [ ] **IF-16** — Import Activity / Rundown
+- [ ] **IF-17** — Import Attendance
+- [ ] **IF-18** — Import Access Grant
+- [ ] **IF-19** — Regression penuh + parity audit seluruh import vs golden standard
 
 ---
 

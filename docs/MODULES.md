@@ -114,6 +114,26 @@ Future (V2 Roadmap Remaining)
 
 ---
 
+# Import Framework
+
+🔲 **IF-01 (audit & desain) COMPLETE** — ✅ **IF-02 (engine infrastructure) COMPLETE** — IF-03+ NOT STARTED.
+
+Standard tunggal untuk seluruh import aplikasi (UI/UX, lifecycle, validation, preview, summary, commit, testing). Golden standard = Import Massal Pengajian. IF-02 menghidupkan skeleton `app/Services/Import/*` (stage pipeline nyata, runner dispatch, DI, exceptions, konsolidasi DTO) — **belum dipakai modul mana pun, perilaku tidak berubah**.
+
+| Import | Status | Route |
+|--------|--------|-------|
+| **Desa** | 🟡 legacy form POST — migrasi IF-05 | `POST /import/desa` |
+| **Kelompok** | 🟡 legacy form POST — migrasi IF-06 | `POST /import/kelompok` |
+| **Regu** | 🟡 legacy form POST — migrasi IF-07 | `POST /import/regu` |
+| **Peserta** | 🟡 legacy form POST — migrasi IF-08 | `POST /import/peserta` |
+| **Pengajian (Import Massal)** | 🟢 golden standard — migrasi ke framework IF-04 | `/pengajian/admin/import-massal` |
+
+Kandidat baru (IF-11+): Person, Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity/Rundown, Access Grant.
+
+Detail: `docs/import-audit.md`, `docs/import-framework.md`.
+
+---
+
 # Attendance
 
 🟢

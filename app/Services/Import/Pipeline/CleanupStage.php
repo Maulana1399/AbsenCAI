@@ -7,13 +7,14 @@ use App\Services\Import\Contracts\ImportPipelineStage;
 use App\Services\Import\DTO\ImportContext;
 
 /**
- * Marks intra-file and database duplicates so the commit can skip them.
+ * Terminal stage hook for releasing transient resources (temp files, buffers).
+ * No-op by default; definitions or consumers may extend behavior later.
  */
-final class DuplicateStage implements ImportPipelineStage
+final class CleanupStage implements ImportPipelineStage
 {
     public function name(): string
     {
-        return 'duplicate';
+        return 'cleanup';
     }
 
     public function supports(ImportContext $context, ImportDefinition $definition): bool
@@ -27,11 +28,6 @@ final class DuplicateStage implements ImportPipelineStage
         ImportDefinition $definition,
         ImportPipelineState $state,
     ): mixed {
-        $summary = $definition->duplicateDetector()->detect($state->rows ?? [], $context);
-
-        $state->duplicateSummary = $summary;
-        $state->statistics['duplicate_rows'] = $summary->duplicateRows;
-
-        return $state->rows;
+        return $payload;
     }
 }

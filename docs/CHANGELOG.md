@@ -7,6 +7,21 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## IF-02 (Import Framework — Engine Infrastructure — 2026-08-06)
+
+Fase infrastructure-only: menghidupkan skeleton `app/Services/Import/*` menjadi engine siap pakai. **Tidak ada perubahan UI, route, controller, service import existing, database, template, maupun permission.** Perilaku aplikasi tidak berubah — seluruh import existing tetap berjalan (baseline hijau).
+
+- **Pipeline nyata (8 stage)** — `Parse/Normalize/Validate/Duplicate/Preview/Commit/Summary/Cleanup` menggantikan 8 stub no-op; `PreflightStage` & `ActivityLogStage` dihapus (logging jadi hook).
+- **Runner dispatch** — `ArrayPipelineStageRunner` benar-benar mengeksekusi stage by name, melewati stage `supports()==false`, dan urutan stage **configurable** (`DefaultImportPipeline::DEFAULT_STAGES` / constructor).
+- **Kontrak stage seragam** — `ImportPipelineStage` (name/supports/handle) dengan `ImportPipelineState` sebagai akumulator mutable (rows/summary/preview/commit/statistics).
+- **Konsolidasi DTO/Results** — duplikat `DTO/ImportSummary|ImportCommit|ImportPreview|ImportResult` dihapus (canonical di `Results/*`); `DTO/ImportSummary` lama memiliki import rusak. `ImportContext` diperluas (`event`, `user`, `version`, immutable).
+- **Exception khusus import** — `app/Services/Import/Exceptions/*` (ImportException base + definition/stage/parse/validation/commit/version); commit-stage tidak membungkus exception bisnis (mis. Maatwebsite ValidationException) agar perilaku legacy tetap.
+- **DI wiring** — `ImportServiceProvider` (registry singleton, runner, pipeline, coordinator, definisi desa/kelompok/regu/peserta) + `bootstrap/providers.php`; `ImportRegistry` + `has()`/`all()`; `ImportCoordinator` + version guard.
+- **Logging hook** — `ImportLogger` (stageStarted/stageCompleted, default `NullImportLogger` silent); `ImportActivityLogger` dipanggil runner setelah preview/commit.
+- **37 unit test** baru (`tests/Unit/Services/Import/*`): Registry, Coordinator, Pipeline/Runner, Definition, Context, Stage Order, Exceptions, DI wiring.
+- **Verifikasi:** full suite → **2002 passed / 4841 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError di 3 file test, di luar scope IF-02).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/import-audit.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md` disinkronkan.
+
 ## Sprint 6A.1 (Release Stabilization — 2026-08-04)
 
 - PHP 8.3 compatibility cleanup started: deprecated signature ordering audited and corrected where required.

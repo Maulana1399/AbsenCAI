@@ -10,5 +10,7 @@ final readonly class ImportPipelineResult
         public ?ImportCommit $commit = null,
         public ?ImportSummary $summary = null,
         public array $stages = [],
+        public array $rows = [],
+        public array $statistics = [],
     ) {}
 }

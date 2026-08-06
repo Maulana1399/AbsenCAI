@@ -176,6 +176,39 @@ TrueNAS
 
 ---
 
+## Import Framework
+
+> Status: 🔲 **IF-01 (audit & desain) COMPLETE** — ✅ **IF-02 (engine infrastructure) COMPLETE** — IF-03+ planned.
+> Audit & GAP: `docs/import-audit.md` | Arsitektur & roadmap: `docs/import-framework.md`
+
+Seluruh fitur import akan distandarisasi ke satu framework: UI/UX, lifecycle, validation,
+preview, summary, commit flow, dan testing yang sama. **Import Massal Pengajian** adalah
+golden standard.
+
+IF-02 menghidupkan skeleton `app/Services/Import/*` menjadi engine yang siap pakai
+(**belum dipakai modul mana pun; UI/route/controller/service tidak berubah**):
+
+```
+app/Services/Import/
+├── Contracts/        (definition, parser, validator, normalizer, dupe, committer,
+│                      activityLogger, pipelineStage, logger)
+├── Pipeline/         (coordinator, pipeline, state, 8 stage nyata:
+│                      parse→normalize→validate→duplicate→preview→commit→summary→cleanup)
+├── Support/          (runner dispatch, import/template version)
+├── Registry/         (register/resolve/has/all)
+├── DTO/              (context, raw/normalized row, error, warning)
+├── Results/          (summary, preview, commit, result, pipelineResult)
+├── Exceptions/       (typed import exceptions)
+├── NullObjects/      (no-op defaults)
+└── Adapters/         (desa/kelompok/regu/peserta/pengajian — dioptimalkan saat migrasi IF-04+)
+```
+
+Wiring DI: `ImportServiceProvider` (registry singleton, runner, pipeline, coordinator,
+definisi desa/kelompok/regu/peserta). Version guard + logging hook tersedia.
+Baseline hijau — perilaku aplikasi tidak berubah.
+
+---
+
 ## Development Rule
 
 Development Server

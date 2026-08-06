@@ -44,6 +44,7 @@ Commercial Platform (Future)
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
+| Import Framework (IF series) | 🔲 **IF-01 AUDIT COMPLETE** — IF-02 ENGINE COMPLETE; IF-03+ NOT STARTED (lihat `docs/import-audit.md` & `docs/import-framework.md`) |
 | Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | Stage | **Pre-UAT** |
 
@@ -1258,9 +1259,53 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 16. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired
 17. **Sprint 3.3** ✅ COMPLETE — Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`)
 18. **Sprint 4** 🔲 NOT STARTED — rekomendasi di bawah
-19. **Competition** (future sprint — V2 generic engine)
-20. **Commercial** (future sprint)
+19. **Import Framework (IF series)** 🔲 IF-01 (audit & desain) COMPLETE; **IF-02 (engine infra) COMPLETE**; IF-03+ NOT STARTED — lihat `docs/import-framework.md`
+20. **Competition** (future sprint — V2 generic engine)
+21. **Commercial** (future sprint)
 ```
+
+---
+
+# Import Framework (IF Series)
+
+## Status
+
+🔲 **IF-01 COMPLETE (audit & desain)** — **IF-02 COMPLETE (engine infrastructure)** — IF-03+ NOT STARTED.
+
+## Goal
+
+Standarisasi seluruh fitur import aplikasi ke **satu Import Framework**:
+UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sama.
+**Import Massal Pengajian** adalah golden standard.
+
+## Deliverables Fase IF-01 (2026-08-05)
+
+- ✅ `docs/import-audit.md` — Inventori seluruh import, perbandingan dengan golden standard, GAP analysis (Kategori A–D).
+- ✅ `docs/import-framework.md` — Desain arsitektur, pipeline standar, interface definition, wizard universal, standar template, roadmap IF-02–IF-19.
+
+## Deliverables Fase IF-02 (2026-08-06 — Infrastructure Only)
+
+- ✅ **Stage pipeline nyata** — Parse/Normalize/Validate/Duplicate/Preview/Commit/Summary/Cleanup (sebelumnya 8/8 stub no-op).
+- ✅ **Pipeline runner dispatch** — `ArrayPipelineStageRunner` benar-benar menjalankan stage; urutan configurable (`DefaultImportPipeline::DEFAULT_STAGES`).
+- ✅ **Konsolidasi DTO/Results** — 4 duplikat `DTO/ImportSummary|Commit|Preview|Result` dihapus; canonical `Results/*`; `ImportContext` + `event/user/version`.
+- ✅ **Exception khusus import** — `app/Services/Import/Exceptions/*` (definition/stage/parse/validation/commit/version).
+- ✅ **DI wiring** — `ImportServiceProvider` (registry singleton, runner, pipeline, coordinator, definisi desa/kelompok/regu/peserta).
+- ✅ **Logging hook** — `ImportLogger` (stageStarted/stageCompleted, default silent) + `ImportActivityLogger` dipanggil runner.
+- ✅ **Version guard** — `ImportCoordinator` memvalidasi `context->version` terhadap definition.
+- ✅ **37 unit test** baru (Registry, Coordinator, Pipeline/Runner, Definition, Context, Stage Order, Exceptions, DI wiring).
+- ✅ **Perilaku tidak berubah** — baseline hijau (2002 passed; 5 failure = pre-existing PlacementService tests).
+
+## Ringkasan Audit
+
+- **5 import aktif:** Desa, Kelompok, Regu, Peserta (form POST manual) + Pengajian (golden wizard).
+- **Skeleton `app/Services/Import/`:** kini fungsional (engine hidup) — belum dipakai modul mana pun.
+- **Kandidat baru tanpa import:** Person, Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity, Rundown, Access Grant.
+
+## Roadmap
+
+IF-03 Wizard → IF-04 Migrasi Pengajian → IF-05/06/07/08 Migrasi Desa/Kelompok/Regu/Peserta → IF-09 Template Engine → IF-10 Activity Log → IF-11+ modul baru (Person, Competition, Venue, Schedule, Committee, Activity/Rundown, Attendance, Access Grant) → IF-19 Regression parity.
+
+Detail lengkap: `docs/import-framework.md`.
 
 ---
 
