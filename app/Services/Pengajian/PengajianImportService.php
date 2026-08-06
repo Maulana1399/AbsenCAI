@@ -2,237 +2,86 @@
 
 namespace App\Services\Pengajian;
 
-use App\Models\desa;
-use App\Models\kelompok;
-use App\Models\Participation;
-use App\Models\Person;
-use App\Services\Placement\PlacementService;
-use App\Services\Registration\RegistrationService;
-use Illuminate\Support\Facades\DB;
+use App\Services\Import\Adapters\ImportAdapter;
+use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\DTO\ImportError;
 
+/**
+ * Public API orchestrator for the Pengajian import.
+ *
+ * Keeps the exact legacy public contract (validate()/import() signatures and
+ * result arrays) but delegates all work to the Import Framework
+ * (ImportAdapter → PengajianImportDefinition → Pipeline → Committer). No
+ * import logic is implemented here anymore.
+ */
 class PengajianImportService
 {
     public function __construct(
-        private readonly RegistrationService $registrationService,
+        private readonly ImportAdapter $adapter,
     ) {}
 
-    public function import(
-        array $rows,
-        int $eventId,
-    ): array {
-        $result = [
-            'created_persons' => 0,
-            'matched_persons' => 0,
-            'created_participations' => 0,
-            'skipped_duplicates' => 0,
-            'failed_rows' => 0,
-            'errors' => [],
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<string, mixed>
+     */
+    public function import(array $rows, int $eventId): array
+    {
+        $context = new ImportContext(
+            type: 'pengajian',
+            eventId: $eventId,
+            source: 'service',
+            mode: 'execute',
+            options: ['rows' => $rows],
+            definitionKey: 'pengajian',
+        );
+
+        $result = $this->adapter->commit('pengajian', $rows, $context);
+
+        $commit = $result->commit;
+        $metrics = $commit?->metrics ?? [];
+
+        return [
+            'created_persons' => $metrics['created_persons'] ?? 0,
+            'matched_persons' => $metrics['matched_persons'] ?? 0,
+            'created_participations' => $metrics['created_participations'] ?? 0,
+            'skipped_duplicates' => $metrics['skipped_duplicates'] ?? 0,
+            'failed_rows' => $metrics['failed_rows'] ?? 0,
+            'errors' => array_map(
+                fn ($row) => [
+                    'row' => $row['row'] ?? 0,
+                    'message' => $row['message'] ?? '',
+                ],
+                $commit?->failedRows ?? [],
+            ),
         ];
-
-        foreach ($rows as $index => $row) {
-            try {
-                $this->processRow($row, $eventId, $index, $result);
-            } catch (\Throwable $e) {
-                $result['failed_rows']++;
-                $result['errors'][] = [
-                    'row' => $index + 2,
-                    'message' => $e->getMessage(),
-                ];
-            }
-        }
-
-        return $result;
     }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<int, array{row: int, errors: array<int, string>}>
+     */
     public function validate(array $rows): array
     {
-        $errors = [];
+        $context = new ImportContext(
+            type: 'pengajian',
+            source: 'service',
+            mode: 'preview',
+            options: ['rows' => $rows],
+            definitionKey: 'pengajian',
+        );
 
-        foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2;
-            $rowErrors = [];
+        $result = $this->adapter->preview('pengajian', $rows, $context);
 
-            if (empty(trim($row['nama'] ?? ''))) {
-                $rowErrors[] = 'Nama wajib diisi.';
-            }
+        $grouped = [];
 
-            if (empty($row['jenis_kelamin'])) {
-                $rowErrors[] = 'Jenis kelamin wajib diisi.';
-            } elseif (! in_array(strtoupper($row['jenis_kelamin']), ['L', 'P'])) {
-                $rowErrors[] = 'Jenis kelamin harus L atau P.';
-            }
+        foreach ($result->summary?->errors ?? [] as $error) {
+            $row = $error instanceof ImportError ? $error->rowNumber : ($error['row'] ?? 0);
+            $message = $error instanceof ImportError ? $error->message : ($error['message'] ?? '');
 
-            if (empty($row['tanggal_lahir'])) {
-                $rowErrors[] = 'Tanggal lahir wajib diisi.';
-            } elseif (! $this->isValidDate($row['tanggal_lahir'])) {
-                $rowErrors[] = 'Format tanggal lahir tidak valid (YYYY-MM-DD).';
-            }
-
-            if (empty(trim($row['desa'] ?? ''))) {
-                $rowErrors[] = 'Desa wajib diisi.';
-            }
-
-            if (! empty($rowErrors)) {
-                $errors[] = [
-                    'row' => $rowNumber,
-                    'errors' => $rowErrors,
-                ];
-            }
+            $grouped[$row]['row'] = $row;
+            $grouped[$row]['errors'][] = $message;
         }
 
-        return $errors;
-    }
-
-    private function processRow(array $row, int $eventId, int $index, array &$result): void
-    {
-        $nama = trim($row['nama'] ?? '');
-        $jenisKelamin = strtoupper(trim($row['jenis_kelamin'] ?? ''));
-        $tanggalLahir = trim($row['tanggal_lahir'] ?? '');
-        $desaName = trim($row['desa'] ?? '');
-        $kelompokName = trim($row['kelompok'] ?? '');
-
-        if ($nama === '') {
-            $result['failed_rows']++;
-            $result['errors'][] = [
-                'row' => $index + 2,
-                'message' => 'Nama wajib diisi.',
-            ];
-
-            return;
-        }
-
-        if ($jenisKelamin === '' || ! in_array($jenisKelamin, ['L', 'P'])) {
-            $result['failed_rows']++;
-            $result['errors'][] = [
-                'row' => $index + 2,
-                'message' => 'Jenis kelamin harus L atau P.',
-            ];
-
-            return;
-        }
-
-        if ($tanggalLahir === '' || ! $this->isValidDate($tanggalLahir)) {
-            $result['failed_rows']++;
-            $result['errors'][] = [
-                'row' => $index + 2,
-                'message' => 'Tanggal lahir wajib diisi dengan format YYYY-MM-DD yang valid.',
-            ];
-
-            return;
-        }
-
-        if ($desaName === '') {
-            $result['failed_rows']++;
-            $result['errors'][] = [
-                'row' => $index + 2,
-                'message' => 'Desa wajib diisi.',
-            ];
-
-            return;
-        }
-
-        $resolvedDesa = desa::whereRaw('LOWER(TRIM(desa_asal)) = ?', [strtolower($desaName)])->first();
-
-        if ($resolvedDesa === null) {
-            $result['failed_rows']++;
-            $result['errors'][] = [
-                'row' => $index + 2,
-                'message' => "Desa '{$desaName}' tidak ditemukan.",
-            ];
-
-            return;
-        }
-
-        $resolvedKelompok = null;
-
-        if ($kelompokName !== '') {
-            $resolvedKelompok = kelompok::where('desa_id', $resolvedDesa->id)
-                ->whereRaw('LOWER(TRIM(kelompok_asal)) = ?', [strtolower($kelompokName)])
-                ->first();
-
-            if ($resolvedKelompok === null) {
-                $notFound = kelompok::whereRaw('LOWER(TRIM(kelompok_asal)) = ?', [strtolower($kelompokName)])->exists();
-
-                if ($notFound) {
-                    $result['failed_rows']++;
-                    $result['errors'][] = [
-                        'row' => $index + 2,
-                        'message' => "Kelompok '{$kelompokName}' tidak berada di Desa '{$desaName}'.",
-                    ];
-                } else {
-                    $result['failed_rows']++;
-                    $result['errors'][] = [
-                        'row' => $index + 2,
-                        'message' => "Kelompok '{$kelompokName}' tidak ditemukan.",
-                    ];
-                }
-
-                return;
-            }
-        }
-
-        DB::transaction(function () use ($nama, $jenisKelamin, $tanggalLahir, $resolvedDesa, $resolvedKelompok, $eventId, &$result) {
-            $normalized = $this->normalizeNama($nama);
-            $candidates = Person::where('desa_id', $resolvedDesa->id)
-                ->whereRaw('LOWER(TRIM(nama)) = ?', [$normalized])
-                ->get();
-
-            $person = null;
-            $isNewPerson = false;
-
-            $existingPerson = $candidates->first(fn (Person $p) => $p->tanggal_lahir?->format('Y-m-d') === $tanggalLahir
-            );
-
-            if ($existingPerson !== null) {
-                $person = $existingPerson;
-                $result['matched_persons']++;
-            } else {
-                $person = Person::create([
-                    'nama' => $nama,
-                    'jenis_kelamin' => $jenisKelamin,
-                    'tanggal_lahir' => $tanggalLahir,
-                    'desa_id' => $resolvedDesa->id,
-                    'kelompok_id' => $resolvedKelompok?->id,
-                    'nip' => null,
-                ]);
-                $result['created_persons']++;
-                $isNewPerson = true;
-            }
-
-            $existingParticipation = Participation::where('person_id', $person->id)
-                ->where('event_id', $eventId)
-                ->first();
-
-            if ($existingParticipation !== null) {
-                $result['skipped_duplicates']++;
-
-                return;
-            }
-
-            $gender = PlacementService::normalizePersonGender($person->jenis_kelamin ?? $jenisKelamin);
-            $participantNumber = PlacementService::generateParticipantNumber($eventId, $gender);
-            $attendanceCode = $this->registrationService->generateAttendanceCode();
-
-            Participation::create([
-                'person_id' => $person->id,
-                'event_id' => $eventId,
-                'participant_number' => $participantNumber,
-                'attendance_code' => $attendanceCode,
-                'jenis_peserta' => 'Pengajian Desa',
-            ]);
-            $result['created_participations']++;
-        });
-    }
-
-    private function normalizeNama(string $nama): string
-    {
-        return trim(mb_strtolower(preg_replace('/\s+/', ' ', $nama)));
-    }
-
-    private function isValidDate(string $date): bool
-    {
-        $d = \DateTime::createFromFormat('Y-m-d', $date);
-
-        return $d && $d->format('Y-m-d') === $date;
+        return array_values($grouped);
     }
 }

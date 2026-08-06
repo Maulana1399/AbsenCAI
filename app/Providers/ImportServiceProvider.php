@@ -24,6 +24,13 @@ use App\Services\Import\Adapters\Participation\ParticipationImportDuplicateDetec
 use App\Services\Import\Adapters\Participation\ParticipationImportNormalizer;
 use App\Services\Import\Adapters\Participation\ParticipationImportParser;
 use App\Services\Import\Adapters\Participation\ParticipationImportValidator;
+use App\Services\Import\Adapters\Pengajian\PengajianImportActivityLogger;
+use App\Services\Import\Adapters\Pengajian\PengajianImportCommitter;
+use App\Services\Import\Adapters\Pengajian\PengajianImportDefinition;
+use App\Services\Import\Adapters\Pengajian\PengajianImportDuplicateDetector;
+use App\Services\Import\Adapters\Pengajian\PengajianImportNormalizer;
+use App\Services\Import\Adapters\Pengajian\PengajianImportParser;
+use App\Services\Import\Adapters\Pengajian\PengajianImportValidator;
 use App\Services\Import\Adapters\Person\PersonImportActivityLogger;
 use App\Services\Import\Adapters\Person\PersonImportCommitter;
 use App\Services\Import\Adapters\Person\PersonImportDefinition;
@@ -131,6 +138,15 @@ class ImportServiceProvider extends ServiceProvider
             ParticipationImportActivityLogger::class,
         ]);
 
+        $this->bindDefinition('pengajian', PengajianImportDefinition::class, [
+            PengajianImportParser::class,
+            PengajianImportValidator::class,
+            PengajianImportNormalizer::class,
+            PengajianImportDuplicateDetector::class,
+            PengajianImportCommitter::class,
+            PengajianImportActivityLogger::class,
+        ]);
+
         $this->bindDefinition('kelompok', KelompokImportDefinition::class, [
             KelompokImportParser::class,
             KelompokImportValidator::class,
@@ -163,7 +179,7 @@ class ImportServiceProvider extends ServiceProvider
     {
         $registry = $this->app->make(ImportRegistry::class);
 
-        foreach (['desa', 'kelompok', 'regu', 'peserta', 'person', 'participation'] as $key) {
+        foreach (['desa', 'kelompok', 'regu', 'peserta', 'person', 'participation', 'pengajian'] as $key) {
             $definition = $this->app->make('import.definition.'.$key);
 
             if ($definition !== null && $registry->resolve($key) === null) {

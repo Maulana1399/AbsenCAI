@@ -22,7 +22,9 @@ test('provider pre-registers complete definitions into the singleton registry', 
         ->and($registry->has('kelompok'))->toBeTrue()
         ->and($registry->has('regu'))->toBeTrue()
         ->and($registry->has('peserta'))->toBeTrue()
-        ->and($registry->has('pengajian'))->toBeFalse();
+        ->and($registry->has('person'))->toBeTrue()
+        ->and($registry->has('participation'))->toBeTrue()
+        ->and($registry->has('pengajian'))->toBeTrue();
 });
 
 test('pipeline and coordinator are resolvable from the container', function () {

@@ -116,9 +116,9 @@ Future (V2 Roadmap Remaining)
 
 # Import Framework
 
-🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — IF-08+ NOT STARTED.
+🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — ✅ **IF-08 (Pengajian/behavior-preserving) COMPLETE** — IF-09+ NOT STARTED.
 
-Standard tunggal untuk seluruh import aplikasi (UI/UX, lifecycle, validation, preview, summary, commit, testing). Golden standard = Import Massal Pengajian. IF-02 engine; IF-03 Desa; IF-04 Kelompok; IF-05 Regu; IF-06 Person; **IF-07 Participation (Design C: Person → Participation → Attendance; commit via `ManualParticipantRegistrationService`)**. Modul lain belum dimigrasi.
+**Seluruh import kini memakai SATU Import Framework (backend + frontend).** Golden standard Pengajian dimigrasi tanpa mengubah behavior (wizard extends `ImportWizardBase`, service → orchestrator, template IDENTIK).
 
 | Import | Status | Route |
 |--------|--------|-------|
@@ -127,8 +127,8 @@ Standard tunggal untuk seluruh import aplikasi (UI/UX, lifecycle, validation, pr
 | **Regu** | 🟢 **FRAMEWORK** (IF-05) | `POST /import/regu` + `GET /import/regu/template` |
 | **Person** | 🟢 **FRAMEWORK** (IF-06 — Design C) | `POST /import/person` + `GET /import/person/template` |
 | **Participation** | 🟢 **FRAMEWORK** (IF-07 — parameter event) | wizard di halaman Registrasi + `GET /events/{event}/registrasi/import-participation/template` |
-| **Peserta** | 🟡 legacy form POST — migrasi lanjutan | `POST /import/peserta` |
-| **Pengajian (Import Massal)** | 🟢 golden standard — migrasi ke framework IF-08 | `/pengajian/admin/import-massal` |
+| **Pengajian (Import Massal)** | 🟢 **FRAMEWORK** (IF-08 — behavior-preserving) | `/pengajian/admin/import-massal` (+ template route tetap) |
+| **Peserta** | 🟡 legacy committer — belum dimigrasi | `POST /import/peserta` |
 
 Kandidat baru (IF-11+): Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity/Rundown, Access Grant.
 

@@ -44,7 +44,7 @@ Commercial Platform (Future)
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
-| Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — IF-05 REGU — IF-06 PERSON — **IF-07 PARTICIPATION (Design C)** — IF-08+ NOT STARTED (lihat `docs/import-framework.md`) |
+| Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — IF-05 REGU — IF-06 PERSON — IF-07 PARTICIPATION — **IF-08 PENGAJIAN (behavior-preserving)** — IF-09+ NOT STARTED (lihat `docs/import-framework.md`) |
 | Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | Stage | **Pre-UAT** |
 
@@ -1259,7 +1259,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 16. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired
 17. **Sprint 3.3** ✅ COMPLETE — Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`)
 18. **Sprint 4** 🔲 NOT STARTED — rekomendasi di bawah
-19. **Import Framework (IF series)** 🔲 IF-01 (audit) COMPLETE; IF-02 (engine) COMPLETE; IF-03 (Desa) COMPLETE; IF-04 (Kelompok) COMPLETE; IF-05 (Regu) COMPLETE; IF-06 (Person) COMPLETE; **IF-07 (Participation) COMPLETE**; IF-08+ NOT STARTED — lihat `docs/import-framework.md`
+19. **Import Framework (IF series)** 🔲 IF-01 (audit) COMPLETE; IF-02 (engine) COMPLETE; IF-03 (Desa) COMPLETE; IF-04 (Kelompok) COMPLETE; IF-05 (Regu) COMPLETE; IF-06 (Person) COMPLETE; IF-07 (Participation) COMPLETE; **IF-08 (Pengajian/behavior-preserving) COMPLETE**; IF-09+ NOT STARTED — lihat `docs/import-framework.md`
 20. **Competition** (future sprint — V2 generic engine)
 21. **Commercial** (future sprint)
 ```
@@ -1270,7 +1270,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 
 ## Status
 
-🔲 **IF-01 COMPLETE (audit & desain)** — ✅ **IF-02 COMPLETE (engine)** — ✅ **IF-03 COMPLETE (Desa)** — ✅ **IF-04 COMPLETE (Kelompok)** — ✅ **IF-05 COMPLETE (Regu)** — ✅ **IF-06 COMPLETE (Person)** — ✅ **IF-07 COMPLETE (Participation)** — IF-08+ NOT STARTED.
+🔲 **IF-01 COMPLETE (audit & desain)** — ✅ **IF-02 COMPLETE (engine)** — ✅ **IF-03 COMPLETE (Desa)** — ✅ **IF-04 COMPLETE (Kelompok)** — ✅ **IF-05 COMPLETE (Regu)** — ✅ **IF-06 COMPLETE (Person)** — ✅ **IF-07 COMPLETE (Participation)** — ✅ **IF-08 COMPLETE (Pengajian)** — IF-09+ NOT STARTED.
 
 ## Goal
 
@@ -1338,15 +1338,25 @@ UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sa
 - ✅ **SummaryStage** — merge warning duplicate ke summary final (warning tampil di wizard).
 - ✅ **17 test baru** (9 unit + 8 feature). Baseline hijau (2120 passed; 5 failure pre-existing).
 
+## Deliverables Fase IF-08 (2026-08-06 — Pengajian, Behavior-Preserving)
+
+- ✅ **Audit lengkap Pengajian** — wizard (parse/preview/executeImport/reset), view 3-langkah, `PengajianImportService` (validate/import/processRow), template `Exports/PersonImportTemplateExport`, routes, 44 test golden.
+- ✅ **Wizard extends `ImportWizardBase`** — lifecycle (upload/reset/updatedFile/uploadError/preview/commit/loading/navigation) dari base; override 3-step, view custom, `importContext()` (eventId), extract/result hooks, pesan persis.
+- ✅ **`PengajianImportService` → orchestrator** — public contract `validate()/import()` IDENTIK; delegasi ke `ImportAdapter → PengajianImportDefinition → Pipeline → Committer`.
+- ✅ **`ImportCommit.metrics`** (backward-compatible) membawa 5 counter Pengajian.
+- ✅ **Parser/Validator/Normalizer/Committer port persis** — CSV tanpa prune, Excel skip nama kosong, pesan validasi & commit persis, gender STRICT L/P, `resolvePerson()` + `PlacementService` + `RegistrationService`, `jenis_peserta='Pengajian Desa'`, tanpa regu/legacy.
+- ✅ **Template IDENTIK** — `PersonImportTemplateExport` + route tetap (wrapper framework).
+- ✅ **18 test baru** (8 unit definition + 10 parity OLD-vs-NEW). 45 test golden tetap hijau. Baseline (2138 passed; 5 failure pre-existing).
+
 ## Ringkasan Audit
 
-- **Import aktif:** Desa (🟢), Kelompok (🟢), Regu (🟢), Person (🟢), **Participation (🟢 Design C)**, Pengajian (golden, legacy), Peserta (legacy).
+- **Import aktif:** Desa 🟢, Kelompok 🟢, Regu 🟢, Person 🟢, Participation 🟢, **Pengajian 🟢 (behavior-preserving)** — semuanya memakai **SATU Import Framework** (backend + frontend). Peserta legacy hanya committer (belum dimigrasi).
 - **Design C:** Person ✅ → Participation ✅ → Attendance (belum dimigrasi).
 - **Kandidat baru tanpa import:** Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity, Rundown, Access Grant.
 
 ## Roadmap
 
-IF-08 Pengajian (orchestrator) → IF-09 Template lanjutan + retire statis → IF-10 Activity Log → IF-11+ modul baru → IF-18 Regression parity.
+IF-09 Template lanjutan + retire statis → IF-10 Activity Log → IF-11+ modul baru → IF-18 Regression parity.
 
 Detail lengkap: `docs/import-framework.md`.
 

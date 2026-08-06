@@ -12,10 +12,11 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 
 /**
- * Reusable 5-step import wizard (Upload → Preview → Validation → Import → Result).
- *
- * Everything is driven by the module definition metadata — parameters, columns,
- * display name, template route — so the blade never hardcodes module details.
+ * Reusable import wizard base (5-step default: Upload → Preview → Validation →
+ * Import → Result). Subclasses override the module-specific bits (definition
+ * key, gate, steps, result mapping, template) while inheriting the full
+ * lifecycle: upload state, reset, updatedFile, uploadError, preview flow,
+ * commit flow, loading, state management and navigation.
  */
 abstract class ImportWizardBase extends Component
 {
@@ -118,25 +119,30 @@ abstract class ImportWizardBase extends Component
         $this->importResult = [];
 
         try {
-            $result = app(ImportAdapter::class)->preview($this->definitionKey(), $this->file, parameters: $this->parameters);
+            $result = app(ImportAdapter::class)->preview(
+                $this->definitionKey(),
+                $this->file,
+                context: $this->importContext('preview'),
+                parameters: $this->parameters,
+            );
 
             $this->previewRows = $this->extractPreviewRows($result);
             $this->validationErrors = $this->extractValidationErrors($result);
 
             if (empty($this->previewRows) && empty($this->validationErrors)) {
                 $this->validationErrors = [
-                    ['row' => 0, 'errors' => ['File tidak berisi data yang bisa diimport.']],
+                    ['row' => 0, 'errors' => [$this->emptyFileMessage()]],
                 ];
             }
 
             $this->summary = $this->summarize($result);
 
-            $this->step = empty($this->validationErrors) ? 2 : 3;
+            $this->step = $this->stepAfterPreview(! empty($this->validationErrors));
         } catch (\Throwable $e) {
             $this->validationErrors = [
-                ['row' => 0, 'errors' => ['Gagal membaca file: '.$e->getMessage()]],
+                ['row' => 0, 'errors' => [$this->parseErrorMessage($e)]],
             ];
-            $this->step = 3;
+            $this->step = $this->stepAfterParseError();
         } finally {
             $this->processing = false;
         }
@@ -162,17 +168,22 @@ abstract class ImportWizardBase extends Component
         $this->processing = true;
 
         try {
-            $result = app(ImportAdapter::class)->commit($this->definitionKey(), $this->file, parameters: $this->parameters);
+            $result = app(ImportAdapter::class)->commit(
+                $this->definitionKey(),
+                $this->file,
+                context: $this->importContext('execute'),
+                parameters: $this->parameters,
+            );
 
             $this->importResult = $this->extractResult($result);
-            $this->step = 5;
+            $this->step = $this->resultStep();
 
             if ($this->refreshEvent() !== null) {
                 $this->dispatch($this->refreshEvent());
             }
         } catch (\Throwable $e) {
             $this->importResult = ['error' => 'Gagal menjalankan import: '.$e->getMessage()];
-            $this->step = 5;
+            $this->step = $this->resultErrorStep();
         } finally {
             $this->processing = false;
         }
@@ -199,6 +210,43 @@ abstract class ImportWizardBase extends Component
             'templateUrl' => $this->templateUrl(),
             'definitionKey' => $this->definitionKey(),
         ]);
+    }
+
+    // --- Overridable hooks (module-specific behavior) ---
+
+    protected function importContext(string $mode): ?ImportContext
+    {
+        return null;
+    }
+
+    protected function emptyFileMessage(): string
+    {
+        return 'File tidak berisi data yang bisa diimport.';
+    }
+
+    protected function stepAfterPreview(bool $hasErrors): int
+    {
+        return $hasErrors ? 3 : 2;
+    }
+
+    protected function stepAfterParseError(): int
+    {
+        return 3;
+    }
+
+    protected function resultStep(): int
+    {
+        return 5;
+    }
+
+    protected function resultErrorStep(): int
+    {
+        return 5;
+    }
+
+    protected function parseErrorMessage(\Throwable $e): string
+    {
+        return 'Gagal membaca file: '.$e->getMessage();
     }
 
     protected function templateUrl(): string
@@ -228,7 +276,7 @@ abstract class ImportWizardBase extends Component
         ];
     }
 
-    private function extractPreviewRows(ImportPipelineResult $result): array
+    protected function extractPreviewRows(ImportPipelineResult $result): array
     {
         return array_map(
             fn (NormalizedImportRow $row) => $row->data,
@@ -236,7 +284,7 @@ abstract class ImportWizardBase extends Component
         );
     }
 
-    private function extractValidationErrors(ImportPipelineResult $result): array
+    protected function extractValidationErrors(ImportPipelineResult $result): array
     {
         $errors = [];
 
@@ -250,7 +298,7 @@ abstract class ImportWizardBase extends Component
         return $errors;
     }
 
-    private function summarize(ImportPipelineResult $result): array
+    protected function summarize(ImportPipelineResult $result): array
     {
         $summary = $result->summary;
 
@@ -269,7 +317,7 @@ abstract class ImportWizardBase extends Component
         ];
     }
 
-    private function extractResult(ImportPipelineResult $result): array
+    protected function extractResult(ImportPipelineResult $result): array
     {
         $summary = $result->summary;
 

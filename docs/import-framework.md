@@ -1,12 +1,11 @@
 # Import Framework — Arsitektur & Roadmap
 
-> Status: **IF-07 COMPLETE — Participation = domain Design C kedua di atas framework.**
+> Status: **IF-08 COMPLETE — Pengajian (golden standard) migrasi ke framework, behavior 100% dipertahankan.**
 > IF-01 (audit & GAP) → `docs/import-audit.md`.
 > Golden Standard: Import Massal Pengajian.
-> IF-02 engine. IF-03 Desa. IF-04 Kelompok. IF-05 Regu. IF-06 Person.
-> **IF-07 Participation** (Design C: Person → Participation → Attendance; commit via
-> `ManualParticipantRegistrationService`).
-> Import Pengajian/Peserta tetap memakai implementasi lama.
+> IF-02 engine. IF-03 Desa. IF-04 Kelompok. IF-05 Regu. IF-06 Person. IF-07 Participation.
+> **IF-08 Pengajian** — behavior-preserving refactor: wizard extends `ImportWizardBase`,
+> service jadi orchestrator, seluruh import memakai Satu Import Framework (backend + frontend).
 
 ---
 
@@ -66,8 +65,9 @@ app/Services/Import/
     ├── Regu/                        ← REAL collaborator penuh + metadata
     ├── Person/                      ← REAL collaborator penuh + metadata + PersonDuplicateDetectionService
     ├── Participation/               ← REAL collaborator penuh (IF-07) + metadata + ManualParticipantRegistrationService
+    ├── Pengajian/                    ← REAL collaborator penuh (IF-08) + metadata + resolvePerson/Placement/Registration
     ├── Peserta/                     ← committer legacy (belum dimigrasi)
-    └── Pengajian/                   ← committer legacy (belum dimigrasi)
+    └── (tidak ada lagi adapter legacy yang dipakai — Peserta legacy hanya committer) 
 ```
 
 **Wiring DI:** `app/Providers/ImportServiceProvider.php` (didaftarkan di `bootstrap/providers.php`)
@@ -227,6 +227,16 @@ template()               // → ImportTemplate (generator)
 - `ParticipationImportCommitter` — per-baris `ManualParticipantRegistrationService::register()` (lookup Person dulu; duplicate event → skip; ambiguous → warning).
 - `ManualParticipantRegistrationService` di-extend: public `resolvePerson()` + param opsional `jenisPeserta/statusRegistrasi/reguId` (backward-compatible).
 
+**Pengajian (IF-08 — behavior-preserving):** *golden standard; `PengajianImportService` jadi orchestrator; wizard extends `ImportWizardBase`; semua output IDENTIK.*
+- `PengajianImportParser` — port persis parsing wizard: CSV header wajib + **semua baris dipertahankan** (tanpa prune), Excel skip baris nama kosong; pesan parse persis.
+- `PengajianImportNormalizer` — mempertahankan nilai mentah (normalisasi inline di commit seperti golden).
+- `PengajianImportValidator` — port persis `validate()`: urutan nama→JK→TTL→desa, pesan persis, **gender STRICT L/P** (bukan `PersonIdentityNormalizer`).
+- `PengajianImportDuplicateDetector` — no-op (duplicate di-handle committer seperti golden; preview tidak pernah menampilkan duplicate).
+- `PengajianImportCommitter` — port persis `processRow()`: counter `created_persons/matched_persons/created_participations/skipped_duplicates/failed_rows`, urutan, `DB::transaction`, resolve desa/kelompok, **`resolvePerson()`** (Person logic), `PlacementService::generateParticipantNumber`, `RegistrationService::generateAttendanceCode`, `jenis_peserta='Pengajian Desa'`, tanpa regu/legacy.
+- `PengajianImportDefinition` — metadata lengkap + `template()` = wrapper `PengajianImportTemplate` (file IDENTIK `PersonImportTemplateExport`, route tetap).
+- `ImportMassal` extends `ImportWizardBase` — override: 3 step, layout/view custom, `importContext()` (eventId), extract/result hooks, pesan empty-file & parse-error persis. Lifecycle (upload/reset/updatedFile/uploadError/preview/commit/loading/navigation) dari base.
+- `ImportCommit.metrics` (baru, backward-compatible) membawa 5 counter Pengajian.
+
 ---
 
 ## 6. Wizard & Komponen UI (TERIMPLEMENTASI)
@@ -310,7 +320,7 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 | **IF-05** | **Migrasi Regu** — collaborator nyata (normalisasi gender sesuai business rule), duplicate by unique name, reusable wizard base `ImportWizardBase`, template REFERENSI gender | Regu via framework + 19 test | ✅ COMPLETE |
 | **IF-06** | **Migrasi Person (Design C)** — identitas global (bukan peserta/NIP), reuses `PersonDuplicateDetectionService`, normalisasi gender/date/spasi, template REFERENSI gender+desa | Person via framework + 21 test | ✅ COMPLETE |
 | **IF-07** | **Migrasi Participation (Design C)** — parameter event_id, lookup Person (tanpa create sembarangan), duplicate Participation per event, commit via `ManualParticipantRegistrationService` (+ `resolvePerson` & param opsional), template REFERENSI event | Participation via framework + 17 test | ✅ COMPLETE |
-| **IF-08** | Migrasi Pengajian ke framework (UX identik, parity golden; Pengajian jadi orchestrator saja) | Pengajian via framework | 🔲 |
+| **IF-08** | **Migrasi Pengajian (behavior-preserving)** — wizard extends `ImportWizardBase`, service → orchestrator, adapter/pipeline/committer, `ImportCommit.metrics`, template IDENTIK, parity test OLD-vs-NEW | Pengajian via framework + 18 test | ✅ COMPLETE |
 | **IF-09** | Template Engine lanjutan (REFERENSI dropdown/data validation) + retire `public/templates/*` | Generator universal | 🔲 |
 | **IF-10** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
 | **IF-11** | Import Competition (cabang & kelas kompetisi) | Competition via framework | 🔲 |
@@ -338,6 +348,10 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 - [x] (IF-07) Person **dicari dulu** (via `resolvePerson`), tidak pernah create sembarangan; ambiguous → warning.
 - [x] (IF-07) Duplicate = Participation existing utk (person, event) — event lain boleh.
 - [x] (IF-07) Commit via `ManualParticipantRegistrationService` (service canonical, backward-compatible extension).
+- [x] (IF-08) **Pengajian memakai framework** — wizard extends `ImportWizardBase`; service → orchestrator.
+- [x] (IF-08) **Behavior IDENTIK** — parser/validator/committer/counter/pesan/template/UI 100% dipertahankan (parity test + 45 test golden hijau).
+- [x] (IF-08) **Satu Import Framework** untuk seluruh import (backend + frontend).
+- [x] (IF-08) Perilaku modul lain tidak berubah — baseline hijau (2138 passed, 5 failure pre-existing).
 - [x] (IF-07) Normalisasi reuse `PersonIdentityNormalizer` (tidak diduplikasi).
 - [x] (IF-07) Perilaku modul lain tidak berubah — baseline hijau (2120 passed, 5 failure pre-existing).
 - [ ] Validasi, duplicate detection, transaction, dan partial-success konsisten di semua modul.

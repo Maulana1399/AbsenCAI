@@ -27,7 +27,7 @@
 
 ## Import Framework (IF series)
 
-> IF-01 ✅, IF-02 ✅ (engine), **IF-03 ✅ (Desa)**, **IF-04 ✅ (Kelompok)**, **IF-05 ✅ (Regu)**, **IF-06 ✅ (Person)**, **IF-07 ✅ (Participation)**.
+> IF-01 ✅, IF-02 ✅ (engine), **IF-03 ✅ (Desa)**, **IF-04 ✅ (Kelompok)**, **IF-05 ✅ (Regu)**, **IF-06 ✅ (Person)**, **IF-07 ✅ (Participation)**, **IF-08 ✅ (Pengajian/behavior-preserving)**.
 
 - [x] **IF-02** — Bangun Import Engine: stage pipeline nyata, runner dispatch, DTO konsolidasi, exceptions, DI registry/coordinator, version guard, logging hook (+37 unit test)
 - [x] **IF-03** — Migrasi Desa: adapter reusable, definition penuh, template generator, wizard + komponen reusable (+36 test)
@@ -35,7 +35,7 @@
 - [x] **IF-05** — Migrasi Regu: collaborator nyata (normalisasi gender, duplicate unique name), `ImportWizardBase` reusable, template REFERENSI gender (+19 test)
 - [x] **IF-06** — Migrasi Person (Design C): identity global, reuses `PersonDuplicateDetectionService`, normalisasi gender/date/spasi, template REFERENSI gender+desa (+21 test)
 - [x] **IF-07** — Migrasi Participation (Design C): parameter event_id, lookup Person dulu, duplicate per event, commit via `ManualParticipantRegistrationService`, template REFERENSI event (+17 test)
-- [ ] **IF-08** — Migrasi Pengajian ke framework (UX identik; parity test golden; Pengajian jadi orchestrator saja)
+- [x] **IF-08** — Migrasi Pengajian (behavior-preserving): wizard extends `ImportWizardBase`, service → orchestrator, `ImportCommit.metrics`, parser/validator/committer port persis, parity test (+18 test)
 - [ ] **IF-09** — Template Engine lanjutan (REFERENSI dropdown) + retire `public/templates/*`
 - [ ] **IF-10** — Import Activity Log + gate/ability audit (`manage-import`)
 - [ ] **IF-11** — Import Competition (cabang & kelas)

@@ -11,6 +11,7 @@ final readonly class ImportCommit
      * @param  array<int, int>  $updatedIds
      * @param  array<int, int>  $skippedIds
      * @param  array<int, array<string, mixed>>  $failedRows
+     * @param  array<string, mixed>  $metrics  module-specific counters (e.g. created_persons)
      */
     public function __construct(
         public ImportContext $context,
@@ -20,5 +21,6 @@ final readonly class ImportCommit
         public array $skippedIds = [],
         public array $failedRows = [],
         public bool $activityLogged = false,
+        public array $metrics = [],
     ) {}
 }

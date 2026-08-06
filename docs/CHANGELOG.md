@@ -7,6 +7,23 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## IF-08 (Import Framework — Pengajian, Behavior-Preserving — 2026-08-06)
+
+Migrasi **Pengajian (golden standard)** ke Import Framework — **behavior 100% dipertahankan** (output, UI, summary, preview, validation, counter, template, error message, database write IDENTIK). Tidak ada perubahan business rule, database, migration, permission, policy, template, maupun UX. Baseline hijau.
+
+- **Wizard `ImportMassal` extends `ImportWizardBase`** — lifecycle (upload/reset/updatedFile/uploadError/preview/commit/loading/navigation) dari base; override 3-step, view custom (`import-massal.blade.php` tidak berubah), `importContext()` (eventId dari ActiveEventContext), extract/result hooks, pesan empty-file & parse-error persis.
+- **`PengajianImportService` → orchestrator** — public contract `validate()/import()` (signature & hasil) IDENTIK; implementasi delegasi `ImportAdapter → PengajianImportDefinition → Pipeline → Committer`.
+- **`ImportCommit.metrics`** (backward-compatible) membawa `created_persons/matched_persons/created_participations/skipped_duplicates/failed_rows`.
+- **`PengajianImportParser`** — port persis (CSV header wajib + semua baris dipertahankan tanpa prune; Excel skip nama kosong; pesan parse persis; row number index+2).
+- **`PengajianImportValidator`** — port persis `validate()` (urutan nama→JK→TTL→desa; gender STRICT L/P; `Laki - Laki` tetap invalid).
+- **`PengajianImportNormalizer`** — mempertahankan nilai mentah (normalisasi inline di committer seperti golden).
+- **`PengajianImportCommitter`** — port persis `processRow()`: counter, urutan, `DB::transaction`, resolusi desa/kelompok, `ManualParticipantRegistrationService::resolvePerson()` (Person logic), `PlacementService::generateParticipantNumber`, `RegistrationService::generateAttendanceCode`, `jenis_peserta='Pengajian Desa'`, tanpa regu/legacy mapping.
+- **`PengajianImportDuplicateDetector`** — no-op (duplicate di-handle committer; preview golden tidak menampilkan duplicate).
+- **Template IDENTIK** — `PersonImportTemplateExport` + route tetap; wrapper `PengajianImportTemplate` untuk metadata definition.
+- **Test** — +18: 8 unit definition (metadata/parser/validator/committer) + 10 parity OLD-vs-NEW (counter, DB writes, matching case/spacing/desa, kelompok collision, wizard). 45 test golden tetap hijau.
+- **Verifikasi:** full suite → **2138 passed / 5438 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md`, `docs/ARCHITECTURE.md`, `docs/import-audit.md` disinkronkan.
+
 ## IF-07 (Import Framework — Participation Import, Design C — 2026-08-06)
 
 Migrasi **Import Participation** sebagai domain Design C kedua (Person → Participation → Attendance). **Pengajian/Competition/Attendance tidak diubah.** Tidak ada perubahan database, migration, maupun business rule. Baseline hijau.

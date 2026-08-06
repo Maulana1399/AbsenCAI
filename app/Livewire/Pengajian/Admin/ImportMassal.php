@@ -2,47 +2,46 @@
 
 namespace App\Livewire\Pengajian\Admin;
 
-use App\Services\Pengajian\PengajianImportService;
+use App\Livewire\Import\ImportWizardBase;
+use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\DTO\ImportError;
+use App\Services\Import\DTO\NormalizedImportRow;
+use App\Services\Import\Results\ImportPipelineResult;
 use App\Support\ActiveEventContext;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
-use Livewire\WithFileUploads;
 
-class ImportMassal extends Component
+/**
+ * Pengajian Import Massal wizard.
+ *
+ * Extends the reusable ImportWizardBase (lifecycle, upload, reset, loading,
+ * navigation all inherited) but keeps the golden 3-step UI and result format
+ * exactly as before via overrides. All import work flows through the Import
+ * Framework (ImportAdapter → PengajianImportDefinition → Pipeline).
+ */
+class ImportMassal extends ImportWizardBase
 {
-    use WithFileUploads;
-
-    public $file = null;
-
-    public bool $processing = false;
-
-    public int $step = 1;
-
-    public array $previewRows = [];
-
-    public array $validationErrors = [];
-
-    public array $importResult = [];
-
     public bool $noActiveEvent = false;
 
     public ?string $eventName = null;
 
-    public ?string $uploadError = null;
-
-    protected function rules(): array
+    protected function definitionKey(): string
     {
-        return [
-            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:5120',
-        ];
+        return 'pengajian';
     }
 
-    protected $messages = [
-        'file.required' => 'Pilih file CSV atau Excel untuk diimport.',
-        'file.file' => 'File harus berupa file yang valid.',
-        'file.mimes' => 'File harus berformat CSV, TXT, XLSX, atau XLS.',
-        'file.max' => 'Ukuran file maksimal 5MB.',
-    ];
+    protected function gateAbility(): string
+    {
+        return 'manage-pengajian';
+    }
+
+    protected function steps(): array
+    {
+        return ['Upload', 'Preview & Validasi', 'Hasil'];
+    }
+
+    protected function refreshEvent(): ?string
+    {
+        return null;
+    }
 
     public function mount(): void
     {
@@ -57,203 +56,102 @@ class ImportMassal extends Component
         $this->eventName = $event->name;
     }
 
-    public function updatedFile(): void
+    protected function importContext(string $mode): ?ImportContext
     {
-        $this->resetErrorBag('file');
-        $this->uploadError = null;
-        $this->validationErrors = [];
-        $this->previewRows = [];
-        $this->importResult = [];
-        $this->step = 1;
+        $event = app(ActiveEventContext::class)->requireCurrent();
+
+        return new ImportContext(
+            type: 'pengajian',
+            eventId: $event->id,
+            userId: auth()->id(),
+            fileName: $this->file?->getClientOriginalName(),
+            source: 'livewire',
+            mode: $mode,
+            options: ['file' => $this->file],
+            definitionKey: 'pengajian',
+        );
     }
 
-    public function uploadError(): void
+    protected function emptyFileMessage(): string
     {
-        $this->uploadError = 'Upload file gagal. Periksa ukuran file (maks 5MB) dan format yang didukung (CSV, XLSX, XLS, TXT).';
+        return 'File tidak berisi data. Pastikan file memiliki minimal satu baris data (di bawah header).';
     }
 
-    public function preview(): void
+    protected function stepAfterPreview(bool $hasErrors): int
     {
-        Gate::authorize('manage-pengajian');
+        return 2;
+    }
 
-        $this->validate();
+    protected function stepAfterParseError(): int
+    {
+        return 2;
+    }
 
-        $this->processing = true;
-        $this->validationErrors = [];
-        $this->previewRows = [];
-        $this->importResult = [];
+    protected function resultStep(): int
+    {
+        return 3;
+    }
 
-        try {
-            $rows = $this->parseFile();
+    protected function resultErrorStep(): int
+    {
+        return 3;
+    }
 
-            if (empty($rows)) {
-                $this->validationErrors = [
-                    ['row' => 0, 'errors' => ['File tidak berisi data. Pastikan file memiliki minimal satu baris data (di bawah header).']],
-                ];
-                $this->step = 2;
+    protected function parseErrorMessage(\Throwable $e): string
+    {
+        $message = $e->getPrevious()?->getMessage() ?? $e->getMessage();
 
-                return;
-            }
+        return 'Gagal membaca file: '.$message;
+    }
 
-            $this->previewRows = $rows;
+    protected function extractPreviewRows(ImportPipelineResult $result): array
+    {
+        return array_map(
+            fn (NormalizedImportRow $row) => $row->original->raw,
+            $result->rows,
+        );
+    }
 
-            $service = app(PengajianImportService::class);
-            $errors = $service->validate($rows);
+    protected function extractValidationErrors(ImportPipelineResult $result): array
+    {
+        $grouped = [];
 
-            $this->validationErrors = $errors;
-            $this->step = 2;
-        } catch (\Throwable $e) {
-            $this->validationErrors = [
-                ['row' => 0, 'errors' => ['Gagal membaca file: '.$e->getMessage()]],
-            ];
-            $this->step = 2;
-        } finally {
-            $this->processing = false;
+        foreach ($result->summary?->errors ?? [] as $error) {
+            $row = $error instanceof ImportError ? $error->rowNumber : ($error['row'] ?? 0);
+            $message = $error instanceof ImportError ? $error->message : ($error['message'] ?? '');
+
+            $grouped[$row]['row'] = $row;
+            $grouped[$row]['errors'][] = $message;
         }
+
+        return array_values($grouped);
     }
 
-    public function executeImport(): void
+    protected function extractResult(ImportPipelineResult $result): array
     {
-        Gate::authorize('manage-pengajian');
+        $commit = $result->commit;
+        $metrics = $commit?->metrics ?? [];
 
-        if ($this->processing || empty($this->previewRows) || ! empty($this->validationErrors)) {
-            return;
-        }
+        $errors = array_map(
+            fn ($row) => [
+                'row' => $row['row'] ?? 0,
+                'message' => $row['message'] ?? '',
+            ],
+            $commit?->failedRows ?? [],
+        );
 
-        $this->processing = true;
-
-        try {
-            $event = app(ActiveEventContext::class)->requireCurrent();
-
-            $service = app(PengajianImportService::class);
-            $result = $service->import($this->previewRows, $event->id);
-
-            $this->importResult = $result;
-            $this->step = 3;
-        } catch (\Throwable $e) {
-            $this->importResult = [
-                'error' => 'Gagal menjalankan import: '.$e->getMessage(),
-            ];
-            $this->step = 3;
-        } finally {
-            $this->processing = false;
-        }
-    }
-
-    public function resetImport(): void
-    {
-        $this->step = 1;
-        $this->file = null;
-        $this->previewRows = [];
-        $this->validationErrors = [];
-        $this->importResult = [];
-        $this->uploadError = null;
-        $this->resetErrorBag('file');
+        return [
+            'created_persons' => $metrics['created_persons'] ?? 0,
+            'matched_persons' => $metrics['matched_persons'] ?? 0,
+            'created_participations' => $metrics['created_participations'] ?? 0,
+            'skipped_duplicates' => $metrics['skipped_duplicates'] ?? 0,
+            'failed_rows' => $metrics['failed_rows'] ?? count($errors),
+            'errors' => $errors,
+        ];
     }
 
     public function render()
     {
         return view('livewire.pengajian.admin.import-massal');
-    }
-
-    private function parseFile(): array
-    {
-        $path = $this->file->getRealPath();
-        $extension = strtolower($this->file->getClientOriginalExtension());
-
-        if (in_array($extension, ['xlsx', 'xls'])) {
-            return $this->parseExcel($path);
-        }
-
-        return $this->parseCsv($path);
-    }
-
-    private function parseCsv(string $path): array
-    {
-        $handle = fopen($path, 'r');
-        if ($handle === false) {
-            throw new \RuntimeException('Tidak dapat membaca file.');
-        }
-
-        $headers = fgetcsv($handle);
-
-        if ($headers === false || $headers === null) {
-            fclose($handle);
-            throw new \RuntimeException('File CSV tidak memiliki header.');
-        }
-
-        $headers = array_map(fn ($h) => trim(mb_strtolower(str_replace([' ', '-'], '_', $h))), $headers);
-
-        $expected = ['nama', 'jenis_kelamin', 'tanggal_lahir', 'desa', 'kelompok'];
-        $missing = array_diff($expected, $headers);
-
-        if (! empty($missing)) {
-            fclose($handle);
-            throw new \RuntimeException(
-                'Kolom wajib tidak ditemukan: '.implode(', ', $missing).
-                '. Kolom yang diharapkan: nama, jenis_kelamin, tanggal_lahir, desa, kelompok.'
-            );
-        }
-
-        $rows = [];
-        $lineNumber = 1;
-
-        while (($data = fgetcsv($handle)) !== false) {
-            $lineNumber++;
-            $row = [];
-
-            foreach ($headers as $i => $header) {
-                $row[$header] = $data[$i] ?? '';
-            }
-
-            $rows[] = $row;
-        }
-
-        fclose($handle);
-
-        return $rows;
-    }
-
-    private function parseExcel(string $path): array
-    {
-        if (! class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
-            throw new \RuntimeException('Library PhpSpreadsheet tidak tersedia untuk membaca Excel.');
-        }
-
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
-        $worksheet = $spreadsheet->getActiveSheet();
-        $data = $worksheet->toArray();
-
-        if (empty($data)) {
-            throw new \RuntimeException('File Excel kosong.');
-        }
-
-        $headers = array_map(fn ($h) => trim(mb_strtolower(str_replace([' ', '-'], '_', (string) $h))), $data[0]);
-
-        $expected = ['nama', 'jenis_kelamin', 'tanggal_lahir', 'desa', 'kelompok'];
-        $missing = array_diff($expected, $headers);
-
-        if (! empty($missing)) {
-            throw new \RuntimeException(
-                'Kolom wajib tidak ditemukan: '.implode(', ', $missing).
-                '. Kolom yang diharapkan: nama, jenis_kelamin, tanggal_lahir, desa, kelompok.'
-            );
-        }
-
-        $rows = [];
-
-        for ($i = 1; $i < count($data); $i++) {
-            $row = [];
-
-            foreach ($headers as $j => $header) {
-                $row[$header] = $data[$i][$j] ?? '';
-            }
-
-            if (! empty(trim($row['nama'] ?? ''))) {
-                $rows[] = $row;
-            }
-        }
-
-        return $rows;
     }
 }

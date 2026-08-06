@@ -178,34 +178,32 @@ TrueNAS
 
 ## Import Framework
 
-> Status: 🔲 **IF-01 (audit & desain) COMPLETE** — ✅ **IF-02 (engine infrastructure) COMPLETE** — IF-03+ planned.
+> Status: 🔲 **IF-01–IF-08 COMPLETE** — seluruh import memakai SATU Import Framework (backend + frontend). Pengajian (golden) dimigrasi tanpa mengubah behavior.
 > Audit & GAP: `docs/import-audit.md` | Arsitektur & roadmap: `docs/import-framework.md`
 
-Seluruh fitur import akan distandarisasi ke satu framework: UI/UX, lifecycle, validation,
-preview, summary, commit flow, dan testing yang sama. **Import Massal Pengajian** adalah
-golden standard.
-
-IF-02 menghidupkan skeleton `app/Services/Import/*` menjadi engine yang siap pakai
-(**belum dipakai modul mana pun; UI/route/controller/service tidak berubah**):
+Seluruh fitur import (Desa, Kelompok, Regu, Person, Participation, Pengajian) distandarisasi:
+UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sama.
+**Import Massal Pengajian** adalah golden standard yang kini berjalan di atas framework
+(wizard extends `ImportWizardBase`, `PengajianImportService` = orchestrator).
 
 ```
 app/Services/Import/
-├── Contracts/        (definition, parser, validator, normalizer, dupe, committer,
-│                      activityLogger, pipelineStage, logger)
+├── Contracts/        (definition, metadata, parser, validator, normalizer, dupe, committer,
+│                      activityLogger, pipelineStage, logger, template)
 ├── Pipeline/         (coordinator, pipeline, state, 8 stage nyata:
 │                      parse→normalize→validate→duplicate→preview→commit→summary→cleanup)
-├── Support/          (runner dispatch, import/template version)
+├── Support/          (runner, file parser, personIdentityNormalizer, versions)
 ├── Registry/         (register/resolve/has/all)
 ├── DTO/              (context, raw/normalized row, error, warning)
-├── Results/          (summary, preview, commit, result, pipelineResult)
+├── Results/          (summary, preview, commit [+metrics], result, pipelineResult)
 ├── Exceptions/       (typed import exceptions)
 ├── NullObjects/      (no-op defaults)
-└── Adapters/         (desa/kelompok/regu/peserta/pengajian — dioptimalkan saat migrasi IF-04+)
+├── Template/         (generator framework DATA/PETUNJUK/REFERENSI + wrapper Pengajian)
+└── Adapters/         (desa/kelompok/regu/person/participation/pengajian — REAL; peserta legacy)
 ```
 
-Wiring DI: `ImportServiceProvider` (registry singleton, runner, pipeline, coordinator,
-definisi desa/kelompok/regu/peserta). Version guard + logging hook tersedia.
-Baseline hijau — perilaku aplikasi tidak berubah.
+Wizard reusable: `ImportWizardBase` (livecycle base) + komponen `<x-import.*>`. Wiring DI:
+`ImportServiceProvider`. Baseline hijau — seluruh import memakai framework yang sama.
 
 ---
 
