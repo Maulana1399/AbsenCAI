@@ -27,7 +27,7 @@
 
 ## Import Framework (IF series)
 
-> IF-01 ✅, IF-02 ✅ (engine), **IF-03 ✅ (Desa)**, **IF-04 ✅ (Kelompok)**, **IF-05 ✅ (Regu)**, **IF-06 ✅ (Person)**, **IF-07 ✅ (Participation)**, **IF-08 ✅ (Pengajian)**, **IF-09 ✅ (Peserta — final legacy)**.
+> IF-01 ✅, IF-02 ✅ (engine), **IF-03 ✅ (Desa)**, **IF-04 ✅ (Kelompok)**, **IF-05 ✅ (Regu)**, **IF-06 ✅ (Person)**, **IF-07 ✅ (Participation)**, **IF-08 ✅ (Pengajian)**, **IF-09 ✅ (Peserta)**, **IF-10 ✅ (Cleanup — STABLE v1.0)**.
 
 - [x] **IF-02** — Bangun Import Engine: stage pipeline nyata, runner dispatch, DTO konsolidasi, exceptions, DI registry/coordinator, version guard, logging hook (+37 unit test)
 - [x] **IF-03** — Migrasi Desa: adapter reusable, definition penuh, template generator, wizard + komponen reusable (+36 test)
@@ -37,7 +37,8 @@
 - [x] **IF-07** — Migrasi Participation (Design C): parameter event_id, lookup Person dulu, duplicate per event, commit via `ManualParticipantRegistrationService`, template REFERENSI event (+17 test)
 - [x] **IF-08** — Migrasi Pengajian (behavior-preserving): wizard extends `ImportWizardBase`, service → orchestrator, `ImportCommit.metrics`, parser/validator/committer port persis, parity test (+18 test)
 - [x] **IF-09** — Migrasi Peserta (final legacy): real collaborators, committer port `model()` via `RegistrationService`, hapus `Excel::import`/`PesertaImport`/manual coordinator/`executeImport`/`ImportPeserta` vestigial (+10 test)
-- [ ] **IF-10** — Template Engine lanjutan (REFERENSI dropdown) + retire `public/templates/*`
+- [x] **IF-10** — Final Lock & Cleanup: hapus orphan (`ImportResult`/`ImportMetrics`/`TemplateVersion`, dir kosong, helper test mati); docs sinkron — **framework v1.0 STABLE**
+- [ ] **IF-11** — Template Engine lanjutan (REFERENSI dropdown) + retire `public/templates/*`
 - [ ] **IF-10** — Import Activity Log + gate/ability audit (`manage-import`)
 - [ ] **IF-11** — Import Competition (cabang & kelas)
 - [ ] **IF-12** — Import Venue

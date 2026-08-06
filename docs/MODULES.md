@@ -116,9 +116,9 @@ Future (V2 Roadmap Remaining)
 
 # Import Framework
 
-🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — ✅ **IF-08 (Pengajian) COMPLETE** — ✅ **IF-09 (Peserta — final legacy) COMPLETE** — IF-10+ NOT STARTED.
+🔲 **IF-01 (audit) COMPLETE** — ✅ **IF-02 (engine) COMPLETE** — ✅ **IF-03 (Desa) COMPLETE** — ✅ **IF-04 (Kelompok) COMPLETE** — ✅ **IF-05 (Regu) COMPLETE** — ✅ **IF-06 (Person) COMPLETE** — ✅ **IF-07 (Participation) COMPLETE** — ✅ **IF-08 (Pengajian) COMPLETE** — ✅ **IF-09 (Peserta) COMPLETE** — ✅ **IF-10 (Cleanup — STABLE v1.0) COMPLETE** — IF-11+ NOT STARTED.
 
-**SELURUH 7 modul import memakai SATU Import Framework (backend + frontend).** Tidak ada lagi Maatwebsite import, `Excel::import`, manual coordinator/registry/pipeline, maupun bypass `ImportAdapter`.
+**Import Framework v1.0 STABLE.** SELURUH 7 modul import memakai SATU Import Framework (backend + frontend). Tidak ada lagi Maatwebsite import, `Excel::import`, manual coordinator/registry/pipeline, maupun bypass `ImportAdapter`. Dead code orphan telah dihapus.
 
 | Import | Status | Route |
 |--------|--------|-------|

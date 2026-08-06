@@ -2,8 +2,8 @@
 
 > Status: **AUDIT / DESIGN** — IF-01 (2026-08-05). IF-02 menghidupkan skeleton.
 > **IF-03 Desa, IF-04 Kelompok, IF-05 Regu, IF-06 Person, IF-07 Participation, IF-08 Pengajian,
-> IF-09 Peserta** sudah dimigrasi ke framework (status inventori di bawah kedaluwarsa).
-> **SELURUH 7 modul import memakai SATU Import Framework** — tidak ada lagi Maatwebsite import,
+> IF-09 Peserta** sudah dimigrasi; **IF-10 cleanup — Import Framework v1.0 STABLE.**
+> **SELURUH 7 modul import memakai SATU Import Framework** — tidak ada Maatwebsite import,
 > `Excel::import()` untuk proses import, manual coordinator/registry/pipeline, maupun bypass adapter.
 > Design C: Person ✅ → Participation ✅ → Attendance (belum).
 > Bagian 4 di bawah (audit skeleton) kini historis: seluruh stage no-op sudah digantikan

@@ -178,7 +178,7 @@ TrueNAS
 
 ## Import Framework
 
-> Status: 🔲 **IF-01–IF-09 COMPLETE** — **SELURUH import memakai SATU Import Framework** (backend + frontend). Peserta (legacy terakhir) dimigrasi; tidak ada lagi `Excel::import`/manual coordinator/registry/pipeline/bypass.
+> Status: 🔲 **IF-01–IF-10 COMPLETE — Import Framework v1.0 STABLE.** SELURUH import memakai SATU Import Framework (backend + frontend). Dead code orphan dihapus; tidak ada lagi `Excel::import`/manual coordinator/registry/pipeline/bypass.
 > Audit & GAP: `docs/import-audit.md` | Arsitektur & roadmap: `docs/import-framework.md`
 
 Seluruh 7 fitur import (Desa, Kelompok, Regu, Person, Participation, Pengajian, Peserta)
@@ -191,12 +191,12 @@ app/Services/Import/
 │                      activityLogger, pipelineStage, logger, template)
 ├── Pipeline/         (coordinator, pipeline, state, 8 stage nyata:
 │                      parse→normalize→validate→duplicate→preview→commit→summary→cleanup)
-├── Support/          (runner, file parser, personIdentityNormalizer, versions)
+├── Support/          (runner, file parser, personIdentityNormalizer, import version)
 ├── Registry/         (register/resolve/has/all)
 ├── DTO/              (context, raw/normalized row, error, warning)
-├── Results/          (summary, preview, commit [+metrics], result, pipelineResult)
+├── Results/          (summary, preview, commit [+metrics], pipelineResult)
 ├── Exceptions/       (typed import exceptions)
-├── NullObjects/      (no-op defaults)
+├── NullObjects/      (no-op collaborators for tests + NullImportLogger)
 ├── Template/         (generator framework DATA/PETUNJUK/REFERENSI + wrapper)
 └── Adapters/         (desa/kelompok/regu/person/participation/pengajian/peserta — ALL REAL)
 ```

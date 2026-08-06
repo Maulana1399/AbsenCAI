@@ -7,6 +7,17 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## IF-10 (Import Framework — Final Lock & Cleanup — 2026-08-06)
+
+Fase non-feature: final lock & cleanup. Import Framework **v1.0 STABLE**. Tidak ada perubahan business rule, database, UI, migration, permission, maupun policy.
+
+- **Dead code dihapus (orphan, tanpa referensi):** `Results/ImportResult.php`, `Metrics/ImportMetrics.php`, `Support/TemplateVersion.php`; direktori kosong `Definitions/`, `Version/`, `Imports/`; helper test mati `something()` & `toBeOne` di `tests/Pest.php`.
+- **Dipertahankan (bukan orphan):** `NullImportParser/Validator/Normalizer/DuplicateDetector/ActivityLogger` (dipakai test fake), `ImportCommitException` (test taxonomy, reserved), `ImportVersion` (guard coordinator), `ImportDesa` wizard (dipakai, via adapter).
+- **Import path tunggal** — seluruh 7 modul melewati `ImportAdapter → ImportCoordinator → Definition → Pipeline → Committer`; tidak ada bypass/manual coordinator/`Excel::import`.
+- **Docs sinkron** — `import-framework.md`, `ROADMAP.md`, `TODO.md`, `MODULES.md`, `ARCHITECTURE.md`, `import-audit.md`, `CHANGELOG.md`.
+- **Verifikasi:** full suite → **2148 passed / 5500 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError). Pint clean.
+- **Import Framework v1.0 STABLE — siap menjadi fondasi seluruh modul berikutnya.**
+
 ## IF-09 (Import Framework — Peserta, Final Legacy Migration — 2026-08-06)
 
 Migrasi **Peserta** (modul legacy terakhir) ke Import Framework. **Seluruh 7 modul import kini memakai SATU Import Framework.** Tidak ada lagi Maatwebsite import, `Excel::import()`, manual coordinator/registry/pipeline, maupun bypass `ImportAdapter`. Tidak ada perubahan business rule, database, migration, permission, template, maupun UI. Baseline hijau.

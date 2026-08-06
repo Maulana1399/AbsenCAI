@@ -1,11 +1,11 @@
 # Import Framework — Arsitektur & Roadmap
 
-> Status: **IF-09 COMPLETE — Peserta (legacy terakhir) dimigrasi; SELURUH import memakai SATU framework.**
+> Status: **IF-10 COMPLETE — Final Lock & Cleanup; Import Framework v1.0 STABLE.**
 > IF-01 (audit & GAP) → `docs/import-audit.md`.
 > Golden Standard: Import Massal Pengajian.
 > IF-02 engine. IF-03 Desa. IF-04 Kelompok. IF-05 Regu. IF-06 Person. IF-07 Participation.
-> IF-08 Pengajian (behavior-preserving). **IF-09 Peserta** — tanpa Maatwebsite/`Excel::import`/manual coordinator.
-> Seluruh 7 modul import kini memakai `ImportAdapter → ImportCoordinator → Definition → Pipeline → Committer`.
+> IF-08 Pengajian (behavior-preserving). IF-09 Peserta (final legacy). **IF-10 cleanup — dead code dihapus, docs sinkron.**
+> Seluruh 7 modul import memakai `ImportAdapter → ImportCoordinator → Definition → Pipeline → Committer`.
 
 ---
 
@@ -46,18 +46,17 @@ app/Services/Import/
 ├── Support/
 │   ├── PipelineStageRunner.php / ArrayPipelineStageRunner.php
 │   ├── FileParser.php               ← IF-03: parser CSV/Excel generik + kolom wajib + prune baris kosong
-│   ├── ImportVersion.php / TemplateVersion.php
+│   └── ImportVersion.php            ← rentang versi (guard coordinator)
 ├── Registry/ImportRegistry.php      ← register/resolve/has/all
 ├── DTO/                             ← ImportContext, RawImportRow, NormalizedImportRow, ImportError, ImportWarning
-├── Results/                         ← ImportSummary, ImportPreview, ImportCommit, ImportResult, ImportPipelineResult
+├── Results/                         ← ImportSummary, ImportPreview, ImportCommit, ImportPipelineResult
 ├── Exceptions/                      ← ImportException (base) + 6 subclass
-├── NullObjects/                     ← no-op defaults + NullImportLogger
+├── NullObjects/                     ← no-op defaults (test/no-op collaborators) + NullImportLogger
 ├── Template/                        ← generator template framework
 │   ├── ImportTemplateExport.php     ← base 3-sheet (DATA/PETUNJUK/REFERENSI)
 │   ├── ImportDataSheet.php / ImportInstructionsSheet.php / ImportReferenceSheet.php
 │   ├── DesaImportTemplateExport.php
 │   └── KelompokImportTemplateExport.php   ← REFERENSI = daftar desa
-├── Metrics/ImportMetrics.php
 └── Adapters/
     ├── ImportAdapter.php            ← adapter reusable (preview/commit/definition/metadata/template + parameters)
     ├── Desa/                        ← REAL collaborator penuh
@@ -332,9 +331,10 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 | **IF-07** | **Migrasi Participation (Design C)** — parameter event_id, lookup Person (tanpa create sembarangan), duplicate Participation per event, commit via `ManualParticipantRegistrationService` (+ `resolvePerson` & param opsional), template REFERENSI event | Participation via framework + 17 test | ✅ COMPLETE |
 | **IF-08** | **Migrasi Pengajian (behavior-preserving)** — wizard extends `ImportWizardBase`, service → orchestrator, adapter/pipeline/committer, `ImportCommit.metrics`, template IDENTIK, parity test OLD-vs-NEW | Pengajian via framework + 18 test | ✅ COMPLETE |
 | **IF-09** | **Migrasi Peserta (final legacy)** — real collaborators, committer port `model()` via `RegistrationService`, hapus `Excel::import`/`PesertaImport`/manual coordinator/`executeImport`/`ImportPeserta` vestigial | Peserta via framework + 10 test | ✅ COMPLETE |
-| **IF-10** | Template Engine lanjutan (REFERENSI dropdown/data validation) + retire `public/templates/*` | Generator universal | 🔲 |
-| **IF-11** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
-| **IF-12** | Import Competition (cabang & kelas kompetisi) | Competition via framework | 🔲 |
+| **IF-10** | **Final Lock & Cleanup** — hapus orphan (`ImportResult`, `ImportMetrics`, `TemplateVersion`, dir kosong, helper test mati); audit dependency; docs sinkron | Framework v1.0 STABLE | ✅ COMPLETE |
+| **IF-11** | Template Engine lanjutan (REFERENSI dropdown/data validation) + retire `public/templates/*` | Generator universal | 🔲 |
+| **IF-12** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
+| **IF-13** | Import Competition (cabang & kelas kompetisi) | Competition via framework | 🔲 |
 | **IF-12** | Import Venue | Venue via framework | 🔲 |
 | **IF-13** | Import Schedule | Schedule via framework | 🔲 |
 | **IF-14** | Import Committee (Event Role / Committee Assignment) | Committee via framework | 🔲 |
@@ -366,6 +366,9 @@ Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REF
 - [x] (IF-09) **Tidak ada lagi** `Excel::import()` untuk proses import, `app/Imports/PesertaImport.php`, manual `ImportCoordinator`/`ImportRegistry`/`Pipeline`, maupun bypass `ImportAdapter`.
 - [x] (IF-09) Perilaku Peserta IDENTIK (full canonical record set, duplicate guard, regu auto-placement) — parity + route tests hijau.
 - [x] (IF-09) Perilaku modul lain tidak berubah — baseline hijau (2148 passed, 5 failure pre-existing).
+- [x] (IF-10) **Cleanup** — orphan dihapus (`ImportResult`, `ImportMetrics`, `TemplateVersion`, dir `Definitions/`/`Version/`/`Imports/` kosong, helper test `something()`/`toBeOne`).
+- [x] (IF-10) Docs sinkron (ROADMAP/TODO/MODULES/ARCHITECTURE/CHANGELOG/import-framework/import-audit).
+- [x] (IF-10) **Import Framework v1.0 STABLE** — fondasi seluruh modul berikutnya.
 - [x] (IF-07) Normalisasi reuse `PersonIdentityNormalizer` (tidak diduplikasi).
 - [x] (IF-07) Perilaku modul lain tidak berubah — baseline hijau (2120 passed, 5 failure pre-existing).
 - [ ] Validasi, duplicate detection, transaction, dan partial-success konsisten di semua modul.
