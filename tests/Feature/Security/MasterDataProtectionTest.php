@@ -289,7 +289,7 @@ test('unauthorized user cannot import desa via Livewire', function () {
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\Database\Desa\ImportDesa::class)
-        ->call('import')
+        ->call('preview')
         ->assertForbidden();
 });
 
@@ -345,7 +345,7 @@ test('unauthorized user cannot import kelompok via Livewire', function () {
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\Database\Kelompok\ImportKelompok::class)
-        ->call('import')
+        ->call('preview')
         ->assertForbidden();
 });
 
@@ -420,7 +420,7 @@ test('unauthorized user cannot import regu via Livewire', function () {
     $this->actingAs($user);
 
     Livewire::test(\App\Livewire\Database\Regu\ImportRegu::class)
-        ->call('import')
+        ->call('preview')
         ->assertForbidden();
 
     $this->assertDatabaseMissing('regus', ['regu' => 'Hacked Regu']);

@@ -1,10 +1,11 @@
 # Import Framework — Arsitektur & Roadmap
 
-> Status: **IF-02 COMPLETE — Import Engine infrastructure siap dipakai.**
+> Status: **IF-05 COMPLETE — Regu = modul ketiga di atas framework.**
 > IF-01 (audit & GAP) → `docs/import-audit.md`.
 > Golden Standard: Import Massal Pengajian.
-> IF-02 menghidupkan skeleton yang sudah ada — **belum ada modul yang memakai framework ini**,
-> UI/route/controller/service/database tidak berubah, seluruh import existing tetap berjalan.
+> IF-02 engine. **IF-03 Desa.** **IF-04 Kelompok** (metadata + parameter). **IF-05 Regu**
+> (+ reusable wizard base `ImportWizardBase`). Import Pengajian/Peserta tetap memakai
+> implementasi lama.
 
 ---
 
@@ -12,7 +13,7 @@
 
 Satu standar Import Framework yang dipakai seluruh modul:
 
-- **UI & UX sama** — satu wizard reusable (IF-03).
+- **UI & UX sama** — wizard + komponen reusable.
 - **Lifecycle sama** — pipeline satu alur.
 - **Validation, Preview, Summary, Commit, Result sama** — satu kontrak per modul.
 - **Testing sama** — unit (pipeline) + feature (wizard) + regression (parity golden).
@@ -21,221 +22,255 @@ Import Pengajian menjadi **golden standard** yang dipertahankan sebagai acuan pa
 
 ---
 
-## 2. Struktur Aktual (IF-02 — skeleton `app/Services/Import/*` dihidupkan)
+## 2. Struktur Aktual
 
 > Sesuai arahan "jangan membuat framework baru", implementasi mempertahankan skeleton yang
-> sudah ada di `app/Services/Import/*` (tidak dipindah ke `app/Import/*`).
+> sudah ada di `app/Services/Import/*`.
 
 ```
 app/Services/Import/
-├── Contracts/                    ← kontrak
-│   ├── ImportDefinition.php      ← parser/validator/normalizer/duplicateDetector/committer/activityLogger + version + supports*
-│   ├── ImportParser.php
-│   ├── ImportValidator.php
-│   ├── ImportNormalizer.php
-│   ├── ImportDuplicateDetector.php
-│   ├── ImportCommitter.php
-│   ├── ImportActivityLogger.php  ← hook audit (logPreview/logCommit) — dipanggil runner
-│   ├── ImportPipelineStage.php   ← kontrak stage seragam: name()/supports()/handle()
-│   └── ImportLogger.php          ← NEW: hook observasi pipeline (stageStarted/stageCompleted) — default silent
+├── Contracts/
+│   ├── ImportDefinition.php         ← kontrak definition (collaborators + version + supports)
+│   ├── ImportDefinitionMetadata.php ← IF-04: displayName/description/icon/parameters/columns/rules/template/summary/parameterOptions
+│   ├── ImportParser / ImportValidator / ImportNormalizer
+│   ├── ImportDuplicateDetector / ImportCommitter / ImportActivityLogger
+│   ├── ImportPipelineStage.php      ← stage seragam: name()/supports()/handle()
+│   ├── ImportTemplate.php           ← IF-03: fileName()/toExport()
+│   └── ImportLogger.php             ← hook observasi pipeline (default silent)
 ├── Pipeline/
-│   ├── ImportPipeline.php        ← interface pipeline (run + stageOrder)
-│   ├── DefaultImportPipeline.php ← orkestrasi: state + runner; stage order configurable
-│   ├── ImportCoordinator.php     ← resolve definition + version guard + run
-│   ├── ImportPipelineState.php   ← NEW: akumulator mutable (rows/summary/preview/commit/statistics)
-│   ├── ParseStage.php            ← parse → RawImportRow[]
-│   ├── NormalizeStage.php        ← normalize → NormalizedImportRow[]
-│   ├── ValidateStage.php         ← validate → ImportSummary
-│   ├── DuplicateStage.php        ← duplicate → ImportSummary
-│   ├── PreviewStage.php          ← preview → ImportPreview (canCommit)
-│   ├── CommitStage.php           ← commit (mode execute; exception bisnis diteruskan apa adanya)
-│   ├── SummaryStage.php          ← agregasi summary final
-│   └── CleanupStage.php          ← hook terminal (no-op default)
+│   ├── ImportPipeline.php / DefaultImportPipeline.php  ← orkestrasi + stage order configurable
+│   ├── ImportCoordinator.php        ← resolve definition + version guard + run
+│   ├── ImportPipelineState.php      ← akumulator mutable
+│   └── ParseStage / NormalizeStage / ValidateStage / DuplicateStage /
+│       PreviewStage / CommitStage / SummaryStage / CleanupStage
 ├── Support/
-│   ├── PipelineStageRunner.php   ← interface runner
-│   ├── ArrayPipelineStageRunner.php ← runner nyata: dispatch stage by name + skip unsupported + logging hook
-│   ├── ImportVersion.php         ← rentang versi + accepts()
-│   └── TemplateVersion.php
-├── Registry/
-│   └── ImportRegistry.php        ← register()/resolve()/has()/all()
-├── DTO/                          ← DTO kanonik (duplikat di Results dihapus)
-│   ├── ImportContext.php         ← input immutable (+ event, user, version)
-│   ├── RawImportRow.php
-│   ├── NormalizedImportRow.php
-│   ├── ImportError.php
-│   └── ImportWarning.php
-├── Results/                      ← hasil pipeline (kanonik)
-│   ├── ImportSummary.php
-│   ├── ImportPreview.php
-│   ├── ImportCommit.php
-│   ├── ImportResult.php
-│   └── ImportPipelineResult.php  (+ rows, statistics)
-├── Exceptions/                   ← NEW: exception khusus import
-│   ├── ImportException.php                 (base)
-│   ├── ImportDefinitionNotFoundException.php
-│   ├── ImportStageNotFoundException.php
-│   ├── ImportParseException.php
-│   ├── ImportValidationException.php
-│   ├── ImportCommitException.php           (cadangan batch atomik)
-│   └── ImportVersionNotSupportedException.php
-├── NullObjects/                  ← no-op default (parser/validator/normalizer/dupe/logger)
-│   └── NullImportLogger.php      ← NEW
+│   ├── PipelineStageRunner.php / ArrayPipelineStageRunner.php
+│   ├── FileParser.php               ← IF-03: parser CSV/Excel generik + kolom wajib + prune baris kosong
+│   ├── ImportVersion.php / TemplateVersion.php
+├── Registry/ImportRegistry.php      ← register/resolve/has/all
+├── DTO/                             ← ImportContext, RawImportRow, NormalizedImportRow, ImportError, ImportWarning
+├── Results/                         ← ImportSummary, ImportPreview, ImportCommit, ImportResult, ImportPipelineResult
+├── Exceptions/                      ← ImportException (base) + 6 subclass
+├── NullObjects/                     ← no-op defaults + NullImportLogger
+├── Template/                        ← generator template framework
+│   ├── ImportTemplateExport.php     ← base 3-sheet (DATA/PETUNJUK/REFERENSI)
+│   ├── ImportDataSheet.php / ImportInstructionsSheet.php / ImportReferenceSheet.php
+│   ├── DesaImportTemplateExport.php
+│   └── KelompokImportTemplateExport.php   ← REFERENSI = daftar desa
 ├── Metrics/ImportMetrics.php
-└── Adapters/                     ← definisi per-modul (belum dioptimalkan; diisi penuh saat migrasi IF-04+)
-    ├── Desa/  (parser/validator/normalizer/dupe/committer/logger/definition — lengkap, trivial)
-    ├── Kelompok/  (hanya committer + definition)
-    ├── Regu/      (hanya committer + definition)
-    ├── Peserta/   (hanya committer + definition)
-    └── Pengajian/ (hanya committer + definition — adaptor lain BELUM ada; didaftarkan IF-04)
+└── Adapters/
+    ├── ImportAdapter.php            ← adapter reusable (preview/commit/definition/metadata/template + parameters)
+    ├── Desa/                        ← REAL collaborator penuh
+    ├── Kelompok/                    ← REAL collaborator penuh + metadata
+    ├── Regu/                        ← REAL collaborator penuh (IF-05) + metadata
+    ├── Peserta/                     ← committer legacy (belum dimigrasi)
+    └── Pengajian/                   ← committer legacy (belum dimigrasi)
 ```
 
 **Wiring DI:** `app/Providers/ImportServiceProvider.php` (didaftarkan di `bootstrap/providers.php`)
-mengikat singleton `ImportRegistry`, `PipelineStageRunner`, `ImportPipeline`, `ImportCoordinator`,
-dan definisi `desa/kelompok/regu/peserta` ke registry. Legacy controller tetap memakai
-instansiasi manual yang sudah ada — perilaku tidak berubah.
+mengikat singleton `ImportRegistry`, `FileParser`, `PipelineStageRunner`, `ImportPipeline`,
+`ImportCoordinator`, `ImportAdapter`, dan definisi `desa/kelompok/regu/peserta` (by class + by key).
+
+**Wizard reusable (IF-05):** `app/Livewire/Import/ImportWizardBase.php` — base Livewire wizard
+(state machine + metadata-driven render) dipakai `ImportKelompok` & `ImportRegu`; view generik
+`resources/views/livewire/import/import-wizard.blade.php`.
 
 ---
 
-## 3. Pipeline Standar (Terimplementasi)
+## 3. Pipeline Standar
 
 Stage order kanonik (`DefaultImportPipeline::DEFAULT_STAGES`), configurable via constructor:
 
 ```
-1 Parse       — source → RawImportRow[] (deteksi kolom wajib, baris kosong)
+1 Parse       — source → RawImportRow[] (FileParser: CSV/Excel, kolom wajib, prune baris kosong)
 2 Normalize   — raw → NormalizedImportRow[] (trim/case/format, tanpa tulis DB)
 3 Validate    — rules per-baris → ImportSummary (validation)
-4 Duplicate   — duplicateKey → ImportSummary (duplicate)
+4 Duplicate   — duplicateKey → ImportSummary (duplicate: intra-file + DB)
 5 Preview     — ImportPreview + canCommit (hanya jika definition supportsPreview)
-6 Commit      — committer → ImportCommit (hanya mode 'execute' + supportsCommit)
+6 Commit      — committer(rows) → ImportCommit (hanya mode 'execute' + supportsCommit)
 7 Summary     — agregasi summary final (validation + duplicate + commit + failedRows)
 8 Cleanup     — hook terminal (no-op default)
 ```
 
-Tanggung jawab detail:
-
 | Stage | Tanggung jawab | Keluaran |
 |-------|----------------|----------|
-| **Parse** | Baca CSV/Excel/TXT → `RawImportRow[]`; deteksi header/kolom wajib; potong baris kosong; error dibungkus `ImportParseException` | `RawImportRow[]` |
-| **Normalize** | Bersihkan nilai, normalisasi format (gender/date/number), resolusi FK referensi tanpa menulis DB | `NormalizedImportRow[]` |
-| **Validate** | Jalankan validator definition; hasil `ImportError`/`ImportWarning`; error dibungkus `ImportValidationException` | `ImportSummary` |
-| **Duplicate** | Tandai duplikat intra-file & terhadap DB via duplicateDetector | `ImportSummary` |
-| **Preview** | Bangun `ImportPreview`; `canCommit = 0 error & rows > 0` | `ImportPreview` |
-| **Commit** | Panggil committer (per-baris transaction, dedup skip); **exception bisnis (mis. Maatwebsite ValidationException) diteruskan apa adanya** | `ImportCommit` |
-| **Summary** | Agregasi summary final (total/valid/invalid/duplicate/created/updated/skipped/errors) | `ImportSummary` |
-| **Cleanup** | Hook pelepasan resource transient (temp file) — no-op default | void |
+| **Parse** | `FileParser` → `RawImportRow[]`; deteksi kolom wajib; error → `ImportParseException` | `RawImportRow[]` |
+| **Normalize** | Bersihkan nilai, normalisasi format, resolusi FK tanpa menulis DB | `NormalizedImportRow[]` |
+| **Validate** | Validator definition; `ImportError`; error → `ImportValidationException` | `ImportSummary` |
+| **Duplicate** | Duplikat intra-file & DB via duplicateDetector | `ImportSummary` |
+| **Preview** | `ImportPreview`; `canCommit = 0 error & rows > 0` | `ImportPreview` |
+| **Commit** | `committer()->commit($state->rows, $context)` (IF-03: committer menerima rows); **exception bisnis diteruskan apa adanya** | `ImportCommit` |
+| **Summary** | Agregasi total/valid/invalid/duplicate/created/updated/skipped/errors | `ImportSummary` |
+| **Cleanup** | Hook pelepasan resource transient | void |
 
-Fitur infrastruktur:
-- **Configurable order:** `new DefaultImportPipeline($runner, ['parse', 'commit'])` — tidak hardcode.
-- **Skip stage:** stage yang `supports()` false dilewati (dicatat di `ImportPipelineState::$skippedStages`).
-- **Preview-only vs execute:** mode `'preview'` melewati CommitStage; mode `'execute'` menjalankan commit.
-- **Activity log hook:** runner memanggil `definition->activityLogger()->logCommit()/logPreview()`
-  (adapter legacy masih no-op — tidak ada perubahan perilaku).
-- **Observability hook:** `ImportLogger` (stageStarted/stageCompleted) — default `NullImportLogger` (senyap).
+**Perubahan IF-03:** `ImportCommitter::commit(array $rows, ImportContext $context)` — committer
+menerima baris ternormalisasi dari pipeline (bukan lagi hanya context). Committer legacy
+(Kelompok/Regu/Peserta/Pengajian) mengabaikan `$rows` dan tetap membaca `options['file']`,
+sehingga perilakunya tidak berubah.
 
 ---
 
-## 4. Kontrak Stage & Definition
+## 4. Adapter Layer (IF-03/IF-04 — TERIMPLEMENTASI)
 
-### ImportPipelineStage (kontrak seragam, sudah dipakai semua stage)
+```
+Controller lama / Wizard
+        ↓
+   ImportAdapter  (app/Services/Import/Adapters/ImportAdapter.php)  ← reusable
+        ↓
+   ImportCoordinator + ImportRegistry
+        ↓
+   DesaImportDefinition / KelompokImportDefinition
+        ↓
+   Framework Pipeline (Parse → Normalize → Validate → Duplicate → Preview → Commit → Summary)
+        ↓
+   Legacy Result (ImportPipelineResult)
+```
+
+`ImportAdapter` adalah satu-satunya pintu masuk bagi pemanggil. Controller/wizard **tidak
+mengetahui pipeline**:
+
+- `preview(key, file, parameters)` → pipeline mode `'preview'` (parse + validasi, tanpa commit).
+- `commit(key, file, parameters)` → pipeline mode `'execute'` (parse + validasi + duplicate + commit).
+- `definition(key)` → resolve definition dari registry.
+- `metadata(key)` → metadata definition (displayName/description/icon/parameters/columns/rules/...).
+- `template(key)` → template generator dari definition.
+
+**Parameter engine (IF-04):** parameter wizard (mis. `desa_id`) dikirim melalui
+`ImportContext.options['parameters']`. Collaborator (normalizer/validator/committer) membaca
+parameter dari context — blade tidak hardcode apa pun.
+
+Adapter bersifat **reusable** — Regu/Peserta nanti cukup memanggil adapter yang sama
+dengan key masing-masing.
+
+---
+
+## 5. Import Definition & Metadata
+
+### 5.1. Metadata Definition (IF-04 — `ImportDefinitionMetadata`)
+
+Definition modul kini mendukung metadata via `Contracts/ImportDefinitionMetadata`:
 
 ```php
-interface ImportPipelineStage
+interface ImportDefinitionMetadata
 {
-    public function name(): string;
-    public function supports(ImportContext $context, ImportDefinition $definition): bool;
-    public function handle(mixed $payload, ImportContext $context, ImportDefinition $definition, ImportPipelineState $state): mixed;
+    displayName(): string;             // branding
+    description(): string;             // branding
+    icon(): string;                    // branding
+    parameters(): array;               // parameter wizard: [key => ['label','type','required']]
+    parameterOptions($key, $ctx): array; // opsi select parameter (mis. daftar desa)
+    columns(): array;                  // kolom preview: [key => ['label','required','example']]
+    rules(): array;                    // rules validasi per baris
+    template(): ImportTemplate;        // generator template
+    summary($rows, $ctx): ImportSummary; // agregasi validasi + duplicate
 }
 ```
 
-### ImportDefinition (kontrak existing, dipertahankan)
+`DesaImportDefinition` dan `KelompokImportDefinition` mengimplementasikan interface ini;
+Regu/Peserta/Pengajian tidak diubah (belum menyediakan metadata).
+
+### 5.2. Capability API Definition (pipeline + modul)
 
 ```php
-interface ImportDefinition
-{
-    public function key(): string;
-    public function label(): string;
-    public function parser(): ImportParser;
-    public function validator(): ImportValidator;
-    public function normalizer(): ImportNormalizer;
-    public function duplicateDetector(): ImportDuplicateDetector;
-    public function committer(): ImportCommitter;
-    public function activityLogger(): ImportActivityLogger;
-    public function supportedVersion(): string;
-    public function minimumVersion(): string;
-    public function currentVersion(): string;
-    public function supportsPreview(ImportContext $context): bool;
-    public function supportsCommit(ImportContext $context): bool;
-}
+// Contract (dipakai pipeline)
+key() label() parser() validator() normalizer() duplicateDetector()
+committer() activityLogger() supportedVersion() minimumVersion() currentVersion()
+supportsPreview() supportsCommit()
+
+// Capability API modul (dipakai adapter/wizard)
+normalize($rows, $ctx)   // → NormalizedImportRow[] (delegasi normalizer)
+validateRow($row, $ctx)  // → string[] error per baris
+duplicate($rows, $ctx)   // → ImportSummary (delegasi duplicateDetector)
+preview($rows, $ctx)     // → ImportPreview (canCommit)
+commit($rows, $ctx)      // → ImportCommit (delegasi committer)
+summary($rows, $ctx)     // → ImportSummary (validasi + duplicate)
+template()               // → ImportTemplate (generator)
 ```
 
-Catatan desain (ekspansi untuk modul masa depan, **tanpa mengubah contract**):
-- Skema kolom/rules/rollback/template akan ditambahkan sebagai kemampuan definition
-  bertahap saat migrasi modul (IF-03+); contract saat ini sudah mencakup seluruh tahapan pipeline.
-- Default mode **non-atomik** (partial success); `ImportCommitException` disiapkan untuk
-  batch atomik di masa depan.
+### 5.3. Collaborator per modul
+
+**Desa (IF-03):**
+- `DesaImportParser` — baca file via `FileParser`, header `desa`.
+- `DesaImportNormalizer` — trim + `duplicateKey` (lowercase).
+- `DesaImportValidator` — required `desa`.
+- `DesaImportDuplicateDetector` — duplikat intra-file + DB.
+- `DesaImportCommitter` — create `desa`, skip duplikat, catat `failedRows`.
+
+**Kelompok (IF-04):**
+- `KelompokImportParser` — baca file via `FileParser`, header `kelompok`.
+- `KelompokImportNormalizer` — trim + `duplicateKey` = `desa_id|kelompok`; attach `desa_id` dari parameter.
+- `KelompokImportValidator` — required `kelompok` + **cek Desa** (desa_id valid).
+- `KelompokImportDuplicateDetector` — duplikat intra-file + DB **scoped per desa**.
+- `KelompokImportCommitter` — create `kelompok` di bawah desa terpilih, skip duplikat.
+
+**Regu (IF-05):** *regu global (tanpa FK) → tanpa parameter; business rule legacy dipertahankan.*
+- `ReguImportParser` — baca file via `FileParser`, header `regu, jenis_kelamin`.
+- `ReguImportNormalizer` — trim + normalisasi gender (`laki-laki`/`Laki - laki`/`Laki – Laki` → `Laki - Laki`, `perempuan` → `Perempuan`) + `duplicateKey` = nama regu.
+- `ReguImportValidator` — required `regu` + required `jenis_kelamin` in `[Laki - Laki, Perempuan]`.
+- `ReguImportDuplicateDetector` — duplikat **by unique regu name** (`unique:regus,regu`).
+- `ReguImportCommitter` — create `regu` + `jenis_kelamin`, skip duplikat nama, catat `failedRows`.
 
 ---
 
-## 5. DTO/Results (Konsolidasi IF-02)
+## 6. Wizard & Komponen UI (TERIMPLEMENTASI)
 
-Duplikat dihapus agar tidak ada class dengan fungsi sama:
-- `DTO/ImportSummary`, `DTO/ImportCommit`, `DTO/ImportPreview`, `DTO/ImportResult` — **dihapus**
-  (canonical berada di `Results/*`; `DTO/ImportSummary` lama bahkan punya import rusak).
-- `DTO/` kini hanya berisi data baris & konteks: `ImportContext`, `RawImportRow`,
-  `NormalizedImportRow`, `ImportError`, `ImportWarning`.
-- `Results/` berisi hasil pipeline: `ImportSummary`, `ImportPreview`, `ImportCommit`,
-  `ImportResult`, `ImportPipelineResult` (kini + `rows`, `statistics`).
+**Komponen reusable** (dipakai Desa & Kelompok):
 
-`ImportContext` (immutable) kini membawa: `type, eventId, userId, fileName, source, mode,
-options, definitionKey, transactionId, event, user, version`. Output eksekusi (rows/preview/
-errors/warnings/summary/statistics) dibawa oleh `ImportPipelineState` yang mutable.
+| Komponen | Fungsi |
+|----------|--------|
+| `<x-import.wizard>` | Layout card + step indicator |
+| `<x-import.progress>` | Spinner/loading section |
+| `<x-import.upload-section>` | Upload section (input file, format info, download template) |
+| `<x-import.preview-table>` | Preview table (generik by columns) |
+| `<x-import.validation-errors>` | Daftar error validasi per baris |
+| `<x-import.summary-card>` | Stat card reusable |
+| `<x-import.result-card>` | Result card (Berhasil/Duplicate/Gagal/Warning/Total) |
+
+**`ImportDesa`** (IF-03): 3 langkah (Upload → Preview & Validasi → Hasil).
+
+**`ImportWizardBase`** (IF-05): base Livewire wizard reusable — 5 langkah
+`Upload → Preview → Validation → Import → Result`, metadata-driven (parameter & kolom dari
+definition, template route `route('import.{key}.template')`). Dipakai oleh:
+- **`ImportKelompok`** (IF-04): parameter `desa_id`.
+- **`ImportRegu`** (IF-05): tanpa parameter (regu global).
+
+View generik: `resources/views/livewire/import/import-wizard.blade.php` (parameter select dari
+`meta['parameters']`, kolom preview dari `meta['columns']`, summary Total/Valid/Invalid/
+Duplicate/Akan Dibuat). Blade **tidak hardcode** detail modul.
+
+File: `resources/views/components/import/*.blade.php` + `livewire/database/{desa,kelompok}/import-*.blade.php`.
+
+Golden parity: Import Pengajian **tidak diubah**.
 
 ---
 
-## 6. Import Wizard — Komponen UI Universal (IF-03)
+## 7. Standar Template (generator framework terimplementasi)
 
-Belum dibangun. Desain target:
-
-```
-Step 1  Upload        — dropzone/input file, info kolom, download template, tombol Preview
-Step 2  Preview       — tabel data + status per baris + ringkasan validasi (badge sukses/gagal)
-Step 3  Validation    — daftar error/warning per baris yang bisa difilter; tombol Upload Ulang
-Step 4  Import        — konfirmasi ringkasan (N baris siap) + tombol Import (proses spinner)
-Step 5  Result        — grid statistik (created/matched/skipped/duplicate/failed) + daftar error
-```
-
-Golden parity: wizard Pengajian yang ada saat ini dipertahankan tampilannya identik
-(hanya sumber logic yang dipindah ke engine).
-
----
-
-## 7. Standar Template (IF-09)
-
-Belum dibangun. Target:
+Generator framework `ImportTemplateExport` (base) + sheet `DATA`/`PETUNJUK`/`REFERENSI`:
 
 | Sheet | Isi |
 |-------|-----|
-| **DATA** | Header kolom (sesuai `columns()`) + baris contoh |
-| **PETUNJUK** | Panduan pengisian per kolom, format, contoh, catatan |
-| **REFERENSI** | Daftar nilai valid (desa, kelompok, kategori, venue, dll) — **tersembunyi** |
+| **DATA** | Header kolom + baris contoh |
+| **PETUNJUK** | Cara import, contoh, aturan duplicate |
+| **REFERENSI** | Nilai referensi (Desa: kosong; **Kelompok: daftar desa**; **Regu: nilai enum gender**) |
 
-Aturan: generator otomatis (pattern `PersonImportTemplateExport`), Data Validation untuk
-kolom referensi/enumerasi, header lowercase-underscore sama dengan parser, `TemplateVersion`
-di sheet PETUNJUK. `public/templates/*` statis di-retire setelah semua modul punya generator.
+- `DesaImportTemplateExport` → `template_import_desa.xlsx` (kolom `desa`).
+- `KelompokImportTemplateExport` → `template_import_kelompok.xlsx` (kolom `kelompok`, REFERENSI = daftar desa).
+- `ReguImportTemplateExport` → `template_import_regu.xlsx` (kolom `regu, jenis_kelamin`, REFERENSI = `Laki - Laki`/`Perempuan`).
+- Route `GET /import/{desa|kelompok|regu}/template` → `ImportDataController::*Template()` (via `ImportAdapter::template`).
+- Template statis `public/templates/*` **tidak lagi dipakai** untuk Desa/Kelompok/Regu (retire menyeluruh saat IF-08).
 
 ---
 
-## 8. Wiring & Integrasi (IF-02 — TERIMPLEMENTASI)
+## 8. Wiring & Integrasi
 
-- **DI / Container:** `ImportServiceProvider` mengikat singleton registry, runner, pipeline,
-  coordinator, dan definisi `desa/kelompok/regu/peserta`. `app(ImportCoordinator::class)` siap.
-- **Versioning:** `ImportCoordinator` memeriksa `context->version` terhadap
-  `minimumVersion()/currentVersion()` definition → `ImportVersionNotSupportedException`.
-- **Exception:** seluruh kesalahan framework memakai `ImportException` subclass
-  (definition/stage/parse/validation/commit/version). Commit-stage **tidak** membungkus
-  exception bisnis agar perilaku legacy (mis. Maatwebsite ValidationException) tidak berubah.
-- **Engine Facade** (`ImportEngine`) — dijadwalkan IF-02 lanjutan/IF-04 bila dibutuhkan
-  wizard; controller/Livewire cukup memanggil coordinator.
+- **DI / Container:** `ImportServiceProvider` mengikat singleton registry, file parser, runner,
+  pipeline, coordinator, adapter, dan definisi `desa/kelompok/regu/peserta`
+  (`app(DesaImportDefinition::class)`, `app(KelompokImportDefinition::class)`, `app(ImportAdapter::class)` siap).
+- **Parameter engine:** parameter wizard dikirim via `ImportContext.options['parameters']`;
+  collaborator membaca dari context (tidak ada hardcode di blade).
+- **Versioning:** `ImportCoordinator` memeriksa `context->version` → `ImportVersionNotSupportedException`.
+- **Exception:** seluruh kesalahan framework memakai `ImportException` subclass; commit-stage
+  **tidak** membungkus exception bisnis (mis. Maatwebsite ValidationException) agar perilaku legacy tetap.
 
 ---
 
@@ -247,38 +282,40 @@ di sheet PETUNJUK. `public/templates/*` statis di-retire setelah semua modul pun
 | Fase | Konten | Keluaran | Status |
 |------|--------|----------|--------|
 | **IF-01** | Audit, GAP, desain arsitektur, roadmap | `import-audit.md`, `import-framework.md`, update ROADMAP/TODO/ARCHITECTURE/MODULES | ✅ COMPLETE |
-| **IF-02** | Revive engine: stage nyata, runner dispatch, DTO konsolidasi, exceptions, DI registry/coordinator, version guard, logging hook | Engine + 37 unit test | ✅ COMPLETE |
-| **IF-03** | Bangun Import Wizard: `ImportWizard` reusable 5 langkah + blade | Wizard + feature test | 🔲 |
-| **IF-04** | Migrasi Pengajian Import ke framework (UX identik; lengkapi adapter pengajian; daftarkan definition) | Parity test golden vs wizard | 🔲 |
-| **IF-05** | Migrasi Desa Import (adapter penuh + template generator) | Desa via wizard | 🔲 |
-| **IF-06** | Migrasi Kelompok Import | Kelompok via wizard | 🔲 |
-| **IF-07** | Migrasi Regu Import (pertahankan normalizer gender) | Regu via wizard | 🔲 |
-| **IF-08** | Migrasi Peserta Import | Peserta via wizard | 🔲 |
-| **IF-09** | Template Engine standar (DATA/PETUNJUK/REFERENSI) + retire `public/templates/*` | Generator universal | 🔲 |
-| **IF-10** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
-| **IF-11** | Import Person (master data) | Person via wizard | 🔲 |
-| **IF-12** | Import Competition (cabang & kelas kompetisi) | Competition via wizard | 🔲 |
-| **IF-13** | Import Venue | Venue via wizard | 🔲 |
-| **IF-14** | Import Schedule | Schedule via wizard | 🔲 |
-| **IF-15** | Import Committee (Event Role / Committee Assignment) | Committee via wizard | 🔲 |
-| **IF-16** | Import Activity / Rundown | Activity/Rundown via wizard | 🔲 |
-| **IF-17** | Import Attendance | Attendance via wizard | 🔲 |
-| **IF-18** | Import Access Grant | Access Grant via wizard | 🔲 |
-| **IF-19** | Regression penuh + parity audit seluruh import vs golden standard | Baseline hijau | 🔲 |
+| **IF-02** | Revive engine: stage nyata, runner dispatch, DTO konsolidasi, exceptions, DI, version guard, logging hook | Engine + 37 unit test | ✅ COMPLETE |
+| **IF-03** | **Migrasi Desa** — adapter reusable, definition penuh, template generator, wizard + komponen UI | Desa di atas framework + 36 test | ✅ COMPLETE |
+| **IF-04** | **Migrasi Kelompok** — metadata definition (`ImportDefinitionMetadata`), parameter engine (desa_id), wizard 5-langkah otomatis, template REFERENSI desa | Kelompok via framework + 25 test | ✅ COMPLETE |
+| **IF-05** | **Migrasi Regu** — collaborator nyata (normalisasi gender sesuai business rule), duplicate by unique name, reusable wizard base `ImportWizardBase`, template REFERENSI gender | Regu via framework + 19 test | ✅ COMPLETE |
+| **IF-06** | Migrasi Peserta | Peserta via framework | 🔲 |
+| **IF-07** | Migrasi Pengajian ke framework (UX identik, parity golden) | Pengajian via framework | 🔲 |
+| **IF-08** | Template Engine lanjutan (REFERENSI dropdown/data validation) + retire `public/templates/*` | Generator universal | 🔲 |
+| **IF-09** | Import Activity Log (preview + commit) + gate/ability audit (`manage-import`) | Logging import | 🔲 |
+| **IF-10** | Import Person (master data) | Person via framework | 🔲 |
+| **IF-11** | Import Competition (cabang & kelas kompetisi) | Competition via framework | 🔲 |
+| **IF-12** | Import Venue | Venue via framework | 🔲 |
+| **IF-13** | Import Schedule | Schedule via framework | 🔲 |
+| **IF-14** | Import Committee (Event Role / Committee Assignment) | Committee via framework | 🔲 |
+| **IF-15** | Import Activity / Rundown | Activity/Rundown via framework | 🔲 |
+| **IF-16** | Import Attendance | Attendance via framework | 🔲 |
+| **IF-17** | Import Access Grant | Access Grant via framework | 🔲 |
+| **IF-18** | Regression penuh + parity audit seluruh import vs golden standard | Baseline hijau | 🔲 |
 
-**Urutan prioritas:** IF-03–04 (fondasi UI + golden migration) → IF-05–08 (legacy) → IF-09–10
-(template & audit trail) → IF-11+ (modul baru sesuai kebutuhan operasional).
+**Urutan prioritas:** IF-05–06 (legacy master data) → IF-07 (golden migration) → IF-08–09
+(template & audit trail) → IF-10+ (modul baru sesuai kebutuhan operasional).
 
 ---
 
 ## 10. Acceptance Criteria
 
-- [x] (IF-02) Engine pipeline nyata, runner dispatch, stage order configurable.
-- [x] (IF-02) DTO/Results tunggal, exception khusus import, DI registry/coordinator/definition.
-- [x] (IF-02) Perilaku aplikasi tidak berubah — baseline hijau (2002 passed, 5 failure pre-existing).
-- [ ] Seluruh flow import pada modul menggunakan Wizard + Engine (IF-03+).
-- [ ] UI/UX identik dengan golden standard (wizard 5 langkah, summary, error per baris).
-- [ ] Validasi, duplicate detection, transaction, dan partial-success konsisten.
-- [ ] Template selalu generator multi-sheet (DATA/PETUNJUK/REFERENSI).
-- [ ] Activity log tercatat untuk setiap import yang sukses.
+- [x] (IF-02) Engine pipeline nyata, runner dispatch, stage order configurable, exception khusus, DI.
+- [x] (IF-03) **Desa memakai framework production** (adapter + definition + pipeline + template + wizard).
+- [x] (IF-04) **Kelompok memakai framework production** (metadata + parameter + template + wizard).
+- [x] (IF-04) Metadata definition: displayName/description/icon/parameters/columns/rules/template/summary.
+- [x] (IF-04) Parameter engine: wizard membaca parameter dari definition (tidak hardcode di blade).
+- [x] (IF-05) **Regu memakai framework production** (metadata + reusable wizard base).
+- [x] (IF-05) **Business rule Regu dipertahankan** — normalisasi gender & unique name duplicate (`unique:regus,regu`); framework mengikuti Regu.
+- [x] (IF-05) **Wizard reusable** — `ImportWizardBase` + view generik dipakai Kelompok & Regu.
+- [x] (IF-05) Perilaku modul lain tidak berubah — baseline hijau (2082 passed, 5 failure pre-existing).
+- [ ] Validasi, duplicate detection, transaction, dan partial-success konsisten di semua modul.
+- [ ] Activity log tercatat untuk setiap import yang sukses (IF-09).
 - [ ] Test: unit pipeline + feature wizard + regression parity — baseline hijau.

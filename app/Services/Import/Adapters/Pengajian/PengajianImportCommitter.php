@@ -14,10 +14,10 @@ final class PengajianImportCommitter implements ImportCommitter
         private readonly PengajianImportService $service,
     ) {}
 
-    public function commit(ImportContext $context): ImportCommit
+    public function commit(array $rows, ImportContext $context): ImportCommit
     {
         $eventId = $context->eventId ?? 0;
-        $result = $this->service->import($context->options['rows'] ?? [], $eventId);
+        $result = $this->service->import($rows, $eventId);
 
         return new ImportCommit(
             $context,

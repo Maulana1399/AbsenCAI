@@ -31,7 +31,7 @@ final class CommitStage implements ImportPipelineStage
         ImportDefinition $definition,
         ImportPipelineState $state,
     ): mixed {
-        $commit = $definition->committer()->commit($context);
+        $commit = $definition->committer()->commit($state->rows ?? [], $context);
 
         $state->commit = $commit;
 

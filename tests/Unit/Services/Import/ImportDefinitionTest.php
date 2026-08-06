@@ -22,7 +22,7 @@ test('definition exposes its collaborators', function () {
     $duplicate = new \App\Services\Import\NullObjects\NullImportDuplicateDetector;
     $committer = new class implements ImportCommitter
     {
-        public function commit(ImportContext $context): ImportCommit
+        public function commit(array $rows, ImportContext $context): ImportCommit
         {
             return new ImportCommit($context, new ImportSummary);
         }

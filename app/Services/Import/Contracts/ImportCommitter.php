@@ -7,5 +7,10 @@ use App\Services\Import\Results\ImportCommit;
 
 interface ImportCommitter
 {
-    public function commit(ImportContext $context): ImportCommit;
+    /**
+     * Persist the normalized rows prepared by the pipeline.
+     *
+     * @param  array<int, \App\Services\Import\DTO\NormalizedImportRow>  $rows
+     */
+    public function commit(array $rows, ImportContext $context): ImportCommit;
 }

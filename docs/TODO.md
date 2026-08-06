@@ -27,27 +27,25 @@
 
 ## Import Framework (IF series)
 
-> IF-01 (audit & desain) ✅ COMPLETE. **IF-02 (engine infrastructure) ✅ COMPLETE 2026-08-06** — infra siap, belum dipakai modul.
+> IF-01 ✅, IF-02 ✅ (engine), **IF-03 ✅ (Desa)**, **IF-04 ✅ (Kelompok + metadata + parameter)**, **IF-05 ✅ (Regu + reusable wizard)**.
 
 - [x] **IF-02** — Bangun Import Engine: stage pipeline nyata, runner dispatch, DTO konsolidasi, exceptions, DI registry/coordinator, version guard, logging hook (+37 unit test)
-- [ ] **IF-03** — Bangun Import Wizard reusable (5 langkah: Upload → Preview → Validation → Import → Result)
-- [ ] **IF-03** — Bangun Import Wizard reusable (5 langkah: Upload → Preview → Validation → Import → Result)
-- [ ] **IF-04** — Migrasi Pengajian Import ke framework (UX identik; parity test golden)
-- [ ] **IF-05** — Migrasi Desa Import
-- [ ] **IF-06** — Migrasi Kelompok Import
-- [ ] **IF-07** — Migrasi Regu Import (pertahankan normalizer gender)
-- [ ] **IF-08** — Migrasi Peserta Import
-- [ ] **IF-09** — Template Engine standar (DATA/PETUNJUK/REFERENSI) + retire `public/templates/*`
-- [ ] **IF-10** — Import Activity Log + gate/ability audit (`manage-import`)
-- [ ] **IF-11** — Import Person
-- [ ] **IF-12** — Import Competition (cabang & kelas)
-- [ ] **IF-13** — Import Venue
-- [ ] **IF-14** — Import Schedule
-- [ ] **IF-15** — Import Committee (Event Role / Committee Assignment)
-- [ ] **IF-16** — Import Activity / Rundown
-- [ ] **IF-17** — Import Attendance
-- [ ] **IF-18** — Import Access Grant
-- [ ] **IF-19** — Regression penuh + parity audit seluruh import vs golden standard
+- [x] **IF-03** — Migrasi Desa: adapter reusable, definition penuh, template generator, wizard + komponen reusable (+36 test)
+- [x] **IF-04** — Migrasi Kelompok: metadata definition (`ImportDefinitionMetadata`), parameter engine (desa_id), wizard 5-langkah otomatis, template REFERENSI desa (+25 test)
+- [x] **IF-05** — Migrasi Regu: collaborator nyata (normalisasi gender, duplicate unique name), `ImportWizardBase` reusable, template REFERENSI gender (+19 test)
+- [ ] **IF-06** — Migrasi Peserta Import
+- [ ] **IF-07** — Migrasi Pengajian Import ke framework (UX identik; parity test golden)
+- [ ] **IF-08** — Template Engine lanjutan (REFERENSI dropdown) + retire `public/templates/*`
+- [ ] **IF-09** — Import Activity Log + gate/ability audit (`manage-import`)
+- [ ] **IF-10** — Import Person
+- [ ] **IF-11** — Import Competition (cabang & kelas)
+- [ ] **IF-12** — Import Venue
+- [ ] **IF-13** — Import Schedule
+- [ ] **IF-14** — Import Committee (Event Role / Committee Assignment)
+- [ ] **IF-15** — Import Activity / Rundown
+- [ ] **IF-16** — Import Attendance
+- [ ] **IF-17** — Import Access Grant
+- [ ] **IF-18** — Regression penuh + parity audit seluruh import vs golden standard
 
 ---
 

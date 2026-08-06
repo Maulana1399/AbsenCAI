@@ -44,7 +44,7 @@ Commercial Platform (Future)
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
-| Import Framework (IF series) | 🔲 **IF-01 AUDIT COMPLETE** — IF-02 ENGINE COMPLETE; IF-03+ NOT STARTED (lihat `docs/import-audit.md` & `docs/import-framework.md`) |
+| Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — **IF-05 REGU** — IF-06+ NOT STARTED (lihat `docs/import-framework.md`) |
 | Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | Stage | **Pre-UAT** |
 
@@ -1259,7 +1259,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 16. **PGM.20 Legacy NIP Retirement** ✅ COMPLETE — All 4 phases done. NIP retired
 17. **Sprint 3.3** ✅ COMPLETE — Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, `UAT_CHECKLIST.md`, `LEGACY_RETIREMENT_PLAN.md`)
 18. **Sprint 4** 🔲 NOT STARTED — rekomendasi di bawah
-19. **Import Framework (IF series)** 🔲 IF-01 (audit & desain) COMPLETE; **IF-02 (engine infra) COMPLETE**; IF-03+ NOT STARTED — lihat `docs/import-framework.md`
+19. **Import Framework (IF series)** 🔲 IF-01 (audit) COMPLETE; **IF-02 (engine) COMPLETE**; **IF-03 (Desa) COMPLETE**; **IF-04 (Kelompok) COMPLETE**; **IF-05 (Regu) COMPLETE**; IF-06+ NOT STARTED — lihat `docs/import-framework.md`
 20. **Competition** (future sprint — V2 generic engine)
 21. **Commercial** (future sprint)
 ```
@@ -1270,7 +1270,7 @@ Super Admin manages user accounts (create, edit, reset password, delete).
 
 ## Status
 
-🔲 **IF-01 COMPLETE (audit & desain)** — **IF-02 COMPLETE (engine infrastructure)** — IF-03+ NOT STARTED.
+🔲 **IF-01 COMPLETE (audit & desain)** — ✅ **IF-02 COMPLETE (engine)** — ✅ **IF-03 COMPLETE (Desa)** — ✅ **IF-04 COMPLETE (Kelompok)** — ✅ **IF-05 COMPLETE (Regu)** — IF-06+ NOT STARTED.
 
 ## Goal
 
@@ -1280,30 +1280,49 @@ UI/UX, lifecycle, validation, preview, summary, commit flow, dan testing yang sa
 
 ## Deliverables Fase IF-01 (2026-08-05)
 
-- ✅ `docs/import-audit.md` — Inventori seluruh import, perbandingan dengan golden standard, GAP analysis (Kategori A–D).
-- ✅ `docs/import-framework.md` — Desain arsitektur, pipeline standar, interface definition, wizard universal, standar template, roadmap IF-02–IF-19.
+- ✅ `docs/import-audit.md` — Inventori seluruh import, GAP analysis (Kategori A–D).
+- ✅ `docs/import-framework.md` — Arsitektur, pipeline, definition, wizard, template, roadmap.
 
 ## Deliverables Fase IF-02 (2026-08-06 — Infrastructure Only)
 
-- ✅ **Stage pipeline nyata** — Parse/Normalize/Validate/Duplicate/Preview/Commit/Summary/Cleanup (sebelumnya 8/8 stub no-op).
-- ✅ **Pipeline runner dispatch** — `ArrayPipelineStageRunner` benar-benar menjalankan stage; urutan configurable (`DefaultImportPipeline::DEFAULT_STAGES`).
-- ✅ **Konsolidasi DTO/Results** — 4 duplikat `DTO/ImportSummary|Commit|Preview|Result` dihapus; canonical `Results/*`; `ImportContext` + `event/user/version`.
-- ✅ **Exception khusus import** — `app/Services/Import/Exceptions/*` (definition/stage/parse/validation/commit/version).
-- ✅ **DI wiring** — `ImportServiceProvider` (registry singleton, runner, pipeline, coordinator, definisi desa/kelompok/regu/peserta).
-- ✅ **Logging hook** — `ImportLogger` (stageStarted/stageCompleted, default silent) + `ImportActivityLogger` dipanggil runner.
-- ✅ **Version guard** — `ImportCoordinator` memvalidasi `context->version` terhadap definition.
-- ✅ **37 unit test** baru (Registry, Coordinator, Pipeline/Runner, Definition, Context, Stage Order, Exceptions, DI wiring).
-- ✅ **Perilaku tidak berubah** — baseline hijau (2002 passed; 5 failure = pre-existing PlacementService tests).
+- ✅ **Stage pipeline nyata** (8 stage), **runner dispatch**, **DTO konsolidasi**, **exception khusus**,
+  **DI wiring**, **logging hook**, **version guard**. +37 unit test. Baseline hijau.
+
+## Deliverables Fase IF-03 (2026-08-06 — First Production Migration: DESA)
+
+- ✅ **Import Desa** = modul pertama di atas framework (adapter + definition + template + wizard).
+- ✅ **Adapter reusable** (`ImportAdapter`), `FileParser`, template generator (DATA/PETUNJUK/REFERENSI).
+- ✅ Wizard + komponen `<x-import.*>`. +36 test. Baseline hijau.
+
+## Deliverables Fase IF-04 (2026-08-06 — Kelompok + Metadata + Parameter Engine)
+
+- ✅ **Metadata definition** — `ImportDefinitionMetadata`: `displayName() description() icon() parameters() columns() rules() template() summary() parameterOptions()`.
+- ✅ **Parameter engine** — Kelompok butuh **Desa (required)**; wizard membaca parameter dari definition (`$meta['parameters']` + `parameterOptions`), **tidak hardcode di blade**; parameter dikirim via `ImportContext.options['parameters']`.
+- ✅ **`KelompokImportDefinition`** — collaborator nyata: parser (FileParser, kolom `kelompok`), normalizer (trim + duplicateKey `desa_id|kelompok`), validator (required + **cek Desa**), duplicate detector (**scoped per desa**), committer (create di bawah desa terpilih).
+- ✅ **Template generator** — `template_import_kelompok.xlsx` (kolom `kelompok`, sheet DATA/PETUNJUK/**REFERENSI = daftar desa aktif**).
+- ✅ **Wizard 5 langkah** — Upload → Preview → Validation → Import → Result, memakai komponen reusable.
+- ✅ **POST route** `import.kelompok` kini butuh `desa_id` (via adapter); route `GET /import/kelompok/template`.
+- ✅ **25 test baru** (11 unit + 14 feature). Baseline hijau (2063 passed; 5 failure pre-existing).
+
+## Deliverables Fase IF-05 (2026-08-06 — Regu + Reusable Wizard Base)
+
+- ✅ **Import Regu** = modul ketiga di atas framework (metadata + wizard + template).
+- ✅ **Business rule Regu dipertahankan** — normalisasi gender (`laki laki`/`Laki - laki`/`Laki – Laki` → `Laki - Laki`; `perempuan` → `Perempuan`), duplicate **by unique regu name** (`unique:regus,regu`). Regu global (tanpa FK) → **tanpa parameter**.
+- ✅ **Reusable wizard** — `app/Livewire/Import/ImportWizardBase.php` + view generik `livewire/import/import-wizard.blade.php` dipakai `ImportKelompok` & `ImportRegu` (metadata-driven).
+- ✅ **`ReguImportDefinition`** — collaborator nyata (parser/normalizer/validator/duplicateDetector/committer) + metadata (displayName/description/icon/parameters/columns/rules/template/summary).
+- ✅ **Template generator** — `template_import_regu.xlsx` (kolom `regu, jenis_kelamin`, sheet DATA/PETUNJUK/REFERENSI = nilai enum gender); route `GET /import/regu/template`.
+- ✅ **POST route** `import.regu` via adapter; error per-field (`jenis_kelamin`); hapus `app/Imports/ReguImport.php` (Maatwebsite).
+- ✅ **19 test baru** (8 unit + 11 feature). Baseline hijau (2082 passed; 5 failure pre-existing).
 
 ## Ringkasan Audit
 
-- **5 import aktif:** Desa, Kelompok, Regu, Peserta (form POST manual) + Pengajian (golden wizard).
-- **Skeleton `app/Services/Import/`:** kini fungsional (engine hidup) — belum dipakai modul mana pun.
+- **Import aktif:** Desa (🟢 framework), Kelompok (🟢 framework), Regu (🟢 framework), Pengajian (golden, legacy), Peserta (legacy).
+- **Skeleton `app/Services/Import/`:** engine + adapter + template + metadata + reusable wizard hidup; Desa/Kelompok/Regu memakai penuh.
 - **Kandidat baru tanpa import:** Person, Competition, Kategori, Kelas, Venue, Schedule, Committee, Attendance, Activity, Rundown, Access Grant.
 
 ## Roadmap
 
-IF-03 Wizard → IF-04 Migrasi Pengajian → IF-05/06/07/08 Migrasi Desa/Kelompok/Regu/Peserta → IF-09 Template Engine → IF-10 Activity Log → IF-11+ modul baru (Person, Competition, Venue, Schedule, Committee, Activity/Rundown, Attendance, Access Grant) → IF-19 Regression parity.
+IF-06 Peserta → IF-07 Pengajian (parity golden) → IF-08 Template lanjutan + retire statis → IF-09 Activity Log → IF-10+ modul baru → IF-18 Regression parity.
 
 Detail lengkap: `docs/import-framework.md`.
 

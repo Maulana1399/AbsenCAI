@@ -9,12 +9,23 @@ use App\Services\Import\Adapters\Desa\DesaImportDuplicateDetector;
 use App\Services\Import\Adapters\Desa\DesaImportNormalizer;
 use App\Services\Import\Adapters\Desa\DesaImportParser;
 use App\Services\Import\Adapters\Desa\DesaImportValidator;
+use App\Services\Import\Adapters\ImportAdapter;
+use App\Services\Import\Adapters\Kelompok\KelompokImportActivityLogger;
 use App\Services\Import\Adapters\Kelompok\KelompokImportCommitter;
 use App\Services\Import\Adapters\Kelompok\KelompokImportDefinition;
+use App\Services\Import\Adapters\Kelompok\KelompokImportDuplicateDetector;
+use App\Services\Import\Adapters\Kelompok\KelompokImportNormalizer;
+use App\Services\Import\Adapters\Kelompok\KelompokImportParser;
+use App\Services\Import\Adapters\Kelompok\KelompokImportValidator;
 use App\Services\Import\Adapters\Peserta\PesertaImportCommitter;
 use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
+use App\Services\Import\Adapters\Regu\ReguImportActivityLogger;
 use App\Services\Import\Adapters\Regu\ReguImportCommitter;
 use App\Services\Import\Adapters\Regu\ReguImportDefinition;
+use App\Services\Import\Adapters\Regu\ReguImportDuplicateDetector;
+use App\Services\Import\Adapters\Regu\ReguImportNormalizer;
+use App\Services\Import\Adapters\Regu\ReguImportParser;
+use App\Services\Import\Adapters\Regu\ReguImportValidator;
 use App\Services\Import\Contracts\ImportLogger;
 use App\Services\Import\NullObjects\NullImportActivityLogger;
 use App\Services\Import\NullObjects\NullImportDuplicateDetector;
@@ -27,6 +38,7 @@ use App\Services\Import\Pipeline\ImportCoordinator;
 use App\Services\Import\Pipeline\ImportPipeline;
 use App\Services\Import\Registry\ImportRegistry;
 use App\Services\Import\Support\ArrayPipelineStageRunner;
+use App\Services\Import\Support\FileParser;
 use App\Services\Import\Support\PipelineStageRunner;
 use Illuminate\Support\ServiceProvider;
 
@@ -50,6 +62,14 @@ class ImportServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ImportLogger::class, NullImportLogger::class);
         $this->app->singleton(ImportRegistry::class);
+        $this->app->singleton(FileParser::class);
+
+        $this->app->singleton(ImportAdapter::class, function ($app) {
+            return new ImportAdapter(
+                $app->make(ImportRegistry::class),
+                $app->make(ImportCoordinator::class),
+            );
+        });
 
         $this->app->singleton(PipelineStageRunner::class, function ($app) {
             return new ArrayPipelineStageRunner(
@@ -80,21 +100,21 @@ class ImportServiceProvider extends ServiceProvider
         ]);
 
         $this->bindDefinition('kelompok', KelompokImportDefinition::class, [
-            NullImportParser::class,
-            NullImportValidator::class,
-            NullImportNormalizer::class,
-            NullImportDuplicateDetector::class,
+            KelompokImportParser::class,
+            KelompokImportValidator::class,
+            KelompokImportNormalizer::class,
+            KelompokImportDuplicateDetector::class,
             KelompokImportCommitter::class,
-            NullImportActivityLogger::class,
+            KelompokImportActivityLogger::class,
         ]);
 
         $this->bindDefinition('regu', ReguImportDefinition::class, [
-            NullImportParser::class,
-            NullImportValidator::class,
-            NullImportNormalizer::class,
-            NullImportDuplicateDetector::class,
+            ReguImportParser::class,
+            ReguImportValidator::class,
+            ReguImportNormalizer::class,
+            ReguImportDuplicateDetector::class,
             ReguImportCommitter::class,
-            NullImportActivityLogger::class,
+            ReguImportActivityLogger::class,
         ]);
 
         $this->bindDefinition('peserta', PesertaImportDefinition::class, [
@@ -122,8 +142,8 @@ class ImportServiceProvider extends ServiceProvider
 
     /**
      * Bind a definition class with ordered collaborators so the definition can
-     * be resolved from the container, then expose it under the
-     * `import.definition.{key}` binding.
+     * be resolved from the container (by class name and by the
+     * `import.definition.{key}` binding), then register it into the registry.
      *
      * @param  array<int, class-string>  $collaborators
      */
@@ -133,11 +153,14 @@ class ImportServiceProvider extends ServiceProvider
             $this->app->singleton($class);
         }
 
-        $this->app->singleton('import.definition.'.$key, function ($app) use ($definitionClass, $collaborators) {
+        $factory = function ($app) use ($definitionClass, $collaborators) {
             return new $definitionClass(...array_map(
                 fn (string $class) => $app->make($class),
                 $collaborators,
             ));
-        });
+        };
+
+        $this->app->singleton('import.definition.'.$key, $factory);
+        $this->app->singleton($definitionClass, $factory);
     }
 }

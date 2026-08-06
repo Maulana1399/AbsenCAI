@@ -144,6 +144,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('can:manage-master-data')
         ->name('import.desa');
 
+    Route::get('import/desa/template', [ImportDataController::class, 'desaTemplate'])
+        ->middleware('can:manage-master-data')
+        ->name('import.desa.template');
+
+    Route::get('import/kelompok/template', [ImportDataController::class, 'kelompokTemplate'])
+        ->middleware('can:manage-master-data')
+        ->name('import.kelompok.template');
+
+    Route::get('import/regu/template', [ImportDataController::class, 'reguTemplate'])
+        ->middleware('can:manage-participants')
+        ->name('import.regu.template');
+
     Route::post('import/kelompok', [ImportDataController::class, 'kelompok'])
         ->middleware('can:manage-master-data')
         ->name('import.kelompok');

@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 final class PesertaImportCommitter implements ImportCommitter
 {
-    public function commit(ImportContext $context): ImportCommit
+    public function commit(array $rows, ImportContext $context): ImportCommit
     {
         if (is_object($context->options['file'] ?? null)) {
             Excel::import(new PesertaImport, $context->options['file']);

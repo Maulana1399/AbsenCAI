@@ -28,7 +28,8 @@ test('import kelompok uploads csv', function () {
     $desa = desa::create(['desa_asal' => 'Desa A']);
 
     $this->post(route('import.kelompok'), [
-        'file' => UploadedFile::fake()->createWithContent('kelompok.csv', "kelompok,desa\nKelompok Import,{$desa->desa_asal}\n"),
+        'file' => UploadedFile::fake()->createWithContent('kelompok.csv', "kelompok\nKelompok Import\n"),
+        'desa_id' => $desa->id,
     ])->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('kelompoks', [

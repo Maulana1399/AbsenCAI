@@ -7,6 +7,48 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## IF-05 (Import Framework — Regu + Reusable Wizard Base — 2026-08-06)
+
+Migrasi **Import Regu** sebagai modul ketiga di atas Import Framework. **Pengajian/Peserta tidak diubah.** Business rule Regu dipertahankan. Tidak ada perubahan database, migration, maupun permission. Baseline hijau.
+
+- **Reusable wizard** — `app/Livewire/Import/ImportWizardBase.php` (base Livewire 5-langkah: Upload → Preview → Validation → Import → Result, metadata-driven) + view generik `livewire/import/import-wizard.blade.php`; dipakai `ImportKelompok` & `ImportRegu`. View lama `import-kelompok/import-regu.blade.php` dihapus.
+- **`ReguImportDefinition`** (metadata + capability API) — **Regu global (tanpa FK) → tanpa parameter**. Collaborator nyata: `ReguImportParser` (FileParser, header `regu, jenis_kelamin`), `ReguImportNormalizer` (trim + **normalisasi gender** sesuai legacy: `laki laki`/`Laki - laki`/`Laki – Laki` → `Laki - Laki`, `perempuan` → `Perempuan`), `ReguImportValidator` (required `regu` + `jenis_kelamin` in `[Laki - Laki, Perempuan]`), `ReguImportDuplicateDetector` (**duplicate by unique regu name** = `unique:regus,regu`), `ReguImportCommitter` (create + skip duplikat nama + failedRows), `ReguImportActivityLogger`.
+- **Template generator** — `ReguImportTemplateExport` (`template_import_regu.xlsx`, kolom `regu, jenis_kelamin`, REFERENSI = nilai enum gender); route `GET /import/regu/template`.
+- **Controller/POST route** — `ImportDataController::regu()` via adapter; error per-field dipetakan ke session (`jenis_kelamin`); `reguTemplate()`. Hapus `app/Imports/ReguImport.php` (Maatwebsite).
+- **Test** — +19 test: 8 unit (metadata, normalisasi gender, duplicate unique name, committer) + 11 feature (POST route, template, wizard). Update `MasterDataProtectionTest` (`preview()`).
+- **Verifikasi:** full suite → **2082 passed / 5145 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError, di luar scope).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md`, `docs/import-audit.md` disinkronkan.
+
+## IF-04 (Import Framework — Kelompok + Metadata + Parameter Engine — 2026-08-06)
+
+Migrasi **Import Kelompok** sebagai modul kedua di atas Import Framework. **Pengajian/Regu/Peserta tidak diubah.** Tidak ada perubahan database, migration, maupun permission. Baseline hijau.
+
+- **Metadata definition** — `Contracts/ImportDefinitionMetadata`: `displayName()/description()/icon()/parameters()/columns()/rules()/template()/summary()/parameterOptions()`. Diimplementasikan pada `DesaImportDefinition` & `KelompokImportDefinition`.
+- **Parameter engine** — Kelompok butuh **Desa (required)**; wizard membaca parameter dari definition (`metadata()->parameters()` + `parameterOptions()`), **tidak hardcode di blade**; parameter dikirim via `ImportContext.options['parameters']` (adapter `preview/commit(key, file, parameters)`).
+- **`KelompokImportDefinition`** — collaborator nyata: `KelompokImportParser` (FileParser, kolom `kelompok`), `KelompokImportNormalizer` (trim + duplicateKey `desa_id|kelompok`), `KelompokImportValidator` (required + **cek Desa**), `KelompokImportDuplicateDetector` (**scoped per desa**), `KelompokImportCommitter` (create di bawah desa terpilih + skip duplikat + failedRows), `KelompokImportActivityLogger`.
+- **Template generator** — `KelompokImportTemplateExport` (`template_import_kelompok.xlsx`, sheet DATA/PETUNJUK/**REFERENSI = daftar desa aktif**); route `GET /import/kelompok/template`.
+- **Wizard 5 langkah** — `ImportKelompok` Livewire (`Upload → Preview → Validation → Import → Result`) memakai komponen `<x-import.*>` yang sudah ada; kolom preview & parameter dari definition; dispatch `refreshKelompok`.
+- **Controller/POST route** — `ImportDataController::kelompok()` kini via adapter + membutuhkan `desa_id` (`required|integer|exists:desas,id`); `kelompokTemplate()`. Hapus `app/Imports/KelompokImport.php` (Maatwebsite) — tidak dipakai lagi.
+- **Test** — +25 test: 11 unit (metadata, collaborator, template REFERENSI, duplicate scoped per desa) + 14 feature (wizard parameter otomatis, POST route, template). Update `ImportDataTest` (kelompok + desa_id) & `MasterDataProtectionTest` (`preview()`).
+- **Verifikasi:** full suite → **2063 passed / 5056 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError, di luar scope).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md`, `docs/import-audit.md` disinkronkan.
+
+## IF-03 (Import Framework — First Production Migration: DESA — 2026-08-06)
+
+Migrasi **Import Desa** sebagai modul production pertama di atas Import Framework (proof-of-concept).
+**Import Pengajian/Kelompok/Regu/Peserta tidak diubah.** Tidak ada perubahan database, migration,
+maupun permission. Baseline hijau.
+
+- **Adapter reusable** — `app/Services/Import/Adapters/ImportAdapter.php` (`preview/commit/definition/template`); controller & wizard hanya memanggil adapter, tidak menyentuh pipeline. Dipakai nanti untuk Kelompok/Regu/Peserta.
+- **`DesaImportDefinition` lengkap** — capability API `columns/rules/normalize/validateRow/duplicate/preview/commit/summary/template` + collaborator nyata: parser (via `FileParser`), normalizer (trim+duplicateKey), validator (required), duplicate detector (intra-file + DB), committer (create + skip duplikat + failedRows).
+- **`FileParser`** — `app/Services/Import/Support/FileParser.php`: parser CSV/Excel/TXT generik (normalisasi header, deteksi kolom wajib, prune baris kosong) — di-extract dari golden Pengajian.
+- **Template generator framework** — `app/Services/Import/Template/*`: `ImportTemplateExport` base + sheet DATA/PETUNJUK/REFERENSI + `DesaImportTemplateExport` (`template_import_desa.xlsx`); route `GET /import/desa/template`; template statis Desa tidak dipakai lagi.
+- **`ImportCommitter` menerima rows** — `commit(array $rows, ImportContext $context)`; `CommitStage` meneruskan `$state->rows`; committer legacy (Kelompok/Regu/Peserta/Pengajian) diupdate signature namun perilaku identik.
+- **Wizard + komponen reusable** — `ImportDesa` Livewire wizard (Upload → Preview & Validasi → Hasil) + `<x-import.*>` (wizard, progress, upload-section, preview-table, validation-errors, summary-card, result-card). Hapus `app/Imports/DesaImport.php` (Maatwebsite) — tidak dipakai lagi.
+- **Test** — +36 test: 6 FileParser, 8 definition/collaborator, 8 adapter, 14 wizard/route feature. Update `MasterDataProtectionTest` (gate `preview()` menggantikan `import()`).
+- **Verifikasi:** full suite → **2038 passed / 4956 assertions**; 5 failure = pre-existing (`PlacementService::leastFilledRegu` TypeError, di luar scope).
+- **Dokumentasi:** `docs/import-framework.md`, `docs/ROADMAP.md`, `docs/TODO.md`, `docs/MODULES.md` disinkronkan.
+
 ## IF-02 (Import Framework — Engine Infrastructure — 2026-08-06)
 
 Fase infrastructure-only: menghidupkan skeleton `app/Services/Import/*` menjadi engine siap pakai. **Tidak ada perubahan UI, route, controller, service import existing, database, template, maupun permission.** Perilaku aplikasi tidak berubah — seluruh import existing tetap berjalan (baseline hijau).

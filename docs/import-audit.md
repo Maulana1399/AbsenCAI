@@ -1,9 +1,10 @@
 # Import Framework — Audit & GAP Analysis (Phase IF-01)
 
-> Status: **AUDIT / DESIGN** — IF-01 (2026-08-05). IF-02 sudah menghidupkan skeleton
-> (engine pipeline nyata, DI, exceptions, konsolidasi DTO) tanpa mengubah perilaku —
-> lihat `docs/import-framework.md`. Bagian 4 di bawah (audit skeleton) kini historis:
-> seluruh stage no-op sudah digantikan implementasi nyata.
+> Status: **AUDIT / DESIGN** — IF-01 (2026-08-05). IF-02 menghidupkan skeleton.
+> **IF-03 memigrasi Desa**, **IF-04 memigrasi Kelompok**, **IF-05 memigrasi Regu** ke
+> framework (status inventori untuk Desa/Kelompok/Regu di bawah sudah kedaluwarsa: kini 🟢 framework).
+> Bagian 4 di bawah (audit skeleton) kini historis: seluruh stage no-op sudah digantikan
+> implementasi nyata.
 > Golden Standard: **Import Massal Pengajian** (`ImportMassal` + `PengajianImportService`).
 > Desain arsitektur & roadmap: `docs/import-framework.md`.
 
@@ -33,9 +34,9 @@ Legend Status: 🟢 = Golden Standard | 🟡 = Berjalan tapi belum sesuai standa
 
 | # | Modul | Route | Livewire | Controller | Upload | Preview | Validation | Summary | Commit | Template | Test | Status |
 |---|-------|-------|----------|-----------|--------|---------|------------|---------|--------|----------|------|--------|
-| 1 | **Desa** | `POST /import/desa` (`import.desa`) | `ImportDesa` (vestigial — form POST ke controller) | `ImportDataController@desa` | HTML POST (xlsx,xls,csv) | ❌ | ❌ (hanya mime) | ❌ | `Excel::import(new DesaImport)` via `DesaImportCommitter` | statis `public/templates/template_desa.xlsx` | `ImportDataTest` (1 happy path) | 🟡 C |
-| 2 | **Kelompok** | `POST /import/kelompok` (`import.kelompok`) | `ImportKelompok` (vestigial) | `ImportDataController@kelompok` | HTML POST | ❌ | ❌ | ❌ | `Excel::import(new KelompokImport)` via `KelompokImportCommitter` | statis `template_kelompok.xlsx` | `ImportDataTest` (1 happy path) | 🟡 C |
-| 3 | **Regu** | `POST /import/regu` (`import.regu`) | `ImportRegu` (vestigial) | `ImportDataController@regu` | HTML POST | ❌ | ✅ sebagian (`ReguImport implements WithValidation` + normalizer gender) | ❌ | `Excel::import(new ReguImport)` via `ReguImportCommitter` | statis `template_regu.xlsx` | `ImportDataTest` (4: happy, normalisasi, invalid) | 🟡 B/C |
+| 1 | **Desa** | `POST /import/desa` (`import.desa`) | `ImportDesa` (wizard IF-03) | `ImportDataController@desa` | HTML POST + Livewire wizard | ✅ | ✅ | ✅ | `DesaImportCommitter` (create + skip duplikat) | **generator** `DesaImportTemplateExport` (DATA/PETUNJUK/REFERENSI) | `ImportDataTest` (1) + `DesaImportFrameworkTest` (14) + unit | 🟢 **FRAMEWORK (IF-03)** |
+| 2 | **Kelompok** | `POST /import/kelompok` (`import.kelompok`) | `ImportKelompok` (wizard IF-04) | `ImportDataController@kelompok` | Livewire wizard + HTML POST (desa_id) | ✅ | ✅ | ✅ | `KelompokImportCommitter` (create + skip duplikat, scoped desa) | **generator** `KelompokImportTemplateExport` (REFERENSI = desa) | `ImportDataTest` (1) + `KelompokImportFrameworkTest` (14) + unit | 🟢 **FRAMEWORK (IF-04)** |
+| 3 | **Regu** | `POST /import/regu` (`import.regu`) | `ImportRegu` (wizard base IF-05) | `ImportDataController@regu` | Livewire wizard + HTML POST | ✅ | ✅ | ✅ | `ReguImportCommitter` (create + skip duplikat nama) | **generator** `ReguImportTemplateExport` (REFERENSI = enum gender) | `ImportDataTest` (3) + `ReguImportFrameworkTest` (11) + unit | 🟢 **FRAMEWORK (IF-05)** |
 | 4 | **Peserta** | `POST /import/peserta` (`import.peserta`) | `ImportPeserta` (vestigial) | `ImportDataController@peserta` | HTML POST | ❌ | ❌ | ❌ | `Excel::import(new PesertaImport)` via `PesertaImportCommitter` | statis `template_peserta.xlsx` | `ImportDataTest` (1 happy path) | 🟡 C |
 | 5 | **Pengajian (Import Massal)** | `GET /events/{event}/pengajian/admin/import-massal` (+ template route) | `ImportMassal` (wizard 3 langkah) | n/a (Livewire) | `WithFileUploads` (csv,txt,xlsx,xls, max 5MB) | ✅ tabel + error per baris | ✅ per-baris (nama, JK, TTL, desa, kelompok) | ✅ created/matched/participation/duplicate/failed + errors | `PengajianImportService` (transaction per-baris, duplicate detection) | **generator** `PersonImportTemplateExport` (3 sheet: Template/Petunjuk/Master Data + dropdown validasi) | `ImportMassalFeatureTest` (15), `ImportMassalUploadEndpointTest` (2), `PengajianImportTest` (service ±20) | 🟢 **GOLDEN** |
 

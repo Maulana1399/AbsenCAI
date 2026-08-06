@@ -115,7 +115,7 @@ test('real commit stage commits in execute mode', function () {
     {
         public function __construct(public object $tracker) {}
 
-        public function commit(ImportContext $context): ImportCommit
+        public function commit(array $rows, ImportContext $context): ImportCommit
         {
             $this->tracker->calls++;
 
@@ -139,7 +139,7 @@ test('real commit stage commits in execute mode', function () {
 test('real commit stage is skipped in preview mode', function () {
     $committer = new class implements ImportCommitter
     {
-        public function commit(ImportContext $context): ImportCommit
+        public function commit(array $rows, ImportContext $context): ImportCommit
         {
             throw new LogicException('Commit harus di-skip pada mode preview.');
         }

@@ -2,20 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Import\Adapters\Desa\DesaImportActivityLogger;
-use App\Services\Import\Adapters\Desa\DesaImportCommitter;
-use App\Services\Import\Adapters\Desa\DesaImportDefinition;
-use App\Services\Import\Adapters\Desa\DesaImportDuplicateDetector;
-use App\Services\Import\Adapters\Desa\DesaImportNormalizer;
-use App\Services\Import\Adapters\Desa\DesaImportParser;
-use App\Services\Import\Adapters\Desa\DesaImportValidator;
-use App\Services\Import\Adapters\Kelompok\KelompokImportCommitter;
-use App\Services\Import\Adapters\Kelompok\KelompokImportDefinition;
+use App\Services\Import\Adapters\ImportAdapter;
 use App\Services\Import\Adapters\Peserta\PesertaImportCommitter;
 use App\Services\Import\Adapters\Peserta\PesertaImportDefinition;
-use App\Services\Import\Adapters\Regu\ReguImportCommitter;
-use App\Services\Import\Adapters\Regu\ReguImportDefinition;
 use App\Services\Import\DTO\ImportContext;
+use App\Services\Import\DTO\ImportError;
+use App\Services\Import\Exceptions\ImportException;
 use App\Services\Import\NullObjects\NullImportActivityLogger;
 use App\Services\Import\NullObjects\NullImportDuplicateDetector;
 use App\Services\Import\NullObjects\NullImportNormalizer;
@@ -28,7 +20,9 @@ use App\Services\Import\Support\ArrayPipelineStageRunner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ImportDataController extends Controller
 {
@@ -36,57 +30,122 @@ class ImportDataController extends Controller
     {
         Gate::authorize('manage-master-data');
 
-        return $this->executeImport(
-            $request,
-            'desa',
-            new DesaImportDefinition(
-                new DesaImportParser,
-                new DesaImportValidator,
-                new DesaImportNormalizer,
-                new DesaImportDuplicateDetector,
-                new DesaImportCommitter,
-                new DesaImportActivityLogger,
-            ),
-            'Data desa berhasil diimpor.',
-        );
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            $result = app(ImportAdapter::class)->commit('desa', $request->file('file'));
+        } catch (ImportException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $summary = $result->summary;
+        $failed = count($result->commit?->failedRows ?? []);
+
+        return back()->with('success', sprintf(
+            'Data desa berhasil diimpor: %d dibuat, %d duplikat dilewati, %d gagal.',
+            $summary?->createdRows ?? 0,
+            $summary?->skippedRows ?? 0,
+            $failed,
+        ));
+    }
+
+    public function desaTemplate(): BinaryFileResponse
+    {
+        Gate::authorize('manage-master-data');
+
+        $template = app(ImportAdapter::class)->template('desa');
+
+        return Excel::download($template->toExport(), $template->fileName());
     }
 
     public function kelompok(Request $request): RedirectResponse
     {
         Gate::authorize('manage-master-data');
 
-        return $this->executeImport(
-            $request,
-            'kelompok',
-            new KelompokImportDefinition(
-                new NullImportParser,
-                new NullImportValidator,
-                new NullImportNormalizer,
-                new NullImportDuplicateDetector,
-                new KelompokImportCommitter,
-                new NullImportActivityLogger,
-            ),
-            'Data kelompok berhasil diimpor.',
-        );
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+            'desa_id' => 'required|integer|exists:desas,id',
+        ]);
+
+        try {
+            $result = app(ImportAdapter::class)->commit(
+                'kelompok',
+                $request->file('file'),
+                parameters: ['desa_id' => (int) $request->input('desa_id')],
+            );
+        } catch (ImportException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $summary = $result->summary;
+        $failed = count($result->commit?->failedRows ?? []);
+
+        return back()->with('success', sprintf(
+            'Data kelompok berhasil diimpor: %d dibuat, %d duplikat dilewati, %d gagal.',
+            $summary?->createdRows ?? 0,
+            $summary?->skippedRows ?? 0,
+            $failed,
+        ));
+    }
+
+    public function kelompokTemplate(): BinaryFileResponse
+    {
+        Gate::authorize('manage-master-data');
+
+        $template = app(ImportAdapter::class)->template('kelompok');
+
+        return Excel::download($template->toExport(), $template->fileName());
     }
 
     public function regu(Request $request): RedirectResponse
     {
         Gate::authorize('manage-participants');
 
-        return $this->executeImport(
-            $request,
-            'regu',
-            new ReguImportDefinition(
-                new NullImportParser,
-                new NullImportValidator,
-                new NullImportNormalizer,
-                new NullImportDuplicateDetector,
-                new ReguImportCommitter,
-                new NullImportActivityLogger,
-            ),
-            'Data regu berhasil diimpor.',
-        );
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            $result = app(ImportAdapter::class)->commit('regu', $request->file('file'));
+        } catch (ImportException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $errors = $result->summary?->errors ?? [];
+
+        if (! empty($errors)) {
+            $messages = [];
+
+            foreach ($errors as $error) {
+                $field = $error instanceof ImportError ? $error->field : 'file';
+                $message = $error instanceof ImportError ? $error->message : ($error['message'] ?? 'Baris tidak valid.');
+
+                $messages[$field] = $message;
+            }
+
+            return back()->withErrors($messages);
+        }
+
+        $summary = $result->summary;
+        $failed = count($result->commit?->failedRows ?? []);
+
+        return back()->with('success', sprintf(
+            'Data regu berhasil diimpor: %d dibuat, %d duplikat dilewati, %d gagal.',
+            $summary?->createdRows ?? 0,
+            $summary?->skippedRows ?? 0,
+            $failed,
+        ));
+    }
+
+    public function reguTemplate(): BinaryFileResponse
+    {
+        Gate::authorize('manage-participants');
+
+        $template = app(ImportAdapter::class)->template('regu');
+
+        return Excel::download($template->toExport(), $template->fileName());
     }
 
     public function peserta(Request $request): RedirectResponse
