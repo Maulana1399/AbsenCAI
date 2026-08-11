@@ -107,7 +107,7 @@ class ImportMassal extends ImportWizardBase
     protected function extractPreviewRows(ImportPipelineResult $result): array
     {
         return array_map(
-            fn (NormalizedImportRow $row) => $row->original->raw,
+            fn (NormalizedImportRow $row) => $row->data,
             $result->rows,
         );
     }

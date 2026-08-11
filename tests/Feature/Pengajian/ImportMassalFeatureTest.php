@@ -83,6 +83,57 @@ function imf_xlsx(array $data): UploadedFile
     );
 }
 
+function imf_datesXlsx(): UploadedFile
+{
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+    $ws = $spreadsheet->getActiveSheet();
+    $ws->fromArray(imf_rows([
+        ['Ahmad', 'L', '', 'Desa Import', 'Kelompok A'],
+        ['Budi', 'P', '', 'Desa Import', 'Kelompok A'],
+        ['Cici', 'L', '', 'Desa Import', 'Kelompok A'],
+        ['Dodi', 'L', '', 'Desa Import', 'Kelompok A'],
+    ]), null, 'A1');
+
+    $serial = fn (string $date) => \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
+
+    $ws->getCell('C2')->setValue($serial('1999-09-16'));
+    $ws->getCell('C2')->getStyle()->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+    $ws->getCell('C3')->setValue($serial('1985-12-31'));
+    $ws->getCell('C3')->getStyle()->getNumberFormat()->setFormatCode('dd-mm-yyyy');
+    $ws->getCell('C4')->setValue($serial('2000-01-01'));
+    $ws->getCell('C4')->getStyle()->getNumberFormat()->setFormatCode('yyyy-mm-dd');
+    $ws->getCell('C5')->setValue($serial('1990-06-20'));
+
+    $path = tempnam(sys_get_temp_dir(), 'imf_dates').'.xlsx';
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+    return new NamedUploadedFile(
+        $path,
+        'import-dates.xlsx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        null,
+        true,
+    );
+}
+
+function imf_emptyDateXlsx(): UploadedFile
+{
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+    $spreadsheet->getActiveSheet()->fromArray(imf_rows([
+        ['Jono', 'L', '', 'Desa Import', 'Kelompok A'],
+    ]), null, 'A1');
+    $path = tempnam(sys_get_temp_dir(), 'imf_empty').'.xlsx';
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+    return new NamedUploadedFile(
+        $path,
+        'import-empty-date.xlsx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        null,
+        true,
+    );
+}
+
 function imf_validCsv(): UploadedFile
 {
     return imf_csv(imf_rows([
@@ -174,6 +225,64 @@ test('preview menampilkan summary validasi sukses', function () {
         ->assertSet('step', 2)
         ->assertSet('validationErrors', [])
         ->assertCount('previewRows', 1);
+});
+
+// ---------------------------------------------------------------------------
+// 3b. Preview menerima Excel native date formats (dd/mm/yyyy, dd-mm-yyyy,
+//     yyyy-mm-dd, serial) dan menampilkan tanggal canonical Y-m-d
+// ---------------------------------------------------------------------------
+
+test('preview menerima excel native date formats dan menampilkan tanggal canonical', function () {
+    imf_mountComponent()
+        ->set('file', imf_datesXlsx())
+        ->call('preview')
+        ->assertSet('step', 2)
+        ->assertHasNoErrors()
+        ->assertSet('validationErrors', [])
+        ->assertCount('previewRows', 4)
+        ->assertSet('previewRows.0.tanggal_lahir', '1999-09-16')
+        ->assertSet('previewRows.1.tanggal_lahir', '1985-12-31')
+        ->assertSet('previewRows.2.tanggal_lahir', '2000-01-01')
+        ->assertSet('previewRows.3.tanggal_lahir', '1990-06-20');
+});
+
+test('import excel native date formats menyimpan tanggal canonical', function () {
+    imf_mountComponent()
+        ->set('file', imf_datesXlsx())
+        ->call('preview')
+        ->call('executeImport')
+        ->assertSet('step', 3)
+        ->assertSet('importResult.failed_rows', 0);
+
+    expect(Person::where('nama', 'Ahmad')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1999-09-16')
+        ->and(Person::where('nama', 'Budi')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1985-12-31')
+        ->and(Person::where('nama', 'Cici')->first()->tanggal_lahir->format('Y-m-d'))->toBe('2000-01-01')
+        ->and(Person::where('nama', 'Dodi')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1990-06-20');
+});
+
+// ---------------------------------------------------------------------------
+// 3c. Tanggal lahir kosong (empty cell) → validation error, row rejected
+// ---------------------------------------------------------------------------
+
+test('preview untuk tanggal lahir kosong menampilkan error dan tidak valid', function () {
+    imf_mountComponent()
+        ->set('file', imf_emptyDateXlsx())
+        ->call('preview')
+        ->assertSet('step', 2)
+        ->assertCount('previewRows', 1)
+        ->assertSet('validationErrors.0.row', 2)
+        ->assertSet('validationErrors.0.errors.0', 'Tanggal lahir wajib diisi.');
+});
+
+test('import tanggal lahir kosong tidak menyimpan data', function () {
+    imf_mountComponent()
+        ->set('file', imf_emptyDateXlsx())
+        ->call('preview')
+        ->assertSet('validationErrors.0.row', 2)
+        ->call('executeImport');
+
+    expect(Person::count())->toBe(0)
+        ->and(Participation::count())->toBe(0);
 });
 
 // ---------------------------------------------------------------------------

@@ -38,6 +38,52 @@ function person_import_xlsx(array $data): PersonTestUploadedFile
     return new PersonTestUploadedFile($path, 'person.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
 }
 
+/**
+ * xlsx dengan worksheet yang XML-nya mendeklarasikan dimension penuh
+ * (A1:E1048576) + trailing empty rows sampai r="1048576" — bentuk file
+ * production yang sebelumnya memicu memory exhaustion via Worksheet::toArray().
+ */
+function person_import_huge_dates_xlsx(): PersonTestUploadedFile
+{
+    $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet;
+    $ws = $spreadsheet->getActiveSheet();
+    $ws->fromArray([
+        ['nama', 'jenis_kelamin', 'tanggal_lahir', 'desa', 'kelompok'],
+        ['Ahmad', 'L', null, 'Desa Import', 'Kelompok A'],
+        ['Budi', 'P', '', 'Desa Import', 'Kelompok A'],
+    ], null, 'A1');
+
+    $serial = PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel('1999-09-16');
+    $ws->getCell('C2')->setValue($serial);
+    $ws->getCell('C2')->getStyle()->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+
+    $path = tempnam(sys_get_temp_dir(), 'pif_huge').'.xlsx';
+    (new PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+    $zip = new ZipArchive;
+    $zip->open($path);
+    $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+    $sheetXml = preg_replace('/<dimension[^\/]*\/>/', '<dimension ref="A1:E1048576"/>', $sheetXml, 1);
+
+    $trailing = '';
+
+    foreach ([1048572, 1048573, 1048574, 1048575, 1048576] as $row) {
+        $cells = '';
+
+        foreach (['A', 'B', 'C', 'D', 'E'] as $column) {
+            $cells .= '<c r="'.$column.$row.'" t="inlineStr"><is><t></t></is></c>';
+        }
+
+        $trailing .= '<row r="'.$row.'" spans="1:5">'.$cells.'</row>';
+    }
+
+    $sheetXml = str_replace('</sheetData>', $trailing.'</sheetData>', $sheetXml);
+    $zip->addFromString('xl/worksheets/sheet1.xml', $sheetXml);
+    $zip->close();
+
+    return new PersonTestUploadedFile($path, 'person-huge.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+}
+
 beforeEach(function () {
     $this->actingAs(User::factory()->create(['role' => Role::SuperAdmin]));
     $this->desa = desa::create(['desa_asal' => 'Desa Import']);
@@ -176,4 +222,99 @@ test('wizard reset clears state and returns to upload', function () {
         ->assertSet('previewRows', [])
         ->assertSet('validationErrors', [])
         ->assertSet('importResult', []);
+});
+
+function person_import_dates_xlsx(): PersonTestUploadedFile
+{
+    $ss = new PhpOffice\PhpSpreadsheet\Spreadsheet;
+    $ws = $ss->getActiveSheet();
+    $ws->fromArray([
+        ['nama', 'jenis_kelamin', 'tanggal_lahir', 'desa', 'kelompok'],
+        ['Ahmad', 'L', null, 'Desa Import', 'Kelompok A'],
+        ['Budi', 'P', null, 'Desa Import', 'Kelompok A'],
+        ['Cici', 'L', null, 'Desa Import', 'Kelompok A'],
+        ['Dodi', 'L', null, 'Desa Import', 'Kelompok A'],
+        ['Fajar', 'L', '2000-01-01', 'Desa Import', 'Kelompok A'],
+    ], null, 'A1');
+
+    $serial = fn (string $date) => PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
+
+    $ws->getCell('C2')->setValue($serial('1999-09-16'));
+    $ws->getCell('C2')->getStyle()->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+    $ws->getCell('C3')->setValue($serial('1985-12-31'));
+    $ws->getCell('C3')->getStyle()->getNumberFormat()->setFormatCode('dd-mm-yyyy');
+    $ws->getCell('C4')->setValue($serial('2000-01-01'));
+    $ws->getCell('C4')->getStyle()->getNumberFormat()->setFormatCode('yyyy-mm-dd');
+    $ws->getCell('C5')->setValue($serial('1990-06-20'));
+
+    $path = tempnam(sys_get_temp_dir(), 'pif_dates').'.xlsx';
+    (new PhpOffice\PhpSpreadsheet\Writer\Xlsx($ss))->save($path);
+
+    return new PersonTestUploadedFile($path, 'person.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+}
+
+test('excel native date formats pass validation and normalize preview/commit', function () {
+    Livewire::test(ImportPerson::class)
+        ->set('file', person_import_dates_xlsx())
+        ->call('preview')
+        ->assertSet('step', 2)
+        ->assertHasNoErrors()
+        ->assertCount('previewRows', 5)
+        ->assertSet('previewRows.0.tanggal_lahir', '1999-09-16') // dd/mm/yyyy cell
+        ->assertSet('previewRows.1.tanggal_lahir', '1985-12-31') // dd-mm-yyyy cell
+        ->assertSet('previewRows.2.tanggal_lahir', '2000-01-01') // yyyy-mm-dd cell
+        ->assertSet('previewRows.3.tanggal_lahir', '1990-06-20') // serial cell
+        ->assertSet('previewRows.4.tanggal_lahir', '2000-01-01') // yyyy-mm-dd string
+        ->call('goToImport')
+        ->call('executeImport')
+        ->assertSet('step', 5)
+        ->assertSet('importResult.created', 5)
+        ->assertSet('importResult.failed', 0);
+
+    expect(Person::where('nama', 'Ahmad')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1999-09-16')
+        ->and(Person::where('nama', 'Budi')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1985-12-31')
+        ->and(Person::where('nama', 'Cici')->first()->tanggal_lahir->format('Y-m-d'))->toBe('2000-01-01')
+        ->and(Person::where('nama', 'Dodi')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1990-06-20')
+        ->and(Person::where('nama', 'Fajar')->first()->tanggal_lahir->format('Y-m-d'))->toBe('2000-01-01');
+});
+
+test('excel dd/mm/yyyy dates no longer produce validation errors', function () {
+    Livewire::test(ImportPerson::class)
+        ->set('file', person_import_dates_xlsx())
+        ->call('preview')
+        ->assertHasNoErrors()
+        ->assertSet('validationErrors', []);
+});
+
+test('excel empty tanggal lahir is rejected and not imported', function () {
+    $ss = new PhpOffice\PhpSpreadsheet\Spreadsheet;
+    $ss->getActiveSheet()->fromArray([
+        ['nama', 'jenis_kelamin', 'tanggal_lahir', 'desa', 'kelompok'],
+        ['Euis', 'P', '', 'Desa Import', 'Kelompok A'],
+    ], null, 'A1');
+    $path = tempnam(sys_get_temp_dir(), 'pif_empty').'.xlsx';
+    (new PhpOffice\PhpSpreadsheet\Writer\Xlsx($ss))->save($path);
+
+    Livewire::test(ImportPerson::class)
+        ->set('file', new PersonTestUploadedFile($path, 'person-empty.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true))
+        ->call('preview')
+        ->assertSet('step', 3)
+        ->assertCount('previewRows', 1)
+        ->assertSet('validationErrors.0.row', 2)
+        ->assertSet('validationErrors.0.errors.0', 'Tanggal lahir wajib diisi.');
+
+    expect(Person::count())->toBe(0);
+});
+
+test('person import parses an xlsx with a 1,048,576-row dimension without memory exhaustion', function () {
+    Livewire::test(ImportPerson::class)
+        ->set('file', person_import_huge_dates_xlsx())
+        ->call('preview')
+        ->assertSet('step', 3)
+        ->assertCount('previewRows', 2)
+        ->assertSet('previewRows.0.tanggal_lahir', '1999-09-16') // native dd/mm/yyyy cell → canonical
+        ->assertSet('validationErrors.0.row', 3)
+        ->assertSet('validationErrors.0.errors.0', 'Tanggal lahir wajib diisi.');
+
+    expect(Person::count())->toBe(0);
 });

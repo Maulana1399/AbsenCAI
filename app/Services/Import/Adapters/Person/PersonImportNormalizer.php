@@ -24,6 +24,7 @@ final class PersonImportNormalizer implements ImportNormalizer
             $nama = $this->personIdentity->normalizeNama($row->raw['nama'] ?? '');
             $jenisKelamin = $this->personIdentity->normalizeGender($row->raw['jenis_kelamin'] ?? null);
             $tanggalLahir = $this->personIdentity->normalizeTanggalLahir($row->raw['tanggal_lahir'] ?? '');
+
             $desaName = trim((string) ($row->raw['desa'] ?? ''));
             $kelompokName = trim((string) ($row->raw['kelompok'] ?? ''));
 

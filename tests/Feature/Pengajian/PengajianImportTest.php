@@ -37,7 +37,7 @@ function pgi_kelompok(string $name, int $desaId): kelompok
     ]);
 }
 
-function pgi_validRow(string $nama = 'Jono', string $gender = 'L', string $birth = '2000-01-15', string $desa = 'Desa Import', string $kelompok = 'Kelompok A'): array
+function pgi_validRow(string $nama = 'Jono', string $gender = 'L', ?string $birth = '2000-01-15', string $desa = 'Desa Import', string $kelompok = 'Kelompok A'): array
 {
     return [
         'nama' => $nama,
@@ -68,21 +68,49 @@ test('validate returns errors for invalid gender', function () {
         ->and($errors[0]['errors'][0])->toContain('L atau P');
 });
 
-test('validate returns errors for empty tanggal_lahir', function () {
+test('validate rejects empty tanggal_lahir and does not import', function ($birth) {
     $service = app(PengajianImportService::class);
-    $errors = $service->validate([pgi_validRow(birth: '')]);
+    $desa = pgi_desa();
+    pgi_kelompok('Kelompok A', $desa->id);
+
+    $errors = $service->validate([pgi_validRow(birth: $birth)]);
 
     expect($errors)->toHaveCount(1)
-        ->and($errors[0]['errors'][0])->toContain('Tanggal lahir');
-});
+        ->and($errors[0]['errors'][0])->toBe('Tanggal lahir wajib diisi.');
+
+    $result = $service->import([pgi_validRow(birth: $birth)], pgi_event()->id);
+    expect($result['failed_rows'])->toBe(1)
+        ->and(Person::count())->toBe(0);
+})->with([null, '', '   ']);
 
 test('validate returns errors for invalid tanggal_lahir format', function () {
     $service = app(PengajianImportService::class);
-    $errors = $service->validate([pgi_validRow(birth: '15-01-2000')]);
+    $errors = $service->validate([pgi_validRow(birth: '31/02/2000')]);
 
     expect($errors)->toHaveCount(1)
         ->and($errors[0]['errors'][0])->toContain('Format');
 });
+
+test('validate accepts common excel date formats for tanggal_lahir', function ($birth, $canonical) {
+    $service = app(PengajianImportService::class);
+    $desa = pgi_desa();
+    pgi_kelompok('Kelompok A', $desa->id);
+
+    expect($service->validate([pgi_validRow(birth: $birth)]))->toBeEmpty();
+
+    $result = $service->import([pgi_validRow(birth: $birth)], pgi_event()->id);
+    expect($result['failed_rows'])->toBe(0);
+
+    $person = Person::where('nama', 'Jono')->first();
+    expect($person)->not->toBeNull()
+        ->and($person->tanggal_lahir->format('Y-m-d'))->toBe($canonical);
+})->with([
+    ['16/09/1999', '1999-09-16'],
+    ['31-12-1985', '1985-12-31'],
+    ['2000-01-01', '2000-01-01'],
+    ['2000/01/15', '2000-01-15'],
+    ['1999/09/16', '1999-09-16'],
+]);
 
 test('validate returns errors for empty desa', function () {
     $service = app(PengajianImportService::class);

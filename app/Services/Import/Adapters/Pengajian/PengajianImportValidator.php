@@ -11,7 +11,8 @@ use App\Services\Import\Results\ImportSummary;
 /**
  * Pengajian validator — exact copy of the golden `validate()` behavior.
  * Error order per row: nama → jenis_kelamin → tanggal_lahir → desa. Gender is
- * STRICT (only L/P after strtoupper); "Laki - Laki" remains invalid.
+ * STRICT (only L/P after strtoupper); "Laki - Laki" remains invalid. Empty
+ * tanggal_lahir is a required-field error — the row is rejected.
  */
 final class PengajianImportValidator implements ImportValidator
 {

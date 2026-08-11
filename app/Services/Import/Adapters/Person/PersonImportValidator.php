@@ -35,7 +35,9 @@ final class PersonImportValidator implements ImportValidator
 
             $tanggalLahir = $row->data['tanggal_lahir'] ?? null;
 
-            if ($tanggalLahir !== null && $tanggalLahir !== '' && ! $this->isValidDate($tanggalLahir)) {
+            if ($tanggalLahir === null || $tanggalLahir === '') {
+                $rowErrors[] = new ImportError($row->rowNumber, 'tanggal_lahir', 'Tanggal lahir wajib diisi.');
+            } elseif (! $this->isValidDate($tanggalLahir)) {
                 $rowErrors[] = new ImportError($row->rowNumber, 'tanggal_lahir', 'Format tanggal lahir tidak valid (YYYY-MM-DD).');
             }
 

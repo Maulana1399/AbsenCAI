@@ -27,6 +27,11 @@ function person_normalized_row(int $rowNumber, array $data, ?string $duplicateKe
     );
 }
 
+function person_raw_row(array $data, int $rowNumber = 2): RawImportRow
+{
+    return new RawImportRow($rowNumber, $rowNumber - 2, $data, $data);
+}
+
 beforeEach(function () {
     $this->definition = app(PersonImportDefinition::class);
     $this->desa = desa::create(['desa_asal' => 'Desa Audit']);
@@ -94,6 +99,18 @@ test('person normalizer handles unicode spaces', function () {
     ], person_context());
 
     expect($normalized[0]->data['nama'])->toBe('Ahmad Wijaya');
+});
+
+test('person normalizer title-cases caps and lowercase names via shared normalizer', function () {
+    $normalized = $this->definition->normalize([
+        new RawImportRow(2, 1, ['nama' => 'REFIANTITO', 'jenis_kelamin' => 'L'], ['nama' => 'REFIANTITO']),
+        new RawImportRow(3, 2, ['nama' => 'royan chiyarul ichsan', 'jenis_kelamin' => 'L'], ['nama' => 'royan chiyarul ichsan']),
+    ], person_context());
+
+    expect($normalized[0]->data['nama'])->toBe('Refiantito')
+        ->and($normalized[1]->data['nama'])->toBe('Royan Chiyarul Ichsan')
+        ->and($normalized[0]->duplicateKey)->toBeNull()
+        ->and($normalized[1]->duplicateKey)->toBeNull();
 });
 
 test('person normalizer does not resolve unknown desa or kelompok', function () {
@@ -186,4 +203,66 @@ test('person committer records failed rows for invalid identity', function () {
     expect($commit->failedRows)->toHaveCount(1)
         ->and($commit->summary->invalidRows)->toBe(1)
         ->and($commit->createdIds)->toBe([]);
+});
+
+// ---------------------------------------------------------------------------
+// Tanggal lahir normalization (bugfix: Excel native dates / empty defaults)
+// ---------------------------------------------------------------------------
+
+test('person normalizer leaves empty tanggal lahir null', function () {
+    foreach (['', '   ', null] as $rawDate) {
+        $rows = $this->definition->normalize([
+            person_raw_row(['nama' => 'Ahmad', 'jenis_kelamin' => 'L', 'tanggal_lahir' => $rawDate, 'desa' => 'Desa Audit']),
+        ], person_context());
+
+        expect($rows[0]->data['tanggal_lahir'])->toBeNull();
+    }
+});
+
+test('person normalizer converts dd/mm/yyyy and dd-mm-yyyy to y-m-d', function () {
+    $rows = $this->definition->normalize([
+        person_raw_row(['nama' => 'Ahmad', 'jenis_kelamin' => 'L', 'tanggal_lahir' => '16/09/1999', 'desa' => 'Desa Audit']),
+        person_raw_row(['nama' => 'Budi', 'jenis_kelamin' => 'L', 'tanggal_lahir' => '31-12-1985', 'desa' => 'Desa Audit'], 3),
+        person_raw_row(['nama' => 'Cici', 'jenis_kelamin' => 'P', 'tanggal_lahir' => '33044', 'desa' => 'Desa Audit'], 4),
+    ], person_context());
+
+    expect($rows[0]->data['tanggal_lahir'])->toBe('1999-09-16')
+        ->and($rows[1]->data['tanggal_lahir'])->toBe('1985-12-31')
+        ->and($rows[2]->data['tanggal_lahir'])->toBe('1990-06-20');
+});
+
+test('person validator rejects impossible dates that normalization left untouched', function () {
+    $rows = $this->definition->normalize([
+        person_raw_row(['nama' => 'Ahmad', 'jenis_kelamin' => 'L', 'tanggal_lahir' => '31/02/2000', 'desa' => 'Desa Audit']),
+        person_raw_row(['nama' => 'Budi', 'jenis_kelamin' => 'L', 'tanggal_lahir' => '2025-99-99', 'desa' => 'Desa Audit'], 3),
+        person_raw_row(['nama' => 'Cici', 'jenis_kelamin' => 'P', 'tanggal_lahir' => 'abc', 'desa' => 'Desa Audit'], 4),
+    ], person_context());
+
+    $summary = $this->definition->validator()->validate($rows, person_context());
+
+    expect($summary->invalidRows)->toBe(3)
+        ->and(collect($summary->errors)->pluck('message')->unique())
+        ->toContain('Format tanggal lahir tidak valid (YYYY-MM-DD).');
+});
+
+test('person validator rejects empty tanggal lahir', function () {
+    $rows = $this->definition->normalize([
+        person_raw_row(['nama' => 'Ahmad', 'jenis_kelamin' => 'L', 'tanggal_lahir' => '', 'desa' => 'Desa Audit']),
+    ], person_context());
+
+    $summary = $this->definition->validator()->validate($rows, person_context());
+
+    expect($summary->invalidRows)->toBe(1)
+        ->and($summary->errors[0]->message)->toBe('Tanggal lahir wajib diisi.');
+});
+
+test('person committer stores canonical y-m-d', function () {
+    $rows = $this->definition->normalize([
+        person_raw_row(['nama' => 'Ahmad', 'jenis_kelamin' => 'L', 'tanggal_lahir' => '16/09/1999', 'desa' => 'Desa Audit', 'kelompok' => 'Kelompok Audit']),
+    ], person_context());
+
+    $commit = $this->definition->commit($rows, person_context());
+
+    expect($commit->createdIds)->toHaveCount(1)
+        ->and(Person::where('nama', 'Ahmad')->first()->tanggal_lahir->format('Y-m-d'))->toBe('1999-09-16');
 });
