@@ -140,10 +140,10 @@ test('least filled regu is scoped to event when eventId is given', function () {
     Participation::create(['person_id' => $personB->id, 'event_id' => $eventB->id, 'participant_number' => 'KL101', 'attendance_code' => 'KJA-EB1', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguB->id]);
 
     // Paling sedikit di Event A adalah Regu B (0 participation di Event A)
-    expect(PlacementService::leastFilledRegu('Laki - Laki', $eventA->id)?->id)->toBe($reguB->id);
+    expect(PlacementService::leastFilledRegu($eventA->id, 'Laki - Laki')?->id)->toBe($reguB->id);
 
     // Paling sedikit di Event B adalah Regu A (0 participation di Event B)
-    expect(PlacementService::leastFilledRegu('Laki - Laki', $eventB->id)?->id)->toBe($reguA->id);
+    expect(PlacementService::leastFilledRegu($eventB->id, 'Laki - Laki')?->id)->toBe($reguA->id);
 });
 
 // ──────────────────────────────────────────────
@@ -224,7 +224,7 @@ test('least filled regu uses participations scoped by event (retired legacy pese
     $person = Person::create(['nama' => 'Event Scoped Person', 'nip' => 5001, 'jenis_kelamin' => 'L']);
     Participation::create(['person_id' => $person->id, 'event_id' => $event->id, 'participant_number' => 'KL501', 'attendance_code' => 'KJA-ES1', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
-    $result = PlacementService::leastFilledRegu('Laki - Laki', $event->id);
+    $result = PlacementService::leastFilledRegu($event->id, 'Laki - Laki');
     expect($result)->toBeInstanceOf(regu::class);
     expect($result->id)->toBe($reguB->id);
 });

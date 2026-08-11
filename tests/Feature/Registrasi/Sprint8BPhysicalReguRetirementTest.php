@@ -211,7 +211,7 @@ test('S8B-08: PlacementService works with participations scoped by eventId', fun
         'regu_id' => $reguA->id,
     ]);
 
-    $result = PlacementService::leastFilledRegu('Laki - Laki', $event->id);
+    $result = PlacementService::leastFilledRegu($event->id, 'Laki - Laki');
     expect($result)->toBeInstanceOf(regu::class);
     expect($result->id)->toBe($reguB->id);
 });
@@ -329,5 +329,5 @@ test('S8B-16: database page renders without active event context', function () {
 // ──────────────────────────────────────────────
 test('S8B-17: leastFilledRegu rejects null eventId with TypeError', function () {
     $this->expectException(\TypeError::class);
-    PlacementService::leastFilledRegu('Laki - Laki', null);
+    PlacementService::leastFilledRegu(null, 'Laki - Laki');
 });

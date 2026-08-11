@@ -513,5 +513,5 @@ test('S8A-15: placement service leastFilledRegu with eventId uses participations
     $p1 = Person::create(['nama' => 'S8A P1', 'nip' => 8151, 'jenis_kelamin' => 'L']);
     Participation::create(['person_id' => $p1->id, 'event_id' => $event->id, 'participant_number' => 'KL151', 'attendance_code' => 'KJA-S8APL1', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
-    expect(PlacementService::leastFilledRegu('Laki - Laki', $event->id)?->id)->toBe($reguB->id);
+    expect(PlacementService::leastFilledRegu($event->id, 'Laki - Laki')?->id)->toBe($reguB->id);
 });

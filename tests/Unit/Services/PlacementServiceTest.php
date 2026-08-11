@@ -68,9 +68,9 @@ test('least filled regu picks the regu with the fewest participants for the sele
     Participation::create(['person_id' => $person1->id, 'event_id' => $event->id, 'participant_number' => 'KL001', 'attendance_code' => 'KJA-LFR01', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
     Participation::create(['person_id' => $person2->id, 'event_id' => $event->id, 'participant_number' => 'KL002', 'attendance_code' => 'KJA-LFR02', 'jenis_peserta' => 'Wajib', 'regu_id' => $reguA->id]);
 
-    expect(PlacementService::leastFilledRegu('Laki - Laki', $event->id)?->id)->toBe($reguB->id)
-        ->and(PlacementService::leastFilledReguId('Laki - Laki', $event->id))->toBe($reguB->id)
-        ->and(PlacementService::leastFilledReguName('Laki - Laki', $event->id))->toBe('Regu B');
+    expect(PlacementService::leastFilledRegu($event->id, 'Laki - Laki')?->id)->toBe($reguB->id)
+        ->and(PlacementService::leastFilledReguId($event->id, 'Laki - Laki'))->toBe($reguB->id)
+        ->and(PlacementService::leastFilledReguName($event->id, 'Laki - Laki'))->toBe('Regu B');
 });
 
 test('auto placement uses legacy nip compatibility and least filled regu', function () {
