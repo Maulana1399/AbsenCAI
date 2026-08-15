@@ -250,6 +250,17 @@ Future
 - Public Portal — homepage, event detail, schedule, bracket, announcements
 - Event Dashboard — overview cards, live matches, quick actions
 
+# Competition Foundation (Event Membership — 2026-08)
+
+🟢
+
+- **5 format lomba** pada `competition_classes.format` — `individual_heat`, `individual_mass`, `team_vs_team`, `team_mass`, `individual_vs_individual` (`App\Support\CompetitionFormat`).
+- **Status lomba** pada `competition_classes.status` — draft / registration_open / registration_closed / ready / running / finished / cancelled (`App\Support\CompetitionStatus`).
+- **Teams** — `competition_teams` (event-scoped, satu kelompok = satu team per lomba) + `competition_team_members` (players + substitutes via `competition_registration_id`).
+- **Auto team formation** — `CompetitionTeamFormationService` (ukuran team = kelompok terkecil; sisa = cadangan; transactional; TIDAK memakai regus).
+- **Team member management** — `CompetitionTeamService` (tambah/hapus/pindah player↔cadangan/shuffle; validasi kelompok & kelas & satu-team).
+- UI `Competition/Team/Index` + route `competition.teams` (gate `manage-registration`).
+
 ---
 
 # Competition (V2 — Competition Engine)
@@ -262,7 +273,7 @@ Future
 
 V2 tidak akan membuat modul khusus per jenis lomba. Semua dikonfigurasi melalui engine.
 
----
+> **Catatan domain:** `CompetitionClass` = lomba (contoh "Tarik Tambang Putra"); `CompetitionCategory` = pengelompokan; format/team/result/schedule melekat pada `CompetitionClass`. Competition **Team** berbeda dari **Regu** (Regu adalah master data operasional CAI lama — tidak dipakai untuk competition).
 
 # QR & Label
 

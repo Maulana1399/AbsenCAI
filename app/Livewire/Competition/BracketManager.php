@@ -122,7 +122,12 @@ class BracketManager extends Component
         }
 
         $this->selectedBracketId = $bracket->id;
-        session()->flash('success', "Bracket generated with {$count} participants.");
+
+        $eventId = app(ActiveEventContext::class)->requireCurrent()->id;
+        $seedResult = app(\App\Services\Competition\CompetitionBracketSeederService::class)
+            ->seedInitialRound($eventId, $bracket->id);
+
+        session()->flash('success', "Bracket generated with {$count} participants (".$seedResult['seeded'].' competitor seeded to initial round).');
     }
 
     public function deleteBracket(int $bracketId): void
@@ -244,7 +249,9 @@ class BracketManager extends Component
         if ($this->selectedBracketId) {
             $selectedBracket = CompetitionBracket::with([
                 'bracketMatches.schedule.scheduleEntries.competitionRegistration.participation.person',
+                'bracketMatches.schedule.scheduleEntries.team',
                 'bracketMatches.schedule.winner.participation.person',
+                'bracketMatches.schedule.winnerTeam',
                 'bracketMatches.sourceMatchA',
                 'bracketMatches.sourceMatchB',
             ])->find($this->selectedBracketId);
@@ -269,6 +276,27 @@ class BracketManager extends Component
             'brackets' => $brackets,
             'selectedBracket' => $selectedBracket,
             'bracketRounds' => $bracketRounds,
+            'podium' => $this->podiumForSelected($selectedBracket, $event?->id),
         ]);
+    }
+
+    /**
+     * Final podium Juara 1/2/3 untuk bracket terpilih (dari competition_outcomes).
+     *
+     * @return array<int, array{position: int, person_name: string, participant_number: string, score: ?float}>
+     */
+    private function podiumForSelected(?CompetitionBracket $bracket, ?int $eventId): array
+    {
+        if ($bracket === null || $eventId === null) {
+            return [];
+        }
+
+        $service = app(\App\Services\Competition\CompetitionResultService::class);
+
+        if ($bracket->competitionClass?->isTeamFormat()) {
+            return $service->podiumForTeams($eventId, $bracket->competition_class_id);
+        }
+
+        return $service->podiumForClass($eventId, $bracket->competition_class_id);
     }
 }

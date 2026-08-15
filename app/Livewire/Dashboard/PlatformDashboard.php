@@ -48,13 +48,15 @@ class PlatformDashboard extends Component
             return $user->role ? [$user->role->label()] : [];
         }
 
-        if ($user->person_id === null) {
-            return [];
-        }
-
         return EventCommitteeAssignment::query()
             ->where('event_id', $event->id)
-            ->where('person_id', $user->person_id)
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+
+                if ($user->person_id !== null) {
+                    $query->orWhere('person_id', $user->person_id);
+                }
+            })
             ->whereHas('eventRole')
             ->with('eventRole:id,name,code')
             ->get()
@@ -108,9 +110,10 @@ class PlatformDashboard extends Component
         $user = auth()->user();
         $events = $this->events;
 
-        // Header: role platform ditampilkan untuk Super Admin / Admin.
-        // Untuk user event (non-platform), tampilkan ringkasan role assignment.
-        $platformRoleLabel = $user->role && $user->isPlatformUser()
+        // Header: role akun ditampilkan untuk platform (Super Admin / Admin)
+        // maupun account event-scoped (Event Chair / Guest). Untuk user komite
+        // (role null), tampilkan ringkasan role assignment.
+        $platformRoleLabel = $user->role && $user->role->isAccountRole()
             ? $user->role->label()
             : null;
 

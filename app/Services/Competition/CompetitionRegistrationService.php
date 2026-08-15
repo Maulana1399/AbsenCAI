@@ -63,8 +63,9 @@ class CompetitionRegistrationService
         int $eventId,
         int $competitionCategoryId,
         int $competitionClassId,
+        string $registrationType = 'individual',
     ): array {
-        return DB::transaction(function () use ($person, $eventId, $competitionCategoryId, $competitionClassId) {
+        return DB::transaction(function () use ($person, $eventId, $competitionCategoryId, $competitionClassId, $registrationType) {
             $event = Event::lockForUpdate()->findOrFail($eventId);
 
             $category = CompetitionCategory::where('id', $competitionCategoryId)
@@ -100,13 +101,13 @@ class CompetitionRegistrationService
                 $participation = $this->createParticipation($person, $event, $jenisKelamin);
             }
 
-            $this->createCompetitionRegistration($participation, $category, $class);
+            $registration = $this->createCompetitionRegistration($participation, $category, $class, $registrationType);
 
             return [
                 'status' => 'registered',
                 'person' => $person,
                 'participation' => $participation,
-                'competition_registration' => $participation->fresh()->competitionRegistrations()->latest()->first(),
+                'competition_registration' => $registration,
             ];
         });
     }
@@ -129,12 +130,13 @@ class CompetitionRegistrationService
         Participation $participation,
         CompetitionCategory $category,
         CompetitionClass $class,
+        string $registrationType = 'individual',
     ): CompetitionRegistration {
         return CompetitionRegistration::create([
             'participation_id' => $participation->id,
             'competition_category_id' => $category->id,
             'competition_class_id' => $class->id,
-            'registration_type' => 'individual',
+            'registration_type' => $registrationType,
         ]);
     }
 }

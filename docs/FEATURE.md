@@ -416,6 +416,17 @@ Features
 * Public Portal — homepage, event detail, schedule, bracket, announcements
 * Event Dashboard — overview cards, live matches, today's schedule
 
+## Competition Foundation (Teams + Formats + Status — 2026-08)
+
+🟢 Stable
+
+* **5 format lomba** — `competition_classes.format` (individual_heat, individual_mass, team_vs_team, team_mass, individual_vs_individual) via `App\Support\CompetitionFormat`.
+* **Status lomba** — `competition_classes.status` (draft/registration_open/registration_closed/ready/running/finished/cancelled) via `App\Support\CompetitionStatus`.
+* **Teams** — `competition_teams` (event-scoped; satu kelompok = satu team per lomba) + `competition_team_members` (players + substitutes).
+* **Auto team formation** — `CompetitionTeamFormationService` (ukuran team = kelompok terkecil; sisa = cadangan; transactional; tidak memakai Regu).
+* **Team management** — `CompetitionTeamService` (tambah/hapus/pindah player↔cadangan/shuffle; validasi kelompok/kelas/satu-team).
+* **UI** — `Competition/Team/Index` + route `competition.teams` (gate `manage-registration`).
+
 ## Competition (V2 — Generic Engine)
 
 > Competition Engine adalah bagian dari Roadmap V2 — Event Operating System.

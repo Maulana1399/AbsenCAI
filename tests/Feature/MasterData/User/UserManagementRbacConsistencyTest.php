@@ -48,23 +48,25 @@ function umr_assign(Person $person, Event $event, string $code, string $name): E
 }
 
 // ---------------------------------------------------------------------------
-// 1. Platform Role dropdown hanya berisi role platform
+// 1. Role dropdown berisi role akun (platform + event-scoped account)
 // ---------------------------------------------------------------------------
 
-test('create user dropdown only contains platform roles', function () {
+test('create user dropdown contains account roles (platform + guest/event chair)', function () {
     $component = Livewire::test(CreateUser::class);
     $html = $component->html();
 
     expect($html)->toContain('value="super_admin"');
     expect($html)->toContain('value="admin"');
+    expect($html)->toContain('value="event_chair"');
+    expect($html)->toContain('value="guest"');
 
-    // Role event tidak boleh muncul
+    // Role event (EventRole) tidak boleh muncul
     foreach (['ketua_event', 'sekretariat', 'pj_divisi', 'operator_registrasi', 'operator_scan', 'juri', 'viewer'] as $eventRole) {
         expect($html)->not->toContain('value="'.$eventRole.'"');
     }
 });
 
-test('edit user dropdown only contains platform roles', function () {
+test('edit user dropdown contains account roles (platform + guest/event chair)', function () {
     $user = User::factory()->create(['role' => 'admin', 'email' => 'edit-dropdown@example.com']);
     $this->actingAs(umr_superAdmin());
 
@@ -74,6 +76,8 @@ test('edit user dropdown only contains platform roles', function () {
     $html = $component->html();
     expect($html)->toContain('value="super_admin"');
     expect($html)->toContain('value="admin"');
+    expect($html)->toContain('value="event_chair"');
+    expect($html)->toContain('value="guest"');
 
     foreach (['ketua_event', 'sekretariat', 'pj_divisi', 'operator_registrasi', 'operator_scan', 'juri', 'viewer'] as $eventRole) {
         expect($html)->not->toContain('value="'.$eventRole.'"');

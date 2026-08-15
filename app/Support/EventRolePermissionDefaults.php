@@ -55,6 +55,16 @@ class EventRolePermissionDefaults
         'viewer' => ['view-dashboard', 'view-reports'],
         'juri' => ['submit-result'],
         'ketua_fosda' => ['view-dashboard', 'manage-pengajian', 'view-reports'],
+        'event_chair' => [
+            'view-dashboard',
+            'manage-registration',
+            'manage-participants',
+            'manage-attendance',
+            'manage-sessions',
+            'manage-secretariat',
+            'view-reports',
+        ],
+        'guest' => ['view-dashboard'],
     ];
 
     /**
@@ -77,6 +87,8 @@ class EventRolePermissionDefaults
         'viewer' => 'viewer',
         'pengamat' => 'viewer',
         'juri' => 'juri',
+        'event chair' => 'event_chair',
+        'guest' => 'guest',
     ];
 
     public static function knownCodes(): array

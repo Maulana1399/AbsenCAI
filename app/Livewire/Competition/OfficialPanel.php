@@ -26,7 +26,7 @@ class OfficialPanel extends Component
     protected function rules(): array
     {
         return [
-            'selectedWinnerId' => 'required|integer|exists:competition_registrations,id',
+            'selectedWinnerId' => 'required|integer',
             'finishReason' => 'required|in:Normal,Walk Over (WO),Disqualification (DQ),Cancel',
             'finishNotes' => 'nullable|string|max:1000',
         ];
@@ -49,6 +49,7 @@ class OfficialPanel extends Component
 
         $schedule = CompetitionSchedule::with([
             'scheduleEntries.competitionRegistration.participation.person',
+            'scheduleEntries.team',
         ])->findOrFail($scheduleId);
 
         if ($schedule->status !== 'Waiting Result') {
@@ -62,7 +63,22 @@ class OfficialPanel extends Component
         $this->finishReason = '';
         $this->finishNotes = '';
 
-        $this->availableParticipants = $schedule->scheduleEntries->map(function ($entry) {
+        $isTeamMatch = $schedule->competitionClass?->isTeamFormat() ?? false;
+
+        $this->availableParticipants = $schedule->scheduleEntries->map(function ($entry) use ($isTeamMatch) {
+            if ($isTeamMatch) {
+                $team = $entry->team;
+                if (! $team) {
+                    return null;
+                }
+
+                return [
+                    'id' => $team->id,
+                    'name' => $team->name,
+                    'number' => 'Team',
+                ];
+            }
+
             $reg = $entry->competitionRegistration;
             if (! $reg) {
                 return null;
@@ -91,6 +107,7 @@ class OfficialPanel extends Component
 
         $schedule = CompetitionSchedule::with([
             'scheduleEntries.competitionRegistration',
+            'scheduleEntries.team',
         ])->findOrFail($this->submitScheduleId);
 
         if ($schedule->status !== 'Waiting Result') {
@@ -100,7 +117,11 @@ class OfficialPanel extends Component
             return;
         }
 
-        $assignedIds = $schedule->scheduleEntries->pluck('competition_registration_id')->toArray();
+        $isTeamMatch = $schedule->competitionClass?->isTeamFormat() ?? false;
+
+        $assignedIds = $isTeamMatch
+            ? $schedule->scheduleEntries->pluck('competition_team_id')->filter()->values()->toArray()
+            : $schedule->scheduleEntries->pluck('competition_registration_id')->toArray();
 
         if (! in_array($this->selectedWinnerId, $assignedIds)) {
             session()->flash('error', 'Pemenang harus merupakan peserta yang bertanding.');
@@ -108,12 +129,22 @@ class OfficialPanel extends Component
             return;
         }
 
-        $this->workflow()->submitResult(
-            $schedule,
-            $this->selectedWinnerId,
-            $this->finishReason,
-            $this->finishNotes,
-        );
+        if ($isTeamMatch) {
+            $this->workflow()->submitTeamResult(
+                $schedule,
+                $this->selectedWinnerId,
+                $this->finishReason,
+                $this->finishNotes,
+                app(ActiveEventContext::class)->requireCurrent()->id,
+            );
+        } else {
+            $this->workflow()->submitResult(
+                $schedule,
+                $this->selectedWinnerId,
+                $this->finishReason,
+                $this->finishNotes,
+            );
+        }
 
         $this->cancelSubmitDialog();
 
@@ -144,6 +175,7 @@ class OfficialPanel extends Component
             'competitionClass.competitionCategory',
             'venue',
             'scheduleEntries.competitionRegistration.participation.person',
+            'scheduleEntries.team',
             'matchOfficials.user',
         ])
             ->withCount('scheduleEntries as participants_count')
@@ -158,6 +190,7 @@ class OfficialPanel extends Component
             'competitionClass.competitionCategory',
             'venue',
             'winner.participation.person',
+            'winnerTeam',
         ])
             ->whereIn('competition_class_id', $classIds)
             ->whereIn('id', $assignedScheduleIds)

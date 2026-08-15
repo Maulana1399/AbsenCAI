@@ -61,6 +61,7 @@
                     @can('manage-registration')
                     <flux:navlist.group expandable heading="Registrasi" class="grid">
                         <flux:navlist.item :href="route('competition.registration', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.registration')" wire:navigate>{{ __('Registrasi Peserta') }}</flux:navlist.item>
+                        <flux:navlist.item :href="route('competition.teams', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.teams')" wire:navigate>{{ __('Teams') }}</flux:navlist.item>
                     </flux:navlist.group>
                     @endcan
 

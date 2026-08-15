@@ -2,6 +2,7 @@
 
 namespace App\Services\Activity;
 
+use App\Enums\Role;
 use App\Models\Activity;
 use App\Models\ActivityGroup;
 use App\Models\Event;
@@ -35,11 +36,32 @@ class EventCommitteeService
         ]);
     }
 
+    /**
+     * Assign a user OR a person to an event role.
+     *
+     * Exactly one of `user_id` / `person_id` must be provided:
+     * - user_id   → User-based membership (Guest / Event Chair without Person).
+     * - person_id → Person-based membership (existing behavior).
+     */
     public function assign(array $data): EventCommitteeAssignment
     {
         $event = Event::findOrFail($data['event_id']);
         $role = EventRole::findOrFail($data['event_role_id']);
-        $person = Person::findOrFail($data['person_id']);
+
+        $userId = $data['user_id'] ?? null;
+        $personId = $data['person_id'] ?? null;
+
+        if ($userId !== null && $personId !== null) {
+            throw ValidationException::withMessages(['user_id' => 'Gunakan salah satu: user_id ATAU person_id, bukan keduanya.']);
+        }
+
+        if ($userId === null && $personId === null) {
+            throw ValidationException::withMessages(['person_id' => 'Salah satu dari user_id atau person_id wajib diisi.']);
+        }
+
+        $user = $userId !== null ? User::findOrFail($userId) : null;
+        $person = $personId !== null ? Person::findOrFail($personId) : null;
+
         $participation = array_key_exists('participation_id', $data) && $data['participation_id'] !== null
             ? Participation::findOrFail($data['participation_id'])
             : null;
@@ -55,6 +77,10 @@ class EventCommitteeService
 
         if (! EventOwnership::belongsToEvent($role, $event)) {
             throw ValidationException::withMessages(['event_role_id' => 'Role must belong to the same event.']);
+        }
+
+        if ($participation !== null && $person === null) {
+            throw ValidationException::withMessages(['participation_id' => 'Participation can only be used for Person-based assignments.']);
         }
 
         if ($participation !== null && ! EventOwnership::belongsToEvent($participation, $event)) {
@@ -79,8 +105,14 @@ class EventCommitteeService
 
         $exists = EventCommitteeAssignment::query()
             ->where('event_id', $event->id)
-            ->where('person_id', $person->id)
             ->where('event_role_id', $role->id)
+            ->where(function ($query) use ($userId, $personId) {
+                if ($personId !== null) {
+                    $query->where('person_id', $personId);
+                } else {
+                    $query->where('user_id', $userId);
+                }
+            })
             ->where('participation_id', $participation?->id)
             ->where('activity_group_id', $activityGroup?->id)
             ->where('activity_id', $activity?->id)
@@ -93,7 +125,8 @@ class EventCommitteeService
 
         return EventCommitteeAssignment::create([
             'event_id' => $event->id,
-            'person_id' => $person->id,
+            'user_id' => $userId,
+            'person_id' => $personId,
             'participation_id' => $participation?->id,
             'event_role_id' => $role->id,
             'activity_group_id' => $activityGroup?->id,
@@ -102,6 +135,14 @@ class EventCommitteeService
             'assigned_at' => $data['assigned_at'] ?? now(),
             'notes' => $data['notes'] ?? null,
         ]);
+    }
+
+    /**
+     * Assign an existing user (without requiring a Person) to an event role.
+     */
+    public function assignUser(array $data): EventCommitteeAssignment
+    {
+        return $this->assign(array_merge($data, ['person_id' => null]));
     }
 
     /**
@@ -166,6 +207,67 @@ class EventCommitteeService
             'created' => true,
             'plain_password' => $plainPassword,
         ];
+    }
+
+    /**
+     * Create (or reuse) a Guest account without a Person and bind it to an event
+     * role via a User-based membership.
+     *
+     * @return array{
+     *     assignment: EventCommitteeAssignment,
+     *     user: User,
+     *     user_created: bool,
+     *     plain_password: string|null,
+     * }
+     */
+    public function createGuestAndAssign(array $data): array
+    {
+        return DB::transaction(function () use ($data) {
+            $email = mb_strtolower(trim($data['email']));
+
+            $existing = User::where('email', $email)->first();
+
+            if ($existing !== null) {
+                $user = $existing;
+                $created = false;
+                $plainPassword = null;
+            } else {
+                $name = trim($data['name'] ?? '');
+                $plainPassword = strtolower(Str::random(8));
+                $username = $this->buildUniqueUsername($name !== '' ? $name : $this->nameFromEmail($email));
+
+                $user = User::create([
+                    'name' => $name !== '' ? $name : $this->nameFromEmail($email),
+                    'email' => $email,
+                    'username' => $username,
+                    'password' => Hash::make($plainPassword),
+                    'role' => Role::Guest,
+                    'person_id' => null,
+                    'is_active' => true,
+                ]);
+                $created = true;
+            }
+
+            $assignment = $this->assign([
+                'event_id' => $data['event_id'],
+                'user_id' => $user->id,
+                'event_role_id' => $data['event_role_id'],
+            ]);
+
+            return [
+                'assignment' => $assignment,
+                'user' => $user,
+                'user_created' => $created,
+                'plain_password' => $plainPassword,
+            ];
+        });
+    }
+
+    private function nameFromEmail(string $email): string
+    {
+        $local = Str::before($email, '@');
+
+        return str($local)->replace(['.', '_', '-'], ' ')->title()->trim()->toString() ?: 'Guest';
     }
 
     private function buildUniqueUsername(string $nama): string

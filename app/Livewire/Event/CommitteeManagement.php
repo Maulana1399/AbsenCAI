@@ -29,6 +29,14 @@ class CommitteeManagement extends Component
 
     public string $selectedPersonNama = '';
 
+    public bool $showGuestForm = false;
+
+    public string $guestName = '';
+
+    public string $guestEmail = '';
+
+    public string $guestEventRoleId = '';
+
     #[On('manageCommittee')]
     public function load(int $id): void
     {
@@ -53,6 +61,68 @@ class CommitteeManagement extends Component
     {
         $this->newPersonId = null;
         $this->selectedPersonNama = '';
+    }
+
+    public function toggleGuestForm(): void
+    {
+        $this->showGuestForm = ! $this->showGuestForm;
+        $this->resetGuestForm();
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Create (or reuse) a Guest account without a Person and bind it to an
+     * event role through a User-based membership.
+     */
+    public function createGuest(): void
+    {
+        Gate::authorize('manage-events');
+
+        if ($this->processing) {
+            return;
+        }
+        $this->processing = true;
+
+        try {
+            $this->validate([
+                'guestName' => 'nullable|string|max:255',
+                'guestEmail' => 'required|email|max:255',
+                'guestEventRoleId' => 'required|exists:event_roles,id',
+            ]);
+
+            $event = Event::findOrFail($this->eventId);
+            $role = EventRole::findOrFail($this->guestEventRoleId);
+
+            if (! EventOwnership::belongsToEvent($role, $event)) {
+                $this->addError('guestEventRoleId', 'Role harus berasal dari event yang sama.');
+
+                return;
+            }
+
+            $result = app(EventCommitteeService::class)->createGuestAndAssign([
+                'event_id' => $event->id,
+                'event_role_id' => $role->id,
+                'name' => $this->guestName,
+                'email' => $this->guestEmail,
+            ]);
+
+            $this->resetGuestForm();
+            $this->showGuestForm = false;
+
+            if ($result['user_created']) {
+                session()->flash('success', "Akun Guest berhasil ditambahkan.\n\nAkun Login\nUsername/Email: {$result['user']->email}\nPassword: {$result['plain_password']}");
+            } else {
+                session()->flash('success', 'Akun Guest berhasil ditambahkan. Menggunakan akun login yang sudah ada.');
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if (str_contains($e->getMessage(), 'Duplicate')) {
+                $this->addError('guestEmail', 'User ini sudah memiliki role yang sama di event ini.');
+            } else {
+                throw $e;
+            }
+        } finally {
+            $this->processing = false;
+        }
     }
 
     public function create(): void
@@ -127,6 +197,11 @@ class CommitteeManagement extends Component
     {
         $this->reset(['newPersonId', 'newEventRoleId', 'searchPerson', 'selectedPersonNama']);
         $this->resetErrorBag();
+    }
+
+    private function resetGuestForm(): void
+    {
+        $this->reset(['guestName', 'guestEmail', 'guestEventRoleId']);
     }
 
     public function render()

@@ -11,6 +11,9 @@ class CompetitionClass extends Model
         'competition_category_id',
         'name',
         'gender',
+        'format',
+        'status',
+        'result_type',
         'code',
         'sort_order',
         'is_active',
@@ -41,5 +44,24 @@ class CompetitionClass extends Model
     public function competitionRegistrations()
     {
         return $this->hasMany(CompetitionRegistration::class);
+    }
+
+    public function competitionTeams()
+    {
+        return $this->hasMany(CompetitionTeam::class);
+    }
+
+    public function isTeamFormat(): bool
+    {
+        return \App\Support\CompetitionFormat::isTeamFormat($this->format);
+    }
+
+    public function resultType(): string
+    {
+        if (\App\Support\CompetitionResultType::isValid($this->result_type)) {
+            return $this->result_type;
+        }
+
+        return \App\Support\CompetitionFormat::defaultResultType($this->format);
     }
 }

@@ -2,7 +2,7 @@
 
 > Role & Permission Matrix for KJA Event Manager
 
-> ⚠️ **EVOLUSI PENTING — PERMISSION ENGINE (Design C).** Sejak Sprint 2, ability **event-scoped di-resolve dari `User → Person → EventCommitteeAssignment → EventRole.permissions`**, bukan dari `users.role`. `users.role` hanya menentukan hak platform (SuperAdmin/Admin). Total Gate = **18** (4 platform + 14 event-scoped). Matriks statis di bawah menggambarkan **default EventRole template** (`EventRolePermissionDefaults::BY_CODE`) dan hak platform — bukan lagi sumber authorization runtime untuk role event. Lihat `docs/CHANGELOG.md` (Unreleased → Permission Engine) untuk detail.
+> ⚠️ **EVOLUSI PENTING — PERMISSION ENGINE (Design C).** Sejak Sprint 2, ability **event-scoped di-resolve dari `User → EventCommitteeAssignment → EventRole.permissions`**, bukan dari `users.role`. `users.role` hanya menentukan hak platform (SuperAdmin/Admin) dan role akun (EventChair/Guest). Sejak implementasi Event Membership, `event_committee_assignments` mendukung **dua jalur**: `user_id` (User-based membership — Guest/Event Chair tanpa Person) ATAU `person_id` (Person-based membership). Total Gate = **18** (4 platform + 14 event-scoped). Matriks statis di bawah menggambarkan **default EventRole template** (`EventRolePermissionDefaults::BY_CODE`) dan hak platform — bukan lagi sumber authorization runtime untuk role event. Lihat `docs/CHANGELOG.md` (Unreleased → Permission Engine).
 
 ---
 

@@ -12,12 +12,18 @@
 Canonical data flow:
 
 ```
-Person (master identity)
-  ↓ nama, desa, kelompok, tanggal_lahir
-Participation (event-scoped membership)
+User / Account (login: email/username + password, person_id OPTIONAL)
+  ├── Person (master identity) ── Person-based Event Membership (person_id)
+  └── Event Membership ──► User-based (user_id) — Guest / Event Chair tanpa Person
+        ├── Event
+        ├── Role (EventRole)
+        └── Permission (EventRole.permissions)
+Participation (event-scoped membership, Design C)
   ↓ participant_number, attendance_code, regu
 EventAttendance (canonical attendance)
 ```
+
+> **User ≠ Person.** `users.person_id` nullable. Event access di-resolve dari `event_committee_assignments` via `user_id` ATAU `person_id` (EventAccessService / EventPermissionService).
 
 Legacy compatibility (masih ada, tidak boleh dijadikan canonical):
 - `peserta` table — legacy CAI participant data
@@ -32,6 +38,7 @@ Legacy compatibility (masih ada, tidak boleh dijadikan canonical):
 | PGM/Sprint | Description |
 |------------|-------------|
 | Sprint 1 | Platform Consolidation — MariaDB Migration, Permission Engine, Competition V1, Public Portal, Event Dashboard |
+| Competition Foundation | Teams event-scoped (satu kelompok = satu team per lomba), auto team formation, 5 format lomba, status lomba |
 | Sprint 2 | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
 | Sprint 3.1 | Technical debt cleanup — dead code/views/imports removed, deduplication |
 | Sprint 3.2 | Architecture hardening — Dashboard Presenter Factory, EventOwnership, Import helper, ManualEntry trait |

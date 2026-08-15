@@ -277,6 +277,11 @@ Route::prefix('events/{event}/competition')->middleware(['auth', 'verified', 're
     )->middleware('can:manage-registration')->name('competition.registration');
 
     Route::get(
+        'teams',
+        App\Livewire\Competition\Team\Index::class
+    )->middleware('can:manage-registration')->name('competition.teams');
+
+    Route::get(
         'categories',
         App\Livewire\Competition\Category\Index::class
     )->middleware('can:manage-events')->name('competition.category.index');

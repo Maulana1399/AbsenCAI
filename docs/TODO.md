@@ -13,6 +13,21 @@
 - [ ] **UAT bug fixes** — Address any findings from manual testing
 - [ ] **UAT sign-off** — Formal approval
 
+## Competition Foundation (2026-08) — done / remaining
+
+Done:
+- [x] Format lomba (5 format) + status lomba di `competition_classes`
+- [x] Teams event-scoped (`competition_teams` + `competition_team_members`)
+- [x] Auto team formation (`CompetitionTeamFormationService`)
+- [x] Team member management (`CompetitionTeamService`) + UI `competition.teams`
+
+Remaining (documented in `docs/audit/COMPETITION-IMPLEMENTATION-AUDIT.md`):
+- [ ] Match engine per-format (schedule entries menunjuk team untuk format team)
+- [ ] Result type eksplisit (win/loss · score · time · ranking) di UI hasil
+- [ ] `competition_team_id` di `competition_schedule_entries` untuk scheduling team
+- [ ] Integrasi bracket team (advance winner team)
+- [ ] Import Competition (IF-11)
+
 ---
 
 ## Sprint 4 (Rekomendasi — NOT STARTED)

@@ -811,7 +811,7 @@ test('45. operator-dashboard uses Playing instead of NowPlaying', function () {
     expect($playingCount)->toBe(1);
 });
 
-test('46. official submits result and auto-promotes next Ready', function () {
+test('46. official submits result and does NOT auto-start next Ready (R4H)', function () {
     $venue = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue Auto']);
 
     $service = app(\App\Services\Competition\CompetitionRegistrationService::class);
@@ -860,10 +860,11 @@ test('46. official submits result and auto-promotes next Ready', function () {
     expect($waiting->refresh()->finish_reason)->toBe('Normal');
     expect($waiting->refresh()->finished_by)->not->toBeNull();
     expect($waiting->refresh()->finished_at)->not->toBeNull();
-    expect($ready->refresh()->status)->toBe('Playing');
+    // R4H: Playing hanya boleh terjadi setelah aksi eksplisit operator Start Match.
+    expect($ready->refresh()->status)->toBe('Ready');
 });
 
-test('47. auto-promote only promotes from same venue', function () {
+test('47. official submit does not auto-start Ready matches anywhere (R4H)', function () {
     $venueA = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue A']);
     $venueB = Venue::create(['event_id' => $this->event->id, 'name' => 'Venue B']);
 
@@ -897,6 +898,7 @@ test('47. auto-promote only promotes from same venue', function () {
     $component->call('submitResult');
 
     expect($waiting->refresh()->status)->toBe('Finished');
+    // R4H: tidak ada auto-start — Ready di venue manapun tetap Ready.
     expect($readyOtherVenue->refresh()->status)->toBe('Ready');
 });
 

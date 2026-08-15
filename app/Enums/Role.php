@@ -13,6 +13,8 @@ enum Role: string
     case OperatorScan = 'operator_scan';
     case Juri = 'juri';
     case Viewer = 'viewer';
+    case EventChair = 'event_chair';
+    case Guest = 'guest';
 
     public function label(): string
     {
@@ -26,6 +28,8 @@ enum Role: string
             self::OperatorScan => 'Operator Scan',
             self::Juri => 'Juri',
             self::Viewer => 'Viewer',
+            self::EventChair => 'Event Chair',
+            self::Guest => 'Guest',
         };
     }
 
@@ -51,8 +55,34 @@ enum Role: string
         return array_map(fn (self $role) => $role->value, self::platformCases());
     }
 
+    /**
+     * Role akun yang dapat dipilih pada User Management: platform (Super Admin /
+     * Admin) + role event-scoped (Event Chair / Guest). Event Chair dan Guest
+     * TIDAK mendapat akses global — akses event mereka datang dari Event
+     * Membership (event_committee_assignments.user_id).
+     */
+    public static function accountCases(): array
+    {
+        return [
+            self::SuperAdmin,
+            self::Admin,
+            self::EventChair,
+            self::Guest,
+        ];
+    }
+
+    public static function accountValues(): array
+    {
+        return array_map(fn (self $role) => $role->value, self::accountCases());
+    }
+
     public function isPlatformRole(): bool
     {
         return in_array($this, [self::SuperAdmin, self::Admin], true);
+    }
+
+    public function isAccountRole(): bool
+    {
+        return in_array($this, self::accountCases(), true);
     }
 }

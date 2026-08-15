@@ -27,10 +27,10 @@
                     <div class="max-h-60 space-y-1 overflow-y-auto">
                         @foreach ($assignments as $assignment)
                             <div class="flex items-center gap-2 rounded-md bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-800">
-                                <span class="font-medium">{{ $assignment->person?->nama ?? '-' }}</span>
+                                <span class="font-medium">{{ $assignment->person?->nama ?? $assignment->user?->name ?? '-' }}</span>
                                 <span class="text-xs text-zinc-500">{{ $assignment->eventRole?->name ?? '-' }}</span>
                                 <button wire:click="delete({{ $assignment->id }})" class="ml-auto text-red-500 hover:text-red-700 text-xs"
-                                    wire:confirm="Hapus penugasan {{ $assignment->person?->nama ?? '' }}?">
+                                    wire:confirm="Hapus penugasan {{ $assignment->person?->nama ?? $assignment->user?->name ?? '' }}?">
                                     Hapus
                                 </button>
                             </div>
@@ -75,6 +75,39 @@
                         @error('newEventRoleId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
+            </div>
+
+            <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                <button type="button" wire:click="toggleGuestForm" class="flex w-full items-center justify-between text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <span>Tambah Akun Guest / PJ (tanpa Person)</span>
+                    <span>{{ $showGuestForm ? '−' : '+' }}</span>
+                </button>
+
+                @if ($showGuestForm)
+                    <div class="mt-3 space-y-3">
+                        <div>
+                            <flux:input wire:model="guestEmail" type="email" label="Email" placeholder="pj@example.com" />
+                            @error('guestEmail') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <flux:input wire:model="guestName" label="Nama (opsional)" placeholder="Nama tamu" />
+                            @error('guestName') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Event Role</label>
+                            <flux:select wire:model.live="guestEventRoleId" wire:key="guest-event-role-select-{{ $eventId }}">
+                                <option value="">Pilih role...</option>
+                                @foreach ($roles as $role)
+                                    <flux:select.option value="{{ $role->id }}">{{ $role->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                            @error('guestEventRoleId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <flux:button variant="filled" wire:click="createGuest" :loading="$processing">
+                            Tambah Akun Guest
+                        </flux:button>
+                    </div>
+                @endif
             </div>
 
             <div class="flex">

@@ -103,6 +103,21 @@
     @endif
     @endcan
 
+    {{-- Podium Final (Juara 1/2/3) --}}
+    @if ($selectedBracket && ! empty($podium))
+        <div class="grid gap-3 sm:grid-cols-3">
+            @foreach ($podium as $entry)
+                <div class="rounded-xl border p-4 text-center {{ $entry['position'] === 1 ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40' : ($entry['position'] === 2 ? 'border-zinc-300 bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900' : 'border-orange-200 bg-orange-50/60 dark:border-orange-800 dark:bg-orange-950/30') }}">
+                    <p class="text-xs font-medium uppercase tracking-wide {{ $entry['position'] === 1 ? 'text-amber-600 dark:text-amber-400' : ($entry['position'] === 2 ? 'text-zinc-500' : 'text-orange-600 dark:text-orange-400') }}">
+                        Juara {{ $entry['position'] }}
+                    </p>
+                    <p class="mt-1 truncate font-semibold text-zinc-900 dark:text-white">{{ $entry['person_name'] }}</p>
+                    <p class="text-xs text-zinc-500">{{ $entry['participant_number'] }}</p>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     {{-- Bracket Display --}}
     @if ($selectedBracket && $bracketRounds)
         <div class="overflow-x-auto pb-4">
@@ -118,11 +133,11 @@
                                 $entries = $schedule?->scheduleEntries ?? collect();
                                 $participantA = $entries->first();
                                 $participantB = $entries->skip(1)->first();
-                                $nameA = $participantA?->competitionRegistration?->participation?->person?->nama ?? 'TBD';
-                                $nameB = $participantB?->competitionRegistration?->participation?->person?->nama ?? 'TBD';
+                                $nameA = $participantA?->competitionRegistration?->participation?->person?->nama ?? $participantA?->team?->name ?? 'TBD';
+                                $nameB = $participantB?->competitionRegistration?->participation?->person?->nama ?? $participantB?->team?->name ?? 'TBD';
                                 $isFinished = $schedule && $schedule->status === 'Finished';
                                 $winner = $isFinished ? $schedule?->winner : null;
-                                $winnerName = $winner?->participation?->person?->nama ?? null;
+                                $winnerName = $winner?->participation?->person?->nama ?? $schedule?->winnerTeam?->name ?? null;
                             @endphp
                             <div @class([
                                 'rounded-lg border-2 p-3 text-xs min-w-[180px]',

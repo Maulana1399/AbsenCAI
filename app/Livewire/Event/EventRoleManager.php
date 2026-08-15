@@ -49,6 +49,7 @@ class EventRoleManager extends Component
     {
         return [
             'ketua_event' => 'Ketua Event',
+            'event_chair' => 'Event Chair',
             'sekretariat' => 'Sekretariat',
             'operator_registrasi' => 'Operator Registrasi',
             'operator_scan' => 'Operator Scan',
@@ -56,6 +57,7 @@ class EventRoleManager extends Component
             'pj_divisi' => 'PJ Divisi',
             'juri' => 'Juri',
             'viewer' => 'Viewer',
+            'guest' => 'Guest',
             'ketua_fosda' => 'Ketua Fosda',
             'admin_event' => 'Admin Event',
         ];

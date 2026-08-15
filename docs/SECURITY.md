@@ -579,7 +579,7 @@ All 10 operational abilities from S3 plus Competition abilities (Sprint 7–10) 
 
 ## Authorization Summary (All 18 Abilities)
 
-> Total Gate = 18 (4 platform + 14 event-scoped). Sejak Permission Engine (Sprint 2), ability event-scoped di-resolve via `User → Person → EventCommitteeAssignment → EventRole.permissions`.
+> Total Gate = 18 (4 platform + 14 event-scoped). Sejak Permission Engine (Sprint 2), ability event-scoped di-resolve via `User → EventCommitteeAssignment → EventRole.permissions` (membership `user_id` ATAU `person_id`).
 
 | # | Ability | Type | Applied In | Status |
 |---|---------|------|-----------|--------|
@@ -668,8 +668,9 @@ All 18 Gate abilities now have corresponding sidebar `@can()` directives where a
 ## Architecture
 
 ```
-User.role (platform) → SuperAdmin (bypass) / Admin (bypass event abilities) / lain
-User.person_id → links account to canonical Person
+User.role (platform) → SuperAdmin (bypass) / Admin (bypass event abilities) / Guest / EventChair (event-scoped account)
+User.person_id → optional canonical Person link (Person-based membership)
+User.id → EventCommitteeAssignment.user_id (User-based membership — Guest / Event Chair tanpa Person)
 EventCommitteeAssignment → determines WHICH Event the Person/User is assigned to
 EventRole.permissions (JSON) → determines WHICH event abilities the assignment grants
 ```
@@ -677,9 +678,9 @@ EventRole.permissions (JSON) → determines WHICH event abilities the assignment
 ### Key Design Decisions
 
 1. **EventRole IS authorization for event abilities (sejak Permission Engine).** Ability diberikan jika assignment + EventRole aktif dengan ability di `permissions`. Sebelumnya (S7 asli): EventRole hanya metadata dan assignment-existence yang menentukan.
-2. **User↔Person wajib untuk akses event.** Semua user non-platform harus punya `person_id` + assignment untuk ability event.
+2. **User tanpa Person = valid.** Sejak Event Membership, user non-platform TIDAK lagi wajib punya `person_id` — akses event dapat berasal dari `event_committee_assignments.user_id` (Guest/Event Chair) ATAU `person_id` (Person-based). Role global tidak menjadi satu-satunya sumber event access.
 3. **Defense in depth.** EventSwitcher dropdown difilter DAN server-side `switchTo()` enforces assignment. Gate closures independently verify pada setiap check.
-4. **No automatic assignment creation.** Linking User→Person tidak membuat EventCommitteeAssignment. Assignment harus dibuat eksplisit via Event Management UI.
+4. **No automatic assignment creation.** Linking User→Person tidak membuat EventCommitteeAssignment. Assignment harus dibuat eksplisit via Event Management UI. Guest dibuat tanpa Person dan TANPA akses event otomatis.
 
 ### S7 Completed Deliverables
 

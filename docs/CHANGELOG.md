@@ -7,6 +7,34 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## COMPETITION-FOUNDATION (Audit + Teams + Formats + Status — 2026-08-13)
+
+Audit & adjust modul Competition existing (Competition V1) tanpa membuat dari nol.
+
+- **Migration additive:** `competition_classes.format` (5 format) + `competition_classes.status` (lifecycle); tabel baru `competition_teams` (event-scoped; satu kelompok = satu team per lomba) + `competition_team_members` (players + substitutes via `competition_registration_id`). Tidak ada DROP; kompatibel SQLite/MariaDB. Design C & Regu tidak disentuh.
+- **`App\Support\CompetitionFormat`** — 5 format: `individual_heat`, `individual_mass`, `team_vs_team`, `team_mass`, `individual_vs_individual`.
+- **`App\Support\CompetitionStatus`** — draft / registration_open / registration_closed / ready / running / finished / cancelled.
+- **`CompetitionTeamFormationService`** — auto team formation berdasarkan Kelompok (ukuran team = kelompok terkecil; sisa = cadangan; transactional; TIDAK memakai Regu).
+- **`CompetitionTeamService`** — management anggota team (tambah/hapus/pindah player↔cadangan/shuffle; validasi peserta terdaftar di lomba, kelompok sama, belum di team lain pada lomba sama).
+- **`CompetitionRegistrationService`** — return registration yang dibuat secara deterministik + dukung `registration_type`.
+- **UI** — `Competition/Team/Index` + route `competition.teams` (gate `manage-registration`) + menu sidebar "Teams".
+- **Test:** +18 (`tests/Feature/Competition/CompetitionTeamFoundationTest.php`). Full suite → **2283 passed / 5932 assertions / 0 failed** (baseline 2265 / 5881).
+- **Docs:** `MODULES.md`, `DATABASE.md`, `TERMINOLOGY.md`, `ARCHITECTURE.md`, `FEATURE.md`, `ROADMAP.md`, `TODO.md`, `HANDOFF.md`, `CHANGELOG.md`, `docs/audit/COMPETITION-IMPLEMENTATION-AUDIT.md`.
+
+## EVENT-MEMBERSHIP (User without Person + Event Membership + Guest + Event Chair — 2026-08-13)
+
+Refactor authentication & event access agar User tidak wajib memiliki Person.
+
+- **Migration additive:** `event_committee_assignments.user_id` nullable → users (nullOnDelete) + index; `person_id` dijadikan nullable; unique baru `eca_event_user_role_unique` (event, user, role); backfill `user_id` dari Person→User link. Tidak ada DROP kolom/tabel. Design C (`people`/`participations`/`event_attendances`) tidak disentuh. Regu tidak disentuh.
+- **Event Membership dua jalur:** `EventAccessService` & `EventPermissionService` kini resolve membership via `user_id` (User-based) ATAU `person_id` (Person-based). Person-based access existing tetap berfungsi.
+- **Role enum:** tambah `EventChair` (`event_chair`) dan `Guest` (`guest`) — role akun non-platform (tanpa akses global; akses hanya dari membership). `Role::accountCases()` untuk dropdown User Management. `EventRolePermissionDefaults` tambah template `event_chair` (7 ability, = ketua_event) dan `guest` (view-dashboard).
+- **Guest/Event Chair:** `EventCommitteeService::createGuestAndAssign()` + `assignUser()`; UI Committee Management "Tambah Akun Guest / PJ (tanpa Person)"; CreateUser/EditUser dropdown mendukung `guest`/`event_chair`.
+- **Register:** public registration kini membuat akun **Guest** (role=guest, person_id=null, TANPA akses event otomatis) — tidak lagi membuat akun "mati" (role null).
+- **Profile / ConfirmPassword:** `ConfirmPassword` pakai hash-check langsung (aman untuk user tanpa email); `Profile` mendukung email nullable (user tanpa email tetap bisa simpan nama tanpa crash).
+- **EventSwitcher / PlatformDashboard / IndexUser:** daftar event & label role kini memperhitungkan membership `user_id` ATAU `person_id`.
+- **Test:** +36 test (`tests/Feature/Event/UserEventMembershipTest.php`). Full suite → **2265 passed / 5881 assertions / 0 failed** (baseline 2229 / 5782).
+- **Docs:** `TERMINOLOGY.md`, `ARCHITECTURE.md`, `PERMISSION.md`, `SECURITY.md`, `DATABASE.md`, `HANDOFF.md`, `ROADMAP.md`, `CHANGELOG.md`.
+
 ## IF-10 (Import Framework — Final Lock & Cleanup — 2026-08-06)
 
 Fase non-feature: final lock & cleanup. Import Framework **v1.0 STABLE**. Tidak ada perubahan business rule, database, UI, migration, permission, maupun policy.

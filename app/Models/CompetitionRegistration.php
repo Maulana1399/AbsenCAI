@@ -40,9 +40,31 @@ class CompetitionRegistration extends Model
         return $this->hasOne(CompetitionOutcome::class);
     }
 
+    public function heatResults()
+    {
+        return $this->hasMany(CompetitionHeatResult::class);
+    }
+
     public function scheduleEntries()
     {
         return $this->hasMany(CompetitionScheduleEntry::class);
+    }
+
+    public function teamMember()
+    {
+        return $this->hasOne(CompetitionTeamMember::class);
+    }
+
+    public function team()
+    {
+        return $this->hasOneThrough(
+            CompetitionTeam::class,
+            CompetitionTeamMember::class,
+            'competition_registration_id',
+            'id',
+            'id',
+            'competition_team_id'
+        );
     }
 
     protected static function booted(): void

@@ -35,6 +35,8 @@ test('Role enum has all expected values', function () {
         'operator_scan',
         'juri',
         'viewer',
+        'event_chair',
+        'guest',
     ]);
 });
 

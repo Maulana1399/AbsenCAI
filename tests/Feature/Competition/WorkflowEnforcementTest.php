@@ -208,9 +208,9 @@ test('OutcomeManager only loads schedule entries', function () {
         'schedule' => $this->schedule,
     ]);
 
-    $outcomes = $component->outcomes;
-
-    $ids = collect($outcomes)->pluck('registration_id')->toArray();
+    // Class tanpa format default ke individual_heat → OutcomeManager memakai
+    // jalur heat (per-heat results), tetap hanya memuat entries schedule ini.
+    $ids = collect($component->heatResults)->pluck('registration_id')->toArray();
     expect($ids)->toContain($this->registration->id);
     expect($ids)->not->toContain($registration2->id);
 });

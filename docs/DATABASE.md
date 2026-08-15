@@ -43,8 +43,8 @@ Desa
 | Table | Purpose |
 |-------|---------|
 | `competition_categories` | Event-scoped competition categories |
-| `competition_classes` | Competition classes (gender: L/P/M, category-linked) |
-| `competition_registrations` | Competition registrations (participation-linked) |
+| `competition_classes` | Competition classes / lomba (gender: L/P/M, category-linked; `format` 5 format; `status` lifecycle) |
+| `competition_registrations` | Competition registrations (participation-linked; satu Person bisa ikut banyak lomba) |
 | `competition_schedules` | Match schedule (status: Scheduled/Ready/Playing/Waiting Result/Finished; required_participants; match result fields) |
 | `competition_schedule_entries` | Schedule entries |
 | `competition_outcomes` | Match outcomes / results |
@@ -52,6 +52,18 @@ Desa
 | `competition_brackets` | Single elimination bracket |
 | `competition_bracket_matches` | Bracket matches |
 | `competition_announcements` | Public announcements |
+
+## Competition Foundation (Teams — additive 2026-08)
+
+| Table | Purpose |
+|-------|---------|
+| `competition_teams` | Team per lomba (`event_id`, `competition_class_id`, `name`, `kelompok_id?`); satu kelompok = satu team per lomba |
+| `competition_team_members` | Anggota team (`competition_team_id`, `competition_registration_id`, `is_substitute`, `sort_order`) — players + substitutes |
+
+`competition_classes.format` = `individual_heat` / `individual_mass` / `team_vs_team` / `team_mass` / `individual_vs_individual` (default `individual_heat`).
+`competition_classes.status` = `draft` / `registration_open` / `registration_closed` / `ready` / `running` / `finished` / `cancelled` (default `registration_open`).
+
+> Competition **Team tidak memakai Regu**. Team berbasis Kelompok (`kelompok_id`) dan anggota menunjuk `competition_registration_id`.
 
 ## People Table Schema
 
@@ -120,6 +132,23 @@ Organization
 | Entity | Table | Route | Status |
 |--------|-------|-------|--------|
 | **Regu** | `regus` | `/regu` | CRUD ✅ (legacy CAI, not global master data) |
+
+## Event Membership (Access)
+
+Event access di-resolve via `event_committee_assignments` — mendukung dua jalur:
+
+```
+User / Account
+ ├── Person (optional) ──► person_id   (Person-based membership, existing)
+ └── Event Membership ──► user_id      (User-based membership — Guest / Event Chair tanpa Person)
+```
+
+`event_committee_assignments` (perubahan additive):
+- `user_id` nullable → `users` (nullOnDelete) — jalur User-based.
+- `person_id` nullable (sebelumnya NOT NULL) — dipakai person-based.
+- Unique: `eca_event_person_role_unique` (event, person, role) + `eca_event_user_role_unique` (event, user, role).
+
+`users.person_id` tetap **nullable** — User tanpa Person = valid.
 
 Future:
 

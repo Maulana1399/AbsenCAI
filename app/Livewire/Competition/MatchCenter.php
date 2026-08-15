@@ -139,7 +139,9 @@ class MatchCenter extends Component
             'competitionClass.competitionCategory',
             'venue',
             'scheduleEntries.competitionRegistration.participation.person',
+            'scheduleEntries.team',
             'winner.participation.person',
+            'winnerTeam',
             'finishedBy',
             'matchOfficials.user',
         ])

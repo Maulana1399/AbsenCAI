@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,10 @@ class Register extends Component
 
     /**
      * Handle an incoming registration request.
+     *
+     * Public registration creates a Guest account: it has a defined account
+     * role (Guest) but NO Person and NO automatic event access. Event access is
+     * only ever granted through an explicit Event Membership assignment.
      */
     public function register(): void
     {
@@ -32,9 +37,16 @@ class Register extends Component
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => Role::Guest,
+            'person_id' => null,
+            'is_active' => true,
+        ]);
 
-        event(new Registered(($user = User::create($validated))));
+        event(new Registered($user));
 
         Auth::login($user);
 

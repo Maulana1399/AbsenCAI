@@ -1,6 +1,6 @@
 @php
     $participantNames = $schedule->scheduleEntries->map(function ($e) {
-        return $e->competitionRegistration?->participation?->person?->nama ?? '?';
+        return $e->competitionRegistration?->participation?->person?->nama ?? $e->team?->name ?? '?';
     })->filter()->values();
     $participantsCount = $schedule->participants_count ?? 0;
     $required = $schedule->required_participants ?? 1;

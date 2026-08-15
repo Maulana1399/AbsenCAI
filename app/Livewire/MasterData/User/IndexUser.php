@@ -43,7 +43,7 @@ class IndexUser extends Component
 
         return view('livewire.master-data.user.index-user', [
             'users' => $users,
-            'roles' => Role::platformCases(),
+            'roles' => Role::accountCases(),
             'eventRoleLabels' => $this->eventRoleLabels($users),
         ]);
     }
@@ -55,30 +55,35 @@ class IndexUser extends Component
      */
     private function eventRoleLabels($users): array
     {
+        $userIds = collect($users->items())->pluck('id')->all();
         $personIds = collect($users->items())->pluck('person_id')->filter()->all();
 
-        if ($personIds === []) {
+        if ($userIds === []) {
             return [];
         }
 
         $assignments = EventCommitteeAssignment::query()
-            ->whereIn('person_id', $personIds)
+            ->where(function ($query) use ($userIds, $personIds) {
+                $query->whereIn('user_id', $userIds);
+
+                if ($personIds !== []) {
+                    $query->orWhereIn('person_id', $personIds);
+                }
+            })
             ->whereHas('event', fn ($q) => $q->where('status', 'active'))
             ->whereHas('eventRole', fn ($q) => $q->where('is_active', true))
             ->with('eventRole:id,name')
-            ->get()
-            ->groupBy('person_id');
+            ->get();
 
         $labelsByUser = [];
 
         foreach ($users as $user) {
-            if ($user->person_id === null) {
-                $labelsByUser[$user->id] = '—';
+            $byUser = $assignments->where('user_id', $user->id)->values();
+            $byPerson = $user->person_id !== null
+                ? $assignments->where('person_id', $user->person_id)->values()
+                : collect();
 
-                continue;
-            }
-
-            $names = ($assignments->get($user->person_id) ?? collect())
+            $names = $byUser->merge($byPerson)
                 ->map(fn ($a) => $a->eventRole?->name)
                 ->filter()
                 ->unique()

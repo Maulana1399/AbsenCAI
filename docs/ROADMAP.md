@@ -38,12 +38,14 @@ Commercial Platform (Future)
 |------|--------|
 | Roadmap V1 (Foundation, CAI, Pengajian) | ✅ 100% COMPLETE |
 | Competition V1 (Sprint 7–10) | ✅ COMPLETE |
+| Competition Foundation (Teams + Formats + Status) | ✅ COMPLETE — teams event-scoped, auto formation, 5 format, status. Lihat `docs/audit/COMPETITION-IMPLEMENTATION-AUDIT.md` |
 | Sprint 1 (Platform Consolidation — MariaDB, Permission Engine, Competition V1) | ✅ COMPLETE 100% |
 | Sprint 2 (RBAC & Permission Engine — Design C) | ✅ COMPLETE 100% |
 | Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
 | Sprint 4 | 🔲 NOT STARTED |
+| User without Person + Event Membership + Guest + Event Chair | ✅ COMPLETE — `event_committee_assignments.user_id` (User-based membership), Guest/Event Chair account roles, Register→Guest, Profile/ConfirmPassword null-email safe. Lihat `docs/audit/USER-EVENT-MEMBERSHIP-IMPLEMENTATION.md` |
 | Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — IF-05 REGU — IF-06 PERSON — IF-07 PARTICIPATION — IF-08 PENGAJIAN — IF-09 PESERTA — **IF-10 CLEANUP (STABLE v1.0)** — IF-11+ NOT STARTED (lihat `docs/import-framework.md`) |
 | Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
 | Stage | **Pre-UAT** |

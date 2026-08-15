@@ -90,6 +90,7 @@ After PGM.19 (Physical Regu Retirement), PGM.20 (Legacy NIP Retirement), Competi
 ✅ S3.0–S3.10 Multi Event — COMPLETE
 ✅ RBAC S1–S7 — COMPLETE
 ✅ Competition V1 (Sprint 7–10) — COMPLETE
+✅ Competition Foundation (Teams + Formats + Status) — COMPLETE
 ✅ Public Portal (Sprint 9.0) — COMPLETE
 ✅ Event Dashboard (Sprint 10.0) — COMPLETE
 ```
@@ -124,13 +125,40 @@ Person (master identity)
 - Regu dual-write — stopped
 - Legacy Absensi dual-write — stopped (absensi table retained for historical reads)
 
+## Competition Domain
+
+```
+Event
+ └── CompetitionCategory (pengelompokan)
+      └── CompetitionClass (lomba) — format + status
+            ├── CompetitionRegistration (Person → Participation → lomba)
+            ├── CompetitionTeam (satu kelompok = satu team per lomba)
+            │     └── CompetitionTeamMember (players + substitutes)
+            ├── CompetitionSchedule / ScheduleEntry (match/heat)
+            ├── CompetitionOutcome (result: win/loss · score · time · ranking)
+            └── CompetitionBracket / BracketMatch (format vs, bila diperlukan)
+```
+
+- 5 format: `individual_heat`, `individual_mass`, `team_vs_team`, `team_mass`, `individual_vs_individual`.
+- **Competition Team ≠ Regu.** Team berbasis Kelompok, event-scoped, tidak memakai `regus`.
+
 ## Authentication
 
 Login
 
 Role Based Access
 
-Permission Engine (Design C): ability event-scoped di-resolve dari `User → Person → EventCommitteeAssignment → EventRole.permissions`. `users.role` hanya menentukan hak platform (SuperAdmin/Admin).
+Permission Engine (Design C): ability event-scoped di-resolve dari `User → EventCommitteeAssignment → EventRole.permissions`. `event_committee_assignments` mendukung **dua jalur membership**:
+
+```
+User / Account
+ ├── Person (optional) ──► person_id (Person-based membership, legacy + Design C)
+ └── Event Membership ──► user_id (User-based membership — Guest / Event Chair tanpa Person)
+```
+
+- `users.person_id` **nullable** — User tanpa Person = valid.
+- Event access = User membership OR Person membership; role global (`users.role`) tidak menjadi satu-satunya sumber.
+- `super_admin` / `admin` mempertahankan semantics platform existing.
 
 Token Based Scan (Future)
 

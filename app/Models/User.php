@@ -72,6 +72,16 @@ class User extends Authenticatable
         return $this->hasAnyRole(Role::SuperAdmin, Role::Admin);
     }
 
+    public function isGuest(): bool
+    {
+        return $this->role === Role::Guest;
+    }
+
+    public function isEventChair(): bool
+    {
+        return $this->role === Role::EventChair;
+    }
+
     public function person()
     {
         return $this->belongsTo(Person::class);
@@ -80,5 +90,15 @@ class User extends Authenticatable
     public function hasPerson(): bool
     {
         return $this->person_id !== null;
+    }
+
+    /**
+     * Event memberships directly bound to this user (User-based membership).
+     * Person-based memberships (event_committee_assignments.person_id) are
+     * resolved through the Person relation instead.
+     */
+    public function committeeAssignments()
+    {
+        return $this->hasMany(EventCommitteeAssignment::class, 'user_id');
     }
 }

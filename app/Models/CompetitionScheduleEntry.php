@@ -9,6 +9,7 @@ class CompetitionScheduleEntry extends Model
     protected $fillable = [
         'competition_schedule_id',
         'competition_registration_id',
+        'competition_team_id',
         'order_number',
         'lane',
         'corner',
@@ -24,5 +25,10 @@ class CompetitionScheduleEntry extends Model
     public function competitionRegistration()
     {
         return $this->belongsTo(CompetitionRegistration::class);
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(CompetitionTeam::class, 'competition_team_id');
     }
 }

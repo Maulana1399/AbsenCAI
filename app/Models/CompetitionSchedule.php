@@ -14,6 +14,7 @@ class CompetitionSchedule extends Model
         'status',
         'required_participants',
         'winner_registration_id',
+        'winner_team_id',
         'finish_reason',
         'finish_notes',
         'finished_at',
@@ -50,6 +51,11 @@ class CompetitionSchedule extends Model
     public function winner()
     {
         return $this->belongsTo(CompetitionRegistration::class, 'winner_registration_id');
+    }
+
+    public function winnerTeam()
+    {
+        return $this->belongsTo(CompetitionTeam::class, 'winner_team_id');
     }
 
     public function finishedBy()

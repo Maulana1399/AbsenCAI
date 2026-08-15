@@ -8,6 +8,7 @@ class EventCommitteeAssignment extends Model
 {
     protected $fillable = [
         'event_id',
+        'user_id',
         'person_id',
         'participation_id',
         'event_role_id',
@@ -28,6 +29,11 @@ class EventCommitteeAssignment extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function person()

@@ -25,7 +25,7 @@
         @else
             <div class="grid gap-3">
                 @foreach ($waitingMatches as $schedule)
-                    @php $participants = $schedule->scheduleEntries->map(fn($e) => $e->competitionRegistration?->participation?->person?->nama)->filter(); @endphp
+                    @php $participants = $schedule->scheduleEntries->map(fn($e) => $e->competitionRegistration?->participation?->person?->nama ?? $e->team?->name)->filter(); @endphp
                     <div class="rounded-xl border-2 border-yellow-300 bg-white p-5 dark:border-yellow-600 dark:bg-zinc-950">
                         <div class="flex flex-wrap items-start justify-between gap-4">
                             <div class="flex-1 min-w-0">
@@ -126,6 +126,11 @@
                             @if ($schedule->winner)
                                 <div class="text-right">
                                     <span class="text-sm font-semibold text-yellow-700 dark:text-yellow-300">🏆 {{ $schedule->winner?->participation?->person?->nama ?? '-' }}</span>
+                                    <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $schedule->finish_reason }}</div>
+                                </div>
+                            @elseif ($schedule->winnerTeam)
+                                <div class="text-right">
+                                    <span class="text-sm font-semibold text-yellow-700 dark:text-yellow-300">🏆 {{ $schedule->winnerTeam?->name ?? '-' }}</span>
                                     <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $schedule->finish_reason }}</div>
                                 </div>
                             @endif

@@ -20,11 +20,14 @@ class Profile extends Component
     public function mount(): void
     {
         $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $this->email = Auth::user()->email ?? '';
     }
 
     /**
      * Update the profile information for the currently authenticated user.
+     *
+     * Email is optional so users without an email address (committee accounts,
+     * Guest accounts) can still manage their profile without crashing.
      */
     public function updateProfileInformation(): void
     {
@@ -34,7 +37,7 @@ class Profile extends Component
             'name' => ['required', 'string', 'max:255'],
 
             'email' => [
-                'required',
+                'nullable',
                 'string',
                 'lowercase',
                 'email',
@@ -42,6 +45,9 @@ class Profile extends Component
                 Rule::unique(User::class)->ignore($user->id),
             ],
         ]);
+
+        $email = trim((string) $validated['email']);
+        $validated['email'] = $email === '' ? null : $email;
 
         $user->fill($validated);
 

@@ -109,7 +109,7 @@ class EditUser extends Component
         return [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255|'.$uniqueRule,
-            'role' => 'required|in:'.implode(',', Role::platformValues()),
+            'role' => 'required|in:'.implode(',', Role::accountValues()),
         ];
     }
 
@@ -124,7 +124,7 @@ class EditUser extends Component
     public function render()
     {
         return view('livewire.master-data.user.edit-user', [
-            'roles' => Role::platformCases(),
+            'roles' => Role::accountCases(),
         ]);
     }
 }
