@@ -51,6 +51,11 @@ class CompetitionClass extends Model
         return $this->hasMany(CompetitionTeam::class);
     }
 
+    public function heatFormats()
+    {
+        return $this->hasMany(CompetitionHeatFormat::class);
+    }
+
     public function isTeamFormat(): bool
     {
         return \App\Support\CompetitionFormat::isTeamFormat($this->format);

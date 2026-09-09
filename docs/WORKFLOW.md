@@ -466,3 +466,112 @@ Event Role → Create operational role
   └── Committee Assignment → Person → Role → Event
        └── Optional: scope to ActivityGroup, Activity, or Venue
 ```
+
+---
+
+## 13. Competition Heat Manager (Heat Format Builder + Generation + Rebuild)
+
+Route: `/events/{event}/competition/heat` (`competition.heat.index`, `can:manage-events`). Format yang didukung: `individual_heat` / `team_heat`.
+
+### 13.1 Format Builder (per round)
+```
+/competition/heat → select heat class → "Buat Format"
+  ├── Set: Round, Peserta per Heat (participants_per_heat), Lolos per Heat (qualifiers_per_heat)
+  ├── Validated: participants ≥ 1, qualifiers ≥ 1, qualifiers ≤ participants
+  └── Upsert per (class, round) → competition_heat_formats
+```
+
+### 13.2 Auto-Generate Heat (Round 1)
+```
+Round card → "Generate Heat" (only when round has no heats yet)
+  ├── Kapasitas heat = participants_per_heat (source of truth) → required_participants
+  ├── Kompetitor di-chunk per participants_per_heat → competition_schedule_entries
+  ├── Idempotent: menolak bila round sudah punya heat (round_exists)
+  └── Heat penuh → Ready (canAutoReady); heat sisa → Scheduled
+```
+
+### 13.3 Rebuild Existing Round (legacy / misconfigured heats)
+```
+Round card → amber banner (needs_rebuild) tampil saat ada heat yang
+    required_participants ≠ participants_per_heat
+  └── Operator klik "Generate Ulang Babak Ini" (explicit action, NEVER automatic)
+        ├── Guard 1: ada heat Playing/Waiting Result/Finished?  → TOLAK (round_started)
+        ├── Guard 2: sudah ada competition_heat_results?        → TOLAK (has_results)
+        ├── Hapus heat round yang belum dimulai
+        └── Generate ulang dari format (13.2)
+```
+
+### 13.4 Round Advancement (top-N)
+```
+Heat selesai → Rank → "Advance Top N" PER-HEAT (qualifyHeat)
+  ├── heat tsb lengkap? tidak → TOLAK (heat_incomplete)
+  ├── top-N heat tsb = qualified (position <= topN, exclude status) → disimpan
+  └── TIDAK menunggu sibling heat, TIDAK membuat/mengisi round berikutnya
+
+"Generate Round Berikutnya" (generateNextRound) — round-level
+  ├── hitung qualified pool = union top-N dari SEMUA heat yang selesai
+  ├── pool < participants_per_heat format berikutnya → TOLAK (qualified_pool_insufficient, round belum dibuat)
+  ├── wajib ada format round berikutnya, jika tidak → TOLAK (no_next_format, tanpa fabrikasi babak)
+  ├── Buat heat round berikutnya dari participants_per_heat format tsb
+  └── Isi qualifier → entries (identitas tidak pernah ditukar)
+```
+
+### 13.6 Per-Heat Qualification + Qualified Pool
+```
+Round 1: Heat 01 selesai, Heat 02 berlangsung
+  └── "Advance Top 2" Heat 01 → 2 qualified (pool = 2) — Heat 02 tidak tersentuh
+Round 1: Heat 02 selesai
+  └── "Advance Top 2" Heat 02 → 2 qualified (pool = 4)
+pool 4 >= kapasitas format Round 2 (4) → "Generate Round Berikutnya" → Round 2 = 1 heat 4/4
+```
+
+### 13.5 Behavior — format 5/2 (peserta per heat 5, lolos 2)
+| Competitors | Hasil | required_participants | Entries |
+|---|---|---|---|
+| 5 | 1 heat | 5 | 5 |
+| 9 | 2 heat | 5, 5 | 5, 4 |
+| 10 | 2 heat | 5, 5 | 5, 5 |
+| 4 | 1 heat | 5 | 4 (tidak pernah 2+2) |
+
+Top-N per heat selalu `qualifiers_per_heat` → 5 peserta menghasilkan 2 lolos; 9 peserta menghasilkan 2+2 = 4 lolos.
+
+## 14. Competition Bracket — Perebutan Juara 3 (Bronze Match — 2026-08-27)
+
+Route: `competition.bracket-manager` — generate bracket dengan opsi **Perebutan Juara 3** (checkbox, default OFF = `competition_brackets.third_place_match = false`). Dukungan: Individual (Individual vs Individual) & Team/Futsal (Team vs Team).
+
+### 14.1 Bronze OFF (default — perilaku legacy)
+```
+Generate (opsi OFF) → bracket biasa (tanpa Bronze Match)
+SF selesai → SF winner advance ke Final
+Final selesai → Final winner = Juara 1, Final loser = Juara 2
+Semifinal losers → tied Juara 3 (tanpa perebutan, tanpa posisi 4)
+```
+
+### 14.2 Bronze ON
+```
+Generate (opsi ON, totalRounds >= 2)
+  └── Bracket + Bronze Match dibuat
+      round=1, position=2, is_third_place=true, source_match_a/b = SF1 & SF2
+      (Bronze = CompetitionSchedule normal; badge BRACKET; hasil via Official Panel)
+SF selesai (submitResult / submitTeamResult)
+  ├── advanceWinner / advanceWinnerTeam: SF winner → Final (lookup exclude is_third_place)
+  └── advanceLoser / advanceLoserTeam: SF loser → Bronze (slot source side), hanya bila ON
+  └── Bronze: 1 loser → Scheduled; 2 loser → Ready (canAutoReady)
+Bronze selesai → Bronze winner = Juara 3, Bronze loser = Juara 4 (Bronze tidak advance ke mana pun)
+Final selesai → Final winner = Juara 1, Final loser = Juara 2
+Podium akhir = 1,2,3,4 — urutan selesai Final vs Bronze bebas (Bronze dulu atau Final dulu)
+```
+
+### 14.3 Reset / Rollback (semifinal)
+```
+Reset semifinal → rollback winner (Final) + rollback loser (Bronze)
+  ├── Bronze BELUM dimainkan (Scheduled/Ready):
+  │     losernya dihapus dari Bronze; Bronze match tetap ada → kembali Scheduled
+  └── Bronze SUDAH dimainkan (Playing / Waiting Result / Finished):
+        playedBronzeEntries() → entry + outcome Juara 3/4 Bronze DILINDUNGI
+        (tidak dihapus / tidak dirusak oleh reset semifinal)
+Bronze match sendiri tidak pernah dihapus oleh reset
+```
+
+### 14.4 Interaksi Match Center / Official Panel
+Bronze & Final adalah bracket match normal: berbadge **BRACKET**, `requiresOfficial()` = true → hasil disubmit lewat **Buka Official Panel**, dan tidak pernah memakai tombol Input Hasil (untuk heat). Lifecycle Heat (individual_heat / team_heat) tidak tersentuh.

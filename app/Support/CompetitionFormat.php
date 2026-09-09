@@ -20,18 +20,22 @@ final class CompetitionFormat
 
     public const INDIVIDUAL_VS_INDIVIDUAL = 'individual_vs_individual';
 
+    public const TEAM_HEAT = 'team_heat';
+
     public const ALL = [
         self::INDIVIDUAL_HEAT,
         self::INDIVIDUAL_MASS,
         self::TEAM_VS_TEAM,
         self::TEAM_MASS,
         self::INDIVIDUAL_VS_INDIVIDUAL,
+        self::TEAM_HEAT,
     ];
 
     /** Team-based formats require a Team per Kelompok. */
     public const TEAM_FORMATS = [
         self::TEAM_VS_TEAM,
         self::TEAM_MASS,
+        self::TEAM_HEAT,
     ];
 
     /** Head-to-head formats may use a bracket. */
@@ -84,6 +88,7 @@ final class CompetitionFormat
             self::TEAM_VS_TEAM => 'win_loss',
             self::TEAM_MASS => 'ranking',
             self::INDIVIDUAL_VS_INDIVIDUAL => 'score',
+            self::TEAM_HEAT => 'time',
             default => 'ranking',
         };
     }
@@ -96,6 +101,7 @@ final class CompetitionFormat
             self::TEAM_VS_TEAM => 'Team vs Team',
             self::TEAM_MASS => 'Team Mass',
             self::INDIVIDUAL_VS_INDIVIDUAL => 'Individual vs Individual',
+            self::TEAM_HEAT => 'Team Heat',
             default => 'Individual',
         };
     }

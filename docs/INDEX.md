@@ -60,12 +60,13 @@
 | UI Bug Fix Sprint | ✅ Batch 1–4 VERIFIED |
 | UI Standardization | ✅ Phases 2–7 COMPLETE |
 | Competition V1 (Sprint 7–10) | ✅ COMPLETE |
+| Competition Heat Manager + Format Builder | ✅ COMPLETE (2026-08-26) — format per babak, auto-generate & rebuild round; `participants_per_heat` source of truth |
 | Public Portal (Sprint 9.0) | ✅ COMPLETE |
 | Event Dashboard (Sprint 10.0) | ✅ COMPLETE |
 | Physical Regu Retirement | ✅ PGM.19 COMPLETE |
 | Legacy NIP Retirement | ✅ PGM.20 COMPLETE |
 | Database V2 / Design C | ✅ problem_total = 0 |
-| Test Baseline | ✅ **1944 passed / 4648 assertions / 0 failures** |
+| Test Baseline | ✅ **2436 passed / 6543 assertions / 0 failures / 0 skipped** (2026-08-26) |
 | **Roadmap V1** (All Foundation) | ✅ **100% COMPLETE** |
 | **Roadmap V2** (Event Operating System) | 🟡 **Partial** — Competition V1/Public Portal/Event Dashboard COMPLETE; generic engine Planned |
 
@@ -197,6 +198,14 @@
 |----------|-------------|--------|
 | **SPRINT3_MULTI_EVENT_AUDIT.md** | Sprint 3 multi-event audit | 🟡 Historical — SUPERSEDED (pra-migrasi) |
 | **ARCHITECTURE_REVIEW_PHASE1.md** | Architecture review phase 1 | 🟡 Historical — sebagian superseded (NIP retired) |
+
+### Heat / Competition Audit Docs (docs/audit/)
+| Document | Description | Status |
+|----------|-------------|--------|
+| **audit/SPRINT-MULTI-ROUND-HEAT.md** | Multi-round Heat (R4H) kontrak & penerapan | ✅ Current |
+| **audit/AUDIT-MULTI-ROUND-HEAT.md** | Multi-round Heat audit (R4H) | ✅ Current |
+| **audit/SPRINT-HEAT-MANAGER.md** | Heat Manager + Format Builder sprint | ✅ Current |
+| **audit/AUDIT-HEAT-MANAGER.md** | Heat Manager audit (rebuilt/build, format source of truth) | ✅ Current |
 
 ### Runbooks
 | Document | Description | Status |

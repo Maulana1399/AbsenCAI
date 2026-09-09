@@ -8,12 +8,16 @@ use App\Models\CompetitionSchedule;
 use App\Models\User;
 use App\Services\Competition\CompetitionWorkflowService;
 use App\Support\ActiveEventContext;
+use App\Support\CompetitionFormat;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class MatchCenter extends Component
 {
     public ?string $filterVenueId = null;
+
+    /** Filter jenis pertandingan: null = semua, 'heat', atau 'bracket'. */
+    public ?string $filterType = null;
 
     public bool $showOfficialDialog = false;
 
@@ -46,6 +50,11 @@ class MatchCenter extends Component
         $this->filterVenueId = $id ? (string) $id : null;
     }
 
+    public function setFilterType(?string $type): void
+    {
+        $this->filterType = in_array($type, ['heat', 'bracket'], true) ? $type : null;
+    }
+
     private function workflow(): CompetitionWorkflowService
     {
         return app(CompetitionWorkflowService::class);
@@ -58,7 +67,7 @@ class MatchCenter extends Component
         $schedule = CompetitionSchedule::withCount('scheduleEntries as participants_count')->findOrFail($scheduleId);
 
         if (! $this->workflow()->startMatch($schedule)) {
-            $required = $schedule->required_participants ?? 1;
+            $required = $schedule->minParticipantsToStart();
             $current = $schedule->participants_count ?? 0;
             session()->flash('error', "Cannot start match: need {$required} participant(s), currently {$current} assigned.");
 
@@ -74,9 +83,7 @@ class MatchCenter extends Component
 
         $schedule = CompetitionSchedule::findOrFail($scheduleId);
 
-        $nextStatus = $this->workflow()->completeMatch($schedule);
-
-        if ($nextStatus !== 'Waiting Result') {
+        if (! $this->workflow()->moveToWaitingResult($schedule)) {
             session()->flash('error', 'Only Playing matches can be sent to Waiting Result.');
 
             return;
@@ -149,6 +156,8 @@ class MatchCenter extends Component
             ->whereIn('competition_class_id', $classIds)
             ->whereIn('status', ['Ready', 'Playing', 'Waiting Result'])
             ->when($this->filterVenueId, fn ($q) => $q->where('venue_id', $this->filterVenueId))
+            ->when($this->filterType === 'bracket', fn ($q) => $q->whereHas('bracketMatch'))
+            ->when($this->filterType === 'heat', fn ($q) => $q->whereHas('competitionClass', fn ($q2) => $q2->whereIn('format', [CompetitionFormat::INDIVIDUAL_HEAT, CompetitionFormat::TEAM_HEAT])))
             ->orderByRaw("CASE WHEN status = 'Playing' THEN 0 WHEN status = 'Waiting Result' THEN 1 ELSE 2 END")
             ->orderBy('sort_order')
             ->orderBy('start_at')

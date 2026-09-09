@@ -4,7 +4,6 @@ use App\Enums\Role;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
 use App\Models\CompetitionHeatResult;
-use App\Models\CompetitionOutcome;
 use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Models\CompetitionScheduleEntry;
@@ -370,4 +369,136 @@ test('OutcomeManager heat flow saves per-heat time, aggregates final and shows p
         ->assertSee('Juara 1')
         ->assertSee('H B')
         ->assertSee('Juara 2');
+});
+
+// ---------------------------------------------------------------------------
+// Component — Waiting Result heat: operator input path (UAT gap fix)
+// ---------------------------------------------------------------------------
+
+test('operator can open Waiting Result heat in OutcomeManager and input per-participant times', function () {
+    $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = cha_event();
+    app(\App\Support\ActiveEventContext::class)->set($event);
+    $this->actingAs($admin);
+
+    $category = cha_category($event);
+    $class = cha_class($event, $category, 'individual_heat');
+    $heat = cha_schedule($class, 1);
+    $heat->update(['status' => 'Waiting Result']);
+
+    $a = cha_register(cha_person('WR A'), $event, $category, $class);
+    $b = cha_register(cha_person('WR B'), $event, $category, $class);
+    cha_entry($heat, $a);
+    cha_entry($heat, $b);
+
+    $component = \Livewire::test(\App\Livewire\Competition\Schedule\OutcomeManager::class, ['schedule' => $heat]);
+    $inst = $component->instance();
+
+    expect(count($inst->heatResults))->toBe(2)
+        ->and($component->assertSet('isHeat', true));
+
+    $heatRows = $inst->heatResults;
+    $heatRows[0]['timeText'] = '1:50.0';
+    $heatRows[1]['timeText'] = '1:45.0';
+    $inst->heatResults = $heatRows;
+    $inst->saveOutcomes();
+
+    $saved = CompetitionHeatResult::where('competition_schedule_id', $heat->id)->orderBy('id')->get();
+    expect($saved)->toHaveCount(2)
+        ->and((float) $saved[0]->score)->toBe(110.0)
+        ->and((float) $saved[1]->score)->toBe(105.0);
+
+    expect($heat->fresh()->status)->toBe('Waiting Result');
+});
+
+test('operator score-type heat input uses numeric score field and aggregates via CompetitionResultService', function () {
+    $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = cha_event();
+    app(\App\Support\ActiveEventContext::class)->set($event);
+    $this->actingAs($admin);
+
+    $category = cha_category($event);
+    $class = cha_class($event, $category, 'individual_heat', 'score');
+    $heat = cha_schedule($class, 1);
+    $heat->update(['status' => 'Waiting Result']);
+
+    $a = cha_register(cha_person('SC A'), $event, $category, $class);
+    $b = cha_register(cha_person('SC B'), $event, $category, $class);
+    cha_entry($heat, $a);
+    cha_entry($heat, $b);
+
+    $component = \Livewire::test(\App\Livewire\Competition\Schedule\OutcomeManager::class, ['schedule' => $heat]);
+    $inst = $component->instance();
+
+    $heatRows = $inst->heatResults;
+    $heatRows[0]['scoreValue'] = '7.5';
+    $heatRows[1]['scoreValue'] = '9.0';
+    $inst->heatResults = $heatRows;
+    $inst->saveOutcomes();
+
+    $saved = CompetitionHeatResult::where('competition_schedule_id', $heat->id)->orderBy('id')->get();
+    expect($saved)->toHaveCount(2)
+        ->and((float) $saved[0]->score)->toBe(7.5)
+        ->and((float) $saved[1]->score)->toBe(9.0);
+
+    app(CompetitionResultService::class)->aggregateHeatResults($event->id, $class->id);
+
+    expect((float) $b->outcome->fresh()->score)->toBe(9.0)
+        ->and($b->outcome->fresh()->position)->toBe(1)
+        ->and($a->outcome->fresh()->position)->toBe(2);
+});
+
+test('official submission still finishes a Waiting Result heat after operator input', function () {
+    $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = cha_event();
+    app(\App\Support\ActiveEventContext::class)->set($event);
+    $this->actingAs($admin);
+
+    $category = cha_category($event);
+    $class = cha_class($event, $category, 'individual_heat');
+    $heat = cha_schedule($class, 1);
+    $heat->update(['status' => 'Waiting Result', 'required_participants' => 1]);
+
+    $a = cha_register(cha_person('FIN A'), $event, $category, $class);
+    cha_entry($heat, $a);
+
+    $component = \Livewire::test(\App\Livewire\Competition\Schedule\OutcomeManager::class, ['schedule' => $heat]);
+    $inst = $component->instance();
+    $heatRows = $inst->heatResults;
+    $heatRows[0]['timeText'] = '1:30.0';
+    $inst->heatResults = $heatRows;
+    $inst->saveOutcomes();
+
+    expect(CompetitionHeatResult::where('competition_schedule_id', $heat->id)->count())->toBe(1);
+
+    $official = \Livewire::test(\App\Livewire\Competition\OfficialPanel::class);
+    $official->call('openSubmitDialog', $heat->id);
+    $official->set('selectedWinnerId', $a->id);
+    $official->set('finishReason', 'Normal');
+    $official->call('submitResult');
+
+    expect($heat->fresh()->status)->toBe('Finished')
+        ->and($heat->fresh()->winner_registration_id)->toBe($a->id);
+});
+
+test('Match Center Waiting Result heat shows Input Hasil link to OutcomeManager', function () {
+    $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = cha_event();
+    app(\App\Support\ActiveEventContext::class)->set($event);
+    $this->actingAs($admin);
+
+    $category = cha_category($event);
+    $class = cha_class($event, $category, 'individual_heat');
+    $heat = cha_schedule($class, 1);
+    $heat->update(['status' => 'Waiting Result']);
+
+    $a = cha_register(cha_person('WR A'), $event, $category, $class);
+    cha_entry($heat, $a);
+
+    \Livewire::test(\App\Livewire\Competition\MatchCenter::class)
+        ->assertSee('Input Hasil')
+        ->assertSee(route('competition.schedule.outcomes', ['event' => $event, 'schedule' => $heat->id], false));
+
+    $response = $this->get(route('competition.schedule.outcomes', ['event' => $event, 'schedule' => $heat->id]));
+    $response->assertOk();
 });

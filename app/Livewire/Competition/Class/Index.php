@@ -4,7 +4,11 @@ namespace App\Livewire\Competition\Class;
 
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
+use App\Models\CompetitionHeatResult;
+use App\Models\CompetitionOutcome;
+use App\Models\CompetitionTeamOutcome;
 use App\Support\ActiveEventContext;
+use App\Support\CompetitionResultType;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -20,6 +24,8 @@ class Index extends Component
 
     public string $newSortOrder = '';
 
+    public string $newResultType = '';
+
     public string $newCompetitionCategoryId = '';
 
     public ?int $editId = null;
@@ -31,6 +37,8 @@ class Index extends Component
     public string $editCode = '';
 
     public string $editSortOrder = '';
+
+    public string $editResultType = '';
 
     public string $editCompetitionCategoryId = '';
 
@@ -44,7 +52,7 @@ class Index extends Component
     public function toggleCreateForm(): void
     {
         $this->showCreateForm = ! $this->showCreateForm;
-        $this->reset(['newName', 'newGender', 'newCode', 'newSortOrder', 'newCompetitionCategoryId']);
+        $this->reset(['newName', 'newGender', 'newCode', 'newSortOrder', 'newResultType', 'newCompetitionCategoryId']);
         $this->resetErrorBag();
     }
 
@@ -63,6 +71,7 @@ class Index extends Component
                 'newGender' => 'required|in:L,P,M',
                 'newCode' => 'nullable|string|max:50',
                 'newSortOrder' => 'nullable|integer|min:0',
+                'newResultType' => 'nullable|in:'.implode(',', CompetitionResultType::ALL),
                 'newCompetitionCategoryId' => 'required|exists:competition_categories,id',
             ]);
 
@@ -75,10 +84,11 @@ class Index extends Component
                 'gender' => $this->newGender ?: null,
                 'code' => $this->newCode ?: null,
                 'sort_order' => $this->newSortOrder !== '' ? (int) $this->newSortOrder : null,
+                'result_type' => $this->newResultType !== '' ? $this->newResultType : null,
             ]);
 
             $this->showCreateForm = false;
-            $this->reset(['newName', 'newGender', 'newCode', 'newSortOrder', 'newCompetitionCategoryId']);
+            $this->reset(['newName', 'newGender', 'newCode', 'newSortOrder', 'newResultType', 'newCompetitionCategoryId']);
             session()->flash('success', 'Kelas berhasil dibuat.');
         } finally {
             $this->processing = false;
@@ -93,6 +103,7 @@ class Index extends Component
         $this->editGender = $class->gender ?? '';
         $this->editCode = $class->code ?? '';
         $this->editSortOrder = $class->sort_order ?? '';
+        $this->editResultType = $class->result_type ?? '';
         $this->editCompetitionCategoryId = (string) $class->competition_category_id;
     }
 
@@ -105,6 +116,7 @@ class Index extends Component
             'editGender' => 'required|in:L,P,M',
             'editCode' => 'nullable|string|max:50',
             'editSortOrder' => 'nullable|integer|min:0',
+            'editResultType' => 'nullable|in:'.implode(',', CompetitionResultType::ALL),
             'editCompetitionCategoryId' => 'required|exists:competition_categories,id',
         ]);
 
@@ -115,15 +127,37 @@ class Index extends Component
             'gender' => $this->editGender ?: null,
             'code' => $this->editCode ?: null,
             'sort_order' => $this->editSortOrder !== '' ? (int) $this->editSortOrder : null,
+            'result_type' => $this->canEditResultType($class) && $this->editResultType !== '' ? $this->editResultType : $class->result_type,
         ]);
 
-        $this->reset(['editId', 'editName', 'editGender', 'editCode', 'editSortOrder', 'editCompetitionCategoryId']);
+        $this->reset(['editId', 'editName', 'editGender', 'editCode', 'editSortOrder', 'editResultType', 'editCompetitionCategoryId']);
         session()->flash('success', 'Kelas berhasil diperbarui.');
+    }
+
+    public function canEditResultType(CompetitionClass $class): bool
+    {
+        $scheduleIds = $class->competitionSchedules()->pluck('id');
+
+        if ($scheduleIds->isNotEmpty()) {
+            if (CompetitionHeatResult::whereIn('competition_schedule_id', $scheduleIds)->exists()) {
+                return false;
+            }
+        }
+
+        if (CompetitionOutcome::whereHas('competitionRegistration', fn ($query) => $query->where('competition_class_id', $class->id))->exists()) {
+            return false;
+        }
+
+        if (CompetitionTeamOutcome::whereHas('team', fn ($query) => $query->where('competition_class_id', $class->id))->exists()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['editId', 'editName', 'editGender', 'editCode', 'editSortOrder', 'editCompetitionCategoryId']);
+        $this->reset(['editId', 'editName', 'editGender', 'editCode', 'editSortOrder', 'editResultType', 'editCompetitionCategoryId']);
     }
 
     public function toggleActive(int $id): void

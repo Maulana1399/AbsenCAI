@@ -11,7 +11,15 @@ class CompetitionBracket extends Model
         'name',
         'participant_count',
         'status',
+        'third_place_match',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'third_place_match' => 'boolean',
+        ];
+    }
 
     public function competitionClass()
     {

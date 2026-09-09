@@ -263,6 +263,18 @@ Future
 
 ---
 
+# Competition Heat Manager + Heat Format Builder (2026-08-26)
+
+🟢
+
+- **Format tersimpan per babak** — `competition_heat_formats` (per `competition_class_id` + `round`): `participants_per_heat` + `qualifiers_per_heat` (auto-generate tanpa hardcode).
+- **Orchestrator** — `CompetitionHeatManagerService`: `validateFormat`/`upsertFormat`/`deleteFormat`, `computeHeatCount`, `generateRound` (idempoten, event-scoped), `generateNextRound` (via `advanceRound` + `isRoundCompleteForAdvancement`), `removeRoundSchedules` (reject `round_started`) — Individual Heat & Team Heat saja.
+- **Helper additive R4H** — `CompetitionMultiRoundHeatService::isRoundCompleteForAdvancement(classId, round, isTeam)`.
+- **UI** — menu Heat di sidebar (grup Operasional, `can:manage-events`), `App\Livewire\Competition\Heat\Index`, route `competition.heat.index` (`events/{event}/competition/heat`): daftar kelas heat, kartu heat dengan badge status + daftar peserta, aksi Generate Heat / Generate Round Berikutnya / Hapus Round, lalu Peserta / Match Center / Input Hasil (reuse `EntryManager`, `MatchCenter`, `OutcomeManager`).
+- Menggunakan service R4H apa adanya (`rankHeat`, `advanceRound`, `roundSchedules`, `isFinalRound`) + hasil `competition_heat_results` — tanpa mengubah Bracket, Mass, VS, atau `result_type`.
+
+---
+
 # Competition (V2 — Competition Engine)
 
 📋

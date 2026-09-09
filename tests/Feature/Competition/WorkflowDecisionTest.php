@@ -161,10 +161,10 @@ test('OperatorDashboard advanceStatus sends bracket matches to Waiting Result', 
 });
 
 // -----------------------------------------------------------------------
-// MatchCenter uses completeMatch
+// MatchCenter moveToWaitingResult
 // -----------------------------------------------------------------------
 
-test('MatchCenter moveToWaitingResult uses completeMatch for bracket', function () {
+test('MatchCenter moveToWaitingResult sends bracket match to Waiting Result', function () {
     $bracket = CompetitionBracket::create([
         'competition_class_id' => $this->class->id,
         'name' => 'Test',
@@ -182,4 +182,15 @@ test('MatchCenter moveToWaitingResult uses completeMatch for bracket', function 
         ->call('moveToWaitingResult', $this->schedule->id);
 
     expect($this->schedule->fresh()->status)->toBe('Waiting Result');
+});
+
+test('MatchCenter moveToWaitingResult sends non-bracket (heat) match to Waiting Result, not Finished', function () {
+    $this->class->update(['format' => 'individual_heat']);
+    $this->schedule->refresh();
+
+    \Livewire::test(\App\Livewire\Competition\MatchCenter::class)
+        ->call('moveToWaitingResult', $this->schedule->id);
+
+    expect($this->schedule->fresh()->status)->toBe('Waiting Result')
+        ->not->toBe('Finished');
 });

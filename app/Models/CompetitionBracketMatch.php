@@ -11,6 +11,7 @@ class CompetitionBracketMatch extends Model
         'competition_schedule_id',
         'round',
         'position',
+        'is_third_place',
         'source_match_a_id',
         'source_match_b_id',
     ];
@@ -20,6 +21,7 @@ class CompetitionBracketMatch extends Model
         return [
             'round' => 'integer',
             'position' => 'integer',
+            'is_third_place' => 'boolean',
         ];
     }
 

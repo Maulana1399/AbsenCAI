@@ -9,6 +9,7 @@ class CompetitionHeatResult extends Model
     protected $fillable = [
         'competition_schedule_id',
         'competition_registration_id',
+        'competition_team_id',
         'score',
         'position',
         'status',
@@ -31,5 +32,10 @@ class CompetitionHeatResult extends Model
     public function competitionRegistration()
     {
         return $this->belongsTo(CompetitionRegistration::class);
+    }
+
+    public function competitionTeam()
+    {
+        return $this->belongsTo(CompetitionTeam::class, 'competition_team_id');
     }
 }

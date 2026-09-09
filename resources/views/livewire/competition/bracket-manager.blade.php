@@ -38,6 +38,10 @@
                     <flux:select.option value="32">32</flux:select.option>
                 </flux:select>
             </div>
+            <div class="flex items-center gap-2 pb-2">
+                <flux:checkbox wire:model="thirdPlaceMatch" id="thirdPlaceMatch" />
+                <label for="thirdPlaceMatch" class="text-sm text-zinc-700 dark:text-zinc-300">Perebutan Juara 3</label>
+            </div>
             @php
                 $selectedClass = $filterClassId ? $classes->firstWhere('id', (int) $filterClassId) : null;
                 $regCount = $selectedClass ? \App\Models\CompetitionRegistration::where('competition_class_id', $selectedClass->id)->count() : 0;
@@ -103,19 +107,30 @@
     @endif
     @endcan
 
-    {{-- Podium Final (Juara 1/2/3) --}}
+    {{-- Podium Final (Juara 1/2/3, atau 1/2/3/4 jika Perebutan Juara 3) --}}
     @if ($selectedBracket && ! empty($podium))
-        <div class="grid gap-3 sm:grid-cols-3">
+        <div @class(['grid gap-3', $selectedBracket->third_place_match ? 'sm:grid-cols-4' : 'sm:grid-cols-3'])>
             @foreach ($podium as $entry)
                 <div class="rounded-xl border p-4 text-center {{ $entry['position'] === 1 ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40' : ($entry['position'] === 2 ? 'border-zinc-300 bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900' : 'border-orange-200 bg-orange-50/60 dark:border-orange-800 dark:bg-orange-950/30') }}">
                     <p class="text-xs font-medium uppercase tracking-wide {{ $entry['position'] === 1 ? 'text-amber-600 dark:text-amber-400' : ($entry['position'] === 2 ? 'text-zinc-500' : 'text-orange-600 dark:text-orange-400') }}">
                         Juara {{ $entry['position'] }}
                     </p>
-                    <p class="mt-1 truncate font-semibold text-zinc-900 dark:text-white">{{ $entry['person_name'] }}</p>
-                    <p class="text-xs text-zinc-500">{{ $entry['participant_number'] }}</p>
+                    <p class="mt-1 truncate font-semibold text-zinc-900 dark:text-white">{{ $entry['person_name'] ?? $entry['team_name'] ?? '-' }}</p>
+                    @if (! empty($entry['participant_number'] ?? null))
+                        <p class="text-xs text-zinc-500">{{ $entry['participant_number'] }}</p>
+                    @endif
                 </div>
             @endforeach
         </div>
+        @if ($selectedBracket->third_place_match)
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                Juara 1 = pemenang Final &middot; Juara 2 = runner-up Final &middot; Juara 3 = pemenang <strong>Perebutan Juara 3</strong> (semifinal loser) &middot; Juara 4 = runner-up Perebutan Juara 3.
+            </p>
+        @else
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                Juara 1 = pemenang Final &middot; Juara 2 = runner-up Final &middot; Juara 3 ditentukan otomatis dari <strong>semifinal losers</strong> (seri peringkat 3, tanpa perebutan Juara 3).
+            </p>
+        @endif
     @endif
 
     {{-- Bracket Display --}}

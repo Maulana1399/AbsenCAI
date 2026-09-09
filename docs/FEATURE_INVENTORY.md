@@ -251,6 +251,46 @@
 | Competition Gates | ✅ | `manage-matches`, `manage-officials`, `submit-result` | 3 gate tambahan (total 18) |
 | Venue CRUD | ✅ | `Livewire/Competition/Venue/Index.php` | event-scoped |
 
+## Competition Heat Manager + Heat Format Builder (2026-08-26)
+
+| Feature | Status | Location | Notes |
+|---------|--------|----------|-------|
+| Heat Format Builder (per class + round) | ✅ | `CompetitionHeatFormat` + `competition_heat_formats` | `participants_per_heat` + `qualifiers_per_heat`; unique `(competition_class_id, round)`; validated (0/0, qualifiers>participants, format unsupported) |
+| Menu Heat (operator) | ✅ | `Livewire/Competition/Heat/Index` + route `competition.heat.index` | Sidebar Operasional, `can:manage-events`; only `individual_heat` / `team_heat` |
+| Auto-Generate Heat (Round 1) | ✅ | `CompetitionHeatManagerService::generateRound` | **`participants_per_heat` = source of truth** → `required_participants` + entries per heat; chunk per format; idempotent (`round_exists`) |
+| Auto-Generate Round Berikutnya | ✅ | `generateNextRound` | Hitung **qualified pool** (top-N per heat yang selesai) → bangun heat round berikutnya HANYA bila `pool >= participants_per_heat`; reject `no_next_format`/`next_round_exists`/`qualified_pool_insufficient` (tanpa fabrikasi babak) |
+| Qualification Per-Heat | ✅ | `CompetitionMultiRoundHeatService::qualifyHeat` | Heat yang selesai langsung menentukan top-N qualified tanpa menunggu sibling heat; reject `heat_incomplete`; dipanggil tombol "Advance Top 2/3" (`OutcomeManager`) |
+| Rebuild Existing Round dari Format | ✅ | `CompetitionHeatManagerService::rebuildRound` | Perbaiki heat legacy/misconfigured (mis. 2/heat) → hapus heat belum-dimulai + generate ulang dari format; guard `round_started` & `has_results` |
+| Deteksi `needs_rebuild` | ✅ | `Heat/Index` render + blade | Round ditandai bila ada heat yang `required_participants` ≠ `participants_per_heat` → banner amber + tombol **Generate Ulang Babak Ini** |
+| Hapus Heat Babak Ini | ✅ | `removeRoundSchedules` | Reset round; reject `round_started` |
+| Rank/Input Hasil/Podium | ✅ | `rankHeat`, `OutcomeManager`, `aggregateRoundResults`, `finalizePodium` (R4H) | Ranking, `result_type`, identity tidak diubah |
+
+**Behavior format 5/2** (verifikasi unit test UAT Case A–D):
+
+| Competitors | Heats | `required_participants` per heat | Entries per heat |
+|---|---|---|---|
+| 5 | 1 | [5] | [5] |
+| 9 | 2 | [5, 5] | [5, 4] |
+| 10 | 2 | [5, 5] | [5, 5] |
+| 4 | 1 | [5] | [4] (bukan 2+2) |
+
+Top-N qualifier per heat selalu `qualifiers_per_heat` (5 → 2 lolos; 9 → 2+2 = 4 lolos). Qualification bersifat **per-heat**: heat yang selesai bisa qualify tanpa menunggu heat lain; round berikutnya dibangun hanya saat pool qualified cukup (pool 2 < kapasitas 4 → tunggu; pool 4 ≥ 4 → 1 heat 4/4). Rebuild tidak pernah otomatis (`round_started`/`has_results` menolak; murni aksi operator).
+
+## Competition Bracket — Perebutan Juara 3 (Bronze Match — 2026-08-27)
+
+| Feature | Status | Location | Notes |
+|---------|--------|----------|-------|
+| Bronze Match Option | ✅ | `competition_brackets.third_place_match` (boolean, default false) | Migrasi `2026_08_27_000001`; backward-compatible, existing = OFF |
+| Bronze Match Flag | ✅ | `competition_bracket_matches.is_third_place` (boolean, default false) | Migrasi `2026_08_27_000002`; `round=1` `position=2`, source = SF1 & SF2 |
+| Generate Bronze Match | ✅ | `BracketManager::generate()` + checkbox blade | Hanya saat ON & `totalRounds >= 2`; section "Perebutan Juara 3" di render |
+| SF Winner → Final | ✅ | `CompetitionWorkflowService::advanceWinner` / `advanceWinnerTeam` | Lookup next-match exclude `is_third_place`; Bronze winner tidak advance |
+| SF Loser → Bronze | ✅ | `advanceLoser` / `advanceLoserTeam` | Hanya bila `third_place_match`; idempotent; slot dari source side; Bronze auto-Ready saat penuh |
+| Bronze Podium 3/4 | ✅ | `CompetitionBracketPodiumService::finalizePodiumForSchedule` / `finalizeTeamPodiumForSchedule` | `is_third_place`: winner 3 / loser 4; Final 1/2; OFF: SF losers tied 3; tanpa duplikasi |
+| Podium limit 4 | ✅ | `CompetitionResultService::podiumForClass` / `podiumForTeams` `$limit = 3` | Bronze ON memakai limit 4; default 3 tidak berubah |
+| Rollback loser | ✅ | `rollbackLoserAdvancement` / `rollbackLoserTeamAdvancement` | Reset semifinal → losernya keluar dari Bronze (bila Bronze belum dimainkan) |
+| Played Bronze Protection | ✅ | `playedBronzeEntries()` + `resetMatch` | Bronze `Playing`/`Waiting Result`/`Finished`: entry + outcome Juara 3/4 dilindungi |
+| Test | ✅ | `CompetitionBracketBronzePodiumTest` (12 test / 89 assertions) | Bronze OFF & ON (Individual + Team), urutan selesai bebas, re-finalization, rollback, idempotency |
+
 ## V2 Planned Features (Event Operating System)
 
 Fitur berikut adalah bagian dari **Roadmap V2**. Semua masih **Planned**, belum diimplementasikan.

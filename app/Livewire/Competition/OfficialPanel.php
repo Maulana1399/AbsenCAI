@@ -41,6 +41,29 @@ class OfficialPanel extends Component
     public function mount(): void
     {
         app(ActiveEventContext::class)->requireCurrent();
+
+        // Deep-link dari Match Center ("Buka Official Panel") — auto-buka dialog
+        // submit untuk match yang di-query bila match tsb memang milik user dan
+        // masih berstatus Waiting Result.
+        $scheduleId = request()->integer('schedule');
+
+        if ($scheduleId === null || $scheduleId === 0) {
+            return;
+        }
+
+        $assigned = \App\Models\CompetitionMatchOfficial::where('user_id', auth()->id())
+            ->where('competition_schedule_id', $scheduleId)
+            ->exists();
+
+        if (! $assigned) {
+            return;
+        }
+
+        $schedule = CompetitionSchedule::find($scheduleId);
+
+        if ($schedule !== null && $schedule->status === 'Waiting Result') {
+            $this->openSubmitDialog($scheduleId);
+        }
     }
 
     public function openSubmitDialog(int $scheduleId): void

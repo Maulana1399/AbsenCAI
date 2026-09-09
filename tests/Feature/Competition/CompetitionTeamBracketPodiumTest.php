@@ -5,13 +5,12 @@ use App\Models\CompetitionBracket;
 use App\Models\CompetitionBracketMatch;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionClass;
-use App\Models\CompetitionSchedule;
 use App\Models\CompetitionScheduleEntry;
 use App\Models\CompetitionTeam;
 use App\Models\CompetitionTeamOutcome;
 use App\Models\Event;
-use App\Models\User;
 use App\Models\kelompok;
+use App\Models\User;
 use App\Services\Competition\CompetitionResultService;
 use App\Services\Competition\CompetitionWorkflowService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -264,7 +263,7 @@ test('unfinished team final does not finalize team podium', function () {
 // reset team match
 // ---------------------------------------------------------------------------
 
-test('resetMatch clears team winner and team outcomes', function () {
+test('resetMatch clears team winner and team outcomes and returns a full final to Ready', function () {
     $admin = User::factory()->create(['role' => Role::SuperAdmin]);
     $event = ctbp_event();
     app(\App\Support\ActiveEventContext::class)->set($event);
@@ -288,6 +287,99 @@ test('resetMatch clears team winner and team outcomes', function () {
     app(CompetitionWorkflowService::class)->resetMatch($final->schedule);
 
     expect($final->schedule->fresh()->winner_team_id)->toBeNull()
-        ->and($final->schedule->fresh()->status)->toBe('Scheduled')
+        ->and($final->schedule->fresh()->status)->toBe('Ready')
         ->and(CompetitionTeamOutcome::count())->toBe(0);
+});
+
+// ---------------------------------------------------------------------------
+// UAT regression — Team/Futsal 8-team bracket reaching Final caused HTTP 500:
+// "Undefined array key person_name" in bracket-manager.blade.php. Podium for
+// team bracket uses `team_name` (no `person_name`/`participant_number`).
+// ---------------------------------------------------------------------------
+
+test('UAT regression: 8-team futsal bracket final renders podium (team_name) without 500', function () {
+    $admin = User::factory()->create(['role' => Role::SuperAdmin]);
+    $event = ctbp_event();
+    app(\App\Support\ActiveEventContext::class)->set($event);
+    $this->actingAs($admin);
+
+    $category = ctbp_category($event);
+    $class = ctbp_class($event, $category);
+
+    $teams = [];
+    for ($i = 1; $i <= 8; $i++) {
+        $teams[] = ctbp_team($event, $class, ctbp_kelompok('FTS '.$i), 'UAT Futsal Team '.str_pad((string) $i, 2, '0', STR_PAD_LEFT));
+    }
+
+    $bracket = ctbp_generateBracket($class, 8);
+
+    // Quarter Final (round 3, 4 matches) — masing-masing sudah ter-seed 2 team.
+    $qf = $bracket->bracketMatches->where('round', 3)->sortBy('position')->values();
+    expect($qf)->toHaveCount(4);
+
+    $qfWinners = [];
+    foreach ($qf as $match) {
+        $entryIds = $match->schedule->scheduleEntries()->pluck('competition_team_id')->sort()->values();
+        expect($entryIds)->toHaveCount(2);
+        $winner = $entryIds->first();
+        $qfWinners[] = $winner;
+        ctbp_finishTeamMatch($match, $winner);
+    }
+
+    // Semi Final (round 2, 2 matches) — berisi pemenang QF.
+    $sf = $bracket->bracketMatches->where('round', 2)->sortBy('position')->values();
+    expect($sf)->toHaveCount(2);
+
+    $sfWinners = [];
+    foreach ($sf as $match) {
+        $entryIds = $match->schedule->fresh()->scheduleEntries()->pluck('competition_team_id')->sort()->values();
+        expect($entryIds)->toHaveCount(2);
+        $winner = $entryIds->first();
+        $sfWinners[] = $winner;
+        ctbp_finishTeamMatch($match, $winner);
+    }
+
+    // Final (round 1) — berisi 2 pemenang SF.
+    $final = $bracket->bracketMatches->where('round', 1)->first();
+    $finalEntryIds = $final->schedule->fresh()->scheduleEntries()->pluck('competition_team_id')->sort()->values();
+    expect($finalEntryIds)->toHaveCount(2);
+
+    $champion = $finalEntryIds->first();
+    $runnerUp = $finalEntryIds->last();
+    ctbp_finishTeamMatch($final, $champion);
+
+    // Podium: Juara 1 = champion, Juara 2 = runner-up, Juara 3 = SF losers (tied).
+    $posByTeam = CompetitionTeamOutcome::pluck('position', 'competition_team_id');
+    expect($posByTeam->get($champion))->toBe(1)
+        ->and($posByTeam->get($runnerUp))->toBe(2)
+        ->and($final->schedule->fresh()->winner_team_id)->toBe($champion);
+
+    // Kedua semifinal losers sama-sama Juara 3 (kontrak "tied 3rd", tanpa bronze).
+    $sfLoserPositions = [];
+    foreach ($sf as $match) {
+        $winnerId = $match->schedule->fresh()->winner_team_id;
+        foreach ($match->schedule->fresh()->scheduleEntries()->pluck('competition_team_id') as $teamId) {
+            if ((int) $teamId !== (int) $winnerId) {
+                $sfLoserPositions[] = $posByTeam->get($teamId);
+            }
+        }
+    }
+    expect($sfLoserPositions)->toBe([3, 3]);
+
+    // Render BracketManager dengan bracket terpilih — TIDAK boleh 500, dan
+    // podium harus menampilkan nama team (team_name), bukan person_name,
+    // serta keterangan penentuan Juara 3.
+    $championName = CompetitionTeam::find($champion)->name;
+    $runnerUpName = CompetitionTeam::find($runnerUp)->name;
+
+    $component = \Livewire::test(\App\Livewire\Competition\BracketManager::class)
+        ->call('selectBracket', $bracket->id);
+
+    $component->assertSee('Juara 1')
+        ->assertSee('Juara 2')
+        ->assertSee('Juara 3')
+        ->assertSee($championName)
+        ->assertSee($runnerUpName)
+        ->assertSee('semifinal losers')
+        ->assertHasNoErrors();
 });

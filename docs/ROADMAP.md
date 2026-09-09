@@ -44,10 +44,11 @@ Commercial Platform (Future)
 | Sprint 3.1 (technical debt cleanup) | ✅ COMPLETE 100% |
 | Sprint 3.2 (architecture hardening) | ✅ COMPLETE 100% |
 | Sprint 3.3 (legacy retirement prep & UAT readiness) | ✅ COMPLETE 100% |
+| Heat Manager + Heat Format Builder | ✅ COMPLETE — menu Heat operator (format peserta/heat + lolos/heat per babak, auto-generate heat & babak berikutnya) untuk Individual Heat & Team Heat; `competition_heat_formats` + `CompetitionHeatManagerService` + UI `competition.heat.index`. Lihat `docs/audit/SPRINT-HEAT-MANAGER.md` & `AUDIT-HEAT-MANAGER.md` |
 | Sprint 4 | 🔲 NOT STARTED |
 | User without Person + Event Membership + Guest + Event Chair | ✅ COMPLETE — `event_committee_assignments.user_id` (User-based membership), Guest/Event Chair account roles, Register→Guest, Profile/ConfirmPassword null-email safe. Lihat `docs/audit/USER-EVENT-MEMBERSHIP-IMPLEMENTATION.md` |
 | Import Framework (IF series) | 🔲 **IF-01 AUDIT** — IF-02 ENGINE — IF-03 DESA — IF-04 KELOMPOK — IF-05 REGU — IF-06 PERSON — IF-07 PARTICIPATION — IF-08 PENGAJIAN — IF-09 PESERTA — **IF-10 CLEANUP (STABLE v1.0)** — IF-11+ NOT STARTED (lihat `docs/import-framework.md`) |
-| Test Baseline | ✅ **1944+ passed / 4648+ assertions / 0 failures** |
+| Test Baseline | ✅ **2436 passed / 6543 assertions / 0 failures / 0 skipped** (2026-08-26, `-d memory_limit=1G`) |
 | Stage | **Pre-UAT** |
 
 ---

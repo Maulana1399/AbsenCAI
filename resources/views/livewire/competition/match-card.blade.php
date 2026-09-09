@@ -3,8 +3,13 @@
         return $e->competitionRegistration?->participation?->person?->nama ?? $e->team?->name ?? '?';
     })->filter()->values();
     $participantsCount = $schedule->participants_count ?? 0;
-    $required = $schedule->required_participants ?? 1;
+    $required = $schedule->minParticipantsToStart();
     $participantsComplete = $participantsCount >= $required;
+
+    $format = $schedule->competitionClass?->format;
+    $isHeat = in_array($format, [\App\Support\CompetitionFormat::INDIVIDUAL_HEAT, \App\Support\CompetitionFormat::TEAM_HEAT], true);
+    $isBracketMatch = $schedule->bracketMatch()->exists();
+    $requiresOfficial = app(\App\Services\Competition\CompetitionWorkflowService::class)->requiresOfficial($schedule);
 @endphp
 <div @class([
     'rounded-xl border-2 bg-white p-5 dark:bg-zinc-950',
@@ -21,6 +26,11 @@
                     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' => $schedule->status === 'Waiting Result',
                     'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' => $schedule->status === 'Ready',
                 ])>{{ $schedule->status }}</span>
+                @if ($isHeat)
+                    <span class="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:bg-violet-900 dark:text-violet-200">HEAT</span>
+                @elseif ($isBracketMatch)
+                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:bg-orange-900 dark:text-orange-200">BRACKET</span>
+                @endif
                 @if ($schedule->venue)
                     <span class="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">{{ $schedule->venue->name }}</span>
                 @endif
@@ -72,11 +82,26 @@
                 <flux:button wire:click="moveToWaitingResult({{ $schedule->id }})" variant="danger" class="whitespace-nowrap">
                     Finish Match
                 </flux:button>
+                @if ($requiresOfficial)
+                    <flux:button :href="route('competition.official-panel', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" variant="ghost" class="whitespace-nowrap">
+                        Buka Official Panel
+                    </flux:button>
+                @else
+                    <flux:button :href="route('competition.schedule.outcomes', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" variant="ghost" class="whitespace-nowrap">
+                        Input Hasil
+                    </flux:button>
+                @endif
             @endif
             @if ($schedule->status === 'Waiting Result')
-                <flux:button disabled variant="ghost" class="whitespace-nowrap">
-                    Menunggu Hasil
-                </flux:button>
+                @if ($requiresOfficial)
+                    <flux:button :href="route('competition.official-panel', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" variant="primary" class="whitespace-nowrap">
+                        Buka Official Panel
+                    </flux:button>
+                @else
+                    <flux:button :href="route('competition.schedule.outcomes', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" variant="primary" class="whitespace-nowrap">
+                        Input Hasil
+                    </flux:button>
+                @endif
             @endif
             @can('manage-officials')
                 <flux:button wire:click="openOfficialDialog({{ $schedule->id }})" size="sm" variant="ghost" class="whitespace-nowrap">

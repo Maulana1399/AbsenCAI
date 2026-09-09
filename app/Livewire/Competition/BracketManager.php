@@ -8,6 +8,7 @@ use App\Models\CompetitionClass;
 use App\Models\CompetitionRegistration;
 use App\Models\CompetitionSchedule;
 use App\Support\ActiveEventContext;
+use App\Support\CompetitionFormat;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -18,6 +19,8 @@ class BracketManager extends Component
     public ?int $selectedBracketId = null;
 
     public string $newParticipantCount = '8';
+
+    public bool $thirdPlaceMatch = false;
 
     public function mount(): void
     {
@@ -89,6 +92,7 @@ class BracketManager extends Component
             'name' => $class->name.' Bracket',
             'participant_count' => $count,
             'status' => 'active',
+            'third_place_match' => $this->thirdPlaceMatch,
         ]);
 
         $totalRounds = (int) log($count, 2);
@@ -109,6 +113,7 @@ class BracketManager extends Component
                     'competition_schedule_id' => $schedule->id,
                     'round' => $round,
                     'position' => $pos,
+                    'is_third_place' => false,
                 ]);
 
                 if ($round < $totalRounds) {
@@ -119,6 +124,30 @@ class BracketManager extends Component
 
                 $bracketMatch->save();
             }
+        }
+
+        // Perebutan Juara 3 (Bronze Match): round=1, position=2, is_third_place.
+        // Sumber = dua semifinal (round 2). Loser SF masuk ke sini (via
+        // CompetitionWorkflowService::advanceLoser*). Independen dari Final.
+        if ($this->thirdPlaceMatch && $totalRounds >= 2) {
+            $bronzeSchedule = CompetitionSchedule::create([
+                'competition_class_id' => $classId,
+                'status' => 'Scheduled',
+                'required_participants' => 2,
+                'sort_order' => (($totalRounds - 1) * 100) + 2,
+            ]);
+
+            $bronze = new CompetitionBracketMatch([
+                'competition_bracket_id' => $bracket->id,
+                'competition_schedule_id' => $bronzeSchedule->id,
+                'round' => 1,
+                'position' => 2,
+                'is_third_place' => true,
+                'source_match_a_id' => $this->findBracketMatch($bracket->id, 2, 1),
+                'source_match_b_id' => $this->findBracketMatch($bracket->id, 2, 2),
+            ]);
+
+            $bronze->save();
         }
 
         $this->selectedBracketId = $bracket->id;
@@ -229,6 +258,7 @@ class BracketManager extends Component
 
         $classes = CompetitionClass::where('event_id', $event?->id)
             ->where('is_active', true)
+            ->whereIn('format', [CompetitionFormat::INDIVIDUAL_VS_INDIVIDUAL, CompetitionFormat::TEAM_VS_TEAM])
             ->orderBy('sort_order')->orderBy('name')
             ->get();
 
@@ -258,13 +288,27 @@ class BracketManager extends Component
 
             if ($selectedBracket) {
                 $totalRounds = (int) log($selectedBracket->participant_count, 2);
-                $matches = $selectedBracket->bracketMatches->groupBy('round')->sortKeysDesc();
+                $matches = $selectedBracket->bracketMatches
+                    ->where('is_third_place', false)
+                    ->groupBy('round')
+                    ->sortKeysDesc();
 
                 foreach ($matches as $round => $roundMatches) {
                     $bracketRounds[] = [
                         'label' => $this->getRoundLabel($round, $totalRounds),
                         'round' => $round,
                         'matches' => $roundMatches->sortBy('position')->values(),
+                    ];
+                }
+
+                // Perebutan Juara 3 (Bronze Match) sebagai section terpisah.
+                $bronzeMatch = $selectedBracket->bracketMatches->firstWhere('is_third_place', true);
+
+                if ($bronzeMatch) {
+                    $bracketRounds[] = [
+                        'label' => 'Perebutan Juara 3',
+                        'round' => 0,
+                        'matches' => collect([$bronzeMatch]),
                     ];
                 }
             }
@@ -281,9 +325,11 @@ class BracketManager extends Component
     }
 
     /**
-     * Final podium Juara 1/2/3 untuk bracket terpilih (dari competition_outcomes).
+     * Final podium untuk bracket terpilih (dari competition_outcomes / team outcomes).
      *
-     * @return array<int, array{position: int, person_name: string, participant_number: string, score: ?float}>
+     * Bronze OFF → Juara 1/2/3 (3 slot); Bronze ON → Juara 1/2/3/4 (4 slot).
+     *
+     * @return array<int, array{position: int, person_name?: string, team_name?: string, participant_number?: string, score: ?float}>
      */
     private function podiumForSelected(?CompetitionBracket $bracket, ?int $eventId): array
     {
@@ -291,12 +337,14 @@ class BracketManager extends Component
             return [];
         }
 
+        $limit = $bracket->third_place_match ? 4 : 3;
+
         $service = app(\App\Services\Competition\CompetitionResultService::class);
 
         if ($bracket->competitionClass?->isTeamFormat()) {
-            return $service->podiumForTeams($eventId, $bracket->competition_class_id);
+            return $service->podiumForTeams($eventId, $bracket->competition_class_id, $limit);
         }
 
-        return $service->podiumForClass($eventId, $bracket->competition_class_id);
+        return $service->podiumForClass($eventId, $bracket->competition_class_id, $limit);
     }
 }

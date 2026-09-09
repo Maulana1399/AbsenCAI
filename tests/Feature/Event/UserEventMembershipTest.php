@@ -14,7 +14,6 @@ use App\Models\User;
 use App\Services\Activity\EventCommitteeService;
 use App\Services\Event\EventAccessService;
 use App\Services\Event\EventPermissionService;
-use App\Support\ActiveEventContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;

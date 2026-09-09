@@ -18,6 +18,8 @@
 | Sprint 3.1 | ✅ COMPLETE 100% | Technical debt cleanup (dead code/views/imports, deduplication) |
 | Sprint 3.2 | ✅ COMPLETE 100% | Architecture hardening (Presenter Factory, EventOwnership, Import helper, ManualEntry trait) |
 | Sprint 3.3 | ✅ COMPLETE 100% | Legacy retirement prep & UAT readiness (legacy audit, Platform Dashboard TODOs, import Gate gaps, UAT checklist, legacy retirement plan) |
+| Heat Manager + Format Builder | ✅ COMPLETE 100% | Menu Heat operator + `competition_heat_formats`; auto-generate heat & round berikutnya; rebuild existing round dari format (source of truth kapasitas). Lihat `docs/audit/SPRINT-HEAT-MANAGER.md` |
+| Bracket Bronze Match (2026-08-27) | ✅ COMPLETE 100% | Perebutan Juara 3 (Bronze Match) untuk bracket Individual & Team/Futsal — `competition_brackets.third_place_match` + `competition_bracket_matches.is_third_place`; SF loser → Bronze; Juara 3/4; opsional (default OFF) |
 | Sprint 6A | ✅ COMPLETE 100% | Import Architecture migration complete |
 | Sprint 6A.1 | 🟡 IN PROGRESS | Release stabilization, PHP 8.3 cleanup, docs sync |
 | Sprint 4 | 🔲 NOT STARTED | — |
@@ -182,6 +184,42 @@ Deferred: CategoryDefinition CRUD UI (UI `Competition/Category` mengelola `compe
 
 ---
 
+## Competition Heat Manager (2026-08-26)
+
+```
+████████████████████████████████████████ 100%
+```
+
+| Area | Progress | Notes |
+|------|----------|-------|
+| Heat Format Builder + Menu Heat | 100% | `competition_heat_formats` + UI `competition.heat.index` |
+| Auto-Generate Heat & Round Berikutnya | 100% | `CompetitionHeatManagerService::generateRound` / `generateNextRound` |
+| Qualification Per-Heat + Qualified Pool | 100% | `qualifyHeat` (per-heat, tanpa sibling) + `qualifiedPool`; `generateNextRound` gated `pool >= capacity` (2026-08-20) |
+| Rebuild Existing Round dari Format | 100% | `rebuildRound` — guard `round_started` / `has_results`; tidak otomatis |
+| Source of Truth Kapasitas | 100% | `participants_per_heat` → `required_participants` + entries; deteksi `needs_rebuild` |
+| Advance/Podium reuse | 100% | `rankHeat`, `OutcomeManager`, `aggregateRoundResults`, `finalizePodium` (R4H) — tidak diubah |
+
+---
+
+## Competition Bracket — Perebutan Juara 3 (Bronze Match — 2026-08-27)
+
+```
+████████████████████████████████████████ 100%
+```
+
+| Area | Progress | Notes |
+|------|----------|-------|
+| Bronze Match Option | 100% | `competition_brackets.third_place_match` (default false, backward-compatible) |
+| Bronze Match Flag | 100% | `competition_bracket_matches.is_third_place` (round=1, position=2, source SF1/SF2) |
+| SF Winner → Final (exclude Bronze) | 100% | `advanceWinner(-Team)`; Bronze winner tidak advance |
+| SF Loser → Bronze | 100% | `advanceLoser(-Team)` — hanya saat ON; idempotent; auto-Ready saat penuh |
+| Bronze Podium 3/4 | 100% | `CompetitionBracketPodiumService`; urutan selesai bebas; tanpa duplikasi |
+| Podium limit 4 | 100% | `podiumForClass`/`podiumForTeams` `$limit` (default 3 tetap) |
+| Rollback + Proteksi Bronze | 100% | `rollbackLoser*`; Bronze `Playing`/`Finished` dilindungi reset SF |
+| Test | 100% | `CompetitionBracketBronzePodiumTest` +12 test; baseline full suite 2480/7015 |
+
+---
+
 ## Role-Based Access Control
 
 ```
@@ -268,7 +306,7 @@ Deferred: CategoryDefinition CRUD UI (UI `Competition/Category` mengelola `compe
 | # | Item | Progress | Notes |
 |---|------|----------|-------|
 | 1 | Blueprint Event | 0% | 📋 Planned |
-| 2 | Competition Engine | 60% | Competition V1 (module) COMPLETE; generic engine masih Planned |
+| 2 | Competition Engine | 60% | Competition V1 (module) COMPLETE; Heat Manager (format/rebuild) COMPLETE; generic engine masih Planned |
 | 3 | Scoring Engine | 0% | 📋 Planned — generic, not hardcoded |
 | 4 | Venue Management | 30% | Venue CRUD V1 ada; hierarki Master/Event/Arena masih Planned |
 | 5 | Live Schedule Engine | 30% | Jadwal + status match ada; estimasi realtime masih Planned |
@@ -318,7 +356,7 @@ Deferred: CategoryDefinition CRUD UI (UI `Competition/Category` mengelola `compe
 | Area | Progress | Status |
 |------|----------|--------|
 | Blueprint Event | 0% | 📋 Planned |
-| Competition Engine | 60% | ✅ Competition V1 (module) COMPLETE; generic engine Planned |
+| Competition Engine | 60% | ✅ Competition V1 (module) COMPLETE; Heat Manager COMPLETE; Bracket Bronze (Perebutan Juara 3) COMPLETE; generic engine Planned |
 | Scoring Engine | 0% | 📋 Planned |
 | Venue Management | 30% | 🟡 Venue CRUD V1 ada; hierarki V2 Planned |
 | Live Schedule Engine | 30% | 🟡 Jadwal + status match ada |
@@ -328,4 +366,4 @@ Deferred: CategoryDefinition CRUD UI (UI `Competition/Category` mengelola `compe
 | Mobile | 0% | 📋 Planned |
 | Public API | 0% | 📋 Planned |
 
-**Current test baseline: 1944 passed / 4648 assertions / 0 failures**
+**Current test baseline: 2480 passed / 7015 assertions / 0 failures / 0 skipped (2026-08-27, `-d memory_limit=1G`); Competition dir: 295 passed / 1031 assertions**

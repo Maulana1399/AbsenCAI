@@ -43,6 +43,7 @@
                 <flux:select.option value="Scheduled">Scheduled</flux:select.option>
                 <flux:select.option value="Ready">Ready</flux:select.option>
                 <flux:select.option value="Playing">Playing</flux:select.option>
+                <flux:select.option value="Waiting Result">Waiting Result</flux:select.option>
                 <flux:select.option value="Finished">Finished</flux:select.option>
             </flux:select>
         </div>
@@ -168,6 +169,7 @@
                         'border-zinc-200 dark:border-zinc-800' => $schedule->status === 'Scheduled',
                         'border-blue-300 dark:border-blue-700' => $schedule->status === 'Ready',
                         'border-green-400 dark:border-green-600' => $schedule->status === 'Playing',
+                        'border-yellow-300 dark:border-yellow-600' => $schedule->status === 'Waiting Result',
                         'border-zinc-400 dark:border-zinc-600' => $schedule->status === 'Finished',
                     ])>
                         {{-- Top: Category + Venue + Time --}}
@@ -185,12 +187,14 @@
                                 'bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200' => $schedule->status === 'Scheduled',
                                 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' => $schedule->status === 'Ready',
                                 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' => $schedule->status === 'Playing',
+                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' => $schedule->status === 'Waiting Result',
                                 'bg-zinc-800 text-white dark:bg-black dark:text-zinc-300' => $schedule->status === 'Finished',
                             ])>
                                 @switch($schedule->status)
                                     @case('Scheduled')⬜ @break
                                     @case('Ready')🟦 @break
                                     @case('Playing')🟢 @break
+                                    @case('Waiting Result')🟡 @break
                                     @case('Finished')⬛ @break
                                 @endswitch
                                 {{ $schedule->status }}
@@ -237,6 +241,8 @@
                                 <p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                                     @if ($schedule->status === 'Finished')
                                         Pertandingan selesai
+                                    @elseif ($schedule->status === 'Waiting Result')
+                                        Menunggu hasil / input hasil heat
                                     @elseif ($isComplete)
                                         Siap dimainkan
                                     @else
@@ -270,6 +276,10 @@
                             @elseif ($schedule->status === 'Playing')
                                 <flux:button :href="route('competition.match-center', ['event' => app(\App\Support\ActiveEventContext::class)->current()], absolute: false)" size="xs" icon="play" variant="primary" class="flex-1">Match Center</flux:button>
                                 <flux:button :href="route('competition.schedule.outcomes', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" size="xs" icon="clipboard-document-list" class="flex-1">Hasil</flux:button>
+                                <flux:button wire:click="edit({{ $schedule->id }})" size="xs" icon="pencil" variant="ghost">Edit</flux:button>
+
+                            @elseif ($schedule->status === 'Waiting Result')
+                                <flux:button :href="route('competition.schedule.outcomes', ['event' => app(\App\Support\ActiveEventContext::class)->current(), 'schedule' => $schedule->id], absolute: false)" size="xs" icon="clipboard-document-list" class="flex-1">Input Hasil</flux:button>
                                 <flux:button wire:click="edit({{ $schedule->id }})" size="xs" icon="pencil" variant="ghost">Edit</flux:button>
 
                             @elseif ($schedule->status === 'Finished')

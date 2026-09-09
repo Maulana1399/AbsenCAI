@@ -30,7 +30,15 @@ class CompetitionBracketPodiumService
     {
         $bracketMatch = $schedule->bracketMatch;
 
-        if (! $bracketMatch || (int) $bracketMatch->round !== 1 || $schedule->status !== 'Finished') {
+        if (! $bracketMatch || $schedule->status !== 'Finished') {
+            return ['finalized' => false, 'reason' => 'not_final'];
+        }
+
+        // Final dan Bronze Match sama-sama round=1 — bedakan lewat is_third_place.
+        $isBronze = (bool) $bracketMatch->is_third_place;
+        $isFinal = ! $isBronze && (int) $bracketMatch->round === 1;
+
+        if (! $isFinal && ! $isBronze) {
             return ['finalized' => false, 'reason' => 'not_final'];
         }
 
@@ -39,36 +47,57 @@ class CompetitionBracketPodiumService
             return ['finalized' => false, 'reason' => 'no_bracket'];
         }
 
+        // Bronze hanya relevan bila bracket di-generate dengan third_place_match.
+        if ($isBronze && ! $bracket->third_place_match) {
+            return ['finalized' => false, 'reason' => 'not_final'];
+        }
+
         $winner = $schedule->winner_registration_id;
         if ($winner === null) {
             return ['finalized' => false, 'reason' => 'no_winner'];
         }
 
-        $entries = $schedule->scheduleEntries()->pluck('competition_registration_id');
-        $finalLoser = $entries->first(fn ($id) => (int) $id !== (int) $winner);
-
         $positions = [];
-        $positions[(int) $winner] = 1;
-        if ($finalLoser !== null) {
-            $positions[(int) $finalLoser] = 2;
-        }
 
-        // Semifinal losers (round 2) — tied 3rd place.
-        $semifinals = CompetitionBracketMatch::where('competition_bracket_id', $bracket->id)
-            ->where('round', 2)
-            ->with('schedule.scheduleEntries')
-            ->get();
+        if ($isBronze) {
+            // Bronze Match → Juara 3 (pemenang) / Juara 4 (runner-up).
+            $entries = $schedule->scheduleEntries()->pluck('competition_registration_id');
+            $bronzeLoser = $entries->first(fn ($id) => $id !== null && (int) $id !== (int) $winner);
 
-        foreach ($semifinals as $semi) {
-            if (! $semi->schedule || $semi->schedule->status !== 'Finished') {
-                continue;
+            $positions[(int) $winner] = 3;
+            if ($bronzeLoser !== null) {
+                $positions[(int) $bronzeLoser] = 4;
+            }
+        } else {
+            // Final → Juara 1 (pemenang) / Juara 2 (runner-up).
+            $entries = $schedule->scheduleEntries()->pluck('competition_registration_id');
+            $finalLoser = $entries->first(fn ($id) => (int) $id !== (int) $winner);
+
+            $positions[(int) $winner] = 1;
+            if ($finalLoser !== null) {
+                $positions[(int) $finalLoser] = 2;
             }
 
-            $semiWinner = $semi->schedule->winner_registration_id;
+            // Bronze OFF → semifinal losers (round 2) tied 3rd (existing).
+            // Bronze ON → posisi 3/4 ditentukan oleh Bronze Match, bukan di sini.
+            if (! $bracket->third_place_match) {
+                $semifinals = CompetitionBracketMatch::where('competition_bracket_id', $bracket->id)
+                    ->where('round', 2)
+                    ->with('schedule.scheduleEntries')
+                    ->get();
 
-            foreach ($semi->schedule->scheduleEntries->pluck('competition_registration_id') as $regId) {
-                if ((int) $regId !== (int) $semiWinner) {
-                    $positions[(int) $regId] = 3;
+                foreach ($semifinals as $semi) {
+                    if (! $semi->schedule || $semi->schedule->status !== 'Finished') {
+                        continue;
+                    }
+
+                    $semiWinner = $semi->schedule->winner_registration_id;
+
+                    foreach ($semi->schedule->scheduleEntries->pluck('competition_registration_id') as $regId) {
+                        if ((int) $regId !== (int) $semiWinner) {
+                            $positions[(int) $regId] = 3;
+                        }
+                    }
                 }
             }
         }
@@ -97,7 +126,14 @@ class CompetitionBracketPodiumService
     {
         $bracketMatch = $schedule->bracketMatch;
 
-        if (! $bracketMatch || (int) $bracketMatch->round !== 1 || $schedule->status !== 'Finished') {
+        if (! $bracketMatch || $schedule->status !== 'Finished') {
+            return ['finalized' => false, 'reason' => 'not_final'];
+        }
+
+        $isBronze = (bool) $bracketMatch->is_third_place;
+        $isFinal = ! $isBronze && (int) $bracketMatch->round === 1;
+
+        if (! $isFinal && ! $isBronze) {
             return ['finalized' => false, 'reason' => 'not_final'];
         }
 
@@ -106,36 +142,56 @@ class CompetitionBracketPodiumService
             return ['finalized' => false, 'reason' => 'no_bracket'];
         }
 
+        if ($isBronze && ! $bracket->third_place_match) {
+            return ['finalized' => false, 'reason' => 'not_final'];
+        }
+
         $winner = $schedule->winner_team_id;
         if ($winner === null) {
             return ['finalized' => false, 'reason' => 'no_winner'];
         }
 
-        $entries = $schedule->scheduleEntries()->pluck('competition_team_id');
-        $finalLoser = $entries->first(fn ($id) => $id !== null && (int) $id !== (int) $winner);
-
         $positions = [];
-        $positions[(int) $winner] = 1;
-        if ($finalLoser !== null) {
-            $positions[(int) $finalLoser] = 2;
-        }
 
-        // Semifinal losers (round 2) — tied 3rd place.
-        $semifinals = CompetitionBracketMatch::where('competition_bracket_id', $bracket->id)
-            ->where('round', 2)
-            ->with('schedule.scheduleEntries')
-            ->get();
+        if ($isBronze) {
+            // Bronze Match → Juara 3 (pemenang) / Juara 4 (runner-up).
+            $entries = $schedule->scheduleEntries()->pluck('competition_team_id');
+            $bronzeLoser = $entries->first(fn ($id) => $id !== null && (int) $id !== (int) $winner);
 
-        foreach ($semifinals as $semi) {
-            if (! $semi->schedule || $semi->schedule->status !== 'Finished') {
-                continue;
+            $positions[(int) $winner] = 3;
+            if ($bronzeLoser !== null) {
+                $positions[(int) $bronzeLoser] = 4;
+            }
+        } else {
+            // Final → Juara 1 (pemenang) / Juara 2 (runner-up).
+            $entries = $schedule->scheduleEntries()->pluck('competition_team_id');
+            $finalLoser = $entries->first(fn ($id) => $id !== null && (int) $id !== (int) $winner);
+
+            $positions[(int) $winner] = 1;
+            if ($finalLoser !== null) {
+                $positions[(int) $finalLoser] = 2;
             }
 
-            $semiWinner = $semi->schedule->winner_team_id;
+            // Bronze OFF → semifinal losers (round 2) tied 3rd (existing).
+            // Bronze ON → posisi 3/4 ditentukan oleh Bronze Match, bukan di sini.
+            if (! $bracket->third_place_match) {
+                $semifinals = CompetitionBracketMatch::where('competition_bracket_id', $bracket->id)
+                    ->where('round', 2)
+                    ->with('schedule.scheduleEntries')
+                    ->get();
 
-            foreach ($semi->schedule->scheduleEntries->pluck('competition_team_id') as $teamId) {
-                if ($teamId !== null && (int) $teamId !== (int) $semiWinner) {
-                    $positions[(int) $teamId] = 3;
+                foreach ($semifinals as $semi) {
+                    if (! $semi->schedule || $semi->schedule->status !== 'Finished') {
+                        continue;
+                    }
+
+                    $semiWinner = $semi->schedule->winner_team_id;
+
+                    foreach ($semi->schedule->scheduleEntries->pluck('competition_team_id') as $teamId) {
+                        if ($teamId !== null && (int) $teamId !== (int) $semiWinner) {
+                            $positions[(int) $teamId] = 3;
+                        }
+                    }
                 }
             }
         }

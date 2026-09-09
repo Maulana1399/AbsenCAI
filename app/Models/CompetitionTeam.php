@@ -76,4 +76,9 @@ class CompetitionTeam extends Model
     {
         return $this->hasMany(CompetitionScheduleEntry::class, 'competition_team_id');
     }
+
+    public function heatResults()
+    {
+        return $this->hasMany(CompetitionHeatResult::class, 'competition_team_id');
+    }
 }

@@ -72,6 +72,9 @@
                     @endcan
 
                     <flux:navlist.group expandable heading="Operasional" class="grid">
+                        @can('manage-events')
+                        <flux:navlist.item :href="route('competition.heat.index', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.heat.index')" wire:navigate>{{ __('Heat') }}</flux:navlist.item>
+                        @endcan
                         <flux:navlist.item :href="route('competition.schedule.index', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.schedule.index')" wire:navigate>{{ __('Jadwal') }}</flux:navlist.item>
                         @can('manage-matches')
                         <flux:navlist.item :href="route('competition.match-center', ['event' => $activeEvent], absolute: false)" :current="request()->routeIs('competition.match-center')" wire:navigate>{{ __('Match Center') }}</flux:navlist.item>

@@ -307,6 +307,11 @@ Route::prefix('events/{event}/competition')->middleware(['auth', 'verified', 're
     )->middleware('can:manage-events')->name('competition.schedule.index');
 
     Route::get(
+        'heat',
+        App\Livewire\Competition\Heat\Index::class
+    )->middleware('can:manage-events')->name('competition.heat.index');
+
+    Route::get(
         'operator-dashboard',
         App\Livewire\Competition\OperatorDashboard::class
     )->middleware('can:manage-events')->name('competition.operator-dashboard');

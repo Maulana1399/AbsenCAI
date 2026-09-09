@@ -91,6 +91,7 @@ After PGM.19 (Physical Regu Retirement), PGM.20 (Legacy NIP Retirement), Competi
 ✅ RBAC S1–S7 — COMPLETE
 ✅ Competition V1 (Sprint 7–10) — COMPLETE
 ✅ Competition Foundation (Teams + Formats + Status) — COMPLETE
+✅ Heat Manager + Heat Format Builder (2026-08-26) — COMPLETE (menu Heat, `competition_heat_formats`, `CompetitionHeatManagerService`)
 ✅ Public Portal (Sprint 9.0) — COMPLETE
 ✅ Event Dashboard (Sprint 10.0) — COMPLETE
 ```
@@ -134,9 +135,10 @@ Event
             ├── CompetitionRegistration (Person → Participation → lomba)
             ├── CompetitionTeam (satu kelompok = satu team per lomba)
             │     └── CompetitionTeamMember (players + substitutes)
-            ├── CompetitionSchedule / ScheduleEntry (match/heat)
-            ├── CompetitionOutcome (result: win/loss · score · time · ranking)
-            └── CompetitionBracket / BracketMatch (format vs, bila diperlukan)
+├── CompetitionSchedule / ScheduleEntry (match/heat)
+├── CompetitionHeatFormat (peserta-per-heat + lolos-per-heat per babak, untuk Individual/Team Heat)
+├── CompetitionOutcome (result: win/loss · score · time · ranking)
+└── CompetitionBracket / BracketMatch (format vs, bila diperlukan)
 ```
 
 - 5 format: `individual_heat`, `individual_mass`, `team_vs_team`, `team_mass`, `individual_vs_individual`.

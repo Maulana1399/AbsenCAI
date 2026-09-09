@@ -2,8 +2,8 @@
 
 > Active task list. Completed items removed per documentation sync (2026-08-03) and Sprint 3.3 (2026-08-03).
 >
-> Sprint series: Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 ✅, Sprint 3.2 ✅, Sprint 3.3 ✅ — Sprint 4 NOT STARTED.
-> Baseline: **1944+ passed / 4648+ assertions / 0 failures**.
+> Sprint series: Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 ✅, Sprint 3.2 ✅, Sprint 3.3 ✅, Heat Manager ✅ — Sprint 4 NOT STARTED.
+> Baseline: **2436 passed / 6543 assertions / 0 failures / 0 skipped** (2026-08-26).
 
 ---
 
@@ -20,6 +20,7 @@ Done:
 - [x] Teams event-scoped (`competition_teams` + `competition_team_members`)
 - [x] Auto team formation (`CompetitionTeamFormationService`)
 - [x] Team member management (`CompetitionTeamService`) + UI `competition.teams`
+- [x] **Heat Manager + Heat Format Builder** — menu Heat operator: `competition_heat_formats` (peserta/heat + lolos/heat per babak), `CompetitionHeatManagerService` (auto-generate heat & babak berikutnya, idempoten), UI `competition.heat.index` + sidebar. Lihat `docs/audit/SPRINT-HEAT-MANAGER.md` & `AUDIT-HEAT-MANAGER.md`
 
 Remaining (documented in `docs/audit/COMPETITION-IMPLEMENTATION-AUDIT.md`):
 - [ ] Match engine per-format (schedule entries menunjuk team untuk format team)

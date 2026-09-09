@@ -7,6 +7,102 @@ Format changelog mengikuti prinsip **Keep a Changelog**.
 ---
 # [Unreleased]
 
+## BRACKET-PEREBUTAN-JUARA-3 (Bronze Match / Perebutan Juara 3 — 2026-08-27)
+
+Bracket kini dapat memilih **Perebutan Juara 3 (Bronze Match)** saat generate bracket — perebutan Juara 3/4 yang nyata (sebelumnya Juara 3 selalu ditentukan otomatis dari semifinal losers — tied 3rd, tanpa bronze). Opsional & backward-compatible: **default OFF**, record existing tidak berubah.
+
+- **Schema (2 migrasi baru, backward-compatible):**
+  - `competition_brackets.third_place_match` (boolean, default `false`) — opsi Perebutan Juara 3 per bracket (`2026_08_27_000001`).
+  - `competition_bracket_matches.is_third_place` (boolean, default `false`) — penanda Bronze Match (`2026_08_27_000002`).
+
+- **Kontrak Juara** — saat **OFF**: Final winner=`1`, Final loser=`2`, semifinal losers tied=`3` (legacy). Saat **ON**: SF winner → Final (`1`/`2`); SF loser → Bronze; Bronze winner=`3`, Bronze loser=`4`. Final & Bronze independen — urutan selesai (Bronze dulu / Final dulu) bebas, hasil akhir tetap `1,2,3,4`.
+
+- **`BracketManager` (`app/Livewire/Competition/BracketManager.php`)** — properti publik `$thirdPlaceMatch`; saat generate & ON (`totalRounds >= 2`) membuat **Bronze Match**: `round=1, position=2, is_third_place=true`, `source_match_a_id`/`source_match_b_id` = kedua semifinal (round 2). `render()` memisahkan Bronze ke section "Perebutan Juara 3"; `podiumForSelected()` memakai limit `4` saat ON.
+- **Generate form (`bracket-manager.blade.php`)** — checkbox "Perebutan Juara 3" (default OFF); podium grid `sm:grid-cols-4` saat ON; keterangan podium membedakan Bronze ON vs OFF.
+- **Advancement (`CompetitionWorkflowService`)**:
+  - `advanceWinner` / `advanceWinnerTeam` kini meng-exclude match `is_third_place = true` dari lookup match berikutnya → **SF winner → Final** (tidak pernah ke Bronze); Bronze winner tidak advance ke mana pun (guard `is_third_place`).
+  - Baru: **`advanceLoser`** / **`advanceLoserTeam`** — **SF loser → Bronze** (slot sesuai source side A/B), hanya bila `$bracket->third_place_match === true`; idempotent (tanpa duplikasi entry); Bronze otomatis `Ready` saat kedua loser terisi (reuse `canAutoReady`).
+  - `submitResult` / `submitTeamResult` urutan: persist → advance winner → advance loser → finalize podium.
+- **Rollback / proteksi** — `resetMatch` mem-rollback winner **dan loser** (`rollbackLoserAdvancement` / `rollbackLoserTeamAdvancement`): reset semifinal yang belum dimainkan menghapus losernya dari Bronze (match Bronze tetap ada, kembali `Scheduled`). Bronze yang sudah `Playing`/`Waiting Result`/`Finished` dilindungi via **`playedBronzeEntries()`** — entry & outcome Juara 3/4 dari Bronze yang sudah dimainkan tidak dihapus oleh reset semifinal.
+- **Podium (`CompetitionBracketPodiumService`)** — membedakan Final dan Bronze via `is_third_place` (keduanya `round=1`): Bronze → winner `3` / loser `4`; Final → winner `1` / loser `2`; Bronze OFF → semifinal losers tied `3` (existing). `updateOrCreate` + unique index → tanpa duplikasi saat re-finalization.
+- **Podium API (`CompetitionResultService`)** — `podiumForClass` / `podiumForTeams` menerima `int $limit = 3` (Bronze ON memakai `4`); default `3` tidak berubah di tempat lain.
+- **Dukungan format** — Individual (Individual vs Individual → `competition_outcomes`) & Team/Futsal (Team vs Team → `competition_team_outcomes`); tanpa asumsi `person_name` (team shape memakai `team_name`).
+- **Match Center / Official Panel** — Bronze adalah bracket match `CompetitionSchedule` nyata (badge `BRACKET`, hasil via Official Panel, bukan HEAT); lifecycle status existing (Scheduled → Ready → Playing → Waiting Result → Finished) tidak diubah; Heat tidak tersentuh.
+- **Test** — `CompetitionBracketBronzePodiumTest` (+12 test / 89 assertions): Bronze OFF tied-3rd & tanpa posisi 4; generate Bronze (round 1, position 2, source SF1/SF2, tidak silang winner/loser); Final→Bronze & Bronze→Final (urutan bebas); re-finalization tanpa duplikat; Team/Futsal 1/2/3/4 (tanpa 500); rollback loser Individual & Team; proteksi Bronze Finished/Playing; idempotency reset/retry. Existing bracket podium tests (Individual + Team + UAT futsal) tetap hijau.
+- **Verifikasi:** Competition dir → **295 passed / 1031 assertions / 0 failed**; full suite → **2480 passed / 7015 assertions / 0 failed / 0 skipped**. Pint: PASS.
+
+## MATCH-CENTER-FILTER + BRACKET-JUARA-3 (Match Center Filter + Bracket Juara 3 Clarity — 2026-08-20)
+
+Dua finding UAT (scoped): (1) Match Center butuh filter/tab untuk memisahkan Heat vs Bracket; (2) jelaskan penentuan Juara 3 bracket (kontrak existing: otomatis dari semifinal losers — tied 3rd, TANPA bronze match). Tanpa schema change, tanpa mengubah engine.
+
+- **`app/Livewire/Competition/MatchCenter.php`** — tambah `$filterType` + `setFilterType()`; render memfilter: `bracket` → `whereHas('bracketMatch')`, `heat` → format `individual_heat`/`team_heat`, null = semua.
+- **`resources/views/livewire/competition/match-center.blade.php`** — tab filter `Semua / Heat / Bracket` di atas venue filter.
+- **`resources/views/livewire/competition/bracket-manager.blade.php`** — keterangan penentuan Juara 3: "Juara 3 ditentukan otomatis dari semifinal losers (seri peringkat 3, tanpa perebutan Juara 3)."
+- **Juara 3 contract (dikonfirmasi, tidak diubah):** `CompetitionBracketPodiumService` → Juara 1 = winner Final, Juara 2 = runner-up Final, Juara 3 = semifinal losers (tied 3rd). Tidak ada bronze match / `third_place` di schema maupun format.
+- **Test:** +3 filter/tab (`MatchCenterHeatBracketTest`); pertegas assertion tied-3rd kedua SF losers = posisi 3 + keterangan "semifinal losers" (`CompetitionTeamBracketPodiumTest`).
+- **Verifikasi:** Competition dir → **283 passed / 942 assertions / 0 failed**; full suite → **2468 passed / 6926 assertions / 0 failed / 0 skipped**. Pint: PASS.
+
+> **Catatan (2026-08-27):** kontrak "Juara 3 = semifinal losers (tied 3rd, tanpa bronze / perebutan Juara 3)" yang dikonfirmasi di sini merupakan perilaku saat **Bronze OFF** (`competition_brackets.third_place_match = false`), tetap default. Sejak fitur **BRACKET-PEREBUTAN-JUARA-3** (Bronze ON), Juara 3/4 ditentukan oleh Bronze Match. Lihat entry BRACKET-PEREBUTAN-JUARA-3 di atas.
+
+## MATCH-CENTER-HEAT-BRACKET (Match Center UX — Pemisahan Workflow Heat vs Bracket — 2026-08-20)
+
+UX fix UAT: Match Center mencampur workflow Heat dan Bracket dengan tombol `Input Hasil` yang sama. Hasil manual di Match Center tidak menggerakkan bracket, sehingga operator keliru. Kini Match Center memisahkan aksi berdasarkan source of truth existing (bracket relationship + `CompetitionWorkflowService::requiresOfficial()`), tanpa perubahan engine/result_type/schema.
+
+- **`resources/views/livewire/competition/match-card.blade.php`** — badge `HEAT` (format individual_heat/team_heat) vs `BRACKET` (`$schedule->bracketMatch()->exists()`); untuk match yang `requiresOfficial()` (bracket/vs) tombol `Input Hasil` diganti **Buka Official Panel** (deep-link `competition.official-panel?schedule={id}`); Heat/mass tetap `Input Hasil`; lifecycle Start/Finish + Atur Official + Atur Peserta tetap.
+- **`app/Livewire/Competition/OfficialPanel.php::mount()`** — auto-buka dialog submit (`openSubmitDialog`) bila `?schedule={id}` adalah match Waiting Result yang di-assign ke user (deep-link dari Match Center membuka pertandingan yang benar).
+- **Tidak diubah:** `CompetitionResultType`, `CompetitionFormat`, bracket engine, heat engine, advancement, ranking.
+- **Test:** +5 (`tests/Feature/Competition/MatchCenterHeatBracketTest.php`) — Heat tetap `Input Hasil` + badge HEAT; Individual & Team bracket `Buka Official Panel` + badge BRACKET (tanpa `Input Hasil`); deep-link membuka match ter-assign; deep-link tidak membuka match non-assigned.
+- **Verifikasi:** Competition dir → **280 passed / 930 assertions / 0 failed**; full suite → **2465 passed / 6914 assertions / 0 failed / 0 skipped**. Pint: PASS.
+
+## TEAM-BRACKET-FINAL-500 (Team/Futsal Bracket Final Podium — 2026-08-20)
+
+Regression fix UAT: Team/Futsal bracket yang selesai sampai Final menghasilkan HTTP 500 (`Undefined array key "person_name"`) saat membuka `bracket-manager`. Podium team bracket mengembalikan key `team_name`, sedangkan blade hanya membaca `person_name`/`participant_number`. View-only fix — tidak ada schema/engine/result_type change.
+
+- **`resources/views/livewire/competition/bracket-manager.blade.php`** — podium block kini null-safe: `person_name ?? team_name ?? '-'` + guard `participant_number` (selaras dengan pola existing di `outcome-manager.blade.php`).
+- **Mengapa hanya Team/Futsal:** `BracketManager::podiumForSelected()` memakai `CompetitionResultService::podiumForTeams()` (key `team_name`) untuk format team, vs `podiumForClass()` (key `person_name` + `participant_number`) untuk individual. Podium hanya terisi setelah Final selesai (`finalizeTeamPodiumForSchedule`), sehingga 500 muncul persis saat membuka/menyelesaikan Final.
+- **Test:** +1 regression (`CompetitionTeamBracketPodiumTest` → 7 test / 35 assertions) — skenario 8-team futsal end-to-end QF→SF→Final→podium, assert render `BracketManager` tanpa error + nama team tampil.
+- **Verifikasi:** Competition dir → **275 passed / 915 assertions / 0 failed**; full suite → **2460 passed / 6899 assertions / 0 failed / 0 skipped**. Pint: PASS.
+
+## HEAT-PER-HEAT-QUALIFICATION (Per-Heat Qualification + Qualified Pool — 2026-08-20)
+
+Regression fix UAT: klik "Advance Top 2" pada Heat 01 ditolak `not_all_finished` karena Heat 02 belum selesai. Qualification kini bersifat PER-HEAT — Heat 01 yang selesai bisa langsung menghasilkan top-N qualified tanpa menunggu sibling heat; round berikutnya dibangun hanya saat qualified pool sudah mencukupi kapasitas format. Tanpa schema change (qualifier = `competition_heat_results.position` + `status`).
+
+- **`CompetitionMultiRoundHeatService::qualifyHeat(eventId, scheduleId, topN)`** (baru) — per-heat: validasi heat lengkap (`isHeatCompleteForAdvancement`; reject `heat_incomplete` bila ada kompetitor belum berstatus, `win_loss` untuk format non-ranked), lalu `rankHeat` + ambil top-N (`position <= topN`, exclude `CompetitionResultService::EXCLUDED_STATUSES`). Tidak menyentuh sibling heat, tidak membuat/mengisi round berikutnya. Idempotent.
+- **`CompetitionMultiRoundHeatService::qualifiedPool(eventId, classId, round, topN)`** (baru) — union top-N dari setiap heat yang SUDAH selesai; heat belum selesai di-skip (bukan di-reject). Pengganti guard `not_all_finished`.
+- **`CompetitionMultiRoundHeatService::advanceRound`** — guard `not_all_finished` (semua heat selesai) DIHAPUS; kini mengisi heat babak berikutnya dari `qualifiedPool` (skip heat belum selesai). Guard `no_next_round`/`no_next_heats` dipertahankan untuk kompatibilitas flow Schedule legacy.
+- **`CompetitionHeatManagerService::generateNextRound`** — guard `not_all_finished` DIGANTI `qualified_pool_insufficient`: pool dihitung dari heat yang selesai; round berikutnya hanya dibuat bila `pool >= participants_per_heat` format berikutnya (contoh: pool 2 < 4 → wait; pool 4 ≥ 4 → 1 heat 4/4).
+- **`OutcomeManager::advanceHeatRound(topN)`** — tombol "Advance Top 2/3" kini memanggil `qualifyHeat` (per-heat), bukan `advanceRound`. Pesan sukses: "N peserta berhasil lolos dari heat ini (top N)."
+- **Error/UX:** `heat_incomplete` (heat dipilih belum selesai) dibedakan dari `qualified_pool_insufficient` (heat selesai tapi pool belum cukup untuk bangun round berikutnya). Pesan lama "masih ada kompetitor yang belum selesai di babak ini" tidak lagi dipakai untuk qualification per-heat.
+- **Tidak diubah:** ranking engine, `CompetitionResultType`, `CompetitionResultService::EXCLUDED_STATUSES`, kontrak top-N, `participants_per_heat`, Bracket, team competition. Tidak ada migration/schema change.
+- **Test:** +6 baru (`tests/Feature/Competition/PerHeatQualificationTest.php`) — Test 1 (per-heat qualify tanpa sibling), Test 2 (round tidak prematur saat pool < capacity), Test 3 (round dibangun saat pool >= capacity), Test 4 (`heat_incomplete`), Test 5 (idempotensi), Test 7 (full UAT scenario). Update kontrak: `CompetitionMultiRoundHeatTest` H (skip sibling heat) & AG (`qualifyHeat` heat_incomplete), `HeatManagerTest` G (`no_qualifiers`), A/E/UAT-Case-A/B (format R2 disesuaikan agar pool >= capacity).
+- **Verifikasi:** Competition dir → **274 passed / 898 assertions / 0 failed**; full suite → **2459 passed / 6882 assertions / 0 failed / 0 skipped** (`/tmp/opencode/bin/php -d memory_limit=1G vendor/bin/pest`). Pint: 7 file PHP — PASS.
+
+## HEAT-MANAGER-REBUILD (Format Source of Truth + Rebuild Round — 2026-08-26)
+
+Regression fix UAT 2026-08-26: Heat Manager tidak boleh lagi menampilkan/mengandalkan heat 1v1 (2 peserta/heat) walau format menyatakan 5 peserta/heat. `participants_per_heat` menjadi SATU-SATUNYA sumber kebenaran kapasitas; round yang heat-nya lama/legacy/misconfigured dapat dibangun ulang dari format via aksi operator eksplisit. Code tetap source of truth — hanya sinkron dokumentasi.
+
+- **Source of truth kapasitas:** `CompetitionHeatFormat.participants_per_heat` → `competition_schedules.required_participants` + pembagian `competition_schedule_entries` per heat (kompetitor di-chunk per `participants_per_heat`). Kapasitas lama/legacy tidak pernah dibaca. Refactor inti generator ke `generateRoundInternal()` — dipakai `generateRound` & `rebuildRound`.
+- **`CompetitionHeatManagerService::rebuildRound(eventId, classId, round)`** (baru) — menghapus heat round yang BELUM dimulai lalu membangun ulang dari format. Perlindungan data: menolak `round_started` (ada heat `Playing`/`Waiting Result`/`Finished`) dan `has_results` (sudah ada `competition_heat_results` pada round). **Tidak berjalan otomatis** — murni aksi operator (tombol "Generate Ulang Babak Ini"), tanpa mutation data.
+- **Deteksi `needs_rebuild`:** UI Heat menandai sebuah round bila ada heat yang `required_participants`-nya ≠ `participants_per_heat` (mis. legacy 2/heat) → banner amber + tombol **Generate Ulang Babak Ini**.
+- **Behavior (format 5/2):** 5 peserta → 1 heat isi 5; 9 peserta → 2 heat isi 5+4; 10 peserta → 2 heat isi 5+5; 4 peserta → 1 heat isi 4 (bukan 2+2). Top-N qualifier per heat tetap `qualifiers_per_heat` (5 → 2 lolos; 9 → 2+2 = 4 lolos).
+- **Tidak diubah:** ranking, `result_type`, `OutcomeManager`, `CompetitionMultiRoundHeatService`, Bracket, Match Center, team competition, kontrak advancement R4H.
+- **Test:** +8 regression (`tests/Feature/Competition/HeatManagerTest.php` → **27 test / 121 assertions**): UAT Case A (5→1 heat, req 5, 5 entries, top 2), Case B (9→2 heat, req [5,5], entries [5,4], top 2+2), Case C (10→2 heat entries [5,5]), Case D (4→1 heat entries 4, bukan 2+2), legacy 2-participant heat rebuild, started-round protection, existing-results protection, Livewire rebuild action (F3).
+- **Verifikasi:** Competition dir → **268 passed / 855 assertions / 0 failed**; full suite → **2436 passed / 6543 assertions / 0 failed / 0 skipped** (`/tmp/opencode/bin/php -d memory_limit=1G vendor/bin/pest`). Pint: 3 file PHP — PASS.
+- **Docs:** FEATURE_INVENTORY.md, CAPABILITY_MATRIX.md, WORKFLOW.md, PROGRESS.md, HANDOFF.md, INDEX.md, CHANGELOG.md.
+
+## HEAT-MANAGER (Heat Format Builder + Auto-Generate Heat & Round — 2026-08-26)
+
+Heat Manager operator untuk format `individual_heat` & `team_heat` (multi-round R4H): format per babak tersimpan, auto-generate heat, auto-generate round berikutnya dari kualifikasi. Dibangun di atas arsitektur R4H tanpa mengubah `CompetitionMultiRoundHeatService` logika (hanya +1 helper additive), Bracket, Mass, VS, `result_type`, maupun `competition_heat_results`.
+
+- **Migration additive (1):** `competition_heat_formats` — `competition_class_id` (FK cascade), `round`, `participants_per_heat`, `qualifiers_per_heat`, `unique(competition_class_id, round)`. Menutup gap R4H: `top_n`/peserta-per-heat sebelumnya hanya parameter method (tidak persisten), sehingga auto-generate round berikutnya tidak mungkin tanpa hardcode. Tidak ada DROP.
+- **`CompetitionHeatManagerService`** (baru) — orchestrator event-scoped: `validateFormat` (0/0, qualifiers>participants, format unsupported), `upsertFormat`/`deleteFormat` (updateOrCreate per kelas+babak), `computeHeatCount`, `generateRound` (idempoten; reject `round_exists`/`no_format`/`no_competitors`; buat heat `Scheduled` + isi `CompetitionScheduleEntry` merata), `generateNextRound` (reject `no_format`/`no_next_format`/`not_all_finished`/`next_round_exists`/`no_qualifiers`; panggil `advanceRound(topN)`), `removeRoundSchedules` (reject `round_started`).
+- **Helper additive R4H:** `CompetitionMultiRoundHeatService::isRoundCompleteForAdvancement(classId, round, isTeam)` — round lengkap bila SEMUA heat memenuhi `isHeatCompleteForAdvancement`.
+- **UI:** `App\Livewire\Competition\Heat\Index` + blade heat cards (badge status, daftar peserta, tombol Peserta / Match Center / Input Hasil reuse `EntryManager`/`MatchCenter`/`OutcomeManager`); route `events/{event}/competition/heat` (`competition.heat.index`, `can:manage-events`); menu **Heat** sidebar grup Operasional.
+- **Result flow tetap:** ranking `rankHeat`, input hasil via `OutcomeManager` (time/score/ranking), agregasi `aggregateRoundResults`, podium `finalizePodium` — identitas kompetitor tidak pernah tertukar.
+- **Test:** +19 (`tests/Feature/Competition/HeatManagerTest.php`, 81 assertions) — schema, validasi, B (28→4 heat 7/heat), idempoten, partial (30→7-7-7-7-2), team generation, C+D (4×3→12→2 heat 201/202), A (top-3), E (identitas UAT read-back), F (OutcomeManager read-back), F2 (page createFormat+generateRound), G (`not_all_finished`), H (single-round → `no_next_format`, tanpa round fabrikasi), removeRound, team advancement.
+- **Verifikasi:** Competition dir → **260 passed / 815 assertions / 0 failed**; full suite → **2428 passed / 6503 assertions / 0 failed / 0 skipped** (`-d memory_limit=1G`). Pint: 8 file, 5 style issue diperbaiki otomatis → PASS.
+- **Docs:** `docs/audit/SPRINT-HEAT-MANAGER.md` & `AUDIT-HEAT-MANAGER.md` (baru), `MODULES.md`, `FEATURE.md`, `DATABASE.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `TODO.md`, `CHANGELOG.md`.
+
 ## COMPETITION-FOUNDATION (Audit + Teams + Formats + Status — 2026-08-13)
 
 Audit & adjust modul Competition existing (Competition V1) tanpa membuat dari nol.

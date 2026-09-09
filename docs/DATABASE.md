@@ -47,6 +47,7 @@ Desa
 | `competition_registrations` | Competition registrations (participation-linked; satu Person bisa ikut banyak lomba) |
 | `competition_schedules` | Match schedule (status: Scheduled/Ready/Playing/Waiting Result/Finished; required_participants; match result fields) |
 | `competition_schedule_entries` | Schedule entries |
+| `competition_heat_formats` | Format heat per babak (`competition_class_id`+`round`; `participants_per_heat`, `qualifiers_per_heat`) — dipakai auto-generate heat & babak berikutnya (Heat Manager) |
 | `competition_outcomes` | Match outcomes / results |
 | `competition_match_officials` | Officials assignment per match (referee/judge/scorer/supervisor) |
 | `competition_brackets` | Single elimination bracket |
@@ -64,6 +65,16 @@ Desa
 `competition_classes.status` = `draft` / `registration_open` / `registration_closed` / `ready` / `running` / `finished` / `cancelled` (default `registration_open`).
 
 > Competition **Team tidak memakai Regu**. Team berbasis Kelompok (`kelompok_id`) dan anggota menunjuk `competition_registration_id`.
+
+## Competition Heat Format (additive 2026-08-26)
+
+| Table | Purpose |
+|-------|---------|
+| `competition_heat_formats` | Format per babak untuk `individual_heat` / `team_heat`: `participants_per_heat` + `qualifiers_per_heat`, `unique(competition_class_id, round)` |
+
+- Kapasitas satu heat tersimpan di `competition_schedules.required_participants`; `competition_heat_formats` menyimpan konfigurasi **tingkat round** agar auto-generate heat & round berikutnya tidak hardcode jumlah peserta/lolos.
+- Konvensi round tetap: `competition_schedules.sort_order = round*100 + heatIndex` (final round 1 = 101–104, round 2 = 201–202).
+- Heat Schedule lifecycle (`Scheduled/Ready/Playing/Waiting Result/Finished`) dan hasil (`competition_heat_results`) tidak berubah.
 
 ## People Table Schema
 

@@ -427,6 +427,34 @@ Features
 * **Team management** — `CompetitionTeamService` (tambah/hapus/pindah player↔cadangan/shuffle; validasi kelompok/kelas/satu-team).
 * **UI** — `Competition/Team/Index` + route `competition.teams` (gate `manage-registration`).
 
+## Heat Manager + Heat Format Builder (2026-08-26)
+
+🟢 Stable
+
+* **Menu Heat operator** — `competition.heat.index` (`events/{event}/competition/heat`), sidebar grup Operasional, gate `manage-events`; hanya `individual_heat` & `team_heat`.
+* **Format per babak tersimpan** — `competition_heat_formats` (`participants_per_heat`, `qualifiers_per_heat`) per (kelas, babak); builder + validate (0/0, qualifiers>participants, format unsupported).
+* **Auto-generate heat** — `generateRound`: bagi peserta → N heat (`sort_order = round*100+i`, `required_participants`), isi `CompetitionScheduleEntry` merata, idempoten (reject `round_exists`/`no_format`/`no_competitors`).
+* **Auto-generate babak berikutnya** — `generateNextRound`: menghitung **qualified pool** (top-N dari heat yang SUDAH selesai — heat belum selesai di-skip, bukan `not_all_finished`), lalu membangun heat babak baru hanya bila `pool >= participants_per_heat` format babak berikutnya (reject `qualified_pool_insufficient` bila pool belum cukup). Reject `no_next_format` untuk babak final / single-round (tidak pernah memfabrikasi babak). Assignment memakai `advanceRound(topN)`.
+* **Qualification PER-HEAT** — `qualifyHeat(eventId, scheduleId, topN)`: heat yang selesai langsung menentukan & menyimpan top-N qualified tanpa menunggu sibling heat (reject `heat_incomplete` bila heat tsb belum lengkap). Tombol "Advance Top 2/3" di `OutcomeManager` memanggil ini — bukan round-level generation. Round berikutnya tetap dibangun lewat "Generate Round Berikutnya".
+* **Hapus round** — `removeRoundSchedules` (reject bila heat sudah dimulai).
+* **Rank/hasil/podium tetap reuse** — `rankHeat`, `OutcomeManager` (input hasil `time`/`score`/`ranking`), `aggregateRoundResults`, `finalizePodium` dari arsitektur R4H; identitas kompetitor tidak pernah tertukar.
+* **Rebuild round dari format** — `rebuildRound`: hapus heat round yang belum dimulai + generate ulang dari format; guard `round_started` (ada heat Playing/Waiting Result/Finished) & `has_results` (sudah ada `competition_heat_results`); tidak pernah otomatis. Deteksi mismatch kapasitas legacy via `needs_rebuild` → banner amber + tombol "Generate Ulang Babak Ini" di halaman Heat.
+* **Test** — `HeatManagerTest` (27 test / 121 assertions) + `PerHeatQualificationTest` (6 test) + `CompetitionMultiRoundHeatTest` — A–H + schema + validasi + team + remove-round + regression UAT Case A–D, rebuild legacy, started-round & existing-results protection, Livewire rebuild, per-heat qualification & qualified pool.
+
+## Bracket Manager + Perebutan Juara 3 (Bronze Match — 2026-08-27)
+
+🟢 Stable
+
+* **Single Elimination Bracket** — `competition_brackets` + `BracketManager`, ukuran 4/8/16/32, auto-advance pemenang; Individual (Individual vs Individual) & Team/Futsal (Team vs Team).
+* **Opsi Perebutan Juara 3 (Bronze Match)** — `competition_brackets.third_place_match` (boolean, **default `false`**, backward-compatible: record existing = OFF; perilaku legacy tidak berubah).
+* **Bronze Match** — `competition_bracket_matches.is_third_place = true`, `round=1`, `position=2`, source = dua semifinal (round 2). Dibuat hanya saat generate dengan opsi ON dan `totalRounds >= 2`. Bronze adalah `CompetitionSchedule` nyata (lifecycle yang sama; badge `BRACKET` di Match Center; hasil via Official Panel — bukan HEAT).
+* **Kontrak Juara** — **OFF**: Final winner=`1`, Final loser=`2`, semifinal losers tied `3`. **ON**: SF winner → Final; SF loser → Bronze; Bronze winner=`3`, Bronze loser=`4`. Final & Bronze independen (urutan selesai bebas → hasil akhir tetap `1,2,3,4`).
+* **Advancement** — `CompetitionWorkflowService::advanceWinner(-Team)` meng-exclude `is_third_place` (SF winner → Final, tidak pernah ke Bronze; Bronze winner tidak advance); baru `advanceLoser(-Team)` (SF loser → Bronze, hanya bila `third_place_match`, idempotent; Bronze auto-`Ready` saat penuh via `canAutoReady`).
+* **Rollback & proteksi** — `resetMatch` mem-rollback winner + loser (`rollbackLoserAdvancement(-Team)`): reset semifinal yang belum dimainkan menghapus losernya dari Bronze (match tetap ada); Bronze yang sudah `Playing`/`Waiting Result`/`Finished` dilindungi (`playedBronzeEntries()`) — outcome Juara 3/4 tidak dihapus.
+* **Podium service** — `CompetitionBracketPodiumService::finalizePodiumForSchedule` / `finalizeTeamPodiumForSchedule` membedakan Final vs Bronze via `is_third_place` (keduanya `round=1`); `updateOrCreate` + unique index → tanpa duplikasi saat re-finalization.
+* **Podium API** — `CompetitionResultService::podiumForClass(-Teams)` mendapat `int $limit = 3` (Bronze ON memakai `4`); default `3` tidak berubah di tempat lain.
+* **Test** — `CompetitionBracketBronzePodiumTest` (+12 test): Bronze OFF tied-3rd & tanpa posisi 4; generate Bronze; urutan selesai bebas; re-finalization; Team/Futsal 1/2/3/4; rollback & proteksi; idempotency. Baseline full suite: **2480 passed / 7015 assertions**.
+
 ## Competition (V2 — Generic Engine)
 
 > Competition Engine adalah bagian dari Roadmap V2 — Event Operating System.

@@ -1051,7 +1051,59 @@ test('53. official submission persists all match result fields', function () {
     expect($schedule->finished_by)->not->toBeNull();
 });
 
-test('54. bracket generation creates correct number of matches', function () {
+test('54. bracket manager only lists bracket-capable classes', function () {
+    $event = $this->event;
+    $category = $this->category;
+
+    $heatClass = CompetitionClass::create([
+        'event_id' => $event->id,
+        'competition_category_id' => $category->id,
+        'name' => 'Heat Visible Test',
+        'gender' => 'M',
+        'format' => 'individual_heat',
+        'status' => 'registration_open',
+        'is_active' => true,
+    ]);
+
+    $individualBracketClass = CompetitionClass::create([
+        'event_id' => $event->id,
+        'competition_category_id' => $category->id,
+        'name' => 'Individual Bracket Visible Test',
+        'gender' => 'M',
+        'format' => 'individual_vs_individual',
+        'status' => 'registration_open',
+        'is_active' => true,
+    ]);
+
+    $teamBracketClass = CompetitionClass::create([
+        'event_id' => $event->id,
+        'competition_category_id' => $category->id,
+        'name' => 'Team Bracket Visible Test',
+        'gender' => 'M',
+        'format' => 'team_vs_team',
+        'status' => 'registration_open',
+        'is_active' => true,
+    ]);
+
+    $massClass = CompetitionClass::create([
+        'event_id' => $event->id,
+        'competition_category_id' => $category->id,
+        'name' => 'Mass Invisible Test',
+        'gender' => 'M',
+        'format' => 'individual_mass',
+        'status' => 'registration_open',
+        'is_active' => true,
+    ]);
+
+    Livewire::test(\App\Livewire\Competition\BracketManager::class)
+        ->assertSee('Bracket Manager')
+        ->assertSee($individualBracketClass->name)
+        ->assertSee($teamBracketClass->name)
+        ->assertDontSee($heatClass->name)
+        ->assertDontSee($massClass->name);
+});
+
+test('55. bracket generation creates correct number of matches', function () {
     $class = CompetitionClass::create([
         'event_id' => $this->event->id,
         'competition_category_id' => $this->category->id,

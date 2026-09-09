@@ -36,6 +36,28 @@
         </div>
     </div>
 
+    {{-- Type Filter (Semua / Heat / Bracket) --}}
+    <div class="flex flex-wrap gap-2">
+        <button wire:click="setFilterType(null)"
+                @class([
+                    'rounded-full px-4 py-2 text-sm font-medium transition',
+                    'bg-zinc-600 text-white' => $filterType === null,
+                    'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700' => $filterType !== null,
+                ])>Semua</button>
+        <button wire:click="setFilterType('heat')"
+                @class([
+                    'rounded-full px-4 py-2 text-sm font-medium transition',
+                    'bg-violet-600 text-white' => $filterType === 'heat',
+                    'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700' => $filterType !== 'heat',
+                ])>Heat</button>
+        <button wire:click="setFilterType('bracket')"
+                @class([
+                    'rounded-full px-4 py-2 text-sm font-medium transition',
+                    'bg-orange-600 text-white' => $filterType === 'bracket',
+                    'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700' => $filterType !== 'bracket',
+                ])>Bracket</button>
+    </div>
+
     {{-- Venue Filter --}}
     @if ($venues->isNotEmpty())
         <div class="flex flex-wrap gap-2">

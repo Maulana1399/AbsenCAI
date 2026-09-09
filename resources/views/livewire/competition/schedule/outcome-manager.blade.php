@@ -16,7 +16,10 @@
                 &middot; Auto-rank: {{ $resultDirection === 'asc' ? 'terkecil dahulu (waktu/finish)' : 'terbesar dahulu (skor)' }}
             @endif
             @if ($isHeat)
-                &middot; Waktu format: <span class="font-mono text-zinc-700 dark:text-zinc-300">1:32.500</span>
+                &middot; <span @class(['font-medium text-zinc-800 dark:text-zinc-200'])>{{ \App\Support\CompetitionResultType::label($resultType) }}</span>
+                @if ($resultType === \App\Support\CompetitionResultType::TIME)
+                    &middot; Format waktu: <span class="font-mono text-zinc-700 dark:text-zinc-300">1:32.500</span>
+                @endif
             @endif
         </p>
     </div>
@@ -53,7 +56,7 @@
         </div>
     @endif
 
-    @if ($isTeam)
+    @if ($isTeam && ! $isTeamHeat)
         {{-- Team results (Team Mass / team competitor) --}}
         <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
             <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -113,15 +116,27 @@
             </div>
         @endif
     @elseif ($isHeat)
-        {{-- Heat results: per (heat, participant) --}}
+        {{-- Heat results: per (heat, participant/team) --}}
+        <div class="rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-950">
+            <span class="font-semibold text-zinc-900 dark:text-white">Babak (Round) {{ $round }}</span>
+            <span class="ml-2 text-zinc-500 dark:text-zinc-400">
+                {{ $isTeamHeat ? 'Team Heat' : 'Individual Heat' }} · per-heat ranking + top-N advancement
+            </span>
+        </div>
         <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
             <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">No</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Nama</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{{ $isTeamHeat ? 'Team' : 'Nama' }}</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">No. Peserta</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Waktu (M:SS.mmm)</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+                            @if ($resultType === \App\Support\CompetitionResultType::TIME)
+                                Waktu (M:SS.mmm)
+                            @else
+                                {{ \App\Support\CompetitionResultType::label($resultType) }}
+                            @endif
+                        </th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Catatan</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Posisi Final</th>
@@ -131,10 +146,14 @@
                     @forelse ($heatResults as $index => $row)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
                             <td class="px-4 py-3 text-sm text-zinc-500">{{ $loop->iteration }}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-white">{{ $row['person_name'] }}</td>
-                            <td class="px-4 py-3 text-sm text-zinc-500">{{ $row['participant_number'] }}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-white">{{ $row['person_name'] ?? $row['team_name'] ?? '-' }}</td>
+                            <td class="px-4 py-3 text-sm text-zinc-500">{{ $row['participant_number'] ?? ($isTeamHeat ? 'Team' : '-') }}</td>
                             <td class="px-4 py-2">
-                                <flux:input wire:model="heatResults.{{ $index }}.timeText" size="sm" placeholder="1:32.500" class="w-28" />
+                                @if ($resultType === \App\Support\CompetitionResultType::TIME)
+                                    <flux:input wire:model="heatResults.{{ $index }}.timeText" size="sm" placeholder="1:32.500" class="w-28" />
+                                @else
+                                    <flux:input wire:model="heatResults.{{ $index }}.scoreValue" type="number" step="0.01" min="0" size="sm" placeholder="0" class="w-24" />
+                                @endif
                             </td>
                             <td class="px-4 py-2">
                                 <flux:select wire:model="heatResults.{{ $index }}.status" size="sm" class="w-28">
@@ -160,11 +179,22 @@
         </div>
 
         @if (!empty($heatResults))
-            <div class="flex justify-end gap-2">
+            <div class="flex flex-wrap justify-end gap-2">
                 <flux:button wire:click="saveOutcomes" variant="filled">
                     Simpan Hasil Heat
                 </flux:button>
-                <flux:button wire:click="aggregateFinal" variant="primary">
+                <flux:button wire:click="rankHeat" variant="filled">
+                    Rank Heat Ini
+                </flux:button>
+                @if ($formatTopN !== null)
+                    <flux:button wire:click="advanceHeat" variant="filled">
+                        Advance Top {{ $formatTopN }}
+                    </flux:button>
+                @endif
+                <flux:button wire:click="finalizeHeatFinal" variant="primary">
+                    Finalize Podium
+                </flux:button>
+                <flux:button wire:click="aggregateFinal" variant="ghost">
                     Generate Final Ranking
                 </flux:button>
             </div>

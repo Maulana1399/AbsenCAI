@@ -12,7 +12,6 @@ use App\Models\Person;
 use App\Models\User;
 use App\Services\Competition\CompetitionRegistrationService;
 use App\Services\Competition\CompetitionResultService;
-use App\Support\CompetitionFormat;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;

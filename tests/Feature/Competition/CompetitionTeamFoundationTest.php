@@ -77,13 +77,14 @@ function ct_kelompokPersons(kelompok $kelompok, array $names): array
 // Formats & status
 // ---------------------------------------------------------------------------
 
-test('five competition formats are defined', function () {
+test('six competition formats are defined', function () {
     expect(CompetitionFormat::ALL)->toBe([
         'individual_heat',
         'individual_mass',
         'team_vs_team',
         'team_mass',
         'individual_vs_individual',
+        'team_heat',
     ]);
 });
 
@@ -96,8 +97,11 @@ test('competition class stores format and status', function () {
         ->and($class->status)->toBe(CompetitionStatus::REGISTRATION_OPEN)
         ->and($class->isTeamFormat())->toBeTrue()
         ->and(CompetitionFormat::isTeamFormat('individual_heat'))->toBeFalse()
+        ->and(CompetitionFormat::isTeamFormat('team_heat'))->toBeTrue()
         ->and(CompetitionFormat::requiresBracket('team_vs_team'))->toBeTrue()
-        ->and(CompetitionFormat::requiresBracket('team_mass'))->toBeFalse();
+        ->and(CompetitionFormat::requiresBracket('team_mass'))->toBeFalse()
+        ->and(CompetitionFormat::requiresBracket('team_heat'))->toBeFalse()
+        ->and(CompetitionFormat::defaultResultType('team_heat'))->toBe('time');
 });
 
 test('registration service can register same person to many competitions without duplicate person', function () {

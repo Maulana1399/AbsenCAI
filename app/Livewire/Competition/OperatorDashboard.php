@@ -75,7 +75,23 @@ class OperatorDashboard extends Component
 
         $schedule = CompetitionSchedule::with('bracketMatch')->findOrFail($scheduleId);
 
-        $this->workflow()->resetMatch($schedule);
+        $result = $this->workflow()->resetMatch($schedule);
+
+        if (! ($result['reset'] ?? false)) {
+            session()->flash('error', $result['reason'] === 'downstream_active'
+                ? 'Reset dibatalkan: babak berikutnya masih berlangsung (Playing / Waiting Result). Selesaikan atau input hasil babak tersebut terlebih dahulu.'
+                : 'Reset dibatalkan: status pertandingan tidak memungkinkan reset.');
+
+            return;
+        }
+
+        if ($result['invalidated_downstream'] ?? false) {
+            session()->flash('info', 'Pertandingan direset. Hasil babak berikutnya yang bergantung pada pertandingan ini ikut dibatalkan, termasuk podium.');
+
+            return;
+        }
+
+        session()->flash('success', 'Pertandingan berhasil direset.');
     }
 
     public function toggleAnnouncementForm(): void

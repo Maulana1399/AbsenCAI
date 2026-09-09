@@ -39,6 +39,8 @@ Legacy compatibility (masih ada, tidak boleh dijadikan canonical):
 |------------|-------------|
 | Sprint 1 | Platform Consolidation — MariaDB Migration, Permission Engine, Competition V1, Public Portal, Event Dashboard |
 | Competition Foundation | Teams event-scoped (satu kelompok = satu team per lomba), auto team formation, 5 format lomba, status lomba |
+| Competition Heat Manager (2026-08-26) | Format per babak (`competition_heat_formats`), auto-generate heat & round berikutnya, rebuild existing round dari format — `participants_per_heat` jadi source of truth kapasitas. Lihat `docs/audit/SPRINT-HEAT-MANAGER.md` |
+| Bracket Bronze Match (2026-08-27) | Perebutan Juara 3 (Bronze Match) untuk bracket Individual & Team/Futsal — `competition_brackets.third_place_match` + `competition_bracket_matches.is_third_place`; SF loser → Bronze; Juara 3/4 (opsional, default OFF = legacy tied-3rd); rollback & proteksi Bronze |
 | Sprint 2 | RBAC & Permission Engine (Design C) — User Management RBAC consistency, Event Role CRUD |
 | Sprint 3.1 | Technical debt cleanup — dead code/views/imports removed, deduplication |
 | Sprint 3.2 | Architecture hardening — Dashboard Presenter Factory, EventOwnership, Import helper, ManualEntry trait |
@@ -86,13 +88,20 @@ The following documentation has been added as part of Project Audit:
 ## Current Test Baseline
 
 ```
-Full suite: 1944 passed, 4648 assertions, 0 failures
+Full suite: 2480 passed, 7015 assertions, 0 failures, 0 skipped (2026-08-27, `-d memory_limit=1G`)
+Competition: 295 passed, 1031 assertions
 Design C:   problem_total = 0
 ```
 
 **MariaDB Migration (COMPLETE):** primary DB switched from SQLite to MariaDB. Migrations, seeders, and the full test suite are green on both drivers. See `docs/CHANGELOG.md` (Unreleased → MariaDB Migration) for the list of driver-compat fixes. Test command for MariaDB: `DB_CONNECTION=mariadb DB_DATABASE=kja_event_manager_test ... vendor/bin/pest`.
 
-**Sprint series (current):** Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 (cleanup) ✅, Sprint 3.2 (hardening) ✅, Sprint 3.3 (legacy retirement prep & UAT readiness) ✅. Sprint 4 — NOT STARTED.
+**Sprint series (current):** Sprint 1 ✅, Sprint 2 ✅, Sprint 3.1 (cleanup) ✅, Sprint 3.2 (hardening) ✅, Sprint 3.3 (legacy retirement prep & UAT readiness) ✅, Heat Manager + Format Builder ✅, Bracket Bronze Match (Perebutan Juara 3) ✅. Sprint 4 — NOT STARTED.
+
+**Competition Heat Manager (2026-08-26 + regression fix):** format per babak (peserta per heat + lolos per heat) kini menjadi source of truth — `generateRound`/`rebuildRound` selalu menulis `required_participants` dari `participants_per_heat` dan membagi entries per heat sesuai format (5→1 heat 5; 9→5+4; 10→5+5; 4→1 heat 4, bukan 2+2). Legacy heat dengan kapasitas beda dideteksi lewat `needs_rebuild` (banner amber + tombol "Generate Ulang Babak Ini"). Rebuild tidak pernah otomatis dan menolak `round_started` / `has_results`. Regression test UAT Case A–D + guard + Livewire rebuild = +8 test (`HeatManagerTest` → 27 test / 121 assertions).
+
+**Per-Heat Qualification (2026-08-20):** qualification bersifat PER-HEAT — `CompetitionMultiRoundHeatService::qualifyHeat()` menentukan top-N sebuah heat yang selesai tanpa menunggu sibling heat (tombol "Advance Top 2/3" di `OutcomeManager`). Round berikutnya dibangun lewat `generateNextRound` hanya saat qualified pool (`qualifiedPool`) ≥ `participants_per_heat` format berikutnya (guard lama `not_all_finished` diganti `qualified_pool_insufficient`). Tanpa schema change; ranking/result_type/top-N tidak diubah. +6 test (`PerHeatQualificationTest`).
+
+**Bracket Bronze Match — Perebutan Juara 3 (2026-08-27):** bracket kini bisa memilih **Perebutan Juara 3 (Bronze Match)** saat generate (`competition_brackets.third_place_match`, default `false`; `competition_bracket_matches.is_third_place`). Saat ON, SF winner → Final, SF loser → Bronze (`advanceLoser(-Team)`); Bronze winner = Juara 3, Bronze loser = Juara 4, Final winner/loser = Juara 1/2 — urutan selesai Final/Bronze bebas. Saat OFF, perilaku legacy (semifinal losers tied 3rd) tidak berubah. `resetMatch` mem-rollback winner + loser; Bronze yang sudah dimainkan (`Playing`/`Finished`) dilindungi dari reset semifinal (`playedBronzeEntries()`), outcome Juara 3/4 tidak dihapus. Dukungan Individual & Team/Futsal; `podiumForClass(-Teams)` mendapat `$limit` (default 3). +12 test (`CompetitionBracketBronzePodiumTest`). See `docs/CHANGELOG.md` (BRACKET-PEREBUTAN-JUARA-3).
 
 ---
 

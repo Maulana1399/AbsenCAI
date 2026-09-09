@@ -52,6 +52,15 @@
                     <flux:input wire:model="newSortOrder" type="number" placeholder="Urutan (opsional)" />
                     @error('newSortOrder') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Metode Penilaian</label>
+                    <flux:select wire:model="newResultType" placeholder="Ikuti default format">
+                        <flux:select.option value="">Ikuti default format</flux:select.option>
+                        <flux:select.option value="{{ \App\Support\CompetitionResultType::TIME }}">Waktu — tercepat menang</flux:select.option>
+                        <flux:select.option value="{{ \App\Support\CompetitionResultType::SCORE }}">Skor — tertinggi menang</flux:select.option>
+                    </flux:select>
+                    @error('newResultType') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
             </div>
             <div class="mt-4 flex justify-end">
                 <flux:button wire:click="create" variant="primary" :loading="$processing">Simpan</flux:button>
@@ -100,7 +109,12 @@
                             <td class="px-4 py-2">
                                 <flux:input wire:model="editSortOrder" type="number" size="sm" />
                             </td>
-                            <td class="px-4 py-2 text-sm">{{ $class->is_active ? 'Active' : 'Inactive' }}</td>
+                            <td class="px-4 py-2 text-sm">
+                                <div class="text-sm text-zinc-900 dark:text-zinc-100">{{ \App\Support\CompetitionResultType::label($class->resultType()) }}</div>
+                                @if (! $this->canEditResultType($class))
+                                    <div class="mt-1 text-xs text-amber-600 dark:text-amber-400">Metode penilaian tidak dapat diubah karena hasil pertandingan sudah tersedia.</div>
+                                @endif
+                            </td>
                             <td class="px-4 py-2">
                                 <div class="flex gap-1">
                                     <flux:button wire:click="update" size="sm" variant="primary">Simpan</flux:button>

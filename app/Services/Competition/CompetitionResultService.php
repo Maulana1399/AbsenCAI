@@ -8,8 +8,8 @@ use App\Models\CompetitionOutcome;
 use App\Models\CompetitionSchedule;
 use App\Models\CompetitionTeamOutcome;
 use App\Support\CompetitionResultType;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Competition Result Engine (Sprint R1).
@@ -217,11 +217,11 @@ class CompetitionResultService
     }
 
     /**
-     * Final podium (top 3) for a whole class, ordered by final position.
+     * Final podium (top-N) for a whole class, ordered by final position.
      *
      * @return array<int, array{position: int, person_name: string, participant_number: string, score: ?float}>
      */
-    public function podiumForClass(int $eventId, int $classId): array
+    public function podiumForClass(int $eventId, int $classId, int $limit = 3): array
     {
         $class = CompetitionClass::where('event_id', $eventId)->findOrFail($classId);
 
@@ -230,7 +230,7 @@ class CompetitionResultService
             ->whereNotNull('position')
             ->where('position', '>', 0)
             ->orderBy('position')
-            ->take(3)
+            ->take($limit)
             ->get()
             ->map(fn ($outcome) => [
                 'position' => (int) $outcome->position,
@@ -301,11 +301,11 @@ class CompetitionResultService
     }
 
     /**
-     * Final podium (top 3 TEAMS) for a class.
+     * Final podium (top-N TEAMS) for a class.
      *
      * @return array<int, array{position: int, team_name: string, score: ?float}>
      */
-    public function podiumForTeams(int $eventId, int $classId): array
+    public function podiumForTeams(int $eventId, int $classId, int $limit = 3): array
     {
         $class = CompetitionClass::where('event_id', $eventId)->findOrFail($classId);
 
@@ -314,7 +314,7 @@ class CompetitionResultService
             ->whereNotNull('position')
             ->where('position', '>', 0)
             ->orderBy('position')
-            ->take(3)
+            ->take($limit)
             ->get()
             ->map(fn ($outcome) => [
                 'position' => (int) $outcome->position,
